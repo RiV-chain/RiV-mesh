@@ -165,7 +165,7 @@ cat > wix.xml << EOF
 
             <ServiceControl
               Id="ServiceControl"
-              Name="mesh"
+              Name="RiV-mesh"
               Start="install"
               Stop="both"
               Remove="uninstall" />
