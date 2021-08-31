@@ -12,8 +12,8 @@ import (
 	//"time"
 
 	"github.com/gologme/log"
-	"github.com/yggdrasil-network/yggdrasil-go/src/address"
-	//"github.com/yggdrasil-network/yggdrasil-go/src/crypto"
+	"github.com/RiV-chain/RiV-mesh/src/address"
+	//"github.com/RiV-chain/RiV-mesh/src/crypto"
 	//"github.com/Arceliar/phony"
 )
 

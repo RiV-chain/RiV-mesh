@@ -18,8 +18,8 @@ import (
 	"golang.org/x/text/encoding/unicode"
 
 	"github.com/hjson/hjson-go"
-	"github.com/yggdrasil-network/yggdrasil-go/src/defaults"
-	"github.com/yggdrasil-network/yggdrasil-go/src/version"
+	"github.com/RiV-chain/RiV-mesh/src/defaults"
+	"github.com/RiV-chain/RiV-mesh/src/version"
 )
 
 type admin_info map[string]interface{}

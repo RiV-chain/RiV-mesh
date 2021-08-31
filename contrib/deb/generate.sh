@@ -41,7 +41,7 @@ mkdir -p /tmp/$PKGNAME/usr/bin/
 mkdir -p /tmp/$PKGNAME/etc/systemd/system/
 
 cat > /tmp/$PKGNAME/debian/changelog << EOF
-Please see https://github.com/yggdrasil-network/yggdrasil-go/
+Please see https://github.com/RiV-chain/RiV-mesh/
 EOF
 echo 9 > /tmp/$PKGNAME/debian/compat
 cat > /tmp/$PKGNAME/debian/control << EOF
@@ -60,10 +60,10 @@ Description: Yggdrasil Network
  other Yggdrasil nodes.
 EOF
 cat > /tmp/$PKGNAME/debian/copyright << EOF
-Please see https://github.com/yggdrasil-network/yggdrasil-go/
+Please see https://github.com/RiV-chain/RiV-mesh/
 EOF
 cat > /tmp/$PKGNAME/debian/docs << EOF
-Please see https://github.com/yggdrasil-network/yggdrasil-go/
+Please see https://github.com/RiV-chain/RiV-mesh/
 EOF
 cat > /tmp/$PKGNAME/debian/install << EOF
 usr/bin/yggdrasil usr/bin

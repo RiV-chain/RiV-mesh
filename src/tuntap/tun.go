@@ -19,10 +19,10 @@ import (
 	"github.com/gologme/log"
 	"golang.zx2c4.com/wireguard/tun"
 
-	"github.com/yggdrasil-network/yggdrasil-go/src/address"
-	"github.com/yggdrasil-network/yggdrasil-go/src/config"
-	"github.com/yggdrasil-network/yggdrasil-go/src/core"
-	"github.com/yggdrasil-network/yggdrasil-go/src/defaults"
+	"github.com/RiV-chain/RiV-mesh/src/address"
+	"github.com/RiV-chain/RiV-mesh/src/config"
+	"github.com/RiV-chain/RiV-mesh/src/core"
+	"github.com/RiV-chain/RiV-mesh/src/defaults"
 )
 
 type MTU uint16

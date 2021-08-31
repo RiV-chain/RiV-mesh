@@ -109,14 +109,14 @@ cat > wix.xml << EOF
     Language="1033"
     Codepage="1252"
     Version="${PKGVERSIONMS}"
-    Manufacturer="github.com/yggdrasil-network">
+    Manufacturer="github.com/RiV-chain">
 
     <Package
       Id="*"
       Keywords="Installer"
       Description="Yggdrasil Network Installer"
       Comments="Yggdrasil Network standalone router for Windows."
-      Manufacturer="github.com/yggdrasil-network"
+      Manufacturer="github.com/RiV-chain"
       InstallerVersion="200"
       InstallScope="perMachine"
       Languages="1033"

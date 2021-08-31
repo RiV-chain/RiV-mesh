@@ -1,7 +1,7 @@
 # Yggdrasil
 
-[![CircleCI](https://circleci.com/gh/yggdrasil-network/yggdrasil-go.svg?style=shield&circle-token=:circle-token
-)](https://circleci.com/gh/yggdrasil-network/yggdrasil-go)
+[![CircleCI](https://circleci.com/gh/RiV-chain/RiV-mesh.svg?style=shield&circle-token=:circle-token
+)](https://circleci.com/gh/RiV-chain/RiV-mesh)
 
 ## Introduction
 
@@ -16,7 +16,7 @@ connectivity - it also works over IPv4.
 Yggdrasil works on a number of platforms, including Linux, macOS, Ubiquiti
 EdgeRouter, VyOS, Windows, FreeBSD, OpenBSD and OpenWrt.
 
-Please see our [Installation](https://yggdrasil-network.github.io/installation.html) 
+Please see our [Installation](https://RiV-chain.github.io/installation.html) 
 page for more information. You may also find other platform-specific wrappers, scripts
 or tools in the `contrib` folder.
 
@@ -74,11 +74,11 @@ by giving the Yggdrasil binary the `CAP_NET_ADMIN` capability.
 
 ## Documentation
 
-Documentation is available [on our website](https://yggdrasil-network.github.io).
+Documentation is available [on our website](https://RiV-chain.github.io).
 
-- [Installing Yggdrasil](https://yggdrasil-network.github.io/installation.html)
-- [Configuring Yggdrasil](https://yggdrasil-network.github.io/configuration.html)
-- [Frequently asked questions](https://yggdrasil-network.github.io/faq.html)
+- [Installing Yggdrasil](https://RiV-chain.github.io/installation.html)
+- [Configuring Yggdrasil](https://RiV-chain.github.io/configuration.html)
+- [Frequently asked questions](https://RiV-chain.github.io/faq.html)
 - [Version changelog](CHANGELOG.md)
 
 ## Community

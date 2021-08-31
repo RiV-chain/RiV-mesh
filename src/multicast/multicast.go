@@ -15,8 +15,8 @@ import (
 	"github.com/Arceliar/phony"
 	"github.com/gologme/log"
 
-	"github.com/yggdrasil-network/yggdrasil-go/src/config"
-	"github.com/yggdrasil-network/yggdrasil-go/src/core"
+	"github.com/RiV-chain/RiV-mesh/src/config"
+	"github.com/RiV-chain/RiV-mesh/src/core"
 	"golang.org/x/net/ipv6"
 )
 

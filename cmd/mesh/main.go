@@ -23,15 +23,15 @@ import (
 	"github.com/kardianos/minwinsvc"
 	"github.com/mitchellh/mapstructure"
 
-	"github.com/yggdrasil-network/yggdrasil-go/src/address"
-	"github.com/yggdrasil-network/yggdrasil-go/src/admin"
-	"github.com/yggdrasil-network/yggdrasil-go/src/config"
-	"github.com/yggdrasil-network/yggdrasil-go/src/defaults"
+	"github.com/RiV-chain/RiV-mesh/src/address"
+	"github.com/RiV-chain/RiV-mesh/src/admin"
+	"github.com/RiV-chain/RiV-mesh/src/config"
+	"github.com/RiV-chain/RiV-mesh/src/defaults"
 
-	"github.com/yggdrasil-network/yggdrasil-go/src/core"
-	"github.com/yggdrasil-network/yggdrasil-go/src/multicast"
-	"github.com/yggdrasil-network/yggdrasil-go/src/tuntap"
-	"github.com/yggdrasil-network/yggdrasil-go/src/version"
+	"github.com/RiV-chain/RiV-mesh/src/core"
+	"github.com/RiV-chain/RiV-mesh/src/multicast"
+	"github.com/RiV-chain/RiV-mesh/src/tuntap"
+	"github.com/RiV-chain/RiV-mesh/src/version"
 )
 
 type node struct {

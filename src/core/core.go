@@ -14,9 +14,9 @@ import (
 	"github.com/Arceliar/phony"
 	"github.com/gologme/log"
 
-	"github.com/yggdrasil-network/yggdrasil-go/src/config"
-	//"github.com/yggdrasil-network/yggdrasil-go/src/crypto"
-	"github.com/yggdrasil-network/yggdrasil-go/src/version"
+	"github.com/RiV-chain/RiV-mesh/src/config"
+	//"github.com/RiV-chain/RiV-mesh/src/crypto"
+	"github.com/RiV-chain/RiV-mesh/src/version"
 )
 
 // The Core object represents the Yggdrasil node. You should create a Core

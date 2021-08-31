@@ -17,7 +17,7 @@ command -v mkbom >/dev/null 2>&1 || (
 
 # Check if we can find the files we need - they should
 # exist if you are running this script from the root of
-# the yggdrasil-go repo and you have ran ./build
+# the RiV-mesh repo and you have ran ./build
 test -f yggdrasil || (echo "yggdrasil binary not found"; exit 1)
 test -f meshctl || (echo "meshctl binary not found"; exit 1)
 test -f contrib/macos/yggdrasil.plist || (echo "contrib/macos/yggdrasil.plist not found"; exit 1)
@@ -78,7 +78,7 @@ PAYLOADSIZE=$(( $(wc -c pkgbuild/flat/base.pkg/Payload | awk '{ print $1 }') / 1
 
 # Create the PackageInfo file
 cat > pkgbuild/flat/base.pkg/PackageInfo << EOF
-<pkg-info format-version="2" identifier="io.github.yggdrasil-network.pkg" version="${PKGVERSION}" install-location="/" auth="root">
+<pkg-info format-version="2" identifier="io.github.RiV-chain.pkg" version="${PKGVERSION}" install-location="/" auth="root">
   <payload installKBytes="${PAYLOADSIZE}" numberOfFiles="3"/>
   <scripts>
     <postinstall file="./postinstall"/>
@@ -112,9 +112,9 @@ cat > pkgbuild/flat/Distribution << EOF
         <line choice="choice1"/>
     </choices-outline>
     <choice id="choice1" title="base">
-        <pkg-ref id="io.github.yggdrasil-network.pkg"/>
+        <pkg-ref id="io.github.RiV-chain.pkg"/>
     </choice>
-    <pkg-ref id="io.github.yggdrasil-network.pkg" installKBytes="${PAYLOADSIZE}" version="${VERSION}" auth="Root">#base.pkg</pkg-ref>
+    <pkg-ref id="io.github.RiV-chain.pkg" installKBytes="${PAYLOADSIZE}" version="${VERSION}" auth="Root">#base.pkg</pkg-ref>
 </installer-script>
 EOF
 
