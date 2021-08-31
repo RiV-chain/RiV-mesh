@@ -41,31 +41,31 @@ To generate static configuration, either generate a HJSON file (human-friendly,
 complete with comments):
 
 ```
-./yggdrasil -genconf > /path/to/yggdrasil.conf
+./mesh -genconf > /path/to/mesh.conf
 ```
 
 ... or generate a plain JSON file (which is easy to manipulate
 programmatically):
 
 ```
-./yggdrasil -genconf -json > /path/to/yggdrasil.conf
+./mesh -genconf -json > /path/to/mesh.conf
 ```
 
-You will need to edit the `yggdrasil.conf` file to add or remove peers, modify
+You will need to edit the `mesh.conf` file to add or remove peers, modify
 other configuration such as listen addresses or multicast addresses, etc.
 
 ### Run Yggdrasil
 
 To run with the generated static configuration:
 ```
-./yggdrasil -useconffile /path/to/yggdrasil.conf
+./mesh -useconffile /path/to/mesh.conf
 ```
 
 To run in auto-configuration mode (which will use sane defaults and random keys
 at each startup, instead of using a static configuration file):
 
 ```
-./yggdrasil -autoconf
+./mesh -autoconf
 ```
 
 You will likely need to run Yggdrasil as a privileged user or under `sudo`,
@@ -84,8 +84,8 @@ Documentation is available [on our website](https://RiV-chain.github.io).
 ## Community
 
 Feel free to join us on our [Matrix
-channel](https://matrix.to/#/#yggdrasil:matrix.org) at `#yggdrasil:matrix.org`
-or in the `#yggdrasil` IRC channel on [libera.chat](https://libera.chat).
+channel](https://matrix.to/#/#mesh:matrix.org) at `#mesh:matrix.org`
+or in the `#mesh` IRC channel on [libera.chat](https://libera.chat).
 
 ## License
 

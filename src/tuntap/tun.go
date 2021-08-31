@@ -28,9 +28,9 @@ import (
 type MTU uint16
 
 // TunAdapter represents a running TUN interface and extends the
-// yggdrasil.Adapter type. In order to use the TUN adapter with Yggdrasil, you
-// should pass this object to the yggdrasil.SetRouterAdapter() function before
-// calling yggdrasil.Start().
+// mesh.Adapter type. In order to use the TUN adapter with Yggdrasil, you
+// should pass this object to the mesh.SetRouterAdapter() function before
+// calling mesh.Start().
 type TunAdapter struct {
 	core        *core.Core
 	config      *config.NodeConfig

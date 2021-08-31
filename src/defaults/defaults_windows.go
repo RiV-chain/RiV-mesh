@@ -10,7 +10,7 @@ func GetDefaults() platformDefaultParameters {
 		DefaultAdminListen: "tcp://localhost:9001",
 
 		// Configuration (used for meshctl)
-		DefaultConfigFile: "C:\\Program Files\\Yggdrasil\\yggdrasil.conf",
+		DefaultConfigFile: "C:\\Program Files\\Yggdrasil\\mesh.conf",
 
 		// Multicast interfaces
 		DefaultMulticastInterfaces: []MulticastInterfaceConfig{
