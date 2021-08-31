@@ -1,9 +1,9 @@
 #!/bin/sh
 #
-# Put the yggdrasil and yggdrasilctl binaries into /usr/local/bin
+# Put the yggdrasil and meshctl binaries into /usr/local/bin
 # Then copy this script into /etc/rc.d/yggdrasil
 # Finally, run:
-#   1. chmod +x /etc/rc.d/yggdrasil /usr/local/bin/{yggdrasil,yggdrasilctl}
+#   1. chmod +x /etc/rc.d/yggdrasil /usr/local/bin/{yggdrasil,meshctl}
 #   2. echo "yggdrasil_enable=yes" >> /etc/rc.d
 #   3. service yggdrasil start
 #

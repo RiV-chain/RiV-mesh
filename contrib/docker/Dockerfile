@@ -10,7 +10,7 @@ RUN apk add git && ./build && go build -o /src/genkeys cmd/genkeys/main.go
 FROM docker.io/alpine
 
 COPY --from=builder /src/yggdrasil /usr/bin/yggdrasil
-COPY --from=builder /src/yggdrasilctl /usr/bin/yggdrasilctl
+COPY --from=builder /src/meshctl /usr/bin/meshctl
 COPY --from=builder /src/genkeys /usr/bin/genkeys
 COPY contrib/docker/entrypoint.sh /usr/bin/entrypoint.sh
 

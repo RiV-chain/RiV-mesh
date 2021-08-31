@@ -67,7 +67,7 @@ Please see https://github.com/yggdrasil-network/yggdrasil-go/
 EOF
 cat > /tmp/$PKGNAME/debian/install << EOF
 usr/bin/yggdrasil usr/bin
-usr/bin/yggdrasilctl usr/bin
+usr/bin/meshctl usr/bin
 etc/systemd/system/*.service etc/systemd/system
 EOF
 cat > /tmp/$PKGNAME/debian/postinst << EOF
@@ -109,11 +109,11 @@ fi
 EOF
 
 cp yggdrasil /tmp/$PKGNAME/usr/bin/
-cp yggdrasilctl /tmp/$PKGNAME/usr/bin/
+cp meshctl /tmp/$PKGNAME/usr/bin/
 cp contrib/systemd/*.service /tmp/$PKGNAME/etc/systemd/system/
 
 tar -czvf /tmp/$PKGNAME/data.tar.gz -C /tmp/$PKGNAME/ \
-  usr/bin/yggdrasil usr/bin/yggdrasilctl \
+  usr/bin/yggdrasil usr/bin/meshctl \
   etc/systemd/system/yggdrasil.service \
   etc/systemd/system/yggdrasil-default-config.service
 tar -czvf /tmp/$PKGNAME/control.tar.gz -C /tmp/$PKGNAME/debian .

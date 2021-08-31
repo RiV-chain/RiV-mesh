@@ -19,7 +19,7 @@ command -v mkbom >/dev/null 2>&1 || (
 # exist if you are running this script from the root of
 # the yggdrasil-go repo and you have ran ./build
 test -f yggdrasil || (echo "yggdrasil binary not found"; exit 1)
-test -f yggdrasilctl || (echo "yggdrasilctl binary not found"; exit 1)
+test -f meshctl || (echo "meshctl binary not found"; exit 1)
 test -f contrib/macos/yggdrasil.plist || (echo "contrib/macos/yggdrasil.plist not found"; exit 1)
 test -f contrib/semver/version.sh || (echo "contrib/semver/version.sh not found"; exit 1)
 
@@ -35,7 +35,7 @@ mkdir -p pkgbuild/root/Library/LaunchDaemons
 
 # Copy package contents into the pkgbuild root
 cp yggdrasil pkgbuild/root/usr/local/bin
-cp yggdrasilctl pkgbuild/root/usr/local/bin
+cp meshctl pkgbuild/root/usr/local/bin
 cp contrib/macos/yggdrasil.plist pkgbuild/root/Library/LaunchDaemons
 
 # Create the postinstall script
@@ -64,7 +64,7 @@ EOF
 # Set execution permissions
 chmod +x pkgbuild/scripts/postinstall
 chmod +x pkgbuild/root/usr/local/bin/yggdrasil
-chmod +x pkgbuild/root/usr/local/bin/yggdrasilctl
+chmod +x pkgbuild/root/usr/local/bin/meshctl
 
 # Pack payload and scripts
 ( cd pkgbuild/scripts && find . | cpio -o --format odc --owner 0:80 | gzip -c ) > pkgbuild/flat/base.pkg/Scripts

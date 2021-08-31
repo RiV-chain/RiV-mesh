@@ -56,7 +56,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     - The greedy routing scheme, used to forward all traffic in previous releases, is now only used for protocol traffic (i.e. DHT setup and source route discovery)
     - The routing logic now lives in a [standalone library](https://github.com/Arceliar/ironwood). You are encouraged **not** to use it, as it's still considered pre-alpha, but it's available for those who want to experiment with the new routing algorithm in other contexts
     - Session MTUs may be slightly lower now, in order to accommodate large packet headers if required
-- Many of the admin functions available over `yggdrasilctl` have been changed or removed as part of rewrites to the code
+- Many of the admin functions available over `meshctl` have been changed or removed as part of rewrites to the code
     - Several remote `debug` functions have been added temporarily, to allow for crawling and census gathering during the transition to the new version, but we intend to remove this at some point in the (possibly distant) future
     - The list of available functions will likely be expanded in future releases
 - The configuration file format has been updated in response to the changed/removed features
@@ -328,7 +328,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 - Admin socket `getTunTap` call now returns properly instead of claiming no interface is enabled in all cases
-- Handling of `getRoutes` etc in `yggdrasilctl` is now working
+- Handling of `getRoutes` etc in `meshctl` is now working
 - Local interface names are no longer leaked in multicast packets
 - Link-local TCP connections, particularly those initiated because of multicast beacons, are now always correctly scoped for the target interface
 - Yggdrasil now correctly responds to multicast interfaces going up and down during runtime
@@ -387,7 +387,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 - Switch peer convergence is now much faster again (previously it was taking up to a minute once the peering was established)
-- `yggdrasilctl` is now less prone to crashing when parameters are specified incorrectly
+- `meshctl` is now less prone to crashing when parameters are specified incorrectly
 - Panic fixed when `Peers` or `InterfacePeers` was commented out
 
 ## [0.3.0] - 2018-12-12
@@ -398,19 +398,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - New macOS .pkgs built automatically by CircleCI
 - Add Dockerfile to repository for Docker support
 - Add `-json` command line flag for generating and normalising configuration in plain JSON instead of HJSON
-- Build name and version numbers are now imprinted onto the build, accessible through `yggdrasil -version` and `yggdrasilctl getSelf`
+- Build name and version numbers are now imprinted onto the build, accessible through `yggdrasil -version` and `meshctl getSelf`
 - Add ability to disable admin socket by setting `AdminListen` to `"none"`
-- `yggdrasilctl` now tries to look for the default configuration file to find `AdminListen` if `-endpoint` is not specified
-- `yggdrasilctl` now returns more useful logging in the event of a fatal error
+- `meshctl` now tries to look for the default configuration file to find `AdminListen` if `-endpoint` is not specified
+- `meshctl` now returns more useful logging in the event of a fatal error
 
 ### Changed
 - Switched to Chord DHT (instead of Kademlia, although still compatible at the protocol level)
-- The `AdminListen` option and `yggdrasilctl` now default to `unix:///var/run/yggdrasil.sock` on BSDs, macOS and Linux
+- The `AdminListen` option and `meshctl` now default to `unix:///var/run/yggdrasil.sock` on BSDs, macOS and Linux
 - Cleaned up some of the parameter naming in the admin socket
 - Latency-based parent selection for the switch instead of uptime-based (should help to avoid high latency links somewhat)
 - Real peering endpoints now shown in the admin socket `getPeers` call to help identify peerings
 - Reuse the multicast port on supported platforms so that multiple Yggdrasil processes can run
-- `yggdrasilctl` now has more useful help text (with `-help` or when no arguments passed)
+- `meshctl` now has more useful help text (with `-help` or when no arguments passed)
 
 ### Fixed
 - Memory leaks in the DHT fixed
@@ -444,7 +444,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [0.2.5] - 2018-07-19
 ### Changed
-- Make `yggdrasilctl` less case sensitive
+- Make `meshctl` less case sensitive
 - More verbose TCP disconnect messages
 
 ### Fixed

@@ -174,9 +174,9 @@ cat > wix.xml << EOF
           <Component Id="CtrlExecutable" Guid="a916b730-974d-42a1-b687-d9d504cbb86a">
             <File
               Id="Yggdrasilctl"
-              Name="yggdrasilctl.exe"
+              Name="meshctl.exe"
               DiskId="1"
-              Source="yggdrasilctl.exe"
+              Source="meshctl.exe"
               KeyPath="yes"/>
           </Component>
 
