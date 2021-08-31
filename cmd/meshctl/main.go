@@ -70,7 +70,7 @@ func run() int {
 	if *ver {
 		fmt.Println("Build name:", version.BuildName())
 		fmt.Println("Build version:", version.BuildVersion())
-		fmt.Println("To get the version number of the running Yggdrasil node, run", os.Args[0], "getSelf")
+		fmt.Println("To get the version number of the running RiV-mesh node, run", os.Args[0], "getSelf")
 		return 0
 	}
 

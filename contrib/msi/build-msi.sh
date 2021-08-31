@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# This script generates an MSI file for Yggdrasil for a given architecture. It
+# This script generates an MSI file for RiV-mesh for a given architecture. It
 # needs to run on Windows within MSYS2 and Go 1.13 or later must be installed on
 # the system and within the PATH. This is ran currently by Appveyor (see
 # appveyor.yml in the repository root) for both x86 and x64.
@@ -47,7 +47,7 @@ then
   )
 fi
 
-# Build Yggdrasil!
+# Build RiV-mesh!
 [ "${PKGARCH}" == "x64" ] && GOOS=windows GOARCH=amd64 CGO_ENABLED=0 ./build
 [ "${PKGARCH}" == "x86" ] && GOOS=windows GOARCH=386 CGO_ENABLED=0 ./build
 [ "${PKGARCH}" == "arm" ] && GOOS=windows GOARCH=arm CGO_ENABLED=0 ./build
@@ -55,12 +55,12 @@ fi
 
 # Create the postinstall script
 cat > updateconfig.bat << EOF
-if not exist %ALLUSERSPROFILE%\\Yggdrasil (
-  mkdir %ALLUSERSPROFILE%\\Yggdrasil
+if not exist %ALLUSERSPROFILE%\\RiV-mesh (
+  mkdir %ALLUSERSPROFILE%\\RiV-mesh
 )
-if not exist %ALLUSERSPROFILE%\\Yggdrasil\\mesh.conf (
+if not exist %ALLUSERSPROFILE%\\RiV-mesh\\mesh.conf (
   if exist mesh.exe (
-    mesh.exe -genconf > %ALLUSERSPROFILE%\\Yggdrasil\\mesh.conf
+    mesh.exe -genconf > %ALLUSERSPROFILE%\\RiV-mesh\\mesh.conf
   )
 )
 EOF
@@ -93,9 +93,9 @@ else
 fi
 
 if [ $PKGNAME != "master" ]; then
-  PKGDISPLAYNAME="Yggdrasil Network (${PKGNAME} branch)"
+  PKGDISPLAYNAME="RiV-mesh Network (${PKGNAME} branch)"
 else
-  PKGDISPLAYNAME="Yggdrasil Network"
+  PKGDISPLAYNAME="RiV-mesh Network"
 fi
 
 # Generate the wix.xml file
@@ -114,8 +114,8 @@ cat > wix.xml << EOF
     <Package
       Id="*"
       Keywords="Installer"
-      Description="Yggdrasil Network Installer"
-      Comments="Yggdrasil Network standalone router for Windows."
+      Description="RiV-mesh Network Installer"
+      Comments="RiV-mesh Network standalone router for Windows."
       Manufacturer="github.com/RiV-chain"
       InstallerVersion="200"
       InstallScope="perMachine"
@@ -134,11 +134,11 @@ cat > wix.xml << EOF
 
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="${PKGINSTFOLDER}" Name="PFiles">
-        <Directory Id="YggdrasilInstallFolder" Name="Yggdrasil">
+        <Directory Id="RiV-meshInstallFolder" Name="RiV-mesh">
 
           <Component Id="MainExecutable" Guid="c2119231-2aa3-4962-867a-9759c87beb24">
             <File
-              Id="Yggdrasil"
+              Id="RiV-mesh"
               Name="mesh.exe"
               DiskId="1"
               Source="mesh.exe"
@@ -153,14 +153,14 @@ cat > wix.xml << EOF
             <ServiceInstall
               Id="ServiceInstaller"
               Account="LocalSystem"
-              Description="Yggdrasil Network router process"
-              DisplayName="Yggdrasil Service"
+              Description="RiV-mesh Network router process"
+              DisplayName="RiV-mesh Service"
               ErrorControl="normal"
               LoadOrderGroup="NetworkProvider"
-              Name="Yggdrasil"
+              Name="RiV-mesh"
               Start="auto"
               Type="ownProcess"
-              Arguments='-useconffile "%ALLUSERSPROFILE%\\Yggdrasil\\mesh.conf" -logto "%ALLUSERSPROFILE%\\Yggdrasil\\mesh.log"'
+              Arguments='-useconffile "%ALLUSERSPROFILE%\\RiV-mesh\\mesh.conf" -logto "%ALLUSERSPROFILE%\\RiV-mesh\\mesh.log"'
               Vital="yes" />
 
             <ServiceControl
@@ -173,7 +173,7 @@ cat > wix.xml << EOF
 
           <Component Id="CtrlExecutable" Guid="a916b730-974d-42a1-b687-d9d504cbb86a">
             <File
-              Id="Yggdrasilctl"
+              Id="RiV-meshctl"
               Name="meshctl.exe"
               DiskId="1"
               Source="meshctl.exe"
@@ -192,7 +192,7 @@ cat > wix.xml << EOF
       </Directory>
     </Directory>
 
-    <Feature Id="YggdrasilFeature" Title="Yggdrasil" Level="1">
+    <Feature Id="RiV-meshFeature" Title="RiV-mesh" Level="1">
       <ComponentRef Id="MainExecutable" />
       <ComponentRef Id="CtrlExecutable" />
       <ComponentRef Id="ConfigScript" />
@@ -200,7 +200,7 @@ cat > wix.xml << EOF
 
     <CustomAction
       Id="UpdateGenerateConfig"
-      Directory="YggdrasilInstallFolder"
+      Directory="RiV-meshInstallFolder"
       ExeCommand="cmd.exe /c updateconfig.bat"
       Execute="deferred"
       Return="check"

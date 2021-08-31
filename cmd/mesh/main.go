@@ -223,7 +223,7 @@ func getArgs() yggArgs {
 	}
 }
 
-// The main function is responsible for configuring and starting Yggdrasil.
+// The main function is responsible for configuring and starting RiV-mesh.
 func run(args yggArgs, ctx context.Context, done chan struct{}) {
 	defer close(done)
 	// Create a new logger that logs output to stdout.
@@ -324,11 +324,11 @@ func run(args yggArgs, ctx context.Context, done chan struct{}) {
 	default:
 	}
 
-	// Setup the Yggdrasil node itself. The node{} type includes a Core, so we
+	// Setup the RiV-mesh node itself. The node{} type includes a Core, so we
 	// don't need to create this manually.
 	n := node{config: cfg}
-	// Now start Yggdrasil - this starts the DHT, router, switch and other core
-	// components needed for Yggdrasil to operate
+	// Now start RiV-mesh - this starts the DHT, router, switch and other core
+	// components needed for RiV-mesh to operate
 	if err = n.core.Start(cfg, logger); err != nil {
 		logger.Errorln("An error occurred during startup")
 		panic(err)

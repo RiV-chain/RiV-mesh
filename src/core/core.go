@@ -19,8 +19,8 @@ import (
 	"github.com/RiV-chain/RiV-mesh/src/version"
 )
 
-// The Core object represents the Yggdrasil node. You should create a Core
-// object for each Yggdrasil node you plan to run.
+// The Core object represents the RiV-mesh node. You should create a Core
+// object for each RiV-mesh node you plan to run.
 type Core struct {
 	// This is the main data structure that holds everything else for a node
 	// We're going to keep our own copy of the provided config - that way we can
@@ -116,7 +116,7 @@ func (c *Core) _addPeerLoop() {
 	})
 }
 
-// Start starts up Yggdrasil using the provided config.NodeConfig, and outputs
+// Start starts up RiV-mesh using the provided config.NodeConfig, and outputs
 // debug logging through the provided log.Logger. The started stack will include
 // TCP and UDP sockets, a multicast discovery socket, an admin socket, router,
 // switch and DHT node. A config.NodeState is returned which contains both the
@@ -159,7 +159,7 @@ func (c *Core) _start(nc *config.NodeConfig, log *log.Logger) error {
 	return nil
 }
 
-// Stop shuts down the Yggdrasil node.
+// Stop shuts down the RiV-mesh node.
 func (c *Core) Stop() {
 	phony.Block(c, c._stop)
 }
