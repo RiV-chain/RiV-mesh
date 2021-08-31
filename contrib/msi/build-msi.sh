@@ -8,12 +8,12 @@
 # Author: Neil Alexander <neilalexander@users.noreply.github.com>
 
 # Get arch from command line if given
-PKGARCH=$1
-if [ "${PKGARCH}" == "" ];
-then
-  echo "tell me the architecture: x86, x64 or arm"
-  exit 1
-fi
+PKGARCH="x64"
+#if [ "${PKGARCH}" == "" ];
+#then
+#  echo "tell me the architecture: x86, x64 or arm"
+#  exit 1
+#fi
 
 # Get the rest of the repository history. This is needed within Appveyor because
 # otherwise we don't get all of the branch histories and therefore the semver
@@ -134,11 +134,11 @@ cat > wix.xml << EOF
 
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="${PKGINSTFOLDER}" Name="PFiles">
-        <Directory Id="RiV-meshInstallFolder" Name="RiV-mesh">
+        <Directory Id="RiVMeshInstallFolder" Name="RiV-mesh">
 
           <Component Id="MainExecutable" Guid="c2119231-2aa3-4962-867a-9759c87beb24">
             <File
-              Id="RiV-mesh"
+              Id="RiVMesh"
               Name="mesh.exe"
               DiskId="1"
               Source="mesh.exe"
@@ -173,7 +173,7 @@ cat > wix.xml << EOF
 
           <Component Id="CtrlExecutable" Guid="a916b730-974d-42a1-b687-d9d504cbb86a">
             <File
-              Id="RiV-meshctl"
+              Id="RiVMeshctl"
               Name="meshctl.exe"
               DiskId="1"
               Source="meshctl.exe"
@@ -192,7 +192,7 @@ cat > wix.xml << EOF
       </Directory>
     </Directory>
 
-    <Feature Id="RiV-meshFeature" Title="RiV-mesh" Level="1">
+    <Feature Id="RiVMeshFeature" Title="RiV-mesh" Level="1">
       <ComponentRef Id="MainExecutable" />
       <ComponentRef Id="CtrlExecutable" />
       <ComponentRef Id="ConfigScript" />
@@ -200,7 +200,7 @@ cat > wix.xml << EOF
 
     <CustomAction
       Id="UpdateGenerateConfig"
-      Directory="RiV-meshInstallFolder"
+      Directory="RiVMeshInstallFolder"
       ExeCommand="cmd.exe /c updateconfig.bat"
       Execute="deferred"
       Return="check"
@@ -221,5 +221,5 @@ EOF
 # Generate the MSI
 CANDLEFLAGS="-nologo"
 LIGHTFLAGS="-nologo -spdb -sice:ICE71 -sice:ICE61"
-wixbin/candle $CANDLEFLAGS -out ${PKGNAME}-${PKGVERSION}-${PKGARCH}.wixobj -arch ${PKGARCH} wix.xml && \
-wixbin/light $LIGHTFLAGS -ext WixUtilExtension.dll -out ${PKGNAME}-${PKGVERSION}-${PKGARCH}.msi ${PKGNAME}-${PKGVERSION}-${PKGARCH}.wixobj
+wixbin/candle.exe $CANDLEFLAGS -out ${PKGNAME}-${PKGVERSION}-${PKGARCH}.wixobj -arch ${PKGARCH} wix.xml && \
+wixbin/light.exe $LIGHTFLAGS -ext WixUtilExtension.dll -out ${PKGNAME}-${PKGVERSION}-${PKGARCH}.msi ${PKGNAME}-${PKGVERSION}-${PKGARCH}.wixobj
