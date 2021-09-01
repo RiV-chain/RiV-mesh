@@ -3,9 +3,10 @@
 # Check if xar and mkbom are available
 command -v xar >/dev/null 2>&1 || (
   echo "Building xar"
-  sudo apt-get install libxml2-dev libssl1.0-dev zlib1g-dev -y
-  mkdir -p /tmp/xar && cd /tmp/xar
-  git clone https://github.com/mackyle/xar && cd xar/xar
+  sudo apt-get install libxml2-dev libssl1.0-dev zlib1g-dev autoconf -y
+  rm -rf /tmp/xar && mkdir -p /tmp/xar && cd /tmp/xar
+  #git clone https://github.com/mackyle/xar && cd xar/xar
+  git clone https://github.com/RiV-chain/xar.git && cd xar/xar
   (sh autogen.sh && make && sudo make install) || (echo "Failed to build xar"; exit 1)
 )
 command -v mkbom >/dev/null 2>&1 || (
