@@ -83,9 +83,8 @@ Documentation is available [on our website](https://RiV-chain.github.io).
 
 ## Community
 
-Feel free to join us on our [Matrix
-channel](https://matrix.to/#/#mesh:matrix.org) at `#mesh:matrix.org`
-or in the `#mesh` IRC channel on [libera.chat](https://libera.chat).
+Feel free to join us on our [Telegram
+channel](https://t.me/rivchain).
 
 ## License
 
