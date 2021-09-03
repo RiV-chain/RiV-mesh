@@ -7,7 +7,7 @@
 
 RiV-mesh is an implementation of a fully end-to-end encrypted IPv6
 network, created in the scope to produce the Transport Layer for RiV Chain Blockchain,
-also to facilitate secure conectivity between a wide spectrum of endpoint devices like IOT devices,
+also to facilitate secure conectivity between a wide spectrum of endpoint devices like IoT devices,
 desktop computers or even routers.
 It is lightweight, self-arranging, supported on multiple
 platforms and allows pretty much any IPv6-capable application
