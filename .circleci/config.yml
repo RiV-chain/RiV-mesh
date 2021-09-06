@@ -90,7 +90,7 @@ jobs:
           name: Build for EdgeRouter and VyOS
           command: |
               rm -f {mesh,meshctl}
-              git clone https://github.com/neilalexander/vyatta-mesh /tmp/vyatta-mesh;
+              git clone https://github.com/RiV-chain/vyatta-mesh /tmp/vyatta-mesh;
               cd /tmp/vyatta-mesh;
               BUILDDIR_YGG=$CIRCLE_WORKING_DIRECTORY ./build-edgerouter-x $CIRCLE_BRANCH;
               BUILDDIR_YGG=$CIRCLE_WORKING_DIRECTORY ./build-edgerouter-lite $CIRCLE_BRANCH;
