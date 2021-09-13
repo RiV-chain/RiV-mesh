@@ -18,8 +18,8 @@ import (
 	"golang.org/x/text/encoding/unicode"
 
 	"github.com/hjson/hjson-go"
-	"github.com/yggdrasil-network/yggdrasil-go/src/defaults"
-	"github.com/yggdrasil-network/yggdrasil-go/src/version"
+	"github.com/RiV-chain/RiV-mesh/src/defaults"
+	"github.com/RiV-chain/RiV-mesh/src/version"
 )
 
 type admin_info map[string]interface{}
@@ -70,7 +70,7 @@ func run() int {
 	if *ver {
 		fmt.Println("Build name:", version.BuildName())
 		fmt.Println("Build version:", version.BuildVersion())
-		fmt.Println("To get the version number of the running Yggdrasil node, run", os.Args[0], "getSelf")
+		fmt.Println("To get the version number of the running RiV-mesh node, run", os.Args[0], "getSelf")
 		return 0
 	}
 

@@ -19,18 +19,18 @@ import (
 	"github.com/gologme/log"
 	"golang.zx2c4.com/wireguard/tun"
 
-	"github.com/yggdrasil-network/yggdrasil-go/src/address"
-	"github.com/yggdrasil-network/yggdrasil-go/src/config"
-	"github.com/yggdrasil-network/yggdrasil-go/src/core"
-	"github.com/yggdrasil-network/yggdrasil-go/src/defaults"
+	"github.com/RiV-chain/RiV-mesh/src/address"
+	"github.com/RiV-chain/RiV-mesh/src/config"
+	"github.com/RiV-chain/RiV-mesh/src/core"
+	"github.com/RiV-chain/RiV-mesh/src/defaults"
 )
 
 type MTU uint16
 
 // TunAdapter represents a running TUN interface and extends the
-// yggdrasil.Adapter type. In order to use the TUN adapter with Yggdrasil, you
-// should pass this object to the yggdrasil.SetRouterAdapter() function before
-// calling yggdrasil.Start().
+// mesh.Adapter type. In order to use the TUN adapter with RiV-mesh, you
+// should pass this object to the mesh.SetRouterAdapter() function before
+// calling mesh.Start().
 type TunAdapter struct {
 	core        *core.Core
 	config      *config.NodeConfig
@@ -92,7 +92,7 @@ func MaximumMTU() uint64 {
 }
 
 // Init initialises the TUN module. You must have acquired a Listener from
-// the Yggdrasil core before this point and it must not be in use elsewhere.
+// the RiV-mesh core before this point and it must not be in use elsewhere.
 func (tun *TunAdapter) Init(core *core.Core, config *config.NodeConfig, log *log.Logger, options interface{}) error {
 	tun.core = core
 	tun.config = config

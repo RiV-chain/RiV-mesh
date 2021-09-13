@@ -1,10 +1,11 @@
-module github.com/yggdrasil-network/yggdrasil-go
+module github.com/RiV-chain/RiV-mesh
 
 go 1.16
 
 require (
 	github.com/Arceliar/ironwood v0.0.0-20210619124114-6ad55cae5031
 	github.com/Arceliar/phony v0.0.0-20210209235338-dde1a8dca979
+	github.com/RiV-chain/RiV-mesh-extras v0.0.0-20210908113704-d30dca38b092 // indirect
 	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/cheggaaa/pb/v3 v3.0.8
 	github.com/fatih/color v1.12.0 // indirect
@@ -18,6 +19,7 @@ require (
 	github.com/vishvananda/netlink v1.1.0
 	github.com/vishvananda/netns v0.0.0-20210104183010-2eb08e3e575f // indirect
 	golang.org/x/crypto v0.0.0-20210513164829-c07d793c2f9a // indirect
+	golang.org/x/mobile v0.0.0-20210902104108-5d9a33257ab5 // indirect
 	golang.org/x/net v0.0.0-20210610132358-84b48f89b13b
 	golang.org/x/sys v0.0.0-20210611083646-a4fc73990273
 	golang.org/x/text v0.3.7-0.20210503195748-5c7c50ebbd4f

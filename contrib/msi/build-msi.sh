@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# This script generates an MSI file for Yggdrasil for a given architecture. It
+# This script generates an MSI file for RiV-mesh for a given architecture. It
 # needs to run on Windows within MSYS2 and Go 1.13 or later must be installed on
 # the system and within the PATH. This is ran currently by Appveyor (see
 # appveyor.yml in the repository root) for both x86 and x64.
@@ -8,12 +8,12 @@
 # Author: Neil Alexander <neilalexander@users.noreply.github.com>
 
 # Get arch from command line if given
-PKGARCH=$1
-if [ "${PKGARCH}" == "" ];
-then
-  echo "tell me the architecture: x86, x64 or arm"
-  exit 1
-fi
+PKGARCH="x64"
+#if [ "${PKGARCH}" == "" ];
+#then
+#  echo "tell me the architecture: x86, x64 or arm"
+#  exit 1
+#fi
 
 # Get the rest of the repository history. This is needed within Appveyor because
 # otherwise we don't get all of the branch histories and therefore the semver
@@ -47,7 +47,7 @@ then
   )
 fi
 
-# Build Yggdrasil!
+# Build RiV-mesh!
 [ "${PKGARCH}" == "x64" ] && GOOS=windows GOARCH=amd64 CGO_ENABLED=0 ./build
 [ "${PKGARCH}" == "x86" ] && GOOS=windows GOARCH=386 CGO_ENABLED=0 ./build
 [ "${PKGARCH}" == "arm" ] && GOOS=windows GOARCH=arm CGO_ENABLED=0 ./build
@@ -55,12 +55,12 @@ fi
 
 # Create the postinstall script
 cat > updateconfig.bat << EOF
-if not exist %ALLUSERSPROFILE%\\Yggdrasil (
-  mkdir %ALLUSERSPROFILE%\\Yggdrasil
+if not exist %ALLUSERSPROFILE%\\RiV-mesh (
+  mkdir %ALLUSERSPROFILE%\\RiV-mesh
 )
-if not exist %ALLUSERSPROFILE%\\Yggdrasil\\yggdrasil.conf (
-  if exist yggdrasil.exe (
-    yggdrasil.exe -genconf > %ALLUSERSPROFILE%\\Yggdrasil\\yggdrasil.conf
+if not exist %ALLUSERSPROFILE%\\RiV-mesh\\mesh.conf (
+  if exist mesh.exe (
+    mesh.exe -genconf > %ALLUSERSPROFILE%\\RiV-mesh\\mesh.conf
   )
 )
 EOF
@@ -93,9 +93,9 @@ else
 fi
 
 if [ $PKGNAME != "master" ]; then
-  PKGDISPLAYNAME="Yggdrasil Network (${PKGNAME} branch)"
+  PKGDISPLAYNAME="RiV-mesh Network (${PKGNAME} branch)"
 else
-  PKGDISPLAYNAME="Yggdrasil Network"
+  PKGDISPLAYNAME="RiV-mesh Network"
 fi
 
 # Generate the wix.xml file
@@ -109,14 +109,14 @@ cat > wix.xml << EOF
     Language="1033"
     Codepage="1252"
     Version="${PKGVERSIONMS}"
-    Manufacturer="github.com/yggdrasil-network">
+    Manufacturer="github.com/RiV-chain">
 
     <Package
       Id="*"
       Keywords="Installer"
-      Description="Yggdrasil Network Installer"
-      Comments="Yggdrasil Network standalone router for Windows."
-      Manufacturer="github.com/yggdrasil-network"
+      Description="RiV-mesh Network Installer"
+      Comments="RiV-mesh Network standalone router for Windows."
+      Manufacturer="github.com/RiV-chain"
       InstallerVersion="200"
       InstallScope="perMachine"
       Languages="1033"
@@ -134,14 +134,14 @@ cat > wix.xml << EOF
 
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="${PKGINSTFOLDER}" Name="PFiles">
-        <Directory Id="YggdrasilInstallFolder" Name="Yggdrasil">
+        <Directory Id="RiVMeshInstallFolder" Name="RiV-mesh">
 
-          <Component Id="MainExecutable" Guid="c2119231-2aa3-4962-867a-9759c87beb24">
+          <Component Id="MainExecutable" Guid="ca425a1c-407b-4d37-a629-6d004922e5e6">
             <File
-              Id="Yggdrasil"
-              Name="yggdrasil.exe"
+              Id="RiVMesh"
+              Name="mesh.exe"
               DiskId="1"
-              Source="yggdrasil.exe"
+              Source="mesh.exe"
               KeyPath="yes" />
 
             <File
@@ -153,34 +153,34 @@ cat > wix.xml << EOF
             <ServiceInstall
               Id="ServiceInstaller"
               Account="LocalSystem"
-              Description="Yggdrasil Network router process"
-              DisplayName="Yggdrasil Service"
+              Description="RiV-mesh Network router process"
+              DisplayName="RiV-mesh Service"
               ErrorControl="normal"
               LoadOrderGroup="NetworkProvider"
-              Name="Yggdrasil"
+              Name="RiV-mesh"
               Start="auto"
               Type="ownProcess"
-              Arguments='-useconffile "%ALLUSERSPROFILE%\\Yggdrasil\\yggdrasil.conf" -logto "%ALLUSERSPROFILE%\\Yggdrasil\\yggdrasil.log"'
+              Arguments='-useconffile "%ALLUSERSPROFILE%\\RiV-mesh\\mesh.conf" -logto "%ALLUSERSPROFILE%\\RiV-mesh\\mesh.log"'
               Vital="yes" />
 
             <ServiceControl
               Id="ServiceControl"
-              Name="yggdrasil"
+              Name="RiV-mesh"
               Start="install"
               Stop="both"
               Remove="uninstall" />
           </Component>
 
-          <Component Id="CtrlExecutable" Guid="a916b730-974d-42a1-b687-d9d504cbb86a">
+          <Component Id="CtrlExecutable" Guid="7c13026e-8654-4ccb-8ac3-7cc11f284e52">
             <File
-              Id="Yggdrasilctl"
-              Name="yggdrasilctl.exe"
+              Id="RiVMeshctl"
+              Name="meshctl.exe"
               DiskId="1"
-              Source="yggdrasilctl.exe"
+              Source="meshctl.exe"
               KeyPath="yes"/>
           </Component>
 
-          <Component Id="ConfigScript" Guid="64a3733b-c98a-4732-85f3-20cd7da1a785">
+          <Component Id="ConfigScript" Guid="b9e3d00c-25f5-413c-b152-f8def1cf5025">
             <File
               Id="Configbat"
               Name="updateconfig.bat"
@@ -192,7 +192,7 @@ cat > wix.xml << EOF
       </Directory>
     </Directory>
 
-    <Feature Id="YggdrasilFeature" Title="Yggdrasil" Level="1">
+    <Feature Id="RiVMeshFeature" Title="RiV-mesh" Level="1">
       <ComponentRef Id="MainExecutable" />
       <ComponentRef Id="CtrlExecutable" />
       <ComponentRef Id="ConfigScript" />
@@ -200,7 +200,7 @@ cat > wix.xml << EOF
 
     <CustomAction
       Id="UpdateGenerateConfig"
-      Directory="YggdrasilInstallFolder"
+      Directory="RiVMeshInstallFolder"
       ExeCommand="cmd.exe /c updateconfig.bat"
       Execute="deferred"
       Return="check"
@@ -221,5 +221,5 @@ EOF
 # Generate the MSI
 CANDLEFLAGS="-nologo"
 LIGHTFLAGS="-nologo -spdb -sice:ICE71 -sice:ICE61"
-wixbin/candle $CANDLEFLAGS -out ${PKGNAME}-${PKGVERSION}-${PKGARCH}.wixobj -arch ${PKGARCH} wix.xml && \
-wixbin/light $LIGHTFLAGS -ext WixUtilExtension.dll -out ${PKGNAME}-${PKGVERSION}-${PKGARCH}.msi ${PKGNAME}-${PKGVERSION}-${PKGARCH}.wixobj
+wixbin/candle.exe $CANDLEFLAGS -out ${PKGNAME}-${PKGVERSION}-${PKGARCH}.wixobj -arch ${PKGARCH} wix.xml && \
+wixbin/light.exe $LIGHTFLAGS -ext WixUtilExtension.dll -out ${PKGNAME}-${PKGVERSION}-${PKGARCH}.msi ${PKGNAME}-${PKGVERSION}-${PKGARCH}.wixobj
