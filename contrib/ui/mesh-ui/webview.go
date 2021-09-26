@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/RiV-chain/RiV-mesh/src/defaults"
-	"github.com/RiV-chain/RiV-mesh/src/config"
 	"golang.org/x/text/encoding/unicode"
 	"github.com/webview/webview"
 	"github.com/hjson/hjson-go"
@@ -13,6 +12,7 @@ import (
 	"net/url"
 	"runtime"
 	"strings"
+	"bytes"
 	"log"
 	"fmt"
 	"os"	
@@ -69,6 +69,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	log.Printf("Unmarshaled: %v", confHjson)
 	//use meshctl to pass config into stdin as a new config
     })
     dat, err := ioutil.ReadFile(path+"/index.html")
