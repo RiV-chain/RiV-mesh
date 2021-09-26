@@ -1,7 +1,11 @@
 package main
 
 import (
+	"github.com/RiV-chain/RiV-mesh/src/defaults"
+	"github.com/RiV-chain/RiV-mesh/src/config"
+	"golang.org/x/text/encoding/unicode"
 	"github.com/webview/webview"
+	"github.com/hjson/hjson-go"
 	"encoding/json"
 	"path/filepath"
 	"io/ioutil"
@@ -27,6 +31,7 @@ func main() {
     log.Println(path)
     w.Bind("onLoad", func() {
 	log.Println("page loaded")
+	
 	go run(w)
     })
     w.Bind("savePeers", func(peer_list string) {
@@ -34,6 +39,37 @@ func main() {
 	var peers []string
 	_ = json.Unmarshal([]byte(peer_list), &peers)
 	log.Printf("Unmarshaled: %v", peers)
+	var conf []byte
+	var err error
+	conf, err = ioutil.ReadFile(defaults.GetDefaults().DefaultConfigFile)
+	
+	// If there's a byte order mark - which Windows 10 is now incredibly fond of
+	// throwing everywhere when it's converting things into UTF-16 for the hell
+	// of it - remove it and decode back down into UTF-8. This is necessary
+	// because hjson doesn't know what to do with UTF-16 and will panic
+	if bytes.Equal(conf[0:2], []byte{0xFF, 0xFE}) ||
+		bytes.Equal(conf[0:2], []byte{0xFE, 0xFF}) {
+		utf := unicode.UTF16(unicode.BigEndian, unicode.UseBOM)
+		decoder := utf.NewDecoder()
+		conf, err = decoder.Bytes(conf)
+		if err != nil {
+			log.Printf("Error: %v", err)
+			return
+		}
+	}
+	
+	var dat map[string]interface{}
+	if err := hjson.Unmarshal(conf, &dat); err != nil {
+		log.Printf("Error: %v", err)
+		return
+	}
+	dat["Peers"] = peers
+	// Sanitise the config
+	confHjson, err := hjson.Marshal(dat)
+	if err != nil {
+		panic(err)
+	}
+	//use meshctl to pass config into stdin as a new config
     })
     dat, err := ioutil.ReadFile(path+"/index.html")
     w.Navigate("data:text/html,"+url.QueryEscape(string(dat)))

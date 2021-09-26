@@ -4,7 +4,7 @@ import (
 	"crypto/ed25519"
 	//"encoding/hex"
 	"encoding/json"
-	//"errors"
+	"errors"
 	//"fmt"
 	"net"
 	"net/url"
@@ -156,9 +156,12 @@ func (c *Core) SetLogger(log *log.Logger) {
 //		socks://a.b.c.d:e/f.g.h.i:j
 // This adds the peer to the peer list, so that they will be called again if the
 // connection drops.
-/*
 func (c *Core) AddPeer(addr string, sintf string) error {
-	if err := c.CallPeer(addr, sintf); err != nil {
+	u, err := url.Parse(addr)
+	if err != nil {
+		return err
+	}
+	if err := c.CallPeer(u, sintf); err != nil {
 		// TODO: We maybe want this to write the peer to the persistent
 		// configuration even if a connection attempt fails, but first we'll need to
 		// move the code to check the peer URI so that we don't deliberately save a
@@ -191,7 +194,6 @@ func (c *Core) AddPeer(addr string, sintf string) error {
 	}
 	return nil
 }
-*/
 
 /*
 func (c *Core) RemovePeer(addr string, sintf string) error {

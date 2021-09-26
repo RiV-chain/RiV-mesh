@@ -52,9 +52,12 @@ func readConfig(log *log.Logger, useconf bool, useconffile string, normaliseconf
 	if useconffile != "" {
 		// Read the file from the filesystem
 		conf, err = ioutil.ReadFile(useconffile)
-	} else {
+	} else if useconf {
 		// Read the file from stdin.
 		conf, err = ioutil.ReadAll(os.Stdin)
+	} else {
+		//Read the file from defaults
+		conf, err = ioutil.ReadFile(defaults.GetDefaults().DefaultConfigFile)
 	}
 	if err != nil {
 		panic(err)

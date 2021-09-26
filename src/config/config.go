@@ -22,6 +22,37 @@ import (
 	"sync"
 )
 
+// NodeState represents the active and previous configuration of an RiV-mesh
+// node. A NodeState object is returned when starting an RiV-mesh node. Note
+// that this structure and related functions are likely to disappear soon.
+type NodeState struct {
+	Current  NodeConfig
+	Previous NodeConfig
+	Mutex    sync.RWMutex
+}
+
+// Current returns the active node configuration.
+func (s *NodeState) GetCurrent() NodeConfig {
+	s.Mutex.RLock()
+	defer s.Mutex.RUnlock()
+	return s.Current
+}
+
+// Previous returns the previous node configuration.
+func (s *NodeState) GetPrevious() NodeConfig {
+	s.Mutex.RLock()
+	defer s.Mutex.RUnlock()
+	return s.Previous
+}
+
+// Replace the node configuration with new configuration.
+func (s *NodeState) Replace(n NodeConfig) {
+	s.Mutex.Lock()
+	defer s.Mutex.Unlock()
+	s.Previous = s.Current
+	s.Current = n
+}
+
 // NodeConfig is the main configuration structure, containing configuration
 // options that are necessary for an RiV-mesh node to run. You will need to
 // supply one of these structs to the RiV-mesh core when starting a node.

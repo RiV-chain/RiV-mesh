@@ -29,7 +29,8 @@ type Core struct {
 	// guarantee that it will be covered by the mutex
 	phony.Inbox
 	*iwe.PacketConn
-	config       *config.NodeConfig // Config
+	//config       *config.NodeConfig // Config
+	config       config.NodeState // Config
 	secret       ed25519.PrivateKey
 	public       ed25519.PublicKey
 	links        links
@@ -45,13 +46,13 @@ func (c *Core) _init() error {
 	//  Init sets up structs
 	//  Start launches goroutines that depend on structs being set up
 	// This is pretty much required to completely avoid race conditions
-	c.config.RLock()
-	defer c.config.RUnlock()
+	c.config.Mutex.RLock()
+	defer c.config.Mutex.RUnlock()
 	if c.log == nil {
 		c.log = log.New(ioutil.Discard, "", 0)
 	}
-
-	sigPriv, err := hex.DecodeString(c.config.PrivateKey)
+	current := c.config.GetCurrent()
+	sigPriv, err := hex.DecodeString(current.PrivateKey)
 	if err != nil {
 		return err
 	}
@@ -66,7 +67,7 @@ func (c *Core) _init() error {
 	c.PacketConn, err = iwe.NewPacketConn(c.secret)
 	c.ctx, c.ctxCancel = context.WithCancel(context.Background())
 	c.proto.init(c)
-	if err := c.proto.nodeinfo.setNodeInfo(c.config.NodeInfo, c.config.NodeInfoPrivacy); err != nil {
+	if err := c.proto.nodeinfo.setNodeInfo(current.NodeInfo, current.NodeInfoPrivacy); err != nil {
 		return fmt.Errorf("setNodeInfo: %w", err)
 	}
 	return err
@@ -76,15 +77,16 @@ func (c *Core) _init() error {
 // configure them. The loop ensures that disconnected peers will eventually
 // be reconnected with.
 func (c *Core) _addPeerLoop() {
-	c.config.RLock()
-	defer c.config.RUnlock()
+	c.config.Mutex.RLock()
+	defer c.config.Mutex.RUnlock()
+	current := c.config.GetCurrent()
 
 	if c.addPeerTimer == nil {
 		return
 	}
 
 	// Add peers from the Peers section
-	for _, peer := range c.config.Peers {
+	for _, peer := range current.Peers {
 		go func(peer string, intf string) {
 			u, err := url.Parse(peer)
 			if err != nil {
@@ -97,7 +99,7 @@ func (c *Core) _addPeerLoop() {
 	}
 
 	// Add peers from the InterfacePeers section
-	for intf, intfpeers := range c.config.InterfacePeers {
+	for intf, intfpeers := range current.InterfacePeers {
 		for _, peer := range intfpeers {
 			go func(peer string, intf string) {
 				u, err := url.Parse(peer)
@@ -131,7 +133,10 @@ func (c *Core) Start(nc *config.NodeConfig, log *log.Logger) (err error) {
 // This function is unsafe and should only be ran by the core actor.
 func (c *Core) _start(nc *config.NodeConfig, log *log.Logger) error {
 	c.log = log
-	c.config = nc
+	c.config = config.NodeState{
+		Current:  *nc,
+		Previous: *nc,
+	}
 
 	if name := version.BuildName(); name != "unknown" {
 		c.log.Infoln("Build name:", name)
