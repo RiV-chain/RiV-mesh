@@ -5,6 +5,7 @@ go 1.16
 require (
 	github.com/Arceliar/ironwood v0.0.0-20210912013146-c2bc55bb349c
 	github.com/Arceliar/phony v0.0.0-20210209235338-dde1a8dca979
+	github.com/RiV-chain/RiV-mesh-extras v0.0.0-20211014162023-13f9c29aac17 // indirect
 	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/cheggaaa/pb/v3 v3.0.8
 	github.com/fatih/color v1.12.0 // indirect
@@ -18,6 +19,7 @@ require (
 	github.com/vishvananda/netlink v1.1.0
 	github.com/vishvananda/netns v0.0.0-20210104183010-2eb08e3e575f // indirect
 	github.com/webview/webview v0.0.0-20210330151455-f540d88dde4e // indirect
+	golang.org/x/mobile v0.0.0-20210924032853-1c027f395ef7 // indirect
 	golang.org/x/net v0.0.0-20210903162142-ad29c8ab022f
 	golang.org/x/sys v0.0.0-20210906170528-6f6e22806c34
 	golang.org/x/text v0.3.7
