@@ -28,6 +28,9 @@ type AdminSocket struct {
 	done       chan struct{}
 }
 
+// Info refers to information that is returned to the admin socket handler.
+type Info map[string]interface{}
+
 type AdminSocketResponse struct {
 	Status  string `json:"status"`
 	Request struct {
@@ -142,6 +145,26 @@ func (a *AdminSocket) SetupAdminHandlers(na *AdminSocket) {
 			return nil, err
 		}
 		return res, nil
+	})
+	a.AddHandler("addPeer", []string{"uri", "[interface]"}, func(in json.RawMessage) (interface{}, error) {
+		// Set sane defaults
+		intf := ""
+		// Has interface been specified?
+		if itf, ok := in["interface"]; ok {
+			intf = itf.(string)
+		}
+		if a.core.AddPeer(in["uri"].(string), intf) == nil {
+			return Info{
+				"added": []string{
+					in["uri"].(string),
+				},
+			}, nil
+		}
+		return Info{
+			"not_added": []string{
+				in["uri"].(string),
+			},
+		}, errors.New("Failed to add peer")
 	})
 	//_ = a.AddHandler("getNodeInfo", []string{"key"}, t.proto.nodeinfo.nodeInfoAdminHandler)
 	//_ = a.AddHandler("debug_remoteGetSelf", []string{"key"}, t.proto.getSelfHandler)
