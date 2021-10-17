@@ -11,7 +11,9 @@ import (
 	"strings"
 	"log"
 	"fmt"
-	"os"	
+	"os"
+	
+	"github.com/RiV-chain/RiV-mesh/src/admin"	
 )
 
 func main() {
@@ -59,60 +61,45 @@ func run(w webview.WebView){
 	}
 }
 
-func run_command(riv_ctrl_path string, command string) []string{
-	cmd := exec.Command(riv_ctrl_path, command)
+func run_command(riv_ctrl_path string, command string) []byte{
+	args := []string{"-json", command}
+	cmd := exec.Command(riv_ctrl_path, args...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Fatalf("cmd.Run() failed with %s\n", err)
 		return nil
 	}
-	lines := strings.Split(string(out), "\n")
-	return lines
+	return out
 }
 
 func get_self(w webview.WebView, riv_ctrl_path string){
-	
-	lines := run_command(riv_ctrl_path, "getSelf")
-	m := make(map[string]string)
-	for _, s := range lines {
-		p := strings.SplitN(s, ":", 2)
-		if len(p)>1 {
-			m[p[0]]=strings.TrimSpace(p[1])
-		}
+
+	res := &admin.GetSelfResponse{}
+	out := run_command(riv_ctrl_path, "getSelf")
+	if err := json.Unmarshal(out, &res); err != nil {
+		return
 	}
-	if val, ok := m["IPv6 address"]; ok {
+	for ipv6, s := range res.Self {
 		//found ipv6
-		fmt.Printf("IPv6: %s\n", val)
-		go setFieldValue(w, "ipv6", val)
-	}
-	if val, ok := m["IPv6 subnet"]; ok {
+		fmt.Printf("IPv6: %s\n", ipv6)		
+		go setFieldValue(w, "ipv6", ipv6)
 		//found subnet
-		fmt.Printf("Subnet: %s\n", val)
-		go setFieldValue(w, "subnet", val)
+		fmt.Printf("Subnet: %s\n", s.Subnet)
+		go setFieldValue(w, "subnet", s.Subnet)
 	}	
 }
 
 func get_peers(w webview.WebView, riv_ctrl_path string){
-	
-	lines := run_command(riv_ctrl_path, "getPeers")
-	lines = lines[1:] /*remove first element which is a header*/
+
+	res := &admin.GetPeersResponse{}
+	out := run_command(riv_ctrl_path, "getPeers")
+	if err := json.Unmarshal(out, &res); err != nil {
+		return
+	}
+
 	var m []string
-	r:=""
-	for _, s := range lines {
-		p := strings.SplitN(s, " ", -1)
-		if len(p)>1 {
-			for _, t := range p {
-				if len(strings.TrimSpace(t))>0 {
-					r=strings.TrimSpace(t)
-				}
-			}
-			index_p := strings.Index(r, "%")
-			index_b := strings.Index(r, "]")
-			if index_p>0 && index_b>0 {
-				r = r[:index_p]+r[index_b:]
-			}
-			m=append(m, r)
-		}
+	for _, s := range res.Peers {
+		m=append(m, s.Remote)
 	}
 	for k := range m {         
 	    // Loop
