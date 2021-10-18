@@ -152,11 +152,7 @@ func (a *AdminSocket) SetupAdminHandlers(na *AdminSocket) {
 		if err := json.Unmarshal(in, &req); err != nil {
 			return nil, err
 		}
-		//js, err := json.Marshal(req)
-		//if err != nil {
-		//	return nil, err
-		//}
-		//fmt.Println("deserialized %s", string(js[:]))
+
 		if err := a.addPeersHandler(req, res); err != nil {
 			return nil, err
 		}

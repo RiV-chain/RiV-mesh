@@ -16,9 +16,6 @@ type AddPeersResponse struct {
 }
 
 func (a *AdminSocket) addPeersHandler(req *AddPeersRequest, res *AddPeersResponse) error {
-	fmt.Println("adding peers handler")
-	
-	
 	// Set sane defaults
 	err:=a.core.AddPeer(req.Uri, req.Intf)
 	if err != nil {
