@@ -124,11 +124,11 @@
     
 	function getPeerList(){
 	    var xhr = new XMLHttpRequest();
-	    xhr.open("GET", 'http://192.168.1.106:8080/rest/peers.json', false);
+	    xhr.open("GET", 'http://192.168.1.107:8080/rest/peers.json', false);
 	    xhr.send(null);
 	    if (xhr.status === 200) {
-		const peerList = JSON.parse(xhr.responseText);
-		add_table(peerList);
+		     const peerList = JSON.parse(xhr.responseText);
+         add_table(peerList);
 	    }
 	};
 	

@@ -24,41 +24,52 @@ func main() {
     w.SetSize(470, 415, webview.HintNone)
     path, err := filepath.Abs(filepath.Dir(os.Args[0]))
     if err != nil {
-            log.Fatal(err)
+        log.Fatal(err)
     }
     log.Println(path)
     w.Bind("onLoad", func() {
 	log.Println("page loaded")
-	go run(w)
+	    go run(w)
     })
     w.Bind("savePeers", func(peer_list string) {
-	//log.Println("peers saved ", peer_list)
-	var peers []string
-	_ = json.Unmarshal([]byte(peer_list), &peers)
-	log.Printf("Unmarshaled: %v", peers)
+	   //log.Println("peers saved ", peer_list)
+	   var peers []string
+	   _ = json.Unmarshal([]byte(peer_list), &peers)
+	   log.Printf("Unmarshaled: %v", peers)
+       for _, u := range peers {
+            log.Printf("Unmarshaled: %v", u)
+            add_peers(w, u)
+       }
     })
     dat, err := ioutil.ReadFile(path+"/index.html")
     w.Navigate("data:text/html,"+url.QueryEscape(string(dat)))
     w.Run()
 }
 
-func run(w webview.WebView){
-	if runtime.GOOS == "windows" {
+func get_ctl_path() string{
+    if runtime.GOOS == "windows" {
 		program_path := "programfiles"
 		path, exists := os.LookupEnv(program_path)
 		if exists {
 			fmt.Println("Program path: %s", path)
 			riv_ctrl_path := fmt.Sprintf("%s\\RiV-mesh\\meshctl.exe", path)
-			get_self(w, riv_ctrl_path)
-			get_peers(w, riv_ctrl_path)
+			return riv_ctrl_path
 		} else {
 			fmt.Println("could not find Program Files path")
+            return ""
 		}
 	} else {
 		riv_ctrl_path := fmt.Sprintf("meshctl")
-		get_self(w, riv_ctrl_path)
-		get_peers(w, riv_ctrl_path)
+		return riv_ctrl_path
 	}
+}
+
+func run(w webview.WebView){
+    riv_ctrl_path := get_ctl_path()
+    if riv_ctrl_path != "" {
+        get_self(w, riv_ctrl_path)
+		get_peers(w, riv_ctrl_path)
+    }
 }
 
 func run_command(riv_ctrl_path string, command string) []byte{
@@ -70,6 +81,22 @@ func run_command(riv_ctrl_path string, command string) []byte{
 		return nil
 	}
 	return out
+}
+
+func run_command_with_arg(riv_ctrl_path string, command string, arg string) []byte{
+	args := []string{"-json", command, arg}
+	cmd := exec.Command(riv_ctrl_path, args...)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Fatalf("cmd.Run() failed with %s\n", err)
+		return nil
+	}
+	return out
+}
+
+func add_peers(w webview.WebView, uri string){
+    riv_ctrl_path := get_ctl_path()
+	run_command_with_arg(riv_ctrl_path, "addpeers", "uri="+uri)	
 }
 
 func get_self(w webview.WebView, riv_ctrl_path string){
