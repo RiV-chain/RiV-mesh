@@ -152,15 +152,19 @@ func (a *AdminSocket) SetupAdminHandlers(na *AdminSocket) {
 		if err := json.Unmarshal(in, &req); err != nil {
 			return nil, err
 		}
-		js, err := json.Marshal(req)
-		if err != nil {
-			return nil, err
-		}
-		fmt.Println("deserialized %s", string(js[:]))
+		//js, err := json.Marshal(req)
+		//if err != nil {
+		//	return nil, err
+		//}
+		//fmt.Println("deserialized %s", string(js[:]))
 		if err := a.addPeersHandler(req, res); err != nil {
 			return nil, err
 		}
 		return res, nil
+	})
+	_ = a.AddHandler("removePeers", []string{}, func(in json.RawMessage) (interface{}, error) {
+		a.core.RemovePeers()
+		return nil, nil
 	})
 	//_ = a.AddHandler("getNodeInfo", []string{"key"}, t.proto.nodeinfo.nodeInfoAdminHandler)
 	//_ = a.AddHandler("debug_remoteGetSelf", []string{"key"}, t.proto.getSelfHandler)

@@ -196,38 +196,17 @@ func (c *Core) AddPeer(addr string, sintf string) error {
 	return nil
 }
 
-
-/*
-func (c *Core) RemovePeer(addr string, sintf string) error {
-	if sintf == "" {
-		for i, peer := range c.config.Current.Peers {
-			if peer == addr {
-				c.config.Current.Peers = append(c.config.Current.Peers[:i], c.config.Current.Peers[i+1:]...)
-				break
-			}
-		}
-	} else if _, ok := c.config.Current.InterfacePeers[sintf]; ok {
-		for i, peer := range c.config.Current.InterfacePeers[sintf] {
-			if peer == addr {
-				c.config.Current.InterfacePeers[sintf] = append(c.config.Current.InterfacePeers[sintf][:i], c.config.Current.InterfacePeers[sintf][i+1:]...)
-				break
-			}
-		}
+func (c *Core) RemovePeers() error {
+	c.config.RLock()
+	defer c.config.RUnlock()
+	c.config.Peers = c.config.Peers[:0]
+	for k := range c.config.InterfacePeers {
+		delete(c.config.InterfacePeers, k)
 	}
-
-	panic("TODO") // Get the net.Conn to this peer (if any) and close it
-	c.peers.Act(nil, func() {
-		ports := c.peers.ports
-		for _, peer := range ports {
-			if addr == peer.intf.name() {
-				c.peers._removePeer(peer)
-			}
-		}
-	})
 
 	return nil
 }
-*/
+
 
 // CallPeer calls a peer once. This should be specified in the peer URI format,
 // e.g.:
