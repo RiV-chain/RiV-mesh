@@ -164,7 +164,8 @@ func (a *AdminSocket) SetupAdminHandlers(na *AdminSocket) {
 	})
 	_ = a.AddHandler("removePeers", []string{}, func(in json.RawMessage) (interface{}, error) {
 		a.core.RemovePeers()
-		return nil, nil
+		res := &AddPeersResponse{}
+		return res, nil
 	})
 	//_ = a.AddHandler("getNodeInfo", []string{"key"}, t.proto.nodeinfo.nodeInfoAdminHandler)
 	//_ = a.AddHandler("debug_remoteGetSelf", []string{"key"}, t.proto.getSelfHandler)
