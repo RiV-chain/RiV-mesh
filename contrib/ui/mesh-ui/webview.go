@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/webview/webview"
+    "github.com/hjson/hjson-go"
 	"encoding/json"
 	"path/filepath"
 	"io/ioutil"
@@ -43,7 +44,11 @@ func main() {
         }
     } else {
         //read peers
-        
+        //conf, err := ioutil.ReadFile(mesh_settings_path)
+        //var dat map[string]interface{}
+       	//if err := hjson.Unmarshal(conf, &dat); err != nil {
+        //	panic(err)
+        //}
     }
     path, err := filepath.Abs(filepath.Dir(os.Args[0]))
     if err != nil {
@@ -62,6 +67,14 @@ func main() {
        for _, u := range peers {
             log.Printf("Unmarshaled: %v", u)
             add_peers(w, u)
+       }
+       //add peers to ~/mesh.conf
+       var dat map[string]interface{}
+       dat["Peers"] = peers
+       bs, _ := hjson.Marshal(dat)
+       e := ioutil.WriteFile(mesh_settings_path, bs, 0750)
+       if e != nil {
+           fmt.Printf("Unable to write file: %v", e)
        }
     })
     dat, err := ioutil.ReadFile(path+"/index.html")
