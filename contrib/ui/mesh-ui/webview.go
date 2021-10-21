@@ -32,6 +32,9 @@ func main() {
     user_home := get_user_home_path()
     mesh_settings_folder := filepath.Join(user_home, mesh_folder)
     err := os.MkdirAll(mesh_settings_folder, os.ModePerm)
+    if err != nil {
+        fmt.Printf("Unable to create folder: %v", err)
+    }
     mesh_settings_path := filepath.Join(user_home, mesh_folder, mesh_conf)
     if _, err := os.Stat(mesh_settings_path); os.IsNotExist(err) { 
         err := ioutil.WriteFile(mesh_settings_path, []byte(""), 0750)
@@ -68,9 +71,19 @@ func main() {
 
 func get_user_home_path() string {
     if runtime.GOOS == "windows" {
-        return "USERPROFILE"
+        path, exists := os.LookupEnv("USERPROFILE")
+        if exists {
+            return path
+        } else {
+            return ""
+        }
     } else {
-        return "HOME"
+        path, exists := os.LookupEnv("HOME")
+        if exists {
+            return path
+        } else {
+            return ""
+        }
     }
 }
 
