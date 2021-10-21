@@ -22,6 +22,25 @@ func main() {
     defer w.Destroy()
     w.SetTitle("RiV-mesh")
     w.SetSize(470, 415, webview.HintNone)
+    /*1. Create ~/.riv-mesh folder if not existing
+     *2. Create ~/.riv-mesh/mesh.conf if not existing
+     *3. If the file exists read Peers. 
+     *3.1 Invoke add peers for each record
+     */
+    mesh_folder := ".riv-mesh"
+    mesh_conf := "mesh.conf"
+    user_home := get_user_home_path()
+    err := os.MkdirAll(mesh_folder, os.ModePerm)
+    mesh_settings_path := filepath.Join(user_home, mesh_folder, mesh_conf)
+    if _, err := os.Stat(mesh_settings_path); os.IsNotExist(err) { 
+        err := ioutil.WriteFile(mesh_settings_path, []byte(""), 0750)
+        if err != nil {
+            fmt.Printf("Unable to write file: %v", err)
+        }
+    } else {
+        //read peers
+        
+    }
     path, err := filepath.Abs(filepath.Dir(os.Args[0]))
     if err != nil {
         log.Fatal(err)
@@ -44,6 +63,14 @@ func main() {
     dat, err := ioutil.ReadFile(path+"/index.html")
     w.Navigate("data:text/html,"+url.QueryEscape(string(dat)))
     w.Run()
+}
+
+func get_user_home_path() string {
+    if runtime.GOOS == "windows" {
+        return "USERPROFILE"
+    } else {
+        return "HOME"
+    }
 }
 
 func get_ctl_path() string{
