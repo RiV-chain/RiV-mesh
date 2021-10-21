@@ -44,11 +44,17 @@ func main() {
         }
     } else {
         //read peers
-        //conf, err := ioutil.ReadFile(mesh_settings_path)
-        //var dat map[string]interface{}
-       	//if err := hjson.Unmarshal(conf, &dat); err != nil {
-        //	panic(err)
-        //}
+        conf, _ := ioutil.ReadFile(mesh_settings_path)
+        var dat map[string]interface {}
+       	if err := hjson.Unmarshal(conf, &dat); err != nil {
+        	log.Fatal(err)
+        }
+        peers := dat["Peers"].([]interface{}) 
+        remove_peers()
+        for _, u := range peers {
+           log.Printf("Unmarshaled: %v", u.(string))
+           add_peers(u.(string))
+        }
     }
     path, err := filepath.Abs(filepath.Dir(os.Args[0]))
     if err != nil {
