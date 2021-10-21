@@ -64,12 +64,13 @@ func main() {
 	   var peers []string
 	   _ = json.Unmarshal([]byte(peer_list), &peers)
 	   log.Printf("Unmarshaled: %v", peers)
+       remove_peers()
        for _, u := range peers {
             log.Printf("Unmarshaled: %v", u)
-            add_peers(w, u)
+            add_peers(u)
        }
        //add peers to ~/mesh.conf
-       var dat map[string]interface{}
+       dat := make(map[string]interface{})
        dat["Peers"] = peers
        bs, _ := hjson.Marshal(dat)
        e := ioutil.WriteFile(mesh_settings_path, bs, 0750)
@@ -142,15 +143,20 @@ func run_command_with_arg(riv_ctrl_path string, command string, arg string) []by
 	cmd := exec.Command(riv_ctrl_path, args...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Fatalf("cmd.Run() failed with %s\n", err)
+        log.Fatalf("command failed: %s\n", riv_ctrl_path+" "+strings.Join(args, " "))
 		return nil
 	}
 	return out
 }
 
-func add_peers(w webview.WebView, uri string){
+func add_peers(uri string){
     riv_ctrl_path := get_ctl_path()
 	run_command_with_arg(riv_ctrl_path, "addpeers", "uri="+uri)	
+}
+
+func remove_peers(){
+    riv_ctrl_path := get_ctl_path()
+	run_command(riv_ctrl_path, "removepeers")	
 }
 
 func get_self(w webview.WebView, riv_ctrl_path string){
