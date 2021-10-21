@@ -49,11 +49,15 @@ func main() {
        	if err := hjson.Unmarshal(conf, &dat); err != nil {
         	fmt.Printf("Unable to parse mesh.conf file: %v", err)
         } else {
-            peers := dat["Peers"].([]interface{}) 
-            remove_peers()
-            for _, u := range peers {
-               log.Printf("Unmarshaled: %v", u.(string))
-               add_peers(u.(string))
+            if dat["Peers"]!=nil {
+                peers := dat["Peers"].([]interface{}) 
+                remove_peers()
+                for _, u := range peers {
+                   log.Printf("Unmarshaled: %v", u.(string))
+                   add_peers(u.(string))
+                }
+            } else {
+                fmt.Printf("Warning: Peers array not loaded from mesh.conf file")
             }
         }
     }
