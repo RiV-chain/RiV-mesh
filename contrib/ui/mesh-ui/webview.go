@@ -30,7 +30,8 @@ func main() {
     mesh_folder := ".riv-mesh"
     mesh_conf := "mesh.conf"
     user_home := get_user_home_path()
-    err := os.MkdirAll(mesh_folder, os.ModePerm)
+    mesh_settings_folder := filepath.Join(user_home, mesh_folder)
+    err := os.MkdirAll(mesh_settings_folder, os.ModePerm)
     mesh_settings_path := filepath.Join(user_home, mesh_folder, mesh_conf)
     if _, err := os.Stat(mesh_settings_path); os.IsNotExist(err) { 
         err := ioutil.WriteFile(mesh_settings_path, []byte(""), 0750)
