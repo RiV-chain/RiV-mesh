@@ -268,6 +268,7 @@ cat > wix.xml << EOF
 
     <!-- Step 3: Include the custom action -->
     <Property Id="WixShellExecTarget" Value="[#MeshUI]" />
+    <Property Id="ASSISTANCE_START_VIA_REGISTRY">1</Property>
     <CustomAction Id="LaunchApplication"
         BinaryKey="WixCA"
         DllEntry="WixShellExec"
@@ -291,8 +292,6 @@ cat > wix.xml << EOF
         <RegistryValue Root="HKCU" Key="Software\RiV-chain\RiV-mesh" Name="installed" Type="integer" Value="1" KeyPath="yes" />
      </Component>
 
-     <Property Id="ASSISTANCE_START_VIA_REGISTRY">1</Property>
-
      <!-- Auto-start via Registry -->
      <Component Id="RiVMeshAutostart" Guid="e737c665-7bad-45f0-acaf-fe8b8656c75e">
        <RegistryValue Id="MerAs.rst" Root="HKMU" Action="write"
@@ -302,8 +301,6 @@ cat > wix.xml << EOF
                    Type="string" />
       <Condition>ASSISTANCE_START_VIA_REGISTRY</Condition>
     </Component>
-
-    <ComponentRef Id="RiVMeshAutostart" />
 
   </Product>
 </Wix>
