@@ -53,6 +53,7 @@ PKGVERSION=$(sh contrib/msi/msversion.sh --bare)
 PKGVERSIONMS=$(echo $PKGVERSION | tr - .)
 PKGINDEXFILE=contrib/ui/mesh-ui/index.html
 PKGLICENSEFILE=LICENSE.rtf
+GUIDEBUG="ON"
 
 #Build winres
 go-winres simply --icon riv.ico --file-version $PKGVERSION --file-description "RiV-mesh (c) service, 2021 RIV CHAIN" \
@@ -66,9 +67,13 @@ go-winres simply --file-version $PKGVERSION --file-description "RiV-mesh (c) CLI
 cp *.syso cmd/meshctl
 
 # Build Mesh!
-[ "${PKGARCH}" == "x64" ] && GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ LDFLAGS="-H windowsgui" ./build
-[ "${PKGARCH}" == "x86" ] && GOOS=windows GOARCH=386 CGO_ENABLED=1 CC=i686-w64-mingw32-gcc CXX=i686-w64-mingw32-g++ LDFLAGS="-H windowsgui" ./build
-[ "${PKGARCH}" == "arm" ] && GOOS=windows GOARCH=arm CGO_ENABLED=0 ./build
+[ "${PKGARCH}" == "x64" && "${GUIDEBUG}" == "OFF"] && GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ LDFLAGS="-H windowsgui" ./build
+[ "${PKGARCH}" == "x86" && "${GUIDEBUG}" == "OFF"] && GOOS=windows GOARCH=386 CGO_ENABLED=1 CC=i686-w64-mingw32-gcc CXX=i686-w64-mingw32-g++ LDFLAGS="-H windowsgui" ./build
+[ "${PKGARCH}" == "arm" && "${GUIDEBUG}" == "OFF"] && GOOS=windows GOARCH=arm CGO_ENABLED=0 ./build
+
+[ "${PKGARCH}" == "x64" && "${GUIDEBUG}" == "ON"] && GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ ./build
+[ "${PKGARCH}" == "x86" && "${GUIDEBUG}" == "ON"] && GOOS=windows GOARCH=386 CGO_ENABLED=1 CC=i686-w64-mingw32-gcc CXX=i686-w64-mingw32-g++ ./build
+[ "${PKGARCH}" == "arm" && "${GUIDEBUG}" == "ON"] && GOOS=windows GOARCH=arm CGO_ENABLED=0 ./build
 #[ "${PKGARCH}" == "arm64" ] && GOOS=windows GOARCH=arm64 CGO_ENABLED=0 ./build
 
 # Create the postinstall script
