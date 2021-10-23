@@ -8,58 +8,58 @@
     <title>RiV-mesh</title>
     <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/font-awesome-line-awesome/css/all.min.css" type="text/css">
     <link rel="stylesheet" href="https://unpkg.com/bulmaswatch/slate/bulmaswatch.min.css" type="text/css">
-    <script>
+  <script>
       
     function setFieldValue(id, value){
-        var field = document.getElementById(id);
-        field.innerHTML = value;
+      var field = document.getElementById(id);
+      field.innerHTML = value;
     }
-
+  
     function openTab(element, tabName) {
-        // Declare all variables
-        var i, tabContent, tabLinks;
-    
-        // Get all elements with class="content" and hide them
-        tabContent = document.getElementsByClassName("tab here");
-        for (i = 0; i < tabContent.length; i++) {
-            tabContent[i].className = "tab here is-hidden";
-        }
-    
-        // Get all elements with class="tab" and remove the class "is-active"
-        tabLinks = document.getElementsByClassName("tab is-active");
-        for (i = 0; i < tabLinks.length; i++) {
-            tabLinks[i].className = "tab";
-        }
-    
-        // Show the current tab, and add an "is-active" class to the button that opened the tab
-        document.getElementById(tabName).className = "tab here";
-        element.parentElement.className = "tab is-active";
-        refreshRecordsList();
+      // Declare all variables
+      var i, tabContent, tabLinks;
+      
+      // Get all elements with class="content" and hide them
+      tabContent = document.getElementsByClassName("tab here");
+      for (i = 0; i < tabContent.length; i++) {
+          tabContent[i].className = "tab here is-hidden";
+      }
+      
+      // Get all elements with class="tab" and remove the class "is-active"
+      tabLinks = document.getElementsByClassName("tab is-active");
+      for (i = 0; i < tabLinks.length; i++) {
+          tabLinks[i].className = "tab";
+      }
+      
+      // Show the current tab, and add an "is-active" class to the button that opened the tab
+      document.getElementById(tabName).className = "tab here";
+      element.parentElement.className = "tab is-active";
+      refreshRecordsList();
     };
-    
+      
     function copy2clipboard(text){
       var textArea = document.createElement("textarea");
       textArea.style.position = 'fixed';
       textArea.style.top = 0;
       textArea.style.left = 0;
-    
+      
       // Ensure it has a small width and height. Setting to 1px / 1em
       // doesn't work as this gives a negative w/h on some browsers.
       textArea.style.width = '2em';
       textArea.style.height = '2em';
-    
+      
       // We don't need padding, reducing the size if it does flash render.
       textArea.style.padding = 0;
-    
+      
       // Clean up any borders.
       textArea.style.border = 'none';
       textArea.style.outline = 'none';
       textArea.style.boxShadow = 'none';
-    
+      
       // Avoid flash of the white box if rendered for any reason.
       textArea.style.background = 'transparent';
       textArea.value = text;
-
+  
       document.body.appendChild(textArea);
       textArea.focus();
       textArea.select();
@@ -73,107 +73,107 @@
       document.body.removeChild(textArea);
       showInfo('value copied successfully!');
     };
-    
+      
     function showInfo(text) {
-        var info = document.getElementById("notification_info");
-        var message = document.getElementById("info_text");
-        message.innerHTML = text;
-    
-        info.className = "notification is-primary";
-        var button = document.getElementById("info_close");
-        button.onclick = function() {
-            message.value = "";
-            info.className = "notification is-primary is-hidden";
-        };
-        setTimeout(button.onclick, 2000);
+      var info = document.getElementById("notification_info");
+      var message = document.getElementById("info_text");
+      message.innerHTML = text;
+  
+      info.className = "notification is-primary";
+      var button = document.getElementById("info_close");
+      button.onclick = function() {
+        message.value = "";
+        info.className = "notification is-primary is-hidden";
+      };
+      setTimeout(button.onclick, 2000);
     };
-    
+      
     function showWindow(text) {
-        var info = document.getElementById("notification_window");
-        var message = document.getElementById("info_window");
-        message.innerHTML = text;
-    
-        info.className = "notification is-primary";
-        var button = document.getElementById("info_close");
-        button.onclick = function() {
-            message.value = "";
-            info.className = "notification is-primary is-hidden";
-        };
-        var button = document.getElementById("window_close");
-        button.onclick = function() {
-            message.value = "";
-            info.className = "notification is-primary is-hidden";
-        };
-        var button = document.getElementById("window_save");
-        button.onclick = function() {
-            message.value = "";
-            info.className = "notification is-primary is-hidden";
-            //todo save peers
-            var peers = document.querySelectorAll('*[id^="peer-"]');
-            var peer_list = [];
-            for (i = 0; i < peers.length; ++i) {
-              var p = peers[i];
-              if (p.checked) {
-            		var peerURL = p.parentElement.parentElement.firstChild.innerText;
-            		peer_list.push(peerURL);
-              }
+      var info = document.getElementById("notification_window");
+      var message = document.getElementById("info_window");
+      message.innerHTML = text;
+      
+      info.className = "notification is-primary";
+      var button = document.getElementById("info_close");
+      button.onclick = function() {
+        message.value = "";
+        info.className = "notification is-primary is-hidden";
+      };
+      var button = document.getElementById("window_close");
+      button.onclick = function() {
+        message.value = "";
+        info.className = "notification is-primary is-hidden";
+      };
+      var button = document.getElementById("window_save");
+      button.onclick = function() {
+        message.value = "";
+        info.className = "notification is-primary is-hidden";
+        //todo save peers
+        var peers = document.querySelectorAll('*[id^="peer-"]');
+          var peer_list = [];
+          for (i = 0; i < peers.length; ++i) {
+            var p = peers[i];
+            if (p.checked) {
+              var peerURL = p.parentElement.parentElement.firstChild.innerText;
+              peer_list.push(peerURL);
             }
-            savePeers(JSON.stringify(peer_list));
+          }
+          savePeers(JSON.stringify(peer_list));
         };
-    };
+  };
+      
+  function getPeerList(){
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", 'http://r4.rivchain.org:8080/rest/peers.json', false);
+    xhr.send(null);
+    if (xhr.status === 200) {
+      const peerList = JSON.parse(xhr.responseText);
+      add_table(peerList);
+    }
+  };
     
-	function getPeerList(){
-	    var xhr = new XMLHttpRequest();
-	    xhr.open("GET", 'http://r4.rivchain.org:8080/rest/peers.json', false);
-	    xhr.send(null);
-	    if (xhr.status === 200) {
-		     const peerList = JSON.parse(xhr.responseText);
-         add_table(peerList);
-	    }
-	};
-	
-function add_table(peerList) {
-  const countries = Object.keys(peerList);
-  // get the reference for the body
-  var body = document.createElement("div");
-
-  // creates a <table> element and a <tbody> element
-  var tbl = document.createElement("table");
-  tbl.setAttribute('id', "peer_list");
-  //tbl.setAttribute('cellpadding', '10');
-  var tblBody = document.createElement("tbody");
-
-  // creating all cells
-  for (var c in peerList) {
-    let counter = 1;
-    for (peer in peerList[c]){
-    // creates a table row
-    var row = document.createElement("tr");
-    var peerAddress = document.createElement("td");
-    var cellText = document.createTextNode(peer);
-    peerAddress.appendChild(cellText);
-    var peerSelect = document.createElement("td");
-    var chk = document.createElement('input');
-    chk.setAttribute('type', 'checkbox');
-    chk.setAttribute('id', "peer-"+counter);
-    peerSelect.appendChild(chk);
-    row.appendChild(peerAddress);
-    row.appendChild(peerSelect);
-    tblBody.appendChild(row);
-  }
-}
-  // put the <tbody> in the <table>
-  tbl.appendChild(tblBody);
-  // appends <table> into <body>
-  body.appendChild(tbl);
-  // sets the border attribute of tbl to 2;
-  //tbl.setAttribute("border", "0");
-  showWindow(body.innerHTML);
-};
+  function add_table(peerList) {
+    const countries = Object.keys(peerList);
+    // get the reference for the body
+    var body = document.createElement("div");
+  
+    // creates a <table> element and a <tbody> element
+    var tbl = document.createElement("table");
+    tbl.setAttribute('id', "peer_list");
+    //tbl.setAttribute('cellpadding', '10');
+    var tblBody = document.createElement("tbody");
+  
+    // creating all cells
+    for (var c in peerList) {
+      let counter = 1;
+      for (peer in peerList[c]){
+        // creates a table row
+        var row = document.createElement("tr");
+        var peerAddress = document.createElement("td");
+        var cellText = document.createTextNode(peer);
+        peerAddress.appendChild(cellText);
+        var peerSelect = document.createElement("td");
+        var chk = document.createElement('input');
+        chk.setAttribute('type', 'checkbox');
+        chk.setAttribute('id', "peer-"+counter);
+        peerSelect.appendChild(chk);
+        row.appendChild(peerAddress);
+        row.appendChild(peerSelect);
+        tblBody.appendChild(row);
+      }
+    }
+    // put the <tbody> in the <table>
+    tbl.appendChild(tblBody);
+    // appends <table> into <body>
+    body.appendChild(tbl);
+    // sets the border attribute of tbl to 2;
+    //tbl.setAttribute("border", "0");
+    showWindow(body.innerHTML);
+  };
 
         
-    </script>
-    <style>
+  </script>
+  <style>
           
     .container-ip {
     
@@ -207,29 +207,29 @@ function add_table(peerList) {
     }
     
     .container{
-        position: relative;
+      position: relative;
     }
     
     .box{
-        width: 100%;
-        height: 100px;
-        position: absolute;
-        top: 0;
-        left: 0;
-        background: rgba(0, 0, 0, 0.0);
+      width: 100%;
+      height: 100px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: rgba(0, 0, 0, 0.0);
     }
 
     .stack-top{
-        z-index: 9;
-        margin: 10px; /* for demo purpose  */
-	background: rgba(255, 0, 0, 1);
+      z-index: 9;
+      margin: 10px; /* for demo purpose  */
+      background: rgba(255, 0, 0, 1);
     }
     
     th, td {
-	  padding: 5px;
+      padding: 5px;
     }
 
-    </style>
+  </style>
 </head>
 
 <body onload="onLoad();">
