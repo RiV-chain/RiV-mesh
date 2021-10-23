@@ -19,7 +19,6 @@ import (
 )
 
 func main() {
-    peersTimer := time.NewTimer(time.Minute)
     debug := true
     w := webview.New(debug)
     defer w.Destroy()
@@ -71,10 +70,6 @@ func main() {
     w.Bind("onLoad", func() {
 	log.Println("page loaded")
 	    go run(w)
-        go func() {
-            <-peersTimer.C
-            run(w)
-        }()
     })
     w.Bind("savePeers", func(peer_list string) {
 	   //log.Println("peers saved ", peer_list)
@@ -137,11 +132,15 @@ func get_ctl_path() string{
 }
 
 func run(w webview.WebView){
+    //var peersTimer *time.Timer
     riv_ctrl_path := get_ctl_path()
     if riv_ctrl_path != "" {
         get_self(w, riv_ctrl_path)
 		get_peers(w, riv_ctrl_path)
     }
+    _ = time.AfterFunc(10*time.Second, func() {
+        run(w)
+    })
 }
 
 func run_command(riv_ctrl_path string, command string) []byte{
