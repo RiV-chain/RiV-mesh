@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"runtime"
 	"strings"
+    "time"
 	"log"
 	"fmt"
 	"os"
@@ -18,6 +19,7 @@ import (
 )
 
 func main() {
+    peersTimer := time.NewTimer(time.Minute)
     debug := true
     w := webview.New(debug)
     defer w.Destroy()
@@ -43,7 +45,7 @@ func main() {
             fmt.Printf("Unable to write file: %v", err)
         }
     } else {
-        //read peers
+        //read peers from mesh.conf
         conf, _ := ioutil.ReadFile(mesh_settings_path)
         var dat map[string]interface {}
        	if err := hjson.Unmarshal(conf, &dat); err != nil {
@@ -69,6 +71,10 @@ func main() {
     w.Bind("onLoad", func() {
 	log.Println("page loaded")
 	    go run(w)
+        go func() {
+            <-peersTimer.C
+            run(w)
+        }()
     })
     w.Bind("savePeers", func(peer_list string) {
 	   //log.Println("peers saved ", peer_list)
