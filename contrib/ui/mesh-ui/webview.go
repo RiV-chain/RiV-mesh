@@ -10,7 +10,9 @@ import (
 	"net/url"
 	"runtime"
 	"strings"
+    "strconv"
     "time"
+    "net"
 	"log"
 	"fmt"
 	"os"
@@ -90,9 +92,40 @@ func main() {
            fmt.Printf("Unable to write file: %v", e)
        }
     })
+    w.Bind("ping", func(peer_list string) {
+
+        go ping(w, peer_list)
+
+    })
     dat, err := ioutil.ReadFile(path+"/index.html")
     w.Navigate("data:text/html,"+url.QueryEscape(string(dat)))
     w.Run()
+}
+
+func ping(w webview.WebView, peer_list string){
+    var peers []string
+    _ = json.Unmarshal([]byte(peer_list), &peers)
+    log.Printf("Unmarshaled: %v", peers)
+    for _, u := range peers {
+        log.Printf("Unmarshaled: %v", u)
+        ping_time := check(u);
+        log.Printf("ping: %d", ping_time)
+        setPingValue(w, u, strconv.FormatInt(ping_time, 10));
+    }
+}
+
+func check(peer string) int64 {
+    u, e := url.Parse(peer)
+    if e!=nil {
+        return -1
+    }
+    t := time.Now()
+    _, err := net.DialTimeout("tcp", u.Host, 5*time.Second)
+    if err!=nil {
+        return -1
+    }
+    d := time.Since(t)
+    return d.Milliseconds()
 }
 
 func get_user_home_path() string {
@@ -215,5 +248,11 @@ func get_peers(w webview.WebView, riv_ctrl_path string){
 func setFieldValue(p webview.WebView, id string, value string) {
 	p.Dispatch(func() {
 		p.Eval("setFieldValue('"+id+"','"+value+"');")
+	})
+}
+
+func setPingValue(p webview.WebView, peer string, value string) {
+	p.Dispatch(func() {
+		p.Eval("setPingValue('"+peer+"','"+value+"');")
 	})
 }
