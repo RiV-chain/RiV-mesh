@@ -157,7 +157,7 @@
           for (i = 0; i < peers.length; ++i) {
             var p = peers[i];
             if (p.checked) {
-              var peerURL = p.parentElement.parentElement.firstChild.innerText;
+              var peerURL = p.parentElement.parentElement.children[1].innerText;
               peer_list.push(peerURL);
             }
           }
