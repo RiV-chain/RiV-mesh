@@ -16,19 +16,46 @@
     }
     
     function setPingValue(peer, value){
-      
+      var cellText;
+      var peerCell = document.getElementById(peer);
+      var peerTable = document.getElementById("peer_list");
       if(value === "-1"){
         var peerAddress = document.getElementById("label_"+peer);
         peerAddress.style.color = "rgba(250,250,250,.5)";
+        moveRowToEnd(peerTable, peerCell.parentNode);
+        
         return;
       }
-      var peerCell = document.getElementById(peer);
-      var cellText = document.createTextNode(value);
+      
+      cellText = document.createTextNode(value);
       peerCell.appendChild(cellText);
       
       var peerCellTime = document.getElementById("time_"+peer);
       var cellTextTime = document.createTextNode("ms");
       peerCellTime.appendChild(cellTextTime);
+      //sort table
+      sortTable(peerTable, 2, false);
+    }
+    
+    function sortTable(table, col, reverse) {
+        var tb = table.tBodies[0], // use `<tbody>` to ignore `<thead>` and `<tfoot>` rows
+            tr = Array.prototype.slice.call(tb.rows, 0), // put rows into array
+            i;
+        reverse = -((+reverse) || -1);
+        tr = tr.sort(function (a, b) { // sort rows
+            return reverse // `-1 *` if want opposite order
+                * (a.cells[col].textContent.trim() // using `.textContent.trim()` for test
+                    .localeCompare(b.cells[col].textContent.trim(), 'en', {numeric: true})
+                   );
+        });
+        for(i = 0; i < tr.length; ++i) tb.appendChild(tr[i]); // append each row in order
+    }
+
+    function moveRowToEnd(table, row) {
+        var tb = table.tBodies[0]; // use `<tbody>` to ignore `<thead>` and `<tfoot>` rows
+        var rowIndex = row.rowIndex;
+        table.deleteRow(rowIndex);
+        tb.appendChild(row); // append each row in order
     }
   
     function openTab(element, tabName) {
