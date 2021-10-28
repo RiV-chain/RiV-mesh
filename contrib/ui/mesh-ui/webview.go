@@ -64,7 +64,13 @@ func main() {
             }
         }
     }
-    path, err := filepath.Abs(filepath.Dir(os.Args[0]))
+    var path string
+
+    if len(os.Args)>1 {
+        path, err = filepath.Abs(filepath.Dir(os.Args[1]))
+    } else {
+        path, err = filepath.Abs(filepath.Dir(os.Args[0]))
+    }
     if err != nil {
         log.Fatal(err)
     }

@@ -43,8 +43,8 @@
             i;
         reverse = -((+reverse) || -1);
         tr = tr.sort(function (a, b) { // sort rows
-            return reverse // `-1 *` if want opposite order
-                * (a.cells[col].textContent.trim() // using `.textContent.trim()` for test
+            // `-1 *` if want opposite order
+            return reverse * (a.cells[col].textContent.trim() // using `.textContent.trim()` for test
                     .localeCompare(b.cells[col].textContent.trim(), 'en', {numeric: true})
                    );
         });
