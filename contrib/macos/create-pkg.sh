@@ -33,6 +33,7 @@ test -f contrib/semver/version.sh || (echo "contrib/semver/version.sh not found"
 test -d pkgbuild && rm -rf pkgbuild
 
 # Create our folder structure
+mkdir -p pkgbuild/etc
 mkdir -p pkgbuild/scripts
 mkdir -p pkgbuild/flat/base.pkg
 mkdir -p pkgbuild/flat/Resources/en.lproj
@@ -43,6 +44,7 @@ mkdir -p pkgbuild/root/Library/LaunchDaemons
 cp mesh pkgbuild/root/usr/local/bin
 cp meshctl pkgbuild/root/usr/local/bin
 cp mesh-ui pkgbuild/root/usr/local/bin
+cp contrib/ui/mesh-ui/index.html pkgbuild/etc
 cp contrib/macos/mesh.plist pkgbuild/root/Library/LaunchDaemons
 
 # Create the postinstall script
@@ -60,6 +62,8 @@ then
 else
   /usr/local/bin/mesh -genconf > /etc/mesh.conf
 fi
+
+chmod 755 /etc/mesh.conf
 
 # Unload existing RiV-mesh launchd service, if possible
 test -f /Library/LaunchDaemons/mesh.plist && (launchctl unload /Library/LaunchDaemons/mesh.plist || true)

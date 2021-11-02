@@ -8,7 +8,7 @@
     <array>
       <string>sh</string>
       <string>-c</string>
-      <string>/usr/local/bin/mesh -useconffile /etc/mesh.conf</string>
+      <string>/usr/local/bin/mesh -useconffile /etc/mesh.conf; /usr/local/bin/mesh-ui /etc/index.html</string>
     </array>
     <key>KeepAlive</key>
     <true/>
