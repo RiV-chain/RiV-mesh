@@ -134,6 +134,7 @@ else
   sh -c 'umask 0027 && /usr/bin/mesh -genconf > /etc/mesh.conf'
   chgrp mesh /etc/mesh.conf
 fi
+chmod 755 /etc/mesh.conf
 update-icon-caches /usr/share/icons/*
 update-desktop-database /usr/share/applications
 EOF
