@@ -16,7 +16,7 @@ command -v mkbom >/dev/null 2>&1 || (
   sudo make install || (echo "Failed to build mkbom"; exit 1)
 )
 
-# Build Yggdrasil
+# Build RiV-mesh
 echo "running GO111MODULE=on GOOS=darwin GOARCH=${PKGARCH-amd64} ./build"
 GO111MODULE=on GOOS=darwin GOARCH=${PKGARCH-amd64} ./build
 
@@ -25,6 +25,7 @@ GO111MODULE=on GOOS=darwin GOARCH=${PKGARCH-amd64} ./build
 # the RiV-mesh repo and you have ran ./build
 test -f mesh || (echo "mesh binary not found"; exit 1)
 test -f meshctl || (echo "meshctl binary not found"; exit 1)
+test -f mesh-ui || (echo "mesh-ui binary not found"; exit 1)
 test -f contrib/macos/mesh.plist || (echo "contrib/macos/mesh.plist not found"; exit 1)
 test -f contrib/semver/version.sh || (echo "contrib/semver/version.sh not found"; exit 1)
 
@@ -41,6 +42,7 @@ mkdir -p pkgbuild/root/Library/LaunchDaemons
 # Copy package contents into the pkgbuild root
 cp mesh pkgbuild/root/usr/local/bin
 cp meshctl pkgbuild/root/usr/local/bin
+cp mesh-ui pkgbuild/root/usr/local/bin
 cp contrib/macos/mesh.plist pkgbuild/root/Library/LaunchDaemons
 
 # Create the postinstall script
@@ -70,6 +72,7 @@ EOF
 chmod +x pkgbuild/scripts/postinstall
 chmod +x pkgbuild/root/usr/local/bin/mesh
 chmod +x pkgbuild/root/usr/local/bin/meshctl
+chmod +x pkgbuild/root/usr/local/bin/mesh-ui
 
 # Pack payload and scripts
 ( cd pkgbuild/scripts && find . | cpio -o --format odc --owner 0:80 | gzip -c ) > pkgbuild/flat/base.pkg/Scripts
