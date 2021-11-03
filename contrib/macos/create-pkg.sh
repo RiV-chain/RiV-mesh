@@ -37,8 +37,7 @@ test -d pkgbuild && rm -rf pkgbuild
 mkdir -p pkgbuild/scripts
 mkdir -p pkgbuild/flat/base.pkg
 mkdir -p pkgbuild/flat/Resources/en.lproj
-mkdir -p pkgbuild/root/etc
-mkdir -p pkgbuild/root/Applications/RiV-mesh.app/Contents
+mkdir -p pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS
 mkdir -p pkgbuild/root/Applications/RiV-mesh.app/Contents/Resources
 mkdir -p pkgbuild/root/usr/local/bin
 mkdir -p pkgbuild/root/Library/LaunchDaemons
@@ -46,10 +45,9 @@ mkdir -p pkgbuild/root/Library/LaunchDaemons
 # Copy package contents into the pkgbuild root
 cp mesh pkgbuild/root/usr/local/bin
 cp meshctl pkgbuild/root/usr/local/bin
-cp mesh-ui pkgbuild/root/usr/local/bin
+cp mesh-ui pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS
 cp riv.icns pkgbuild/root/Applications/RiV-mesh.app/Contents/Resources
-
-cp contrib/ui/mesh-ui/index.html pkgbuild/root/etc
+cp contrib/ui/mesh-ui/index.html pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS
 cp contrib/macos/mesh.plist pkgbuild/root/Library/LaunchDaemons
 
 # Create the postinstall script
@@ -81,7 +79,7 @@ EOF
 chmod +x pkgbuild/scripts/postinstall
 chmod +x pkgbuild/root/usr/local/bin/mesh
 chmod +x pkgbuild/root/usr/local/bin/meshctl
-chmod +x pkgbuild/root/usr/local/bin/mesh-ui
+chmod +x pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS/mesh-ui
 
 # Work out metadata for the package info
 PKGNAME=$(sh contrib/semver/name.sh)
