@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plist version="1.0">
+<dict>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+	<key>NSNetworkVolumesUsageDescription</key>
+	<string>Application needs Network drives access</string>
+	<key>NSHighResolutionCapable</key>
+	<string>True</string>
+	<key>CFBundleIconFile</key>
+	<string>riv.icns</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleGetInfoString</key>
+	<string>0.4.0.1</string>
+	<key>CFBundleVersion</key>
+	<string>0.4.0.1</string>
+	<key>CFBundleShortVersionString</key>
+	<string>0.4.0.1</string>
+	<key>CFBundleExecutable</key>
+	<string>mesh-ui /etc/index.html</string>
+	<key>CFBundleIdentifier</key>
+	<string>org.rivchain.mesh</string>
+	<key>LSUIElement</key>
+	<true/>
+</dict>
+</plist>

@@ -38,6 +38,8 @@ mkdir -p pkgbuild/scripts
 mkdir -p pkgbuild/flat/base.pkg
 mkdir -p pkgbuild/flat/Resources/en.lproj
 mkdir -p pkgbuild/root/etc
+mkdir -p pkgbuild/root/Applications/Mesh.app/Contents
+mkdir -p pkgbuild/root/Applications/Mesh.app/Contents/Resources
 mkdir -p pkgbuild/root/usr/local/bin
 mkdir -p pkgbuild/root/Library/LaunchDaemons
 
@@ -45,6 +47,9 @@ mkdir -p pkgbuild/root/Library/LaunchDaemons
 cp mesh pkgbuild/root/usr/local/bin
 cp meshctl pkgbuild/root/usr/local/bin
 cp mesh-ui pkgbuild/root/usr/local/bin
+cp riv.icns pkgbuild/root/Applications/Mesh.app/Contents/Resources
+
+cp contrib/macos/Info.plist pkgbuild/root/Applications/Mesh.app/Contents
 cp contrib/ui/mesh-ui/index.html pkgbuild/root/etc
 cp contrib/macos/mesh.plist pkgbuild/root/Library/LaunchDaemons
 
