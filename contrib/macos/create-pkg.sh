@@ -38,8 +38,8 @@ mkdir -p pkgbuild/scripts
 mkdir -p pkgbuild/flat/base.pkg
 mkdir -p pkgbuild/flat/Resources/en.lproj
 mkdir -p pkgbuild/root/etc
-mkdir -p pkgbuild/root/Applications/Mesh.app/Contents
-mkdir -p pkgbuild/root/Applications/Mesh.app/Contents/Resources
+mkdir -p pkgbuild/root/Applications/RiV-mesh.app/Contents
+mkdir -p pkgbuild/root/Applications/RiV-mesh.app/Contents/Resources
 mkdir -p pkgbuild/root/usr/local/bin
 mkdir -p pkgbuild/root/Library/LaunchDaemons
 
@@ -47,7 +47,7 @@ mkdir -p pkgbuild/root/Library/LaunchDaemons
 cp mesh pkgbuild/root/usr/local/bin
 cp meshctl pkgbuild/root/usr/local/bin
 cp mesh-ui pkgbuild/root/usr/local/bin
-cp riv.icns pkgbuild/root/Applications/Mesh.app/Contents/Resources
+cp riv.icns pkgbuild/root/Applications/RiV-mesh.app/Contents/Resources
 
 cp contrib/ui/mesh-ui/index.html pkgbuild/root/etc
 cp contrib/macos/mesh.plist pkgbuild/root/Library/LaunchDaemons
@@ -83,10 +83,6 @@ chmod +x pkgbuild/root/usr/local/bin/mesh
 chmod +x pkgbuild/root/usr/local/bin/meshctl
 chmod +x pkgbuild/root/usr/local/bin/mesh-ui
 
-# Pack payload and scripts
-( cd pkgbuild/scripts && find . | cpio -o --format odc --owner 0:80 | gzip -c ) > pkgbuild/flat/base.pkg/Scripts
-( cd pkgbuild/root && find . | cpio -o --format odc --owner 0:80 | gzip -c ) > pkgbuild/flat/base.pkg/Payload
-
 # Work out metadata for the package info
 PKGNAME=$(sh contrib/semver/name.sh)
 PKGVERSION=$(sh contrib/semver/version.sh --bare)
@@ -104,7 +100,7 @@ cat > pkgbuild/flat/base.pkg/PackageInfo << EOF
 EOF
 
 # Create the Info.plist file
-cat > pkgbuild/root/Applications/Mesh.app/Contents/Info.plist << EOF
+cat > pkgbuild/root/Applications/RiV-mesh.app/Contents/Info.plist << EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <plist version="1.0">
 <dict>
@@ -125,7 +121,7 @@ cat > pkgbuild/root/Applications/Mesh.app/Contents/Info.plist << EOF
 	<key>CFBundleShortVersionString</key>
 	<string>${PKGVERSION}</string>
 	<key>CFBundleExecutable</key>
-	<string>mesh-ui /etc/index.html</string>
+	<string>mesh-ui</string>
 	<key>CFBundleIdentifier</key>
 	<string>io.github.RiV-mesh.pkg</string>
 	<key>LSUIElement</key>
@@ -133,6 +129,10 @@ cat > pkgbuild/root/Applications/Mesh.app/Contents/Info.plist << EOF
 </dict>
 </plist>
 EOF
+
+# Pack payload and scripts
+( cd pkgbuild/scripts && find . | cpio -o --format odc --owner 0:80 | gzip -c ) > pkgbuild/flat/base.pkg/Scripts
+( cd pkgbuild/root && find . | cpio -o --format odc --owner 0:80 | gzip -c ) > pkgbuild/flat/base.pkg/Payload
 
 # Create the BOM
 ( cd pkgbuild && mkbom root flat/base.pkg/Bom )
