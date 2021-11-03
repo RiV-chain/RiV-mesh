@@ -49,7 +49,6 @@ cp meshctl pkgbuild/root/usr/local/bin
 cp mesh-ui pkgbuild/root/usr/local/bin
 cp riv.icns pkgbuild/root/Applications/Mesh.app/Contents/Resources
 
-cp contrib/macos/Info.plist pkgbuild/root/Applications/Mesh.app/Contents
 cp contrib/ui/mesh-ui/index.html pkgbuild/root/etc
 cp contrib/macos/mesh.plist pkgbuild/root/Library/LaunchDaemons
 
@@ -96,12 +95,43 @@ PAYLOADSIZE=$(( $(wc -c pkgbuild/flat/base.pkg/Payload | awk '{ print $1 }') / 1
 
 # Create the PackageInfo file
 cat > pkgbuild/flat/base.pkg/PackageInfo << EOF
-<pkg-info format-version="2" identifier="io.github.RiV-chain.pkg" version="${PKGVERSION}" install-location="/" auth="root">
+<pkg-info format-version="2" identifier="io.github.RiV-mesh.pkg" version="${PKGVERSION}" install-location="/" auth="root">
   <payload installKBytes="${PAYLOADSIZE}" numberOfFiles="3"/>
   <scripts>
     <postinstall file="./postinstall"/>
   </scripts>
 </pkg-info>
+EOF
+
+# Create the Info.plist file
+cat > pkgbuild/root/Applications/Mesh.app/Contents/Info.plist << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<plist version="1.0">
+<dict>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+	<key>NSNetworkVolumesUsageDescription</key>
+	<string>Application needs Network drives access</string>
+	<key>NSHighResolutionCapable</key>
+	<string>True</string>
+	<key>CFBundleIconFile</key>
+	<string>riv.icns</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleGetInfoString</key>
+	<string>${PKGVERSION}</string>
+	<key>CFBundleVersion</key>
+	<string>${PKGVERSION}</string>
+	<key>CFBundleShortVersionString</key>
+	<string>${PKGVERSION}</string>
+	<key>CFBundleExecutable</key>
+	<string>mesh-ui /etc/index.html</string>
+	<key>CFBundleIdentifier</key>
+	<string>io.github.RiV-mesh.pkg</string>
+	<key>LSUIElement</key>
+	<true/>
+</dict>
+</plist>
 EOF
 
 # Create the BOM
