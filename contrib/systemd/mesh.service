@@ -1,8 +1,9 @@
 [Unit]
+<<<<<<< HEAD:contrib/systemd/mesh.service
 Description=mesh
-Wants=network.target
+Wants=network-online.target
 Wants=mesh-default-config.service
-After=network.target
+After=network-online.target
 After=mesh-default-config.service
 
 [Service]
