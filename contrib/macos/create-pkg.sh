@@ -94,13 +94,17 @@ cat > pkgbuild/root/Applications/RiV-mesh.app/Contents/Info.plist << EOF
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>NSNetworkVolumesUsageDescription</key>
-	<string>Application needs Network drives access</string>
+	<string>Application needs Network drivers access</string>
+  <key>CFBundleName</key>
+  <string>RiV-mesh</string>
 	<key>NSHighResolutionCapable</key>
 	<string>True</string>
 	<key>CFBundleIconFile</key>
 	<string>riv.icns</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
+  <key>CFBundleSignature</key>
+  <string>????</string>
 	<key>CFBundleGetInfoString</key>
 	<string>${PKGVERSION}</string>
 	<key>CFBundleVersion</key>
@@ -112,7 +116,7 @@ cat > pkgbuild/root/Applications/RiV-mesh.app/Contents/Info.plist << EOF
 	<key>CFBundleIdentifier</key>
 	<string>io.github.RiV-mesh.pkg</string>
 	<key>LSUIElement</key>
-	<true/>
+	<false/>
 </dict>
 </plist>
 EOF
@@ -126,7 +130,7 @@ PAYLOADSIZE=$(( $(wc -c pkgbuild/flat/base.pkg/Payload | awk '{ print $1 }') / 1
 # Create the PackageInfo file
 cat > pkgbuild/flat/base.pkg/PackageInfo << EOF
 <pkg-info format-version="2" identifier="io.github.RiV-mesh.pkg" version="${PKGVERSION}" install-location="/" auth="root">
-  <payload installKBytes="${PAYLOADSIZE}" numberOfFiles="3"/>
+  <payload installKBytes="${PAYLOADSIZE}" numberOfFiles="6"/>
   <scripts>
     <postinstall file="./postinstall"/>
   </scripts>
