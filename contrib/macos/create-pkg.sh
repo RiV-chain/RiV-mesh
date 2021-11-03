@@ -87,17 +87,6 @@ chmod +x pkgbuild/root/usr/local/bin/mesh-ui
 PKGNAME=$(sh contrib/semver/name.sh)
 PKGVERSION=$(sh contrib/semver/version.sh --bare)
 PKGARCH=${PKGARCH-amd64}
-PAYLOADSIZE=$(( $(wc -c pkgbuild/flat/base.pkg/Payload | awk '{ print $1 }') / 1024 ))
-
-# Create the PackageInfo file
-cat > pkgbuild/flat/base.pkg/PackageInfo << EOF
-<pkg-info format-version="2" identifier="io.github.RiV-mesh.pkg" version="${PKGVERSION}" install-location="/" auth="root">
-  <payload installKBytes="${PAYLOADSIZE}" numberOfFiles="3"/>
-  <scripts>
-    <postinstall file="./postinstall"/>
-  </scripts>
-</pkg-info>
-EOF
 
 # Create the Info.plist file
 cat > pkgbuild/root/Applications/RiV-mesh.app/Contents/Info.plist << EOF
@@ -133,6 +122,18 @@ EOF
 # Pack payload and scripts
 ( cd pkgbuild/scripts && find . | cpio -o --format odc --owner 0:80 | gzip -c ) > pkgbuild/flat/base.pkg/Scripts
 ( cd pkgbuild/root && find . | cpio -o --format odc --owner 0:80 | gzip -c ) > pkgbuild/flat/base.pkg/Payload
+
+PAYLOADSIZE=$(( $(wc -c pkgbuild/flat/base.pkg/Payload | awk '{ print $1 }') / 1024 ))
+
+# Create the PackageInfo file
+cat > pkgbuild/flat/base.pkg/PackageInfo << EOF
+<pkg-info format-version="2" identifier="io.github.RiV-mesh.pkg" version="${PKGVERSION}" install-location="/" auth="root">
+  <payload installKBytes="${PAYLOADSIZE}" numberOfFiles="3"/>
+  <scripts>
+    <postinstall file="./postinstall"/>
+  </scripts>
+</pkg-info>
+EOF
 
 # Create the BOM
 ( cd pkgbuild && mkbom root flat/base.pkg/Bom )
