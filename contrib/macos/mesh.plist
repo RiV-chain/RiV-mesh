@@ -3,12 +3,12 @@
 <plist version="1.0">
   <dict>
     <key>Label</key>
-    <string>mesh</string>
+    <string>org.riv-mesh.service</string>
     <key>ProgramArguments</key>
     <array>
-      <string>sh</string>
-      <string>-c</string>
-      <string>/usr/local/bin/mesh -useconffile /etc/mesh.conf</string>
+      <string>/Applications/RiV-mesh.app/Contents/MacOS/mesh</string>
+      <string>-useconffile</string>
+      <string>/etc/mesh.conf</string>
     </array>
     <key>KeepAlive</key>
     <true/>
@@ -16,6 +16,8 @@
     <true/>
     <key>ProcessType</key>
     <string>Interactive</string>
+    <key>WorkingDirectory</key>
+    <string>/Applications/RiV-mesh.app/Contents/MacOS</string>
     <key>StandardOutPath</key>
     <string>/tmp/mesh.stdout.log</string>
     <key>StandardErrorPath</key>

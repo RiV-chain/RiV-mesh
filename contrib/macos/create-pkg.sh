@@ -43,8 +43,8 @@ mkdir -p pkgbuild/root/usr/local/bin
 mkdir -p pkgbuild/root/Library/LaunchDaemons
 
 # Copy package contents into the pkgbuild root
-cp mesh pkgbuild/root/usr/local/bin
 cp meshctl pkgbuild/root/usr/local/bin
+cp mesh pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS
 cp mesh-ui pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS
 cp riv.icns pkgbuild/root/Applications/RiV-mesh.app/Contents/Resources
 cp contrib/ui/mesh-ui/index.html pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS
@@ -61,9 +61,9 @@ then
   echo "Backing up configuration file to /Library/Preferences/RiV-mesh/mesh.conf.`date +%Y%m%d`"
   cp /etc/mesh.conf /Library/Preferences/RiV-mesh/mesh.conf.`date +%Y%m%d`
   echo "Normalising /etc/mesh.conf"
-  /usr/local/bin/mesh -useconffile /Library/Preferences/RiV-mesh/mesh.conf.`date +%Y%m%d` -normaliseconf > /etc/mesh.conf
+  /Applications/RiV-mesh.app/Contents/MacOS/mesh -useconffile /Library/Preferences/RiV-mesh/mesh.conf.`date +%Y%m%d` -normaliseconf > /etc/mesh.conf
 else
-  /usr/local/bin/mesh -genconf > /etc/mesh.conf
+  /Applications/RiV-mesh.app/Contents/MacOS/mesh -genconf > /etc/mesh.conf
 fi
 
 chmod 755 /etc/mesh.conf
@@ -77,8 +77,8 @@ EOF
 
 # Set execution permissions
 chmod +x pkgbuild/scripts/postinstall
-chmod +x pkgbuild/root/usr/local/bin/mesh
 chmod +x pkgbuild/root/usr/local/bin/meshctl
+chmod +x pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS/mesh
 chmod +x pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS/mesh-ui
 
 # Work out metadata for the package info
@@ -93,8 +93,6 @@ cat > pkgbuild/root/Applications/RiV-mesh.app/Contents/Info.plist << EOF
 <dict>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
-	<key>NSNetworkVolumesUsageDescription</key>
-	<string>Application needs Network drivers access</string>
   <key>CFBundleName</key>
   <string>RiV-mesh</string>
 	<key>NSHighResolutionCapable</key>
@@ -115,8 +113,6 @@ cat > pkgbuild/root/Applications/RiV-mesh.app/Contents/Info.plist << EOF
 	<string>mesh-ui</string>
 	<key>CFBundleIdentifier</key>
 	<string>io.github.RiV-mesh.pkg</string>
-	<key>LSUIElement</key>
-	<false/>
 </dict>
 </plist>
 EOF
