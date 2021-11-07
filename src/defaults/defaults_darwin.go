@@ -8,7 +8,7 @@ package defaults
 func GetDefaults() platformDefaultParameters {
 	return platformDefaultParameters{
 		// Admin
-		DefaultAdminListen: "unix:///var/run/mesh.sock",
+		DefaultAdminListen: "tcp://localhost:9001",
 
 		// Configuration (used for meshctl)
 		DefaultConfigFile: "/etc/mesh.conf",
