@@ -55,12 +55,12 @@ fi
 
 # Create the postinstall script
 cat > updateconfig.bat << EOF
-if not exist %ALLUSERSPROFILE%\\Mesh (
-  mkdir %ALLUSERSPROFILE%\\Mesh
+if not exist %ALLUSERSPROFILE%\\RiV-mesh (
+  mkdir %ALLUSERSPROFILE%\\RiV-mesh
 )
-if not exist %ALLUSERSPROFILE%\\Mesh\\mesh.conf (
+if not exist %ALLUSERSPROFILE%\\RiV-mesh\\mesh.conf (
   if exist mesh.exe (
-    mesh.exe -genconf > %ALLUSERSPROFILE%\\Mesh\\mesh.conf
+    mesh.exe -genconf > %ALLUSERSPROFILE%\\RiV-mesh\\mesh.conf
   )
 )
 EOF
@@ -93,9 +93,9 @@ else
 fi
 
 if [ $PKGNAME != "master" ]; then
-  PKGDISPLAYNAME="Mesh Network (${PKGNAME} branch)"
+  PKGDISPLAYNAME="RiV-mesh Network (${PKGNAME} branch)"
 else
-  PKGDISPLAYNAME="Mesh Network"
+  PKGDISPLAYNAME="RiV-mesh Network"
 fi
 
 # Generate the wix.xml file
@@ -114,8 +114,8 @@ cat > wix.xml << EOF
     <Package
       Id="*"
       Keywords="Installer"
-      Description="Mesh Network Installer"
-      Comments="Mesh Network standalone router for Windows."
+      Description="RiV-mesh Network Installer"
+      Comments="RiV-mesh Network standalone router for Windows."
       Manufacturer="github.com/RiV-chain"
       InstallerVersion="200"
       InstallScope="perMachine"
@@ -153,19 +153,19 @@ cat > wix.xml << EOF
             <ServiceInstall
               Id="ServiceInstaller"
               Account="LocalSystem"
-              Description="Mesh Network router process"
-              DisplayName="Mesh Service"
+              Description="RiV-mesh Network router process"
+              DisplayName="RiV-mesh Service"
               ErrorControl="normal"
               LoadOrderGroup="NetworkProvider"
               Name="Mesh"
               Start="auto"
               Type="ownProcess"
-              Arguments='-useconffile "%ALLUSERSPROFILE%\\Mesh\\mesh.conf" -logto "%ALLUSERSPROFILE%\\Mesh\\mesh.log"'
+              Arguments='-useconffile "%ALLUSERSPROFILE%\\RiV-mesh\\mesh.conf" -logto "%ALLUSERSPROFILE%\\RiV-mesh\\mesh.log"'
               Vital="yes" />
 
             <ServiceControl
-              Id="ServiceControl"
-              Name="mesh"
+              Id="MeshServiceControl"
+              Name="Mesh"
               Start="install"
               Stop="both"
               Remove="uninstall" />
