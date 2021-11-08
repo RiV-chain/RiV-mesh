@@ -14,7 +14,7 @@ PKGBRANCH=$(basename `git name-rev --name-only HEAD`)
 PKGNAME=$(sh contrib/semver/name.sh)
 PKGVERSION=$(sh contrib/semver/version.sh --bare)
 PKGARCH=${PKGARCH-amd64}
-PKGFILE=$PKGNAME-$PKGVERSION-$PKGARCH-nogui.deb
+PKGFILE=$PKGNAME-$PKGVERSION-$PKGARCH.deb
 PKGREPLACES=mesh
 
 if [ $PKGBRANCH = "master" ]; then
@@ -23,11 +23,6 @@ fi
 
 if [ $PKGARCH = "amd64" ]; then GOARCH=amd64 GOOS=linux ./build
 elif [ $PKGARCH = "i386" ]; then GOARCH=386 GOOS=linux ./build
-elif [ $PKGARCH = "mipsel" ]; then GOARCH=mipsle GOOS=linux ./build
-elif [ $PKGARCH = "mips" ]; then GOARCH=mips64 GOOS=linux ./build
-elif [ $PKGARCH = "armhf" ]; then GOARCH=arm GOOS=linux GOARM=6 ./build
-elif [ $PKGARCH = "arm64" ]; then GOARCH=arm64 GOOS=linux ./build
-elif [ $PKGARCH = "armel" ]; then GOARCH=arm GOOS=linux GOARM=5 ./build
 else
   echo "Specify PKGARCH=amd64,i386,mips,mipsel,armhf,arm64,armel"
   exit 1
@@ -39,6 +34,30 @@ mkdir -p /tmp/$PKGNAME/
 mkdir -p /tmp/$PKGNAME/debian/
 mkdir -p /tmp/$PKGNAME/usr/bin/
 mkdir -p /tmp/$PKGNAME/etc/systemd/system/
+mkdir -p /tmp/$PKGNAME/usr/share/applications/
+mkdir -p /tmp/$PKGNAME/etc/
+mkdir -p /tmp/$PKGNAME/etc/xdg/autostart
+
+for resolution in 16x16 24x24 32x32 48x48 64x64 192x192 256x256 512x512; do
+  echo "Converting icon for: $resolution"
+  mkdir -p /tmp/$PKGNAME/usr/share/icons/hicolor/$resolution/apps && \
+  convert -colorspace sRGB ./riv.png -resize $resolution PNG8:/tmp/$PKGNAME/usr/share/icons/hicolor/$resolution/apps/riv.png
+done
+
+cp contrib/ui/mesh-ui/index.html /tmp/$PKGNAME/etc/
+
+cat > /tmp/$PKGNAME/usr/share/applications/riv.desktop << EOF
+[Desktop Entry]
+Name=RiV mesh
+GenericName=Mesh network
+Comment=RiV-mesh is an early-stage implementation of a fully end-to-end encrypted IPv6 network
+Exec=sh -c "/usr/bin/mesh-ui /etc/index.html"
+Terminal=false
+Type=Application
+Icon=riv
+Categories=Network;FileTransfer;
+StartupNotify=false
+EOF
 
 cat > /tmp/$PKGNAME/debian/changelog << EOF
 Please see https://github.com/RiV-chain/RiV-mesh/
@@ -57,7 +76,7 @@ Description: RiV-mesh Network
  RiV-mesh is an early-stage implementation of a fully end-to-end encrypted IPv6
  network. It is lightweight, self-arranging, supported on multiple platforms and
  allows pretty much any IPv6-capable application to communicate securely with
- other Mesh nodes.
+ other RiV-mesh nodes.
 EOF
 cat > /tmp/$PKGNAME/debian/copyright << EOF
 Please see https://github.com/RiV-chain/RiV-mesh/
@@ -68,8 +87,21 @@ EOF
 cat > /tmp/$PKGNAME/debian/install << EOF
 usr/bin/mesh usr/bin
 usr/bin/meshctl usr/bin
+usr/bin/mesh-ui usr/bin
+etc/index.html etc
+etc/xdg/autostart/riv.desktop etc/xdg/autostart
 etc/systemd/system/*.service etc/systemd/system
+usr/share/applications/riv.desktop usr/share/applications
+usr/share/icons/hicolor/16x16/apps/riv.png usr/share/icons/hicolor/16x16/apps
+usr/share/icons/hicolor/24x24/apps/riv.png usr/share/icons/hicolor/24x24/apps
+usr/share/icons/hicolor/32x32/apps/riv.png usr/share/icons/hicolor/32x32/apps
+usr/share/icons/hicolor/48x48/apps/riv.png usr/share/icons/hicolor/48x48/apps
+usr/share/icons/hicolor/64x64/apps/riv.png usr/share/icons/hicolor/64x64/apps
+usr/share/icons/hicolor/192x192/apps/riv.png usr/share/icons/hicolor/192x192/apps
+usr/share/icons/hicolor/256x256/apps/riv.png usr/share/icons/hicolor/256x256/apps
+usr/share/icons/hicolor/512x512/apps/riv.png usr/share/icons/hicolor/512x512/apps
 EOF
+
 cat > /tmp/$PKGNAME/debian/postinst << EOF
 #!/bin/sh
 
@@ -93,11 +125,15 @@ then
   fi
 else
   echo "Generating initial configuration file /etc/mesh.conf"
-  echo "Please familiarise yourself with this file before starting RiV-mesh"
+  echo "Please familiarise yourself with this file before starting Mesh"
   sh -c 'umask 0027 && /usr/bin/mesh -genconf > /etc/mesh.conf'
   chgrp mesh /etc/mesh.conf
 fi
+chmod 755 /etc/mesh.conf
+update-icon-caches /usr/share/icons/*
+update-desktop-database /usr/share/applications
 EOF
+
 cat > /tmp/$PKGNAME/debian/prerm << EOF
 #!/bin/sh
 if command -v systemctl >/dev/null; then
@@ -110,10 +146,25 @@ EOF
 
 cp mesh /tmp/$PKGNAME/usr/bin/
 cp meshctl /tmp/$PKGNAME/usr/bin/
+cp mesh-ui /tmp/$PKGNAME/usr/bin/
 cp contrib/systemd/*.service /tmp/$PKGNAME/etc/systemd/system/
+cp /tmp/$PKGNAME/usr/share/applications/riv.desktop /tmp/$PKGNAME/etc/xdg/autostart
 
 tar -czvf /tmp/$PKGNAME/data.tar.gz -C /tmp/$PKGNAME/ \
-  usr/bin/mesh usr/bin/meshctl \
+  usr/bin/mesh \
+  usr/bin/meshctl \
+  usr/bin/mesh-ui \
+  usr/share/applications/riv.desktop \
+  usr/share/icons/hicolor/16x16/apps/riv.png \
+  usr/share/icons/hicolor/24x24/apps/riv.png \
+  usr/share/icons/hicolor/32x32/apps/riv.png \
+  usr/share/icons/hicolor/48x48/apps/riv.png \
+  usr/share/icons/hicolor/64x64/apps/riv.png \
+  usr/share/icons/hicolor/192x192/apps/riv.png \
+  usr/share/icons/hicolor/256x256/apps/riv.png \
+  usr/share/icons/hicolor/512x512/apps/riv.png \
+  etc/index.html \
+  etc/xdg/autostart/riv.desktop \
   etc/systemd/system/mesh.service \
   etc/systemd/system/mesh-default-config.service
 tar -czvf /tmp/$PKGNAME/control.tar.gz -C /tmp/$PKGNAME/debian .
