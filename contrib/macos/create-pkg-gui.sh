@@ -3,9 +3,10 @@
 # Check if xar and mkbom are available
 command -v xar >/dev/null 2>&1 || (
   echo "Building xar"
-  sudo apt-get install libxml2-dev libssl1.0-dev zlib1g-dev -y
-  mkdir -p /tmp/xar && cd /tmp/xar
-  git clone https://github.com/mackyle/xar && cd xar/xar
+  sudo apt-get install libxml2-dev libssl1.0-dev zlib1g-dev autoconf -y
+  rm -rf /tmp/xar && mkdir -p /tmp/xar && cd /tmp/xar
+  #git clone https://github.com/mackyle/xar && cd xar/xar
+  git clone https://github.com/RiV-chain/xar.git && cd xar/xar
   (sh autogen.sh && make && sudo make install) || (echo "Failed to build xar"; exit 1)
 )
 command -v mkbom >/dev/null 2>&1 || (
@@ -15,11 +16,16 @@ command -v mkbom >/dev/null 2>&1 || (
   sudo make install || (echo "Failed to build mkbom"; exit 1)
 )
 
+# Build RiV-mesh
+echo "running GO111MODULE=on GOOS=darwin GOARCH=${PKGARCH-amd64} ./build"
+GO111MODULE=on GOOS=darwin GOARCH=${PKGARCH-amd64} ./build
+
 # Check if we can find the files we need - they should
 # exist if you are running this script from the root of
 # the RiV-mesh repo and you have ran ./build
 test -f mesh || (echo "mesh binary not found"; exit 1)
 test -f meshctl || (echo "meshctl binary not found"; exit 1)
+test -f mesh-ui || (echo "mesh-ui binary not found"; exit 1)
 test -f contrib/macos/mesh.plist || (echo "contrib/macos/mesh.plist not found"; exit 1)
 test -f contrib/semver/version.sh || (echo "contrib/semver/version.sh not found"; exit 1)
 
@@ -27,16 +33,21 @@ test -f contrib/semver/version.sh || (echo "contrib/semver/version.sh not found"
 test -d pkgbuild && rm -rf pkgbuild
 
 # Create our folder structure
+
 mkdir -p pkgbuild/scripts
 mkdir -p pkgbuild/flat/base.pkg
 mkdir -p pkgbuild/flat/Resources/en.lproj
-mkdir -p pkgbuild/root/usr/local/bin
 mkdir -p pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS
+mkdir -p pkgbuild/root/Applications/RiV-mesh.app/Contents/Resources
+mkdir -p pkgbuild/root/usr/local/bin
 mkdir -p pkgbuild/root/Library/LaunchDaemons
 
 # Copy package contents into the pkgbuild root
-cp mesh pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS
 cp meshctl pkgbuild/root/usr/local/bin
+cp mesh pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS
+cp mesh-ui pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS
+cp riv.icns pkgbuild/root/Applications/RiV-mesh.app/Contents/Resources
+cp contrib/ui/mesh-ui/index.html pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS
 cp contrib/macos/mesh.plist pkgbuild/root/Library/LaunchDaemons
 
 # Create the postinstall script
@@ -66,23 +77,56 @@ EOF
 
 # Set execution permissions
 chmod +x pkgbuild/scripts/postinstall
-chmod +x pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS/mesh
 chmod +x pkgbuild/root/usr/local/bin/meshctl
-
-# Pack payload and scripts
-( cd pkgbuild/scripts && find . | cpio -o --format odc --owner 0:80 | gzip -c ) > pkgbuild/flat/base.pkg/Scripts
-( cd pkgbuild/root && find . | cpio -o --format odc --owner 0:80 | gzip -c ) > pkgbuild/flat/base.pkg/Payload
+chmod +x pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS/mesh
+chmod +x pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS/mesh-ui
 
 # Work out metadata for the package info
 PKGNAME=$(sh contrib/semver/name.sh)
 PKGVERSION=$(sh contrib/semver/version.sh --bare)
 PKGARCH=${PKGARCH-amd64}
+
+# Create the Info.plist file
+cat > pkgbuild/root/Applications/RiV-mesh.app/Contents/Info.plist << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<plist version="1.0">
+<dict>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+  <key>CFBundleName</key>
+  <string>RiV-mesh</string>
+	<key>NSHighResolutionCapable</key>
+	<string>True</string>
+	<key>CFBundleIconFile</key>
+	<string>riv.icns</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+  <key>CFBundleSignature</key>
+  <string>????</string>
+	<key>CFBundleGetInfoString</key>
+	<string>${PKGVERSION}</string>
+	<key>CFBundleVersion</key>
+	<string>${PKGVERSION}</string>
+	<key>CFBundleShortVersionString</key>
+	<string>${PKGVERSION}</string>
+	<key>CFBundleExecutable</key>
+	<string>mesh-ui</string>
+	<key>CFBundleIdentifier</key>
+	<string>io.github.RiV-mesh.pkg</string>
+</dict>
+</plist>
+EOF
+
+# Pack payload and scripts
+( cd pkgbuild/scripts && find . | cpio -o --format odc --owner 0:80 | gzip -c ) > pkgbuild/flat/base.pkg/Scripts
+( cd pkgbuild/root && find . | cpio -o --format odc --owner 0:80 | gzip -c ) > pkgbuild/flat/base.pkg/Payload
+
 PAYLOADSIZE=$(( $(wc -c pkgbuild/flat/base.pkg/Payload | awk '{ print $1 }') / 1024 ))
 
 # Create the PackageInfo file
 cat > pkgbuild/flat/base.pkg/PackageInfo << EOF
-<pkg-info format-version="2" identifier="io.github.RiV-chain.pkg" version="${PKGVERSION}" install-location="/" auth="root">
-  <payload installKBytes="${PAYLOADSIZE}" numberOfFiles="3"/>
+<pkg-info format-version="2" identifier="io.github.RiV-mesh.pkg" version="${PKGVERSION}" install-location="/" auth="root">
+  <payload installKBytes="${PAYLOADSIZE}" numberOfFiles="6"/>
   <scripts>
     <postinstall file="./postinstall"/>
   </scripts>
@@ -122,4 +166,4 @@ cat > pkgbuild/flat/Distribution << EOF
 EOF
 
 # Finally pack the .pkg
-( cd pkgbuild/flat && xar --compression none -cf "../../${PKGNAME}-${PKGVERSION}-macos-${PKGARCH}-nogui.pkg" * )
+( cd pkgbuild/flat && xar --compression none -cf "../../${PKGNAME}-${PKGVERSION}-macos-${PKGARCH}.pkg" * )
