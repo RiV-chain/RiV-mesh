@@ -88,8 +88,8 @@ if not exist %ALLUSERSPROFILE%\\RiV-mesh\\mesh.conf (
 EOF
 
 [ "${PKGARCH}" == "x64" ] && \
-  PKGGUID="77757838-1a23-40a5-a720-c3b43e0260cc" PKGINSTFOLDER="ProgramFiles64Folder" || \
-  PKGGUID="54a3294e-a441-4322-aefb-3bb40dd022bb" PKGINSTFOLDER="ProgramFilesFolder"
+  PKGGUID="5bcfdddd-66a7-4eb7-b5f7-4a7500dcc65d" PKGINSTFOLDER="ProgramFiles64Folder" || \
+  PKGGUID="cbf6ffa1-219e-4bb2-a0e5-74dbf1b58a45" PKGINSTFOLDER="ProgramFilesFolder"
 
 # Download the Wintun driver
 if [ ! -d wintun ];
