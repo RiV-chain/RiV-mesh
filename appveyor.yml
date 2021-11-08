@@ -22,6 +22,8 @@ build_script:
 - go install github.com/tc-hib/go-winres@latest
 - c:\msys64\usr\bin\bash -lc "./contrib/msi/build-msi.sh x64"
 - c:\msys64\usr\bin\bash -lc "./contrib/msi/build-msi.sh x86"
+- c:\msys64\usr\bin\bash -lc "./contrib/msi/build-msi-gui.sh x64"
+- c:\msys64\usr\bin\bash -lc "./contrib/msi/build-msi-gui.sh x86"
 
 test: off
 
