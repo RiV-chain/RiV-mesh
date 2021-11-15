@@ -25,7 +25,7 @@ func main() {
     w := webview.New(debug)
     defer w.Destroy()
     w.SetTitle("RiV-mesh")
-    w.SetSize(600, 500, webview.HintFixed)
+    w.SetSize(690, 920, webview.HintFixed)
     /*1. Create ~/.riv-mesh folder if not existing
      *2. Create ~/.riv-mesh/mesh.conf if not existing
      *3. If the file exists read Peers. 
