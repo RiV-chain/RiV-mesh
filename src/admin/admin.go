@@ -13,8 +13,8 @@ import (
 
 	"github.com/gologme/log"
 
-	"github.com/yggdrasil-network/yggdrasil-go/src/config"
-	"github.com/yggdrasil-network/yggdrasil-go/src/core"
+	"github.com/RiV-chain/RiV-mesh/src/config"
+	"github.com/RiV-chain/RiV-mesh/src/core"
 )
 
 // TODO: Add authentication
@@ -141,6 +141,26 @@ func (a *AdminSocket) SetupAdminHandlers(na *AdminSocket) {
 		if err := a.getSessionsHandler(req, res); err != nil {
 			return nil, err
 		}
+		return res, nil
+	})
+	_ = a.AddHandler("addPeers", []string{"uri", "[interface]"}, func(in json.RawMessage) (interface{}, error) {
+		req := &AddPeersRequest{}
+		res := &AddPeersResponse{}
+		
+		fmt.Println("json addpeers request %s", string(in[:]))
+		
+		if err := json.Unmarshal(in, &req); err != nil {
+			return nil, err
+		}
+
+		if err := a.addPeersHandler(req, res); err != nil {
+			return nil, err
+		}
+		return res, nil
+	})
+	_ = a.AddHandler("removePeers", []string{}, func(in json.RawMessage) (interface{}, error) {
+		a.core.RemovePeers()
+		res := &AddPeersResponse{}
 		return res, nil
 	})
 	//_ = a.AddHandler("getNodeInfo", []string{"key"}, t.proto.nodeinfo.nodeInfoAdminHandler)

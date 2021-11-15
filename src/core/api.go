@@ -4,7 +4,7 @@ import (
 	"crypto/ed25519"
 	//"encoding/hex"
 	"encoding/json"
-	//"errors"
+	"errors"
 	//"fmt"
 	"net"
 	"net/url"
@@ -12,8 +12,8 @@ import (
 	//"time"
 
 	"github.com/gologme/log"
-	"github.com/yggdrasil-network/yggdrasil-go/src/address"
-	//"github.com/yggdrasil-network/yggdrasil-go/src/crypto"
+	"github.com/RiV-chain/RiV-mesh/src/address"
+	//"github.com/RiV-chain/RiV-mesh/src/crypto"
 	//"github.com/Arceliar/phony"
 )
 
@@ -122,7 +122,7 @@ func (c *Core) Listen(u *url.URL, sintf string) (*TcpListener, error) {
 	return c.links.tcp.listenURL(u, sintf)
 }
 
-// Address gets the IPv6 address of the Yggdrasil node. This is always a /128
+// Address gets the IPv6 address of the Mesh node. This is always a /128
 // address. The IPv6 address is only relevant when the node is operating as an
 // IP router and often is meaningless when embedded into an application, unless
 // that application also implements either VPN functionality or deals with IP
@@ -132,7 +132,7 @@ func (c *Core) Address() net.IP {
 	return addr
 }
 
-// Subnet gets the routed IPv6 subnet of the Yggdrasil node. This is always a
+// Subnet gets the routed IPv6 subnet of the Mesh node. This is always a
 // /64 subnet. The IPv6 subnet is only relevant when the node is operating as an
 // IP router and often is meaningless when embedded into an application, unless
 // that application also implements either VPN functionality or deals with IP
@@ -143,7 +143,7 @@ func (c *Core) Subnet() net.IPNet {
 	return net.IPNet{IP: subnet, Mask: net.CIDRMask(64, 128)}
 }
 
-// SetLogger sets the output logger of the Yggdrasil node after startup. This
+// SetLogger sets the output logger of the Mesh node after startup. This
 // may be useful if you want to redirect the output later. Note that this
 // expects a Logger from the github.com/gologme/log package and not from Go's
 // built-in log package.
@@ -156,9 +156,13 @@ func (c *Core) SetLogger(log *log.Logger) {
 //		socks://a.b.c.d:e/f.g.h.i:j
 // This adds the peer to the peer list, so that they will be called again if the
 // connection drops.
-/*
+
 func (c *Core) AddPeer(addr string, sintf string) error {
-	if err := c.CallPeer(addr, sintf); err != nil {
+	uri, err := url.Parse(addr)
+	if err != nil {
+		return err
+	}
+	if err := c.CallPeer(uri, sintf); err != nil {
 		// TODO: We maybe want this to write the peer to the persistent
 		// configuration even if a connection attempt fails, but first we'll need to
 		// move the code to check the peer URI so that we don't deliberately save a
@@ -166,64 +170,43 @@ func (c *Core) AddPeer(addr string, sintf string) error {
 		// same thing too but I don't think that happens today
 		return err
 	}
-	c.config.Mutex.Lock()
-	defer c.config.Mutex.Unlock()
+	c.config.RLock()
+	defer c.config.RUnlock()
 	if sintf == "" {
-		for _, peer := range c.config.Current.Peers {
+		for _, peer := range c.config.Peers {
 			if peer == addr {
 				return errors.New("peer already added")
 			}
 		}
-		c.config.Current.Peers = append(c.config.Current.Peers, addr)
+		c.config.Peers = append(c.config.Peers, addr)
 	} else {
-		if _, ok := c.config.Current.InterfacePeers[sintf]; ok {
-			for _, peer := range c.config.Current.InterfacePeers[sintf] {
+		if _, ok := c.config.InterfacePeers[sintf]; ok {
+			for _, peer := range c.config.InterfacePeers[sintf] {
 				if peer == addr {
 					return errors.New("peer already added")
 				}
 			}
 		}
-		if _, ok := c.config.Current.InterfacePeers[sintf]; !ok {
-			c.config.Current.InterfacePeers[sintf] = []string{addr}
+		if _, ok := c.config.InterfacePeers[sintf]; !ok {
+			c.config.InterfacePeers[sintf] = []string{addr}
 		} else {
-			c.config.Current.InterfacePeers[sintf] = append(c.config.Current.InterfacePeers[sintf], addr)
+			c.config.InterfacePeers[sintf] = append(c.config.InterfacePeers[sintf], addr)
 		}
 	}
 	return nil
 }
-*/
 
-/*
-func (c *Core) RemovePeer(addr string, sintf string) error {
-	if sintf == "" {
-		for i, peer := range c.config.Current.Peers {
-			if peer == addr {
-				c.config.Current.Peers = append(c.config.Current.Peers[:i], c.config.Current.Peers[i+1:]...)
-				break
-			}
-		}
-	} else if _, ok := c.config.Current.InterfacePeers[sintf]; ok {
-		for i, peer := range c.config.Current.InterfacePeers[sintf] {
-			if peer == addr {
-				c.config.Current.InterfacePeers[sintf] = append(c.config.Current.InterfacePeers[sintf][:i], c.config.Current.InterfacePeers[sintf][i+1:]...)
-				break
-			}
-		}
+func (c *Core) RemovePeers() error {
+	c.config.RLock()
+	defer c.config.RUnlock()
+	c.config.Peers = c.config.Peers[:0]
+	for k := range c.config.InterfacePeers {
+		delete(c.config.InterfacePeers, k)
 	}
-
-	panic("TODO") // Get the net.Conn to this peer (if any) and close it
-	c.peers.Act(nil, func() {
-		ports := c.peers.ports
-		for _, peer := range ports {
-			if addr == peer.intf.name() {
-				c.peers._removePeer(peer)
-			}
-		}
-	})
 
 	return nil
 }
-*/
+
 
 // CallPeer calls a peer once. This should be specified in the peer URI format,
 // e.g.:
