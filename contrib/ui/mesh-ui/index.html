@@ -235,11 +235,46 @@
         
   </script>
   <style>
-          
+
+
+
+body {
+  margin:0;
+  padding:0;
+ 
+}
+
+.center {
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%, -50%);
+}
+
+
+ input:checked[type="checkbox"]:after {
+      left:10px;
+    } 
+
+
+    .block:not(:last-child) {
+  margin-bottom: 1.5rem;
+}
+
+    .copyright {
+    
+    display: block;
+    justify-content: center;
+    position: fixed;
+    bottom: 1%;
+    left: 30%;
+  
+
+    }
     .container-ip {
     
       display: flex;
-      border: 1px solid #5d656d;
+      border: 1px solid #3EABBF;
       border-radius: 4px;
       margin:10px;
     }
@@ -249,7 +284,7 @@
     }
     
     .item {
-      padding: 10px;
+      padding: 5px;
       /*border: 1px solid #5d656d;*/
       
     }
@@ -277,7 +312,7 @@
       position: absolute;
       top: 0;
       left: 0;
-      background: rgba(0, 0, 0, 0.0);
+      background: rgba(100, 0, 0, 0.0);
     }
 
     .stack-top{
@@ -353,22 +388,41 @@
                     </a>
                 </li>
                 <li class="tab">
+                  <a onclick="openTab(this, 'map');">
+                      <span class="icon">
+                          <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1em" height="1em" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 32 32"><g fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M5 15v15h22V15zm4 0C9 9 9 5 16 5s7 4 7 10m-7 5v3"/><circle cx="16" cy="24" r="1"/></g></svg>
+                      </span>
+                      <span>Map</span>
+                  </a>
+              </li>
+                <li class="tab">
                     <a onclick="openTab(this, 'about');">
                         <span class="icon">
                             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1em" height="1em" style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 48 48"><path fill="#2196F3" d="M37 40H11l-6 6V12c0-3.3 2.7-6 6-6h26c3.3 0 6 2.7 6 6v22c0 3.3-2.7 6-6 6z"/><g fill="#fff"><path d="M22 20h4v11h-4z"/><circle cx="24" cy="15" r="2"/></g></svg>
                         </span>
                         <span>About</span>
-                    </a>
+                                        </a>
                 </li>
             </ul>
+            
         </div>
-        
+
+     
 
         <div class="tab here " id="my_node">
+
+
           
              <div class="column">
+              <div class="item"><p style="text-align: center;">RiV-mesh | Node & Network Info</p></div><br>
+
+
+           
+
+
+
                 <div class="container-ip">
-                  <div class="item">IPv6</div>
+                  <div class="item">IPv6:</div>
                   <div id="ipv6" class="item push-right">N/A</div>
                   <div class="item">
                     <a class="fas fa-copy" onclick="copy2clipboard(document.getElementById('ipv6').innerHTML);"/></a>
@@ -376,7 +430,7 @@
                 </div>
                 
                 <div class="container-ip">
-                  <div class="item">Subnet</div>
+                  <div class="item">Subnet:</div>
                   <div id="subnet" class="item push-right">N/A</div>
                   <div class="item">
                     <a class="fas fa-copy" onclick="copy2clipboard(document.getElementById('subnet').innerHTML);"></a>
@@ -385,7 +439,7 @@
                 
                 <div class="container-ip">
                 
-                 <div class="item">Peers</div>
+                 <div class="item">Peers:</div>
                   <div id="peers" class="item over">
 
                   </div>
@@ -394,16 +448,25 @@
                   </div>
 
                 </div>
+
+               
                 
              </div>
         </div>
-        
-        <div class="tab here is-hidden" id="keys">
-    
+<div class="tab here is-hidden" id="about">
+  <div class="card">
+  <p class="item"> 
+    <i>RiV-mesh is an implementation of a fully end-to-end encrypted IPv6 network, created in the scope to produce the Transport Layer for RiV Chain Blockchain, also to facilitate secure conectivity between a wide spectrum of endpoint devices like IoT devices, desktop computers or even routers. It is lightweight, self-arranging, supported on multiple platforms and allows pretty much any IPv6-capable application to communicate securely with other RiV-mesh nodes. RiV-mesh does not require you to have IPv6 Internet connectivity - it also works over IPv4.
+      <br>RiV-mesh works on a number of platforms, including Linux, macOS, Ubiquiti EdgeRouter, VyOS, Windows, FreeBSD, OpenBSD and OpenWrt.
+</i>
+  </p>
+</div>
         </div>
+        <div class="tab here is-hidden" id="keys"></div>
             
 
     </div>
+   
         
     </div>
     <div style="margin-left: 100px; margin-right: 100px;">
@@ -412,7 +475,14 @@
               <p id="info_text"></p>
         </div>
     </div>
-    
+     <!-- map-->
+<div class="tab here is-hidden" id="map">
+  <div><iframe height="610" width="554" src="http://ci.rivchain.org" title="RiV-mesh 3D"></iframe></div>
+</div>
+<!-- map-->
+
+<br>
+      
     
     <div class="is-hidden">
 
@@ -665,5 +735,12 @@
       <img id="flag_pakistan" src="data:image/webp;base64, UklGRioBAABXRUJQVlA4IB4BAACQCACdASpQADUAPtFap0woJSOiLnVa6QAaCUADtWUaAXGjd0+2Q214vysc/OZiUDwki/dcEV9kHEe28IYcDgWXPwy75opq3l5T08iUkAD+9x6iqcdWIUX/4Fmu5B+eGiu6z+TmiHgpHVS8JhbjP8cxUkAZGXA+KDA9EcL0E0ws0tzJmG2a3TNpTO3R8I8NyoAHRQAdnPm8RFffgzMHju6wDf3PTJBNgDydMFTxM8o3KWvXqw+YbvS9hCLPHdt9CyiA6a8gJ23CtZcup2lsnmgYFBh86j64MbGhiORR/lqt+mE9Ok4D5sbVegzcUYAqySdjJDIeV8BbPex+rUHC0F5yz+UjnjeciyhsFVWc8SjMeph6CVw5EICIWbYQg4AA" />
       
     </div>
-
+<!-- Copyright -->
+<div class="copyright">
+  <div class="item">
+   
+  <p><a href="http://mesh.rivchain.org/">RiV-mesh</a>  (c), Version: 0.4.0.17</p>
+          </div>
+        </div>
+<!-- Copyright -->
 </html>
