@@ -429,20 +429,6 @@
         </div>
         <!-- Disclaimer Modal End-->
 
-
-        <!-- Join Telegram Modal-->
-
-        <div id="join_us" class="modal is active">
-            <div class="modal-content">
-                <div><iframe height="600" width="554" src="http://mesh.rivchain.org" title="RiV"></iframe>
-                </div>
-                <button id="close" class="modal-close is-large" aria-label="close" onclick="join_us.classList.toggle('is-active')">  </button>
-            </div>
-        </div>
-
-        <!-- Join Telegram Modal End-->
-
-
         <!-- My Node Tab-->
         <div class="tab here" id="my_node">
             <div class="item">
@@ -472,6 +458,21 @@
                         <a class="fas fa-edit" onclick="getPeerList();"></a>
                     </div>
                 </div>
+
+                <div id="id01"></div>
+                <script>
+                    function myFunction(arr) {
+                        var out = "";
+                        var i;
+                        for (i = 0; i < arr.length; i++) {
+                            out += '' +
+                                arr[i].display + '<br>';
+                        }
+                        document.getElementById("id01").innerHTML = out;
+                    }
+                </script>
+
+                <script src="test.txt"></script>
             </div>
         </div>
         <!-- My Node Tab End-->
