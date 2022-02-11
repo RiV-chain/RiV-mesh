@@ -22,7 +22,7 @@ import (
 
 func main() {
     debug := true
-    w := webview.New(false, debug)
+    w := webview.New(690, 920,false, debug)
     defer w.Destroy()
     w.SetTitle("RiV-mesh")
     w.SetSize(690, 920, webview.HintFixed)
