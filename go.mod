@@ -18,10 +18,13 @@ require (
 	github.com/vishvananda/netlink v1.1.0
 	github.com/vishvananda/netns v0.0.0-20210104183010-2eb08e3e575f // indirect
 	github.com/webview/webview v0.0.0-20220209163019-f0ed0e951b03 // indirect
+	golang.org/x/crypto v0.0.0-20211108221036-ceb1ce70b4fa // indirect
 	golang.org/x/mobile v0.0.0-20220112015953-858099ff7816
-	golang.org/x/net v0.0.0-20211101193420-4a448f8816b3
-	golang.org/x/sys v0.0.0-20211102192858-4dd72447c267
+	golang.org/x/net v0.0.0-20211111083644-e5c967477495
+	golang.org/x/sys v0.0.0-20211110154304-99a53858aa08
 	golang.org/x/text v0.3.8-0.20211004125949-5bd84dd9b33b
-	golang.zx2c4.com/wireguard v0.0.0-20211017052713-f87e87af0d9a
-	golang.zx2c4.com/wireguard/windows v0.4.12
+	golang.zx2c4.com/go118/netip v0.0.0-20211111135330-a4a02eeacf9d // indirect
+	golang.zx2c4.com/wintun v0.0.0-20211104114900-415007cec224 // indirect
+	golang.zx2c4.com/wireguard v0.0.0-20210604143328-f9b48a961cd2
+	golang.zx2c4.com/wireguard/windows v0.3.15
 )
