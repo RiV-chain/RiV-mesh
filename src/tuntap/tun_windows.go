@@ -28,7 +28,7 @@ func (tun *TunAdapter) setup(ifname string, addr string, mtu uint64) error {
 		var err error
 		var iface wgtun.Device
 		var guid windows.GUID
-		if guid, err = windows.GUIDFromString("{8f59971a-7872-4aa6-b2eb-061fc4e9d0a7}"); err != nil {
+		if guid, err = windows.GUIDFromString("{f1369c05-0344-40ed-a772-bfb4770abdd0}"); err != nil {
 			return err
 		}
 		if iface, err = wgtun.CreateTUNWithRequestedGUID(ifname, &guid, int(mtu)); err != nil {
