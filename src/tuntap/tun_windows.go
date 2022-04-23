@@ -6,6 +6,7 @@ package tuntap
 import (
 	"bytes"
 	"errors"
+	"time"
 	"log"
 	"net"
 
@@ -35,9 +36,18 @@ func (tun *TunAdapter) setup(ifname string, addr string, mtu uint64) error {
 			return err
 		}
 		tun.iface = iface
-		if err = tun.setupAddress(addr); err != nil {
-			tun.log.Errorln("Failed to set up TUN address:", err)
-			return err
+		for i := 1; i < 5; i++ {
+			if err = tun.setupAddress(addr); err != nil {
+				tun.log.Errorln("Failed to set up TUN address:", err)
+				log.Printf("waiting...")
+				if i > 3 {
+					return err
+				} else {
+					time.Sleep(2 * i * time.Second)
+				}
+			} else {
+				break
+			}
 		}
 		if err = tun.setupMTU(getSupportedMTU(mtu)); err != nil {
 			tun.log.Errorln("Failed to set up TUN MTU:", err)

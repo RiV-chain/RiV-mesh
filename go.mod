@@ -18,7 +18,7 @@ require (
 	github.com/mitchellh/mapstructure v1.4.1
 	github.com/vishvananda/netlink v1.1.0
 	github.com/vishvananda/netns v0.0.0-20210104183010-2eb08e3e575f // indirect
-	github.com/webview/webview v0.0.0-20210330151455-f540d88dde4e // indirect
+	github.com/webview/webview v0.0.0-20210330151455-f540d88dde4e
 	golang.org/x/mobile v0.0.0-20211103151657-e68c98865fb2 // indirect
 	golang.org/x/net v0.0.0-20210903162142-ad29c8ab022f
 	golang.org/x/sys v0.0.0-20210906170528-6f6e22806c34
