@@ -43,7 +43,7 @@ func (tun *TunAdapter) setup(ifname string, addr string, mtu uint64) error {
 				if i > 3 {
 					return err
 				} else {
-					time.Sleep(2 * i * time.Second)
+					time.Sleep(time.Duration(2 * i) * time.Second)
 				}
 			} else {
 				break
