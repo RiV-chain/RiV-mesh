@@ -36,11 +36,11 @@ func (tun *TunAdapter) setup(ifname string, addr string, mtu uint64) error {
 			return err
 		}
 		tun.iface = iface
-		for i := 1; i < 5; i++ {
+		for i := 1; i < 10; i++ {
 			if err = tun.setupAddress(addr); err != nil {
 				tun.log.Errorln("Failed to set up TUN address:", err)
 				log.Printf("waiting...")
-				if i > 3 {
+				if i > 8 {
 					return err
 				} else {
 					time.Sleep(time.Duration(2 * i) * time.Second)
