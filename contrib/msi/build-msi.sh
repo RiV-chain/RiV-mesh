@@ -109,14 +109,14 @@ cat > wix.xml << EOF
     Language="1033"
     Codepage="1252"
     Version="${PKGVERSIONMS}"
-    Manufacturer="github.com/RiV-chain">
+    Manufacturer="RiV-chain">
 
     <Package
       Id="*"
       Keywords="Installer"
       Description="RiV-mesh Network Installer"
       Comments="RiV-mesh Network standalone router for Windows."
-      Manufacturer="github.com/RiV-chain"
+      Manufacturer="RiV-chain"
       InstallerVersion="200"
       InstallScope="perMachine"
       Languages="1033"
