@@ -114,7 +114,8 @@ EOF
 cp mesh /tmp/$PKGNAME/usr/bin/
 cp meshctl /tmp/$PKGNAME/usr/bin/
 cp contrib/systemd/*.service /tmp/$PKGNAME/etc/systemd/system/
-chmod +x /tmp/usr/bin/*
+chmod +x /tmp/$PKGNAME/usr/bin/*
+chmod 755 /tmp/$PKGNAME/etc/index.html
 
 dpkg-deb --build --root-owner-group /tmp/$PKGNAME
 cp /tmp/$PKGFILE .
