@@ -31,7 +31,7 @@ or tools in the `contrib` folder.
 If you want to build from source, as opposed to installing one of the pre-built
 packages:
 
-1. Install [Go](https://golang.org) (requires Go 1.16 or later)
+1. Install [Go](https://golang.org) (requires Go 1.17 or later)
 2. Clone this repository
 2. Run `./build`
 
@@ -63,6 +63,7 @@ other configuration such as listen addresses or multicast addresses, etc.
 ### Run RiV-mesh
 
 To run with the generated static configuration:
+
 ```
 ./mesh -useconffile /path/to/mesh.conf
 ```
