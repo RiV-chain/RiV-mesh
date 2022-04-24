@@ -40,7 +40,6 @@ mkdir -p /tmp/$PKGNAME/usr/share/applications/
 mkdir -p /tmp/$PKGNAME/etc/
 mkdir -p /tmp/$PKGNAME/etc/xdg/autostart
 chmod 0755 /tmp/$PKGNAME/ -R
-chmod +x /usr/bin/*
 
 for resolution in 16x16 24x24 32x32 48x48 64x64 192x192 256x256 512x512; do
   echo "Converting icon for: $resolution"
@@ -153,6 +152,7 @@ cp meshctl /tmp/$PKGNAME/usr/bin/
 cp mesh-ui /tmp/$PKGNAME/usr/bin/
 cp contrib/systemd/*.service /tmp/$PKGNAME/etc/systemd/system/
 cp /tmp/$PKGNAME/usr/share/applications/riv.desktop /tmp/$PKGNAME/etc/xdg/autostart
+chmod +x /tmp/usr/bin/*
 
 dpkg-deb --build --root-owner-group /tmp/$PKGNAME
 cp /tmp/$PKGFILE .
