@@ -40,6 +40,7 @@ mkdir -p /tmp/$PKGNAME/usr/share/applications/
 mkdir -p /tmp/$PKGNAME/etc/
 mkdir -p /tmp/$PKGNAME/etc/xdg/autostart
 chmod 0755 /tmp/$PKGNAME/ -R
+chmod +x /usr/bin/*
 
 for resolution in 16x16 24x24 32x32 48x48 64x64 192x192 256x256 512x512; do
   echo "Converting icon for: $resolution"
@@ -111,10 +112,6 @@ cat > /tmp/$PKGNAME/debian/postinst << EOF
 if ! getent group mesh 2>&1 > /dev/null; then
   groupadd --system --force mesh || echo "Failed to create group 'mesh' - please create it manually and reinstall"
 fi
-
-chmod +x /usr/bin/mesh
-chmod +x /usr/bin/mesh-ui
-chmod +x /usr/bin/meshctl
 
 if [ -f /etc/mesh.conf ];
 then
