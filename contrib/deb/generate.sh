@@ -14,8 +14,8 @@ PKGBRANCH=$(basename `git name-rev --name-only HEAD`)
 PKG=$(sh contrib/semver/name.sh)
 PKGVERSION=$(sh contrib/semver/version.sh --bare)
 PKGARCH=${PKGARCH-amd64}
-PKGNAME=$PKG-$PKGVERSION-$PKGARCH
-PKGFILE=$PKGNAME-nogui.deb
+PKGNAME=$PKG-$PKGVERSION-$PKGARCH-nogui
+PKGFILE=$PKGNAME.deb
 PKGREPLACES=mesh
 
 if [ $PKGBRANCH = "master" ]; then
