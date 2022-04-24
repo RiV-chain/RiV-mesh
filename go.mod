@@ -3,10 +3,10 @@ module github.com/RiV-chain/RiV-mesh
 go 1.17
 
 require (
-	github.com/RiV-chain/RiV-mesh-extras v0.0.0-20211014162023-13f9c29aac17 // indirect
-	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/Arceliar/ironwood v0.0.0-20220409035209-b7f71f05435a
 	github.com/Arceliar/phony v0.0.0-20210209235338-dde1a8dca979
+	github.com/RiV-chain/RiV-mesh-extras v0.0.0-20211014162023-13f9c29aac17 // indirect
+	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/cheggaaa/pb/v3 v3.0.8
 	github.com/gologme/log v1.2.0
 	github.com/hashicorp/go-syslog v1.0.0
@@ -25,13 +25,11 @@ require (
 )
 
 require (
-	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/fatih/color v1.12.0 // indirect
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
-	github.com/vishvananda/netns v0.0.0-20210104183010-2eb08e3e575f // indirect
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
 	golang.org/x/mod v0.4.2 // indirect
 	golang.org/x/tools v0.1.8-0.20211022200916-316ba0b74098 // indirect
