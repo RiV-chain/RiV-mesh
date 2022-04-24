@@ -41,6 +41,7 @@ mkdir -p /tmp/$PKGNAME/debian/
 mkdir -p /tmp/$PKGNAME/DEBIAN/
 mkdir -p /tmp/$PKGNAME/usr/bin/
 mkdir -p /tmp/$PKGNAME/etc/systemd/system/
+chmod 0755 /tmp/$PKGNAME/ -R
 
 cat > /tmp/$PKGNAME/debian/changelog << EOF
 Please see https://github.com/RiV-chain/RiV-mesh/
