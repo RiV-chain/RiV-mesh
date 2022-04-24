@@ -94,7 +94,7 @@ EOF
 # Download the Wintun driver
 if [ ! -d wintun ];
 then
-  curl -o wintun.zip https://www.wintun.net/builds/wintun-0.11.zip
+  curl -o wintun.zip https://www.wintun.net/builds/wintun-0.14.1.zip
   unzip wintun.zip
 fi
 if [ $PKGARCH = "x64" ]; then
