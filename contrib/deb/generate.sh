@@ -42,7 +42,6 @@ mkdir -p /tmp/$PKGNAME/DEBIAN/
 mkdir -p /tmp/$PKGNAME/usr/bin/
 mkdir -p /tmp/$PKGNAME/etc/systemd/system/
 chmod 0755 /tmp/$PKGNAME/ -R
-chmod +x /tmp/usr/bin/*
 
 cat > /tmp/$PKGNAME/debian/changelog << EOF
 Please see https://github.com/RiV-chain/RiV-mesh/
@@ -115,6 +114,7 @@ EOF
 cp mesh /tmp/$PKGNAME/usr/bin/
 cp meshctl /tmp/$PKGNAME/usr/bin/
 cp contrib/systemd/*.service /tmp/$PKGNAME/etc/systemd/system/
+chmod +x /tmp/usr/bin/*
 
 dpkg-deb --build --root-owner-group /tmp/$PKGNAME
 cp /tmp/$PKGFILE .
