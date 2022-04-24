@@ -11,10 +11,11 @@ then
 fi
 
 PKGBRANCH=$(basename `git name-rev --name-only HEAD`)
-PKGNAME=$(sh contrib/semver/name.sh)
+PKG=$(sh contrib/semver/name.sh)
 PKGVERSION=$(sh contrib/semver/version.sh --bare)
 PKGARCH=${PKGARCH-amd64}
-PKGFILE=$PKGNAME-$PKGVERSION-$PKGARCH.deb
+PKGNAME=$PKG-$PKGVERSION-$PKGARCH
+PKGFILE=$PKGNAME.deb
 PKGREPLACES=mesh
 
 if [ $PKGBRANCH = "master" ]; then
@@ -32,6 +33,7 @@ echo "Building $PKGFILE"
 
 mkdir -p /tmp/$PKGNAME/
 mkdir -p /tmp/$PKGNAME/debian/
+mkdir -p /tmp/$PKGNAME/DEBIAN/
 mkdir -p /tmp/$PKGNAME/usr/bin/
 mkdir -p /tmp/$PKGNAME/etc/systemd/system/
 mkdir -p /tmp/$PKGNAME/usr/share/applications/
@@ -63,15 +65,15 @@ cat > /tmp/$PKGNAME/debian/changelog << EOF
 Please see https://github.com/RiV-chain/RiV-mesh/
 EOF
 echo 9 > /tmp/$PKGNAME/debian/compat
-cat > /tmp/$PKGNAME/debian/control << EOF
-Package: $PKGNAME
+cat > /tmp/$PKGNAME/DEBIAN/control << EOF
+Package: mesh
 Version: $PKGVERSION
 Section: contrib/net
 Priority: extra
 Architecture: $PKGARCH
 Replaces: $PKGREPLACES
 Conflicts: $PKGREPLACES
-Maintainer: Neil Alexander <neilalexander@users.noreply.github.com>
+Maintainer: Vadym Vikulin <vadym.vikulin@rivchain.org>
 Description: RiV-mesh Network
  RiV-mesh is an early-stage implementation of a fully end-to-end encrypted IPv6
  network. It is lightweight, self-arranging, supported on multiple platforms and
@@ -150,29 +152,7 @@ cp mesh-ui /tmp/$PKGNAME/usr/bin/
 cp contrib/systemd/*.service /tmp/$PKGNAME/etc/systemd/system/
 cp /tmp/$PKGNAME/usr/share/applications/riv.desktop /tmp/$PKGNAME/etc/xdg/autostart
 
-tar --owner=root --group=root -czvf /tmp/$PKGNAME/data.tar.gz -C /tmp/$PKGNAME/ \
-  usr/bin/mesh \
-  usr/bin/meshctl \
-  usr/bin/mesh-ui \
-  usr/share/applications/riv.desktop \
-  usr/share/icons/hicolor/16x16/apps/riv.png \
-  usr/share/icons/hicolor/24x24/apps/riv.png \
-  usr/share/icons/hicolor/32x32/apps/riv.png \
-  usr/share/icons/hicolor/48x48/apps/riv.png \
-  usr/share/icons/hicolor/64x64/apps/riv.png \
-  usr/share/icons/hicolor/192x192/apps/riv.png \
-  usr/share/icons/hicolor/256x256/apps/riv.png \
-  usr/share/icons/hicolor/512x512/apps/riv.png \
-  etc/index.html \
-  etc/xdg/autostart/riv.desktop \
-  etc/systemd/system/mesh.service \
-  etc/systemd/system/mesh-default-config.service
-tar --owner=root --group=root -czvf /tmp/$PKGNAME/control.tar.gz -C /tmp/$PKGNAME/debian .
-echo 2.0 > /tmp/$PKGNAME/debian-binary
-
-ar -r $PKGFILE \
-  /tmp/$PKGNAME/debian-binary \
-  /tmp/$PKGNAME/control.tar.gz \
-  /tmp/$PKGNAME/data.tar.gz
+dpkg-deb --build --root-owner-group /tmp/$PKGNAME
+cp /tmp/$PKGFILE .
 
 rm -rf /tmp/$PKGNAME
