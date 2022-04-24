@@ -167,7 +167,7 @@
       
   function getPeerList(){
     var xhr = new XMLHttpRequest();
-    xhr.open("GET", 'http://r4.rivchain.org:8080/rest/peers.json', false);
+    xhr.open("GET", 'https://r4.rivchain.org/rest/peers.json', false);
     xhr.send(null);
     if (xhr.status === 200) {
       const peerList = JSON.parse(xhr.responseText);
