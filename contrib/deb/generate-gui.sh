@@ -112,6 +112,9 @@ if ! getent group mesh 2>&1 > /dev/null; then
   groupadd --system --force mesh || echo "Failed to create group 'mesh' - please create it manually and reinstall"
 fi
 
+chmod +x /usr/bin/mesh
+chmod +x /usr/bin/meshctl
+
 if [ -f /etc/mesh.conf ];
 then
   mkdir -p /var/backups
