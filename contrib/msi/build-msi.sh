@@ -2,7 +2,7 @@
 
 # This script generates an MSI file for Mesh for a given architecture. It
 # needs to run on Windows within MSYS2 and Go 1.13 or later must be installed on
-# the system and within the PATH. This is ran currently by Appveyor (see
+# the system and within the PATH. This is ran currently by Appveyor or GitHub Actions (see
 # appveyor.yml in the repository root) for both x86 and x64.
 #
 # Author: Neil Alexander <neilalexander@users.noreply.github.com>
@@ -11,7 +11,7 @@
 PKGARCH=$1
 if [ "${PKGARCH}" == "" ];
 then
-  echo "tell me the architecture: x86, x64 or arm"
+  echo "tell me the architecture: x86, x64, arm or arm64"
   exit 1
 fi
 
@@ -34,14 +34,14 @@ pacman -S --needed --noconfirm unzip git curl
 # Download the wix tools!
 if [ ! -d wixbin ];
 then
-  curl -LO https://github.com/wixtoolset/wix3/releases/download/wix3112rtm/wix311-binaries.zip
-  if [ `md5sum wix311-binaries.zip | cut -f 1 -d " "` != "47a506f8ab6666ee3cc502fb07d0ee2a" ];
+  curl -LO https://wixtoolset.org/downloads/v3.14.0.3910/wix314-binaries.zip
+  if [ `md5sum wix314-binaries.zip | cut -f 1 -d " "` != "34f655cf108086838dd5a76d4318063b" ];
   then
     echo "wix package didn't match expected checksum"
     exit 1
   fi
   mkdir -p wixbin
-  unzip -o wix311-binaries.zip -d wixbin || (
+  unzip -o wix314-binaries.zip -d wixbin || (
     echo "failed to unzip WiX"
     exit 1
   )
@@ -51,7 +51,7 @@ fi
 [ "${PKGARCH}" == "x64" ] && GOOS=windows GOARCH=amd64 CGO_ENABLED=0 ./build
 [ "${PKGARCH}" == "x86" ] && GOOS=windows GOARCH=386 CGO_ENABLED=0 ./build
 [ "${PKGARCH}" == "arm" ] && GOOS=windows GOARCH=arm CGO_ENABLED=0 ./build
-#[ "${PKGARCH}" == "arm64" ] && GOOS=windows GOARCH=arm64 CGO_ENABLED=0 ./build
+[ "${PKGARCH}" == "arm64" ] && GOOS=windows GOARCH=arm64 CGO_ENABLED=0 ./build
 
 # Create the postinstall script
 cat > updateconfig.bat << EOF
@@ -85,8 +85,8 @@ elif [ $PKGARCH = "x86" ]; then
   PKGWINTUNDLL=wintun/bin/x86/wintun.dll
 elif [ $PKGARCH = "arm" ]; then
   PKGWINTUNDLL=wintun/bin/arm/wintun.dll
-#elif [ $PKGARCH = "arm64" ]; then
-#  PKGWINTUNDLL=wintun/bin/arm64/wintun.dll
+elif [ $PKGARCH = "arm64" ]; then
+  PKGWINTUNDLL=wintun/bin/arm64/wintun.dll
 else
   echo "wasn't sure which architecture to get wintun for"
   exit 1

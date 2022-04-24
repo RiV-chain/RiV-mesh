@@ -2,7 +2,7 @@
 
 # This script generates an MSI file for Mesh for a given architecture. It
 # needs to run on Windows within MSYS2 and Go 1.13 or later must be installed on
-# the system and within the PATH. This is ran currently by Appveyor (see
+# the system and within the PATH. This is ran currently by Appveyor or GitHub Actions (see
 # appveyor.yml in the repository root) for both x86 and x64.
 #
 # Author: Neil Alexander <neilalexander@users.noreply.github.com>, Vadym Vikulin <vadym.vikulin@rivchain.org>
@@ -34,8 +34,8 @@ pacman -S --needed --noconfirm unzip git curl
 # Download the wix tools!
 if [ ! -d wixbin ];
 then
-  curl -LO https://github.com/wixtoolset/wix3/releases/download/wix3112rtm/wix311-binaries.zip
-  if [ `md5sum wix311-binaries.zip | cut -f 1 -d " "` != "47a506f8ab6666ee3cc502fb07d0ee2a" ];
+  curl -LO https://wixtoolset.org/downloads/v3.14.0.3910/wix314-binaries.zip
+  if [ `md5sum wix314-binaries.zip | cut -f 1 -d " "` != "34f655cf108086838dd5a76d4318063b" ];
   then
     echo "wix package didn't match expected checksum"
     exit 1

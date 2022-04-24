@@ -1,7 +1,10 @@
 #!/bin/sh
 
 # Get the current branch name
-BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null)
+BRANCH="$GITHUB_REF_NAME"
+if [ -z "$BRANCH" ]; then
+  BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null)
+fi
 
 # Complain if the git history is not available
 if [ $? != 0 ] || [ -z "$BRANCH" ]; then
