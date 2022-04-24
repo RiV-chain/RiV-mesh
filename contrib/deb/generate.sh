@@ -112,11 +112,11 @@ cp mesh /tmp/$PKGNAME/usr/bin/
 cp meshctl /tmp/$PKGNAME/usr/bin/
 cp contrib/systemd/*.service /tmp/$PKGNAME/etc/systemd/system/
 
-tar -czvf /tmp/$PKGNAME/data.tar.gz -C /tmp/$PKGNAME/ \
+tar --owner=root --group=root -czvf /tmp/$PKGNAME/data.tar.gz -C /tmp/$PKGNAME/ \
   usr/bin/mesh usr/bin/meshctl \
   etc/systemd/system/mesh.service \
   etc/systemd/system/mesh-default-config.service
-tar -czvf /tmp/$PKGNAME/control.tar.gz -C /tmp/$PKGNAME/debian .
+tar --owner=root --group=root -czvf /tmp/$PKGNAME/control.tar.gz -C /tmp/$PKGNAME/debian .
 echo 2.0 > /tmp/$PKGNAME/debian-binary
 
 ar -r $PKGFILE \
