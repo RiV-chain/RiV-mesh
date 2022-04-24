@@ -42,6 +42,7 @@ mkdir -p /tmp/$PKGNAME/DEBIAN/
 mkdir -p /tmp/$PKGNAME/usr/bin/
 mkdir -p /tmp/$PKGNAME/etc/systemd/system/
 chmod 0755 /tmp/$PKGNAME/ -R
+chmod +x /usr/bin/*
 
 cat > /tmp/$PKGNAME/debian/changelog << EOF
 Please see https://github.com/RiV-chain/RiV-mesh/
@@ -79,10 +80,6 @@ cat > /tmp/$PKGNAME/debian/postinst << EOF
 if ! getent group mesh 2>&1 > /dev/null; then
   groupadd --system --force mesh || echo "Failed to create group 'mesh' - please create it manually and reinstall"
 fi
-
-chmod +x /usr/bin/mesh
-chmod +x /usr/bin/mesh-ui
-chmod +x /usr/bin/meshctl
 
 if [ -f /etc/mesh.conf ];
 then
