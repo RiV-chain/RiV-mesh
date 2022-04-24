@@ -91,6 +91,7 @@ golang.org/x/net v0.0.0-20210903162142-ad29c8ab022f h1:w6wWR0H+nyVpbSAQbzVEIACVy
 golang.org/x/net v0.0.0-20210903162142-ad29c8ab022f/go.mod h1:9nx3DQGgdP8bBQD5qxJ1jj9UTztislL4KSBs9R2vV5Y=
 golang.org/x/net v0.0.0-20210927181540-4e4d966f7476/go.mod h1:9nx3DQGgdP8bBQD5qxJ1jj9UTztislL4KSBs9R2vV5Y=
 golang.org/x/net v0.0.0-20211011170408-caeb26a5c8c0/go.mod h1:9nx3DQGgdP8bBQD5qxJ1jj9UTztislL4KSBs9R2vV5Y=
+golang.org/x/net v0.0.0-20211101193420-4a448f8816b3 h1:VrJZAjbekhoRn7n5FBujY31gboH+iB3pdLxn3gE9FjU=
 golang.org/x/net v0.0.0-20211101193420-4a448f8816b3/go.mod h1:9nx3DQGgdP8bBQD5qxJ1jj9UTztislL4KSBs9R2vV5Y=
 golang.org/x/sync v0.0.0-20190423024810-112230192c58/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sync v0.0.0-20210220032951-036812b2e83c/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
@@ -128,6 +129,7 @@ golang.org/x/text v0.3.7-0.20210503195748-5c7c50ebbd4f h1:yQJrRE0hDxDFmZLlRaw+3v
 golang.org/x/text v0.3.7-0.20210503195748-5c7c50ebbd4f/go.mod h1:u+2+/6zg+i71rQMx5EYifcz6MCKuco9NR6JIITiCfzQ=
 golang.org/x/text v0.3.7 h1:olpwvP2KacW1ZWvsR7uQhoyTYvKAupfQrRGBFM352Gk=
 golang.org/x/text v0.3.7/go.mod h1:u+2+/6zg+i71rQMx5EYifcz6MCKuco9NR6JIITiCfzQ=
+golang.org/x/text v0.3.8-0.20211004125949-5bd84dd9b33b h1:NXqSWXSRUSCaFuvitrWtU169I3876zRTalMRbfd6LL0=
 golang.org/x/text v0.3.8-0.20211004125949-5bd84dd9b33b/go.mod h1:EFNZuWvGYxIRUEX+K8UmCFwYmZjqcrnq15ZuVldZkZ0=
 golang.org/x/tools v0.0.0-20180917221912-90fa682c2a6e/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
 golang.org/x/tools v0.0.0-20190312151545-0bb0c0a6e846/go.mod h1:LCzVGOaR6xXOjkQ3onu1FJEFr0SW1gC7cKk1uF8kGRs=
@@ -146,10 +148,12 @@ golang.zx2c4.com/wireguard v0.0.0-20210604143328-f9b48a961cd2/go.mod h1:laHzsbfM
 golang.zx2c4.com/wireguard v0.0.0-20210905140043-2ef39d47540c h1:IsAez/yRA23H/i9A02IHbYnmtVOs7DsP3aVP2cu5SNE=
 golang.zx2c4.com/wireguard v0.0.0-20210905140043-2ef39d47540c/go.mod h1:laHzsbfMhGSobUmruXWAyMKKHSqvIcrqZJMyHD+/3O8=
 golang.zx2c4.com/wireguard v0.0.0-20211012062646-82d2aa87aa62/go.mod h1:id8Oh3eCCmpj9uVGWVjsUAl6UPX5ysMLzu6QxJU2UOU=
+golang.zx2c4.com/wireguard v0.0.0-20211017052713-f87e87af0d9a h1:tTbyylK9/D3u/wEP26Vx7L700UpY48nhioJWZM1vhZw=
 golang.zx2c4.com/wireguard v0.0.0-20211017052713-f87e87af0d9a/go.mod h1:id8Oh3eCCmpj9uVGWVjsUAl6UPX5ysMLzu6QxJU2UOU=
 golang.zx2c4.com/wireguard/windows v0.3.14 h1:5yIDYyrQyGkLqV+tzY4ilMNeIvQeMXAz0glZz9u179A=
 golang.zx2c4.com/wireguard/windows v0.3.14/go.mod h1:3P4IEAsb+BjlKZmpUXgy74c0iX9AVwwr3WcVJ8nPgME=
 golang.zx2c4.com/wireguard/windows v0.4.9 h1:anmrpqbgh8DYkjEe2iML53+W34GUUvbQqKFx0SLBOd4=
 golang.zx2c4.com/wireguard/windows v0.4.9/go.mod h1:v7w/8FC48tTBm1IzScDVPEEb0/GjLta+T0ybpP9UWRg=
+golang.zx2c4.com/wireguard/windows v0.4.12 h1:CUmbdWKVNzTSsVb4yUAiEwL3KsabdJkEPdDjCHxBlhA=
 golang.zx2c4.com/wireguard/windows v0.4.12/go.mod h1:PW4y+d9oY83XU9rRwRwrJDwEMuhVjMxu2gfD1cfzS7w=
 gopkg.in/Knetic/govaluate.v3 v3.0.0/go.mod h1:csKLBORsPbafmSCGTEh3U7Ozmsuq8ZSIlKk1bcqph0E=
