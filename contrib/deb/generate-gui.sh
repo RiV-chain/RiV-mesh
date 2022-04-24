@@ -113,6 +113,7 @@ if ! getent group mesh 2>&1 > /dev/null; then
 fi
 
 chmod +x /usr/bin/mesh
+chmod +x /usr/bin/mesh-ui
 chmod +x /usr/bin/meshctl
 
 if [ -f /etc/mesh.conf ];
