@@ -73,7 +73,7 @@ usr/bin/mesh usr/bin
 usr/bin/meshctl usr/bin
 etc/systemd/system/*.service etc/systemd/system
 EOF
-cat > /tmp/$PKGNAME/debian/postinst << EOF
+cat > /tmp/$PKGNAME/DEBIAN/postinst << EOF
 #!/bin/sh
 
 if ! getent group mesh 2>&1 > /dev/null; then
@@ -99,7 +99,7 @@ if command -v systemctl >/dev/null; then
   systemctl restart mesh || echo -n "systemctl restart failed!"
 fi
 EOF
-cat > /tmp/$PKGNAME/debian/prerm << EOF
+cat > /tmp/$PKGNAME/DEBIAN/prerm << EOF
 #!/bin/sh
 if command -v systemctl >/dev/null; then
   if systemctl is-active --quiet mesh; then
