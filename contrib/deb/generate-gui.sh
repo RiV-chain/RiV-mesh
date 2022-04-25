@@ -124,7 +124,6 @@ else
   echo "Generating initial configuration file /etc/mesh.conf"
   echo "Please familiarise yourself with this file before starting Mesh"
   sh -c 'umask 0027 && /usr/bin/mesh -genconf > /etc/mesh.conf'
-  chgrp mesh /etc/mesh.conf
 fi
 chgrp mesh /etc/mesh.conf
 if command -v systemctl >/dev/null; then
