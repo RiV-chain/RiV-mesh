@@ -106,7 +106,7 @@ usr/share/icons/hicolor/256x256/apps/riv.png usr/share/icons/hicolor/256x256/app
 usr/share/icons/hicolor/512x512/apps/riv.png usr/share/icons/hicolor/512x512/apps
 EOF
 
-cat > /tmp/$PKGNAME/debian/postinst << EOF
+cat > /tmp/$PKGNAME/DEBIAN/postinst << EOF
 #!/bin/sh
 
 if ! getent group mesh 2>&1 > /dev/null; then
@@ -127,15 +127,15 @@ fi
 chgrp mesh /etc/mesh.conf
 chmod 755 /etc/mesh.conf
 if command -v systemctl >/dev/null; then
-  systemctl daemon-reload >/dev/null || true
-  systemctl enable mesh || true
-  systemctl restart mesh || true
+  systemctl daemon-reload || echo -n "daemon not reloaded!"
+  systemctl enable mesh || echo -n "systemctl enable failed!"
+  systemctl restart mesh || echo -n "systemctl restart failed!"
 fi
 update-icon-caches /usr/share/icons/*
 update-desktop-database /usr/share/applications
 EOF
 
-cat > /tmp/$PKGNAME/debian/prerm << EOF
+cat > /tmp/$PKGNAME/DEBIAN/prerm << EOF
 #!/bin/sh
 if command -v systemctl >/dev/null; then
   if systemctl is-active --quiet mesh; then
@@ -150,6 +150,7 @@ cp meshctl /tmp/$PKGNAME/usr/bin/
 cp mesh-ui /tmp/$PKGNAME/usr/bin/
 cp contrib/systemd/*.service /tmp/$PKGNAME/etc/systemd/system/
 cp /tmp/$PKGNAME/usr/share/applications/riv.desktop /tmp/$PKGNAME/etc/xdg/autostart
+chmod 0775 /tmp/$PKGNAME/DEBIAN/*
 chmod 644 /tmp/$PKGNAME/etc/systemd/system/*
 chmod 644 /tmp/$PKGNAME/usr/share/applications/riv.desktop
 chmod 644 /tmp/$PKGNAME/etc/xdg/autostart/*
