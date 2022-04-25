@@ -44,7 +44,8 @@ chmod 0775 /tmp/$PKGNAME/ -R
 for resolution in 16x16 24x24 32x32 48x48 64x64 192x192 256x256 512x512; do
   echo "Converting icon for: $resolution"
   mkdir -p /tmp/$PKGNAME/usr/share/icons/hicolor/$resolution/apps && \
-  convert -colorspace sRGB ./riv.png -resize $resolution PNG8:/tmp/$PKGNAME/usr/share/icons/hicolor/$resolution/apps/riv.png
+  convert -colorspace sRGB ./riv.png -resize $resolution PNG8:/tmp/$PKGNAME/usr/share/icons/hicolor/$resolution/apps/riv.png  && \
+  chmod 644 /tmp/$PKGNAME/usr/share/icons/hicolor/$resolution/apps/riv.png
 done
 
 cp contrib/ui/mesh-ui/index.html /tmp/$PKGNAME/etc/
@@ -152,9 +153,10 @@ cp meshctl /tmp/$PKGNAME/usr/bin/
 cp mesh-ui /tmp/$PKGNAME/usr/bin/
 cp contrib/systemd/*.service /tmp/$PKGNAME/etc/systemd/system/
 cp /tmp/$PKGNAME/usr/share/applications/riv.desktop /tmp/$PKGNAME/etc/xdg/autostart
-chmod 755 /tmp/$PKGNAME/usr/bin/mesh
-chmod 755 /tmp/$PKGNAME/usr/bin/meshctl
-chmod 755 /tmp/$PKGNAME/usr/bin/mesh-ui
+chmod 644 /tmp/$PKGNAME/etc/systemd/system/*
+chmod 644 /tmp/$PKGNAME/usr/share/applications/riv.desktop
+chmod 644 /tmp/$PKGNAME/etc/xdg/autostart/*
+chmod 755 /tmp/$PKGNAME/usr/bin/*
 chmod 755 /tmp/$PKGNAME/etc/index.html
 
 dpkg-deb --build --root-owner-group /tmp/$PKGNAME
