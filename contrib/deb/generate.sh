@@ -80,8 +80,7 @@ if ! getent group mesh 2>&1 > /dev/null; then
   groupadd --system --force mesh || echo "Failed to create group 'mesh' - please create it manually and reinstall"
 fi
 
-if [ -f /etc/mesh.conf ];
-then
+if [ -f /etc/mesh.conf ]; then
   mkdir -p /var/backups
   echo "Backing up configuration file to /var/backups/mesh.conf.`date +%Y%m%d`"
   cp /etc/mesh.conf /var/backups/mesh.conf.`date +%Y%m%d`
@@ -95,9 +94,9 @@ fi
 chgrp mesh /etc/mesh.conf
 chmod 755 /etc/mesh.conf
 if command -v systemctl >/dev/null; then
-  systemctl daemon-reload >/dev/null || true
-  systemctl enable mesh || true
-  systemctl restart mesh || true
+  systemctl daemon-reload || echo -n "daemon not reloaded!"
+  systemctl enable mesh || echo -n "systemctl enable failed!"
+  systemctl restart mesh || echo -n "systemctl restart failed!"
 fi
 EOF
 cat > /tmp/$PKGNAME/debian/prerm << EOF
