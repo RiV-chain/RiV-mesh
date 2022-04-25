@@ -39,7 +39,7 @@ mkdir -p /tmp/$PKGNAME/etc/systemd/system/
 mkdir -p /tmp/$PKGNAME/usr/share/applications/
 mkdir -p /tmp/$PKGNAME/etc/
 mkdir -p /tmp/$PKGNAME/etc/xdg/autostart
-chmod 0755 /tmp/$PKGNAME/
+chmod 0775 /tmp/$PKGNAME/ -R
 
 for resolution in 16x16 24x24 32x32 48x48 64x64 192x192 256x256 512x512; do
   echo "Converting icon for: $resolution"
