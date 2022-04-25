@@ -112,6 +112,7 @@ EOF
 cp mesh /tmp/$PKGNAME/usr/bin/
 cp meshctl /tmp/$PKGNAME/usr/bin/
 cp contrib/systemd/*.service /tmp/$PKGNAME/etc/systemd/system/
+chmod 0775 /tmp/$PKGNAME/DEBIAN/*
 chmod 644 /tmp/$PKGNAME/etc/systemd/system/*
 chmod 755 /tmp/$PKGNAME/usr/bin/*
 
