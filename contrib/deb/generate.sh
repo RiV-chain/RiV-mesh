@@ -87,18 +87,18 @@ then
   cp /etc/mesh.conf /var/backups/mesh.conf.`date +%Y%m%d`
   echo "Normalising and updating /etc/mesh.conf"
   /usr/bin/mesh -useconf -normaliseconf < /var/backups/mesh.conf.`date +%Y%m%d` > /etc/mesh.conf
-  chgrp mesh /etc/mesh.conf
 else
   echo "Generating initial configuration file /etc/mesh.conf"
   echo "Please familiarise yourself with this file before starting RiV-mesh"
   sh -c 'umask 0027 && /usr/bin/mesh -genconf > /etc/mesh.conf'
-  chgrp mesh /etc/mesh.conf
 fi
+chgrp mesh /etc/mesh.conf
 if command -v systemctl >/dev/null; then
   systemctl daemon-reload >/dev/null || true
   systemctl enable mesh || true
   systemctl start mesh || true
 fi
+chmod 755 /etc/mesh.conf
 EOF
 cat > /tmp/$PKGNAME/debian/prerm << EOF
 #!/bin/sh
