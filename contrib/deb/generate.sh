@@ -93,12 +93,12 @@ else
   sh -c 'umask 0027 && /usr/bin/mesh -genconf > /etc/mesh.conf'
 fi
 chgrp mesh /etc/mesh.conf
+chmod 755 /etc/mesh.conf
 if command -v systemctl >/dev/null; then
   systemctl daemon-reload >/dev/null || true
   systemctl enable mesh || true
-  systemctl start mesh || true
+  systemctl restart mesh || true
 fi
-chmod 755 /etc/mesh.conf
 EOF
 cat > /tmp/$PKGNAME/debian/prerm << EOF
 #!/bin/sh
