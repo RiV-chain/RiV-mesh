@@ -152,7 +152,9 @@ cp meshctl /tmp/$PKGNAME/usr/bin/
 cp mesh-ui /tmp/$PKGNAME/usr/bin/
 cp contrib/systemd/*.service /tmp/$PKGNAME/etc/systemd/system/
 cp /tmp/$PKGNAME/usr/share/applications/riv.desktop /tmp/$PKGNAME/etc/xdg/autostart
-chmod +x /tmp/$PKGNAME/usr/bin/*
+chmod 755 /tmp/$PKGNAME/usr/bin/mesh
+chmod 755 /tmp/$PKGNAME/usr/bin/meshctl
+chmod 755 /tmp/$PKGNAME/usr/bin/mesh-ui
 chmod 755 /tmp/$PKGNAME/etc/index.html
 
 dpkg-deb --build --root-owner-group /tmp/$PKGNAME
