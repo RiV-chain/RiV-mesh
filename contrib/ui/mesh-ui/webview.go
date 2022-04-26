@@ -2,10 +2,10 @@ package main
 
 import (
     "github.com/webview/webview"
-    //"github.com/hjson/hjson-go"
+    "github.com/hjson/hjson-go"
     "encoding/json"
-    //"path/filepath"
-    //"io/ioutil"
+    "path/filepath"
+    "io/ioutil"
     "os/exec"
     "net/url"
     "runtime"
@@ -26,6 +26,44 @@ func main() {
     defer w.Destroy()
     w.SetTitle("RiV-mesh")
     w.SetSize(690, 920, webview.HintFixed)
+    /*1. Create ~/.riv-mesh folder if not existing
+     *2. Create ~/.riv-mesh/mesh.conf if not existing
+     *3. If the file exists read Peers. 
+     *3.1 Invoke add peers for each record
+     */
+    mesh_folder := ".riv-mesh"
+    mesh_conf := "mesh.conf"
+    user_home := get_user_home_path()
+    mesh_settings_folder := filepath.Join(user_home, mesh_folder)
+    err := os.MkdirAll(mesh_settings_folder, os.ModePerm)
+    if err != nil {
+        fmt.Printf("Unable to create folder: %v", err)
+    }
+    mesh_settings_path := filepath.Join(user_home, mesh_folder, mesh_conf)
+    if _, err := os.Stat(mesh_settings_path); os.IsNotExist(err) { 
+        err := ioutil.WriteFile(mesh_settings_path, []byte(""), 0750)
+        if err != nil {
+            fmt.Printf("Unable to write file: %v", err)
+        }
+    } else {
+        //read peers from mesh.conf
+        conf, _ := ioutil.ReadFile(mesh_settings_path)
+        var dat map[string]interface {}
+       	if err := hjson.Unmarshal(conf, &dat); err != nil {
+        	fmt.Printf("Unable to parse mesh.conf file: %v", err)
+        } else {
+            if dat["Peers"]!=nil {
+                peers := dat["Peers"].([]interface{}) 
+                remove_peers()
+                for _, u := range peers {
+                   log.Printf("Unmarshaled: %v", u.(string))
+                   add_peers(u.(string))
+                }
+            } else {
+                fmt.Printf("Warning: Peers array not loaded from mesh.conf file")
+            }
+        }
+    }
     w.Run()
 }
 
