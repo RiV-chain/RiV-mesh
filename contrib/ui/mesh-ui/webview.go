@@ -2,10 +2,10 @@ package main
 
 import (
     "github.com/webview/webview"
-    "github.com/hjson/hjson-go"
+    //"github.com/hjson/hjson-go"
     "encoding/json"
-    "path/filepath"
-    "io/ioutil"
+    //"path/filepath"
+    //"io/ioutil"
     "os/exec"
     "net/url"
     "runtime"
