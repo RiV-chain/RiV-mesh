@@ -30,13 +30,13 @@ test -d pkgbuild && rm -rf pkgbuild
 mkdir -p pkgbuild/scripts
 mkdir -p pkgbuild/flat/base.pkg
 mkdir -p pkgbuild/flat/Resources/en.lproj
-mkdir -p pkgbuild/root/usr/bin
+mkdir -p pkgbuild/root/usr/local/bin
 mkdir -p pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS
 mkdir -p pkgbuild/root/Library/LaunchDaemons
 
 # Copy package contents into the pkgbuild root
 cp mesh pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS
-cp meshctl pkgbuild/root/usr/bin
+cp meshctl pkgbuild/root/usr/local/bin
 cp contrib/macos/mesh.plist pkgbuild/root/Library/LaunchDaemons
 
 # Create the postinstall script
@@ -67,7 +67,7 @@ EOF
 # Set execution permissions
 chmod 755 pkgbuild/scripts/postinstall
 chmod 755 pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS/mesh
-chmod 755 pkgbuild/root/usr/bin/meshctl
+chmod 755 pkgbuild/root/usr/local/bin/meshctl
 
 # Pack payload and scripts
 ( cd pkgbuild/scripts && find . | cpio -o --format odc --owner 0:80 | gzip -c ) > pkgbuild/flat/base.pkg/Scripts
