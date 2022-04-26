@@ -232,7 +232,9 @@ func get_self(w webview.WebView){
 		//found subnet
 		fmt.Printf("Subnet: %s\n", s.Subnet)
 		go setFieldValue(w, "subnet", s.Subnet)
-	}	
+	}
+	out = run_command("getPeers")
+	go setFieldValue(w, "peers", string(out))
 }
 
 func get_peers(w webview.WebView){
@@ -252,9 +254,9 @@ func get_peers(w webview.WebView){
 	    // Loop
 	    fmt.Println(k)
 	}
-//	inner_html := strings.Join(m[:], "<br>")
+	inner_html := strings.Join(m[:], "<br>")
 	strings.Join(m[:], "<br>")
-	go setFieldValue(w, "peers", string(out))
+	go setFieldValue(w, "peers", inner_html)
 }
 
 func setFieldValue(p webview.WebView, id string, value string) {
