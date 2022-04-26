@@ -227,7 +227,7 @@ func get_self(w webview.WebView, riv_ctrl_path []string){
 	for ipv6, s := range res.Self {
 		//found ipv6
 		fmt.Printf("IPv6: %s\n", ipv6)		
-		go setFieldValue(w, "ipv6", strings.Join(riv_ctrl_path[:], ","))
+		go setFieldValue(w, "ipv6", ipv6)
 		//found subnet
 		fmt.Printf("Subnet: %s\n", s.Subnet)
 		go setFieldValue(w, "subnet", s.Subnet)
