@@ -234,7 +234,7 @@ func get_self(w webview.WebView){
 		go setFieldValue(w, "subnet", s.Subnet)
 	}
 	out = run_command("getPeers")
-	go setFieldValue(w, "peers", string(out))
+	//go setFieldValue(w, "peers", string(out))
 }
 
 func get_peers(w webview.WebView){
