@@ -189,14 +189,14 @@ func run_command(riv_ctrl_path []string, command string) []byte{
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		//log.Fatalf("cmd.Run() failed with %s\n", err)
-		return []byte(strings.Join(riv_ctrl_path[:], ",")) //[]byte(err.Error())
+		return []byte(err.Error())
 	}
 	return out
 }
 
 func run_command_with_arg(riv_ctrl_path []string, command string, arg string) []byte{
 	//args := []string{"-json", command, arg}
-	riv_ctrl_path[2] = riv_ctrl_path[2]+" -json "+command
+	riv_ctrl_path[2] = riv_ctrl_path[2]+" -json "+command+strings.Join(arg[:], " ")
 	cmd := exec.Command(riv_ctrl_path[0], riv_ctrl_path[1:]...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
