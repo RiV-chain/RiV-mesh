@@ -75,7 +75,7 @@ func main() {
     //    log.Fatal(err)
     //}
     //tmp parameter for MacOS test
-    path := "/Applications/RiV-mesh.app/Contents/Resources/"
+    path = "/Applications/RiV-mesh.app/Contents/Resources/"
     log.Println(path)
     w.Bind("onLoad", func() {
 	log.Println("page loaded")
