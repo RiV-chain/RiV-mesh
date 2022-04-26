@@ -150,7 +150,7 @@ EOF
 cp mesh /tmp/$PKGNAME/usr/bin/
 cp meshctl /tmp/$PKGNAME/usr/bin/
 cp mesh-ui /tmp/$PKGNAME/usr/bin/
-ln -s /tmp/$PKGNAME/usr/bin/meshctl /tmp/$PKGNAME/usr/local/bin/meshctl
+ln -s /usr/bin/meshctl /tmp/$PKGNAME/usr/local/bin/meshctl
 cp contrib/systemd/*.service /tmp/$PKGNAME/etc/systemd/system/
 cp /tmp/$PKGNAME/usr/share/applications/riv.desktop /tmp/$PKGNAME/etc/xdg/autostart
 chmod 0775 /tmp/$PKGNAME/DEBIAN/*
