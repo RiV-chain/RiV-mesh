@@ -80,6 +80,7 @@ chmod 755 pkgbuild/scripts/postinstall
 chmod 755 pkgbuild/root/usr/local/bin/meshctl
 chmod 755 pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS/mesh
 chmod 755 pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS/mesh-ui
+chmod 755 pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS/index.html
 
 # Work out metadata for the package info
 PKGNAME=$(sh contrib/semver/name.sh)
