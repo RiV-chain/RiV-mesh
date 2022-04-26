@@ -65,9 +65,9 @@ launchctl load /Library/LaunchDaemons/mesh.plist
 EOF
 
 # Set execution permissions
-chmod +x pkgbuild/scripts/postinstall
-chmod +x pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS/mesh
-chmod +x pkgbuild/root/usr/local/bin/meshctl
+chmod 755 pkgbuild/scripts/postinstall
+chmod 755 pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS/mesh
+chmod 755 pkgbuild/root/usr/local/bin/meshctl
 
 # Pack payload and scripts
 ( cd pkgbuild/scripts && find . | cpio -o --format odc --owner 0:80 | gzip -c ) > pkgbuild/flat/base.pkg/Scripts
