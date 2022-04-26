@@ -205,7 +205,7 @@ func run_command_with_arg(riv_ctrl_path string, command string, arg string) []by
 }
 
 func add_peers(uri string){
-    riv_ctrl_path := get_ctl_path()
+	riv_ctrl_path := get_ctl_path()
 	run_command_with_arg(riv_ctrl_path, "addpeers", "uri="+uri)	
 }
 
@@ -219,12 +219,13 @@ func get_self(w webview.WebView, riv_ctrl_path string){
 	res := &admin.GetSelfResponse{}
 	out := run_command(riv_ctrl_path, "getSelf")
 	if err := json.Unmarshal(out, &res); err != nil {
+		go setFieldValue(w, "ipv6", err)
 		return
 	}
 	for ipv6, s := range res.Self {
 		//found ipv6
 		fmt.Printf("IPv6: %s\n", ipv6)		
-		go setFieldValue(w, "ipv6", ipv6)
+		go setFieldValue(w, "ipv6", out)
 		//found subnet
 		fmt.Printf("Subnet: %s\n", s.Subnet)
 		go setFieldValue(w, "subnet", s.Subnet)
