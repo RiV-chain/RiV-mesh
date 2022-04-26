@@ -147,7 +147,7 @@ func run_command(riv_ctrl_path string, command string) []byte{
 	cmd := exec.Command(riv_ctrl_path, args...)
 	_, err := cmd.CombinedOutput()
 	if err != nil {
-		//log.Fatalf("cmd.Run() failed with %s\n", err)
+		log.Fatalf("cmd.Run() failed with %s\n", err)
 		return nil
 	}
 	return []byte("")
