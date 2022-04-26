@@ -47,7 +47,7 @@ cp meshctl pkgbuild/root/usr/local/bin
 cp mesh pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS
 cp mesh-ui pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS
 cp riv.icns pkgbuild/root/Applications/RiV-mesh.app/Contents/Resources
-cp contrib/ui/mesh-ui/index.html pkgbuild/root/Applications/RiV-mesh.app/Contents/Resources
+cp contrib/ui/mesh-ui/index.html pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS
 cp contrib/macos/mesh.plist pkgbuild/root/Library/LaunchDaemons
 
 # Create the postinstall script
@@ -94,11 +94,6 @@ cat > pkgbuild/root/Applications/RiV-mesh.app/Contents/Info.plist << EOF
 <dict>
   <key>Label</key>
   <string>org.riv-mesh.ui</string>
-  <key>ProgramArguments</key>
-  <array>
-    <string>/Applications/RiV-mesh.app/Contents/MacOS/mesh-ui</string>
-    <string>/Applications/RiV-mesh.app/Contents/Resources/index.html</string>
-  </array>
   <key>NSPrincipalClass</key>
   <string>NSApplication</string>
   <key>CFBundleName</key>
@@ -119,6 +114,8 @@ cat > pkgbuild/root/Applications/RiV-mesh.app/Contents/Info.plist << EOF
   <string>${PKGVERSION}</string>
   <key>CFBundleExecutable</key>
   <string>mesh-ui</string>
+  <key>WorkingDirectory</key>
+  <string>/Applications/RiV-mesh.app/Contents/MacOS</string>
   <key>CFBundleIdentifier</key>
   <string>io.github.RiV-mesh.pkg</string>
 </dict>
