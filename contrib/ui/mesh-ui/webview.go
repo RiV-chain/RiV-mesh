@@ -100,13 +100,11 @@ func main() {
            fmt.Printf("Unable to write file: %v", e)
        }
     })
-    w.Bind("ping", func(peer_list string) {
-
-        go ping(w, peer_list)
-
-    })
-    dat, err := ioutil.ReadFile(path+"/index.html")
-    w.Navigate("data:text/html,"+url.QueryEscape(string(dat)))
+    //w.Bind("ping", func(peer_list string) {
+    //    go ping(w, peer_list)
+    //})
+    //dat, err := ioutil.ReadFile(path+"/index.html")
+    //w.Navigate("data:text/html,"+url.QueryEscape(string(dat)))
     w.Run()
 }
 
