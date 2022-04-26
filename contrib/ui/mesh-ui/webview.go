@@ -185,7 +185,8 @@ func run(w webview.WebView){
 
 func run_command(command string) []byte{
 	//args := []string{"-json", command}
-	cmd_array := riv_ctrl_path
+	cmd_array := make([]string, 3)
+	copy(cmd_array,riv_ctrl_path)
 	cmd_array[2] = cmd_array[2]+" -json "+command
 	cmd := exec.Command(cmd_array[0], cmd_array[1:]...)
 	out, err := cmd.CombinedOutput()
@@ -198,7 +199,8 @@ func run_command(command string) []byte{
 
 func run_command_with_arg(command string, arg string) []byte{
 	//args := []string{"-json", command, arg}
-	cmd_array := riv_ctrl_path
+	cmd_array := make([]string, 3)
+	copy(cmd_array,riv_ctrl_path)
 	cmd_array[2] = cmd_array[2]+" -json "+command
 	cmd := exec.Command(cmd_array[0], cmd_array[1:]...)
 	out, err := cmd.CombinedOutput()
