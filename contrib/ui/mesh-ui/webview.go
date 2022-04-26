@@ -21,7 +21,7 @@ import (
 )
 
 func main() {
-    debug := false
+    debug := true
     w := webview.New(debug)
     defer w.Destroy()
     w.SetTitle("RiV-mesh")
@@ -53,18 +53,57 @@ func main() {
         	fmt.Printf("Unable to parse mesh.conf file: %v", err)
         } else {
             if dat["Peers"]!=nil {
-                //peers := dat["Peers"].([]interface{})
-		//dat["Peers"].([]interface{})
+                peers := dat["Peers"].([]interface{}) 
                 remove_peers()
-                //for _, u := range peers {
-                //   log.Printf("Unmarshaled: %v", u.(string))
-                //   add_peers(u.(string))
-                //}
+                for _, u := range peers {
+                   log.Printf("Unmarshaled: %v", u.(string))
+                   add_peers(u.(string))
+                }
             } else {
                 fmt.Printf("Warning: Peers array not loaded from mesh.conf file")
             }
         }
     }
+    var path string
+
+    if len(os.Args)>1 {
+        path, err = filepath.Abs(filepath.Dir(os.Args[1]))
+    } else {
+        path, err = filepath.Abs(filepath.Dir(os.Args[0]))
+    }
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    log.Println(path)
+    w.Bind("onLoad", func() {
+	log.Println("page loaded")
+	    go run(w)
+    })
+    w.Bind("savePeers", func(peer_list string) {
+	   //log.Println("peers saved ", peer_list)
+	   var peers []string
+	   _ = json.Unmarshal([]byte(peer_list), &peers)
+	   log.Printf("Unmarshaled: %v", peers)
+       remove_peers()
+       for _, u := range peers {
+            log.Printf("Unmarshaled: %v", u)
+            add_peers(u)
+       }
+       //add peers to ~/mesh.conf
+       dat := make(map[string]interface{})
+       dat["Peers"] = peers
+       bs, _ := hjson.Marshal(dat)
+       e := ioutil.WriteFile(mesh_settings_path, bs, 0750)
+       if e != nil {
+           fmt.Printf("Unable to write file: %v", e)
+       }
+    })
+    w.Bind("ping", func(peer_list string) {
+        go ping(w, peer_list)
+    })
+    dat, err := ioutil.ReadFile(path+"/index.html")
+    w.Navigate("data:text/html,"+url.QueryEscape(string(dat)))
     w.Run()
 }
 
@@ -135,7 +174,7 @@ func run(w webview.WebView){
     riv_ctrl_path := get_ctl_path()
     if riv_ctrl_path != "" {
         get_self(w, riv_ctrl_path)
-		get_peers(w, riv_ctrl_path)
+	get_peers(w, riv_ctrl_path)
     }
     _ = time.AfterFunc(10*time.Second, func() {
         run(w)
@@ -147,7 +186,7 @@ func run_command(riv_ctrl_path string, command string) []byte{
 	cmd := exec.Command(riv_ctrl_path, args...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Fatalf("cmd.Run() failed with %s\n", err)
+		//log.Fatalf("cmd.Run() failed with %s\n", err)
 		return nil
 	}
 	return out
@@ -158,7 +197,7 @@ func run_command_with_arg(riv_ctrl_path string, command string, arg string) []by
 	cmd := exec.Command(riv_ctrl_path, args...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-        	log.Fatalf("command failed: %s\n", riv_ctrl_path+" "+strings.Join(args, " "))
+        	//log.Fatalf("command failed: %s\n", riv_ctrl_path+" "+strings.Join(args, " "))
 		return nil
 	}
 	return out
@@ -166,12 +205,12 @@ func run_command_with_arg(riv_ctrl_path string, command string, arg string) []by
 
 func add_peers(uri string){
     riv_ctrl_path := get_ctl_path()
-    run_command_with_arg(riv_ctrl_path, "addpeers", "uri="+uri)	
+	run_command_with_arg(riv_ctrl_path, "addpeers", "uri="+uri)	
 }
 
 func remove_peers(){
-    riv_ctrl_path := get_ctl_path()
-    run_command(riv_ctrl_path, "removepeers")	
+	riv_ctrl_path := get_ctl_path()
+	run_command(riv_ctrl_path, "removepeers")	
 }
 
 func get_self(w webview.WebView, riv_ctrl_path string){
