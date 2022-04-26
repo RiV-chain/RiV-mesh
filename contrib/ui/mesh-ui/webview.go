@@ -189,7 +189,7 @@ func run_command(riv_ctrl_path []string, command string) []byte{
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		//log.Fatalf("cmd.Run() failed with %s\n", err)
-		return []byte(err.Error())
+		return []byte(strings.Join(riv_ctrl_path[:], ",")) //[]byte(err.Error())
 	}
 	return out
 }
