@@ -142,7 +142,7 @@ func run(w webview.WebView){
     })
 }
 
-func run_command(riv_ctrl_path string, command string) []byte{
+func run_command(riv_ctrl_path string, command string) string{
 	args := []string{"-json", command}
 	cmd := exec.Command(riv_ctrl_path, args...)
 	out, err := cmd.CombinedOutput()
@@ -150,7 +150,7 @@ func run_command(riv_ctrl_path string, command string) []byte{
 		log.Fatalf("cmd.Run() failed with %s\n", err)
 		return nil
 	}
-	return out
+	return string(out)
 }
 
 func run_command_with_arg(riv_ctrl_path string, command string, arg string) []byte{
