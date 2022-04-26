@@ -145,11 +145,11 @@ func run(w webview.WebView){
 func run_command(riv_ctrl_path string, command string) []byte{
 	args := []string{"-json", command}
 	cmd := exec.Command(riv_ctrl_path, args...)
-	_, err := cmd.CombinedOutput()
-	if err != nil {
-		log.Fatalf("cmd.Run() failed with %s\n", err)
-		return nil
-	}
+	_, _ := cmd.CombinedOutput()
+	//if err != nil {
+	//	log.Fatalf("cmd.Run() failed with %s\n", err)
+	//	return nil
+	//}
 	return []byte("")
 }
 
