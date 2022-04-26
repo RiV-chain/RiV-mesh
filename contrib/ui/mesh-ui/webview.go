@@ -220,7 +220,7 @@ func remove_peers(){
 func get_self(w webview.WebView){
 
 	res := &admin.GetSelfResponse{}
-	out := run_command(riv_ctrl_path, "getSelf")
+	out := run_command("getSelf")
 	if err := json.Unmarshal(out, &res); err != nil {
 		go setFieldValue(w, "ipv6", err.Error())
 		return
@@ -238,7 +238,7 @@ func get_self(w webview.WebView){
 func get_peers(w webview.WebView){
 
 	res := &admin.GetPeersResponse{}
-	out := run_command(riv_ctrl_path, "getPeers")
+	out := run_command("getPeers")
 	if err := json.Unmarshal(out, &res); err != nil {
 		go setFieldValue(w, "peers", err.Error())
 		return
