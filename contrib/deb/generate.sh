@@ -72,6 +72,7 @@ EOF
 cat > /tmp/$PKGNAME/debian/install << EOF
 usr/bin/mesh usr/bin
 usr/bin/meshctl usr/bin
+usr/local/bin/meshctl usr/local/bin
 etc/systemd/system/*.service etc/systemd/system
 EOF
 cat > /tmp/$PKGNAME/DEBIAN/postinst << EOF
