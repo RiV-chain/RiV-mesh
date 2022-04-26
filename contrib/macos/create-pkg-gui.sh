@@ -97,7 +97,7 @@ cat > pkgbuild/root/Applications/RiV-mesh.app/Contents/Info.plist << EOF
   <key>ProgramArguments</key>
   <array>
     <string>/Applications/RiV-mesh.app/Contents/MacOS/mesh-ui</string>
-    <string>/Applications/RiV-mesh.app/Contents/Resources</string>
+    <string>/Applications/RiV-mesh.app/Contents/Resources/</string>
   </array>
   <key>NSPrincipalClass</key>
   <string>NSApplication</string>
