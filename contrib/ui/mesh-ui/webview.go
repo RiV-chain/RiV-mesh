@@ -152,7 +152,7 @@ func get_user_home_path() string {
     }
 }
 
-func get_ctl_path() string[]{
+func get_ctl_path() []string{
     if runtime.GOOS == "windows" {
 		program_path := "programfiles"
 		path, exists := os.LookupEnv(program_path)
@@ -166,7 +166,7 @@ func get_ctl_path() string[]{
 		}
 	} else {
 		riv_ctrl_path := fmt.Sprintf("meshctl")
-		return return [3]string{"bash", "-c", riv_ctrl_path}
+		return [3]string{"bash", "-c", riv_ctrl_path}
 	}
 }
 
