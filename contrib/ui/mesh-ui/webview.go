@@ -102,7 +102,6 @@ func main() {
     w.Bind("ping", func(peer_list string) {
         go ping(w, peer_list)
     })
-    path = "/Applications/RiV-mesh.app/Contents/Resources"
     dat, err := ioutil.ReadFile(path+"/index.html")
     w.Navigate("data:text/html,"+url.QueryEscape(string(dat)))
     w.Run()
