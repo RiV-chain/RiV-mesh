@@ -219,7 +219,7 @@ func get_self(w webview.WebView, riv_ctrl_path string){
 	res := &admin.GetSelfResponse{}
 	out := run_command(riv_ctrl_path, "getSelf")
 	if err := json.Unmarshal(out, &res); err != nil {
-		go setFieldValue(w, "ipv6", err.Error())
+		go setFieldValue(w, "ipv6", string(out))
 		return
 	}
 	for ipv6, s := range res.Self {
