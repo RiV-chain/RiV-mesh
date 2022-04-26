@@ -150,7 +150,7 @@ func run_command(riv_ctrl_path string, command string) []byte{
 		log.Fatalf("cmd.Run() failed with %s\n", err)
 		return nil
 	}
-	return []byte("")
+	return out //[]byte("")
 }
 
 func run_command_with_arg(riv_ctrl_path string, command string, arg string) []byte{
