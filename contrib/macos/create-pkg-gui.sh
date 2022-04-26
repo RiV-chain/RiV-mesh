@@ -94,11 +94,6 @@ cat > pkgbuild/root/Applications/RiV-mesh.app/Contents/Info.plist << EOF
 <dict>
   <key>Label</key>
   <string>org.riv-mesh.ui</string>
-  <key>ProgramArguments</key>
-  <array>
-    <string>/Applications/RiV-mesh.app/Contents/MacOS/mesh-ui</string>
-    <string>/Applications/RiV-mesh.app/Contents/Resources/</string>
-  </array>
   <key>NSPrincipalClass</key>
   <string>NSApplication</string>
   <key>CFBundleName</key>
@@ -119,8 +114,6 @@ cat > pkgbuild/root/Applications/RiV-mesh.app/Contents/Info.plist << EOF
   <string>${PKGVERSION}</string>
   <key>CFBundleExecutable</key>
   <string>mesh-ui</string>
-  <key>WorkingDirectory</key>
-  <string>/Applications/RiV-mesh.app/Contents/MacOS</string>
   <key>CFBundleIdentifier</key>
   <string>io.github.RiV-mesh.pkg</string>
   <key>StandardOutPath</key>
