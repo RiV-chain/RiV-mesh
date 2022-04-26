@@ -54,7 +54,7 @@ func main() {
         } else {
             if dat["Peers"]!=nil {
                 //peers := dat["Peers"].([]interface{})
-		dat["Peers"].([]interface{})
+		//dat["Peers"].([]interface{})
                 remove_peers()
                 //for _, u := range peers {
                 //   log.Printf("Unmarshaled: %v", u.(string))
