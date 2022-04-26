@@ -91,28 +91,35 @@ cat > pkgbuild/root/Applications/RiV-mesh.app/Contents/Info.plist << EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <plist version="1.0">
 <dict>
-	<key>NSPrincipalClass</key>
-	<string>NSApplication</string>
+  <key>Label</key>
+  <string>org.riv-mesh.ui</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Applications/RiV-mesh.app/Contents/MacOS/mesh-ui</string>
+    <string>index.html</string>
+  </array>
+  <key>NSPrincipalClass</key>
+  <string>NSApplication</string>
   <key>CFBundleName</key>
   <string>RiV-mesh</string>
-	<key>NSHighResolutionCapable</key>
-	<string>True</string>
-	<key>CFBundleIconFile</key>
-	<string>riv.icns</string>
-	<key>CFBundlePackageType</key>
-	<string>APPL</string>
+  <key>NSHighResolutionCapable</key>
+  <string>True</string>
+  <key>CFBundleIconFile</key>
+  <string>riv.icns</string>
+  <key>CFBundlePackageType</key>
+  <string>APPL</string>
   <key>CFBundleSignature</key>
   <string>????</string>
-	<key>CFBundleGetInfoString</key>
-	<string>${PKGVERSION}</string>
-	<key>CFBundleVersion</key>
-	<string>${PKGVERSION}</string>
-	<key>CFBundleShortVersionString</key>
-	<string>${PKGVERSION}</string>
-	<key>CFBundleExecutable</key>
-	<string>mesh-ui</string>
-	<key>CFBundleIdentifier</key>
-	<string>io.github.RiV-mesh.pkg</string>
+  <key>CFBundleGetInfoString</key>
+  <string>${PKGVERSION}</string>
+  <key>CFBundleVersion</key>
+  <string>${PKGVERSION}</string>
+  <key>CFBundleShortVersionString</key>
+  <string>${PKGVERSION}</string>
+  <key>CFBundleExecutable</key>
+  <string>mesh-ui</string>
+  <key>CFBundleIdentifier</key>
+  <string>io.github.RiV-mesh.pkg</string>
 </dict>
 </plist>
 EOF
