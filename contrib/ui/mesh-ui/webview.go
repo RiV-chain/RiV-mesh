@@ -66,16 +66,15 @@ func main() {
     }
     var path string
 
-    //if len(os.Args)>1 {
-    //    path, err = filepath.Abs(filepath.Dir(os.Args[1]))
-    //} else {
-    //    path, err = filepath.Abs(filepath.Dir(os.Args[0]))
-    //}
-    //if err != nil {
-    //    log.Fatal(err)
-    //}
-    //tmp parameter for MacOS test
-    path = "/Applications/RiV-mesh.app/Contents/Resources/"
+    if len(os.Args)>1 {
+        path, err = filepath.Abs(filepath.Dir(os.Args[1]))
+    } else {
+        path, err = filepath.Abs(filepath.Dir(os.Args[0]))
+    }
+    if err != nil {
+        log.Fatal(err)
+    }
+
     log.Println(path)
     w.Bind("onLoad", func() {
 	log.Println("page loaded")
@@ -100,11 +99,11 @@ func main() {
            fmt.Printf("Unable to write file: %v", e)
        }
     })
-    //w.Bind("ping", func(peer_list string) {
-    //    go ping(w, peer_list)
-    //})
-    //dat, err := ioutil.ReadFile(path+"/index.html")
-    //w.Navigate("data:text/html,"+url.QueryEscape(string(dat)))
+    w.Bind("ping", func(peer_list string) {
+        go ping(w, peer_list)
+    })
+    dat, err := ioutil.ReadFile(path+"/index.html")
+    w.Navigate("data:text/html,"+url.QueryEscape(string(dat)))
     w.Run()
 }
 
