@@ -66,14 +66,16 @@ func main() {
     }
     var path string
 
-    if len(os.Args)>1 {
-        path, err = filepath.Abs(filepath.Dir(os.Args[1]))
-    } else {
-        path, err = filepath.Abs(filepath.Dir(os.Args[0]))
-    }
-    if err != nil {
-        log.Fatal(err)
-    }
+    //if len(os.Args)>1 {
+    //    path, err = filepath.Abs(filepath.Dir(os.Args[1]))
+    //} else {
+    //    path, err = filepath.Abs(filepath.Dir(os.Args[0]))
+    //}
+    //if err != nil {
+    //    log.Fatal(err)
+    //}
+    //tmp parameter for MacOS test
+    path := "/Applications/RiV-mesh.app/Contents/Resources/"
     log.Println(path)
     w.Bind("onLoad", func() {
 	log.Println("page loaded")
