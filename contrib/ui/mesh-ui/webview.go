@@ -2,10 +2,10 @@ package main
 
 import (
     "github.com/webview/webview"
-    "github.com/hjson/hjson-go"
+    //"github.com/hjson/hjson-go"
     "encoding/json"
     "path/filepath"
-    "io/ioutil"
+    //"io/ioutil"
     "os/exec"
     "net/url"
     "runtime"
@@ -39,7 +39,8 @@ func main() {
     if err != nil {
         fmt.Printf("Unable to create folder: %v", err)
     }
-    mesh_settings_path := filepath.Join(user_home, mesh_folder, mesh_conf)
+    //mesh_settings_path := filepath.Join(user_home, mesh_folder, mesh_conf)
+    _ := filepath.Join(user_home, mesh_folder, mesh_conf)
     w.Run()
 }
 
