@@ -20,6 +20,8 @@ import (
     "github.com/RiV-chain/RiV-mesh/src/admin"	
 )
 
+var riv_ctrl_path []string
+
 func main() {
     debug := true
     w := webview.New(debug)
@@ -40,6 +42,7 @@ func main() {
         fmt.Printf("Unable to create folder: %v", err)
     }
     mesh_settings_path := filepath.Join(user_home, mesh_folder, mesh_conf)
+    get_ctl_path()
     if _, err := os.Stat(mesh_settings_path); os.IsNotExist(err) { 
         err := ioutil.WriteFile(mesh_settings_path, []byte(""), 0750)
         if err != nil {
@@ -158,21 +161,19 @@ func get_ctl_path() []string{
 		path, exists := os.LookupEnv(program_path)
 		if exists {
 			fmt.Println("Program path: %s", path)
-			riv_ctrl_path := fmt.Sprintf("%s\\RiV-mesh\\meshctl.exe", path)
+			riv_ctrl_path = fmt.Sprintf("%s\\RiV-mesh\\meshctl.exe", path)
 			return []string{"cmd.exe", "/c", riv_ctrl_path}
 		} else {
 			fmt.Println("could not find Program Files path")
 			return []string{}
 		}
 	} else {
-		riv_ctrl_path := fmt.Sprintf("/usr/local/bin/meshctl")
+		riv_ctrl_path = fmt.Sprintf("/usr/local/bin/meshctl")
 		return []string{"bash", "-c", riv_ctrl_path}
 	}
 }
 
 func run(w webview.WebView){
-    //var peersTimer *time.Timer
-    riv_ctrl_path := get_ctl_path()
     if len(riv_ctrl_path) > 0 {
         get_self(w, riv_ctrl_path)
 	get_peers(w, riv_ctrl_path)
@@ -184,8 +185,9 @@ func run(w webview.WebView){
 
 func run_command(riv_ctrl_path []string, command string) []byte{
 	//args := []string{"-json", command}
-	riv_ctrl_path[2] = riv_ctrl_path[2]+" -json "+command
-	cmd := exec.Command(riv_ctrl_path[0], riv_ctrl_path[1:]...)
+	cmd := riv_ctrl_path
+	cmd[2] = cmd[2]+" -json "+command
+	cmd := exec.Command(cmd[0], cmd[1:]...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		//log.Fatalf("cmd.Run() failed with %s\n", err)
@@ -196,8 +198,9 @@ func run_command(riv_ctrl_path []string, command string) []byte{
 
 func run_command_with_arg(riv_ctrl_path []string, command string, arg string) []byte{
 	//args := []string{"-json", command, arg}
-	riv_ctrl_path[2] = riv_ctrl_path[2]+" -json "+arg
-	cmd := exec.Command(riv_ctrl_path[0], riv_ctrl_path[1:]...)
+	cmd := riv_ctrl_path
+	cmd[2] = cmd[2]+" -json "+command
+	cmd := exec.Command(cmd[0], cmd[1:]...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
         	//log.Fatalf("command failed: %s\n", riv_ctrl_path+" "+strings.Join(args, " "))
@@ -207,12 +210,10 @@ func run_command_with_arg(riv_ctrl_path []string, command string, arg string) []
 }
 
 func add_peers(uri string){
-	riv_ctrl_path := get_ctl_path()
 	run_command_with_arg(riv_ctrl_path, "addpeers", "uri="+uri)	
 }
 
 func remove_peers(){
-	riv_ctrl_path := get_ctl_path()
 	run_command(riv_ctrl_path, "removepeers")	
 }
 
