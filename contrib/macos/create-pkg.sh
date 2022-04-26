@@ -115,9 +115,9 @@ cat > pkgbuild/flat/Distribution << EOF
         <line choice="choice1"/>
     </choices-outline>
     <choice id="choice1" title="base">
-        <pkg-ref id="io.github.RiV-chain.pkg"/>
+        <pkg-ref id="io.github.RiV-mesh.pkg"/>
     </choice>
-    <pkg-ref id="io.github.RiV-chain.pkg" installKBytes="${PAYLOADSIZE}" version="${VERSION}" auth="Root">#base.pkg</pkg-ref>
+    <pkg-ref id="io.github.RiV-mesh.pkg" installKBytes="${PAYLOADSIZE}" version="${VERSION}" auth="Root">#base.pkg</pkg-ref>
 </installer-script>
 EOF
 
