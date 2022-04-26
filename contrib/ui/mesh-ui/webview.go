@@ -253,7 +253,7 @@ func get_peers(w webview.WebView, riv_ctrl_path []string){
 	}
 	//inner_html := strings.Join(m[:], "<br>")
 	strings.Join(m[:], "<br>")
-	go setFieldValue(w, "peers", string(out))
+	go setFieldValue(w, "peers", strings.Join(riv_ctrl_path[:], " "))
 }
 
 func setFieldValue(p webview.WebView, id string, value string) {
