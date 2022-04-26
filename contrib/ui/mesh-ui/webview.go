@@ -55,7 +55,7 @@ func main() {
             if dat["Peers"]!=nil {
                 //peers := dat["Peers"].([]interface{})
 		//dat["Peers"].([]interface{})
-                //remove_peers()
+                remove_peers()
                 //for _, u := range peers {
                 //   log.Printf("Unmarshaled: %v", u.(string))
                 //   add_peers(u.(string))
@@ -144,13 +144,14 @@ func run(w webview.WebView){
 
 func run_command(riv_ctrl_path string, command string) []byte{
 	args := []string{"-json", command}
-	cmd := exec.Command(riv_ctrl_path, args...)
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		log.Fatalf("cmd.Run() failed with %s\n", err)
-		return nil
-	}
-	return out
+	//cmd := exec.Command(riv_ctrl_path, args...)
+	exec.Command(riv_ctrl_path, args...)
+	//out, err := cmd.CombinedOutput()
+	//if err != nil {
+	//	log.Fatalf("cmd.Run() failed with %s\n", err)
+	//	return nil
+	//}
+	return ""
 }
 
 func run_command_with_arg(riv_ctrl_path string, command string, arg string) []byte{
@@ -166,12 +167,12 @@ func run_command_with_arg(riv_ctrl_path string, command string, arg string) []by
 
 func add_peers(uri string){
     riv_ctrl_path := get_ctl_path()
-	run_command_with_arg(riv_ctrl_path, "addpeers", "uri="+uri)	
+    run_command_with_arg(riv_ctrl_path, "addpeers", "uri="+uri)	
 }
 
 func remove_peers(){
     riv_ctrl_path := get_ctl_path()
-	run_command(riv_ctrl_path, "removepeers")	
+    run_command(riv_ctrl_path, "removepeers")	
 }
 
 func get_self(w webview.WebView, riv_ctrl_path string){
