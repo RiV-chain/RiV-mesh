@@ -40,7 +40,7 @@ func main() {
         fmt.Printf("Unable to create folder: %v", err)
     }
     //mesh_settings_path := filepath.Join(user_home, mesh_folder, mesh_conf)
-    _ := filepath.Join(user_home, mesh_folder, mesh_conf)
+    filepath.Join(user_home, mesh_folder, mesh_conf)
     w.Run()
 }
 
