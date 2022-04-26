@@ -42,7 +42,7 @@ func main() {
         fmt.Printf("Unable to create folder: %v", err)
     }
     mesh_settings_path := filepath.Join(user_home, mesh_folder, mesh_conf)
-    get_ctl_path()
+    riv_ctrl_path = get_ctl_path()
     if _, err := os.Stat(mesh_settings_path); os.IsNotExist(err) { 
         err := ioutil.WriteFile(mesh_settings_path, []byte(""), 0750)
         if err != nil {
@@ -161,15 +161,15 @@ func get_ctl_path() []string{
 		path, exists := os.LookupEnv(program_path)
 		if exists {
 			fmt.Println("Program path: %s", path)
-			riv_ctrl_path = fmt.Sprintf("%s\\RiV-mesh\\meshctl.exe", path)
-			return []string{"cmd.exe", "/c", riv_ctrl_path}
+			path = fmt.Sprintf("%s\\RiV-mesh\\meshctl.exe", path)
+			return []string{"cmd.exe", "/c", path}
 		} else {
 			fmt.Println("could not find Program Files path")
 			return []string{}
 		}
 	} else {
-		riv_ctrl_path = fmt.Sprintf("/usr/local/bin/meshctl")
-		return []string{"bash", "-c", riv_ctrl_path}
+		path = fmt.Sprintf("/usr/local/bin/meshctl")
+		return []string{"bash", "-c", path}
 	}
 }
 
