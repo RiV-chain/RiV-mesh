@@ -2,7 +2,7 @@ package main
 
 import (
     "github.com/webview/webview"
-    //"github.com/hjson/hjson-go"
+    "github.com/hjson/hjson-go"
     "encoding/json"
     "path/filepath"
     "io/ioutil"
@@ -46,7 +46,14 @@ func main() {
             fmt.Printf("Unable to write file: %v", err)
         }
     } else {
-
+        //read peers from mesh.conf
+        conf, _ := ioutil.ReadFile(mesh_settings_path)
+        var dat map[string]interface {}
+       	if err := hjson.Unmarshal(conf, &dat); err != nil {
+        	fmt.Printf("Unable to parse mesh.conf file: %v", err)
+        } else {
+            
+        }
     }
     w.Run()
 }
