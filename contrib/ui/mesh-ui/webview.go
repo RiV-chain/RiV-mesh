@@ -20,7 +20,7 @@ import (
     "github.com/RiV-chain/RiV-mesh/src/admin"	
 )
 
-var riv_ctrl_path []string
+var riv_ctrl_path string
 
 func main() {
     debug := true
@@ -155,21 +155,21 @@ func get_user_home_path() string {
     }
 }
 
-func get_ctl_path() []string{
+func get_ctl_path() string{
     if runtime.GOOS == "windows" {
 		program_path := "programfiles"
 		path, exists := os.LookupEnv(program_path)
 		if exists {
 			fmt.Println("Program path: %s", path)
 			ctl_path := fmt.Sprintf("%s\\RiV-mesh\\meshctl.exe", path)
-			return []string{"cmd.exe", "/c", ctl_path}
+			return ctl_path
 		} else {
 			fmt.Println("could not find Program Files path")
-			return []string{}
+			return ""
 		}
 	} else {
 		ctl_path := fmt.Sprintf("/usr/local/bin/meshctl")
-		return []string{"bash", "-c", ctl_path}
+		return ctl_path
 	}
 }
 
@@ -184,10 +184,8 @@ func run(w webview.WebView){
 }
 
 func run_command(command string) []byte{
-	cmd_array := make([]string, 3)
-	copy(cmd_array,riv_ctrl_path)
-	cmd_array[2] = cmd_array[2]+" -json "+command
-	cmd := exec.Command(cmd_array[0], cmd_array[1:]...)
+	args := []string{"-json", command}
+	cmd := exec.Command(riv_ctrl_path, args...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		//log.Fatalf("cmd.Run() failed with %s\n", err)
@@ -197,10 +195,8 @@ func run_command(command string) []byte{
 }
 
 func run_command_with_arg(command string, arg string) []byte{
-	cmd_array := make([]string, 3)
-	copy(cmd_array,riv_ctrl_path)
-	cmd_array[2] = cmd_array[2]+" -json "+command+" "+arg
-	cmd := exec.Command(cmd_array[0], cmd_array[1:]...)
+	args := []string{"-json", command, arg}
+	cmd := exec.Command(riv_ctrl_path, args...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
         	//log.Fatalf("command failed: %s\n", riv_ctrl_path+" "+strings.Join(args, " "))
