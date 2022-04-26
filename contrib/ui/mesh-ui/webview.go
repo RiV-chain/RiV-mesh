@@ -175,8 +175,8 @@ func get_ctl_path() []string{
 
 func run(w webview.WebView){
     if len(riv_ctrl_path) > 0 {
-        get_self(w, riv_ctrl_path)
-	get_peers(w, riv_ctrl_path)
+        get_self(w)
+	get_peers(w)
     }
     _ = time.AfterFunc(10*time.Second, func() {
         run(w)
@@ -217,7 +217,7 @@ func remove_peers(){
 	run_command(riv_ctrl_path, "removepeers")	
 }
 
-func get_self(w webview.WebView, riv_ctrl_path []string){
+func get_self(w webview.WebView){
 
 	res := &admin.GetSelfResponse{}
 	out := run_command(riv_ctrl_path, "getSelf")
@@ -235,7 +235,7 @@ func get_self(w webview.WebView, riv_ctrl_path []string){
 	}	
 }
 
-func get_peers(w webview.WebView, riv_ctrl_path []string){
+func get_peers(w webview.WebView){
 
 	res := &admin.GetPeersResponse{}
 	out := run_command(riv_ctrl_path, "getPeers")
