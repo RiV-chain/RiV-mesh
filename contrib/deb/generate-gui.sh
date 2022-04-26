@@ -35,6 +35,7 @@ mkdir -p /tmp/$PKGNAME/
 mkdir -p /tmp/$PKGNAME/debian/
 mkdir -p /tmp/$PKGNAME/DEBIAN/
 mkdir -p /tmp/$PKGNAME/usr/bin/
+mkdir -p /tmp/$PKGNAME/usr/local/bin/
 mkdir -p /tmp/$PKGNAME/etc/systemd/system/
 mkdir -p /tmp/$PKGNAME/usr/share/applications/
 mkdir -p /tmp/$PKGNAME/etc/
@@ -92,6 +93,7 @@ cat > /tmp/$PKGNAME/debian/install << EOF
 usr/bin/mesh usr/bin
 usr/bin/meshctl usr/bin
 usr/bin/mesh-ui usr/bin
+usr/local/bin/meshctl usr/local/bin
 etc/index.html etc
 etc/xdg/autostart/riv.desktop etc/xdg/autostart
 etc/systemd/system/*.service etc/systemd/system
@@ -148,6 +150,7 @@ EOF
 cp mesh /tmp/$PKGNAME/usr/bin/
 cp meshctl /tmp/$PKGNAME/usr/bin/
 cp mesh-ui /tmp/$PKGNAME/usr/bin/
+ln -s /tmp/$PKGNAME/usr/bin/meshctl /tmp/$PKGNAME/usr/local/bin/meshctl
 cp contrib/systemd/*.service /tmp/$PKGNAME/etc/systemd/system/
 cp /tmp/$PKGNAME/usr/share/applications/riv.desktop /tmp/$PKGNAME/etc/xdg/autostart
 chmod 0775 /tmp/$PKGNAME/DEBIAN/*
