@@ -40,6 +40,7 @@ mkdir -p /tmp/$PKGNAME/
 mkdir -p /tmp/$PKGNAME/debian/
 mkdir -p /tmp/$PKGNAME/DEBIAN/
 mkdir -p /tmp/$PKGNAME/usr/bin/
+mkdir -p /tmp/$PKGNAME/usr/local/bin/
 mkdir -p /tmp/$PKGNAME/etc/systemd/system/
 chmod 0775 /tmp/$PKGNAME/ -R
 
@@ -111,6 +112,7 @@ EOF
 
 cp mesh /tmp/$PKGNAME/usr/bin/
 cp meshctl /tmp/$PKGNAME/usr/bin/
+ln -s /tmp/$PKGNAME/usr/bin/meshctl /tmp/$PKGNAME/usr/local/bin/meshctl
 cp contrib/systemd/*.service /tmp/$PKGNAME/etc/systemd/system/
 chmod 0775 /tmp/$PKGNAME/DEBIAN/*
 chmod 644 /tmp/$PKGNAME/etc/systemd/system/*
