@@ -40,30 +40,6 @@ func main() {
         fmt.Printf("Unable to create folder: %v", err)
     }
     mesh_settings_path := filepath.Join(user_home, mesh_folder, mesh_conf)
-    if _, err := os.Stat(mesh_settings_path); os.IsNotExist(err) { 
-        err := ioutil.WriteFile(mesh_settings_path, []byte(""), 0750)
-        if err != nil {
-            fmt.Printf("Unable to write file: %v", err)
-        }
-    } else {
-        //read peers from mesh.conf
-        conf, _ := ioutil.ReadFile(mesh_settings_path)
-        var dat map[string]interface {}
-       	if err := hjson.Unmarshal(conf, &dat); err != nil {
-        	fmt.Printf("Unable to parse mesh.conf file: %v", err)
-        } else {
-            if dat["Peers"]!=nil {
-                peers := dat["Peers"].([]interface{}) 
-                remove_peers()
-                for _, u := range peers {
-                   log.Printf("Unmarshaled: %v", u.(string))
-                   add_peers(u.(string))
-                }
-            } else {
-                fmt.Printf("Warning: Peers array not loaded from mesh.conf file")
-            }
-        }
-    }
     w.Run()
 }
 
