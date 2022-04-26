@@ -199,7 +199,7 @@ func run_command(command string) []byte{
 func run_command_with_arg(command string, arg string) []byte{
 	cmd_array := make([]string, 3)
 	copy(cmd_array,riv_ctrl_path)
-	cmd_array[2] = cmd_array[2]+" -json "+command
+	cmd_array[2] = cmd_array[2]+" -json "+command+" "+arg
 	cmd := exec.Command(cmd_array[0], cmd_array[1:]...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
@@ -253,7 +253,7 @@ func get_peers(w webview.WebView){
 	    fmt.Println(k)
 	}
 	inner_html := strings.Join(m[:], "<br>")
-	go setFieldValue(w, "peers", inner_html)
+	go setFieldValue(w, "peers", string(out))
 }
 
 func setFieldValue(p webview.WebView, id string, value string) {
