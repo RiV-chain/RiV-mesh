@@ -159,14 +159,14 @@ func get_ctl_path() []string{
 		if exists {
 			fmt.Println("Program path: %s", path)
 			riv_ctrl_path := fmt.Sprintf("%s\\RiV-mesh\\meshctl.exe", path)
-			return [3]string{"cmd.exe", "/c", riv_ctrl_path}
+			return []string{"cmd.exe", "/c", riv_ctrl_path}
 		} else {
 			fmt.Println("could not find Program Files path")
 			return []string{}
 		}
 	} else {
 		riv_ctrl_path := fmt.Sprintf("meshctl")
-		return [3]string{"bash", "-c", riv_ctrl_path}
+		return []string{"bash", "-c", riv_ctrl_path}
 	}
 }
 
@@ -182,7 +182,7 @@ func run(w webview.WebView){
     })
 }
 
-func run_command(riv_ctrl_path string, command string) []byte{
+func run_command(riv_ctrl_path []string, command string) []byte{
 	//args := []string{"-json", command}
 	riv_ctrl_path[2] = riv_ctrl_path[2]+" -json "+command
 	cmd := exec.Command(riv_ctrl_path)
@@ -194,7 +194,7 @@ func run_command(riv_ctrl_path string, command string) []byte{
 	return out
 }
 
-func run_command_with_arg(riv_ctrl_path string, command string, arg string) []byte{
+func run_command_with_arg(riv_ctrl_path []string, command string, arg string) []byte{
 	//args := []string{"-json", command, arg}
 	riv_ctrl_path[2] = riv_ctrl_path[2]+" -json "+command
 	cmd := exec.Command(riv_ctrl_path)
@@ -216,7 +216,7 @@ func remove_peers(){
 	run_command(riv_ctrl_path, "removepeers")	
 }
 
-func get_self(w webview.WebView, riv_ctrl_path string){
+func get_self(w webview.WebView, riv_ctrl_path []string){
 
 	res := &admin.GetSelfResponse{}
 	out := run_command(riv_ctrl_path, "getSelf")
@@ -234,7 +234,7 @@ func get_self(w webview.WebView, riv_ctrl_path string){
 	}	
 }
 
-func get_peers(w webview.WebView, riv_ctrl_path string){
+func get_peers(w webview.WebView, riv_ctrl_path []string){
 
 	res := &admin.GetPeersResponse{}
 	out := run_command(riv_ctrl_path, "getPeers")
