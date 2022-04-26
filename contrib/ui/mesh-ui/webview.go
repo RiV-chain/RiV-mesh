@@ -102,7 +102,7 @@ func main() {
     w.Bind("ping", func(peer_list string) {
         go ping(w, peer_list)
     })
-    dat, err := ioutil.ReadFile(path+"/index.html")
+    //dat, err := ioutil.ReadFile(path+"/index.html")
     //w.Navigate("data:text/html,"+url.QueryEscape(string(dat)))
     w.Navigate("data:text/html,"+"<html>"+path+"</html>")
     w.Run()
