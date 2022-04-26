@@ -251,7 +251,8 @@ func get_peers(w webview.WebView, riv_ctrl_path []string){
 	    // Loop
 	    fmt.Println(k)
 	}
-	inner_html := strings.Join(m[:], "<br>")
+	//inner_html := strings.Join(m[:], "<br>")
+	strings.Join(m[:], "<br>")
 	go setFieldValue(w, "peers", string(out))
 }
 
