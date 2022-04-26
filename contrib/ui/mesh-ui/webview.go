@@ -146,12 +146,14 @@ func run_command(riv_ctrl_path string, command string) []byte{
 	args := []string{"-json", command}
 	cmd := exec.Command(riv_ctrl_path, args...)
 	out, err := cmd.CombinedOutput()
-	fmt.Println(out)
 	if err != nil {
 		log.Fatalf("cmd.Run() failed with %s\n", err)
 		return nil
 	}
-	return []byte("")
+	if out == nil {
+		return nil
+	}
+	return out
 }
 
 func run_command_with_arg(riv_ctrl_path string, command string, arg string) []byte{
