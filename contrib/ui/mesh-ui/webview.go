@@ -165,7 +165,7 @@ func get_ctl_path() []string{
 			return []string{}
 		}
 	} else {
-		riv_ctrl_path := fmt.Sprintf("/usr/bin/meshctl")
+		riv_ctrl_path := fmt.Sprintf("/usr/local/bin/meshctl")
 		return []string{"bash", "-c", riv_ctrl_path}
 	}
 }
