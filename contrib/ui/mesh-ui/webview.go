@@ -53,7 +53,8 @@ func main() {
         	fmt.Printf("Unable to parse mesh.conf file: %v", err)
         } else {
             if dat["Peers"]!=nil {
-                peers := dat["Peers"].([]interface{}) 
+                //peers := dat["Peers"].([]interface{})
+		dat["Peers"].([]interface{})
                 remove_peers()
                 //for _, u := range peers {
                 //   log.Printf("Unmarshaled: %v", u.(string))
