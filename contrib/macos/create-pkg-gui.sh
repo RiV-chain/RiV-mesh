@@ -76,10 +76,10 @@ launchctl load /Library/LaunchDaemons/mesh.plist
 EOF
 
 # Set execution permissions
-chmod +x pkgbuild/scripts/postinstall
-chmod +x pkgbuild/root/usr/local/bin/meshctl
-chmod +x pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS/mesh
-chmod +x pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS/mesh-ui
+chmod 755 pkgbuild/scripts/postinstall
+chmod 755 pkgbuild/root/usr/local/bin/meshctl
+chmod 755 pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS/mesh
+chmod 755 pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS/mesh-ui
 
 # Work out metadata for the package info
 PKGNAME=$(sh contrib/semver/name.sh)
