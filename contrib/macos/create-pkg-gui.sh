@@ -123,6 +123,10 @@ cat > pkgbuild/root/Applications/RiV-mesh.app/Contents/Info.plist << EOF
   <string>/Applications/RiV-mesh.app/Contents/MacOS</string>
   <key>CFBundleIdentifier</key>
   <string>io.github.RiV-mesh.pkg</string>
+  <key>StandardOutPath</key>
+  <string>/tmp/mesh-ui.stdout.log</string>
+  <key>StandardErrorPath</key>
+  <string>/tmp/mesh-ui.stderr.log</string>
 </dict>
 </plist>
 EOF
