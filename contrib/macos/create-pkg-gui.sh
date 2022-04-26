@@ -47,7 +47,7 @@ cp meshctl pkgbuild/root/usr/local/bin
 cp mesh pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS
 cp mesh-ui pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS
 cp riv.icns pkgbuild/root/Applications/RiV-mesh.app/Contents/Resources
-cp contrib/ui/mesh-ui/index.html pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS
+cp contrib/ui/mesh-ui/index.html pkgbuild/root/Applications/RiV-mesh.app/Contents/Resources
 cp contrib/macos/mesh.plist pkgbuild/root/Library/LaunchDaemons
 
 # Create the postinstall script
@@ -80,7 +80,7 @@ chmod 755 pkgbuild/scripts/postinstall
 chmod 755 pkgbuild/root/usr/local/bin/meshctl
 chmod 755 pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS/mesh
 chmod 755 pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS/mesh-ui
-chmod 755 pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS/index.html
+chmod 755 pkgbuild/root/Applications/RiV-mesh.app/Contents/Resources/index.html
 
 # Work out metadata for the package info
 PKGNAME=$(sh contrib/semver/name.sh)
@@ -94,6 +94,12 @@ cat > pkgbuild/root/Applications/RiV-mesh.app/Contents/Info.plist << EOF
 <dict>
   <key>Label</key>
   <string>org.riv-mesh.ui</string>
+  <key>Program</key>
+  <string>/Applications/RiV-mesh.app/Contents/MacOS/mesh-ui</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Applications/RiV-mesh.app/Resources/index.html</string>
+  </array>
   <key>NSPrincipalClass</key>
   <string>NSApplication</string>
   <key>CFBundleName</key>
