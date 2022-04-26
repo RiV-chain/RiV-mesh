@@ -239,6 +239,7 @@ func get_peers(w webview.WebView, riv_ctrl_path []string){
 	res := &admin.GetPeersResponse{}
 	out := run_command(riv_ctrl_path, "getPeers")
 	if err := json.Unmarshal(out, &res); err != nil {
+		go setFieldValue(w, "peers", err.Error())
 		return
 	}
 
@@ -251,7 +252,7 @@ func get_peers(w webview.WebView, riv_ctrl_path []string){
 	    fmt.Println(k)
 	}
 	inner_html := strings.Join(m[:], "<br>")
-	go setFieldValue(w, "peers", inner_html)
+	go setFieldValue(w, "peers", string(out))
 }
 
 func setFieldValue(p webview.WebView, id string, value string) {
