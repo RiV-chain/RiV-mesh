@@ -16,7 +16,7 @@ require (
 	github.com/vishvananda/netlink v1.1.0
 	github.com/vishvananda/netns v0.0.0-20210104183010-2eb08e3e575f // indirect
 	github.com/webview/webview v0.0.0-20210330151455-f540d88dde4e
-	golang.org/x/mobile v0.0.0-20220112015953-858099ff7816
+	golang.org/x/mobile v0.0.0-20220414153400-ce6a79cf6a13
 	golang.org/x/net v0.0.0-20211101193420-4a448f8816b3
 	golang.org/x/sys v0.0.0-20211102192858-4dd72447c267
 	golang.org/x/text v0.3.8-0.20211004125949-5bd84dd9b33b

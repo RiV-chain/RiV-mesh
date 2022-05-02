@@ -74,7 +74,10 @@ golang.org/x/mobile v0.0.0-20210924032853-1c027f395ef7 h1:CyFUjc175y/mbMjxe+WdqI
 golang.org/x/mobile v0.0.0-20210924032853-1c027f395ef7/go.mod h1:c4YKU3ZylDmvbw+H/PSvm42vhdWbuxCzbonauEAP9B8=
 golang.org/x/mobile v0.0.0-20211103151657-e68c98865fb2 h1:SFpMH29/c2+VPCOcOlLPQiAVqU2sXiFvwfdtQfVEEJ8=
 golang.org/x/mobile v0.0.0-20211103151657-e68c98865fb2/go.mod h1:pe2sM7Uk+2Su1y7u/6Z8KJ24D7lepUjFZbhFOrmDfuQ=
+golang.org/x/mobile v0.0.0-20220112015953-858099ff7816 h1:jhDgkcu3yQ4tasBZ+1YwDmK7eFmuVf1w1k+NGGGxfmE=
 golang.org/x/mobile v0.0.0-20220112015953-858099ff7816/go.mod h1:pe2sM7Uk+2Su1y7u/6Z8KJ24D7lepUjFZbhFOrmDfuQ=
+golang.org/x/mobile v0.0.0-20220414153400-ce6a79cf6a13 h1:C4eR3yV9J3RkP8WKkcQzpcPyr/foOcUtxW72DvJEOlI=
+golang.org/x/mobile v0.0.0-20220414153400-ce6a79cf6a13/go.mod h1:pe2sM7Uk+2Su1y7u/6Z8KJ24D7lepUjFZbhFOrmDfuQ=
 golang.org/x/mod v0.1.0/go.mod h1:0QHyrYULN0/3qlju5TqG8bIK38QM8yzMo5ekMj3DlcY=
 golang.org/x/mod v0.4.2 h1:Gz96sIWK3OalVv/I/qNygP42zyoKp3xptRVCWRFEBvo=
 golang.org/x/mod v0.4.2/go.mod h1:s0Qsj1ACt9ePp/hMypM3fl4fZqREWJwdYDEqhRiZZUA=
