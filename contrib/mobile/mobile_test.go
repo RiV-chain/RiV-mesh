@@ -5,7 +5,7 @@ import "testing"
 func TestStartYggdrasil(t *testing.T) {
 	ygg := &Mesh{}
 	if err := mesh.StartAutoconfigure(); err != nil {
-		t.Fatalf("Failed to start Yggdrasil: %s", err)
+		t.Fatalf("Failed to start Mesh: %s", err)
 	}
 	t.Log("Address:", mesh.GetAddressString())
 	t.Log("Subnet:", mesh.GetSubnetString())
