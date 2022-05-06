@@ -40,7 +40,7 @@ chmod 0775 /tmp/$PKGFOLDER/ -R
 
 echo "coping ui package..."
 cp contrib/ui/nas-westerndigital-os5/package/mesh/* /tmp/$PKGFOLDER/ -r
-cp contrib/ui/www/* /tmp/$PKGNAME/www/ -r
+cp contrib/ui/www/* /tmp/$PKGFOLDER/www/ -r
 
 for resolution in 128x128; do
   echo "Converting icon for: $resolution"
