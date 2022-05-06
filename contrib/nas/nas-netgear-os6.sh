@@ -23,9 +23,9 @@ if [ $PKGBRANCH = "master" ]; then
 fi
 
 if [ $PKGARCH = "amd64" ]; then GOARCH=amd64 GOOS=linux ./build
-elif [ $PKGARCH = "i386" ]; then GOARCH=386 GOOS=linux ./build
+elif [ $PKGARCH = "armel" ]; then GOARCH=arm GOARM=5 GOOS=linux ./build
 else
-  echo "Specify PKGARCH=amd64,i386,mips,mipsel,armhf,arm64,armel"
+  echo "Specify PKGARCH=amd64,armel"
   exit 1
 fi
 
