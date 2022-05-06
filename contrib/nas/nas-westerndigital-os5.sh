@@ -84,8 +84,8 @@ echo "current folder=$curent_dir"
 
 cd /tmp/$PKGFOLDER/ && MyCloudOS5_mksapkg -E -s -m WDMyCloudEX4100
 
-cp /tmp/WDMyCloudEX4100_mesh_$PKGVERSION.bin* $curent_dir
+cp /tmp/WDMyCloudEX4100_mesh_$PKGVERSION.bin* "$curent_dir"
 
 rm -rf /tmp/$PKGFOLDER
 
-cd $curent_dir
+cd "$curent_dir"
