@@ -39,23 +39,23 @@
     <div id="loginScreen" class="nas-apps-config-form-middle hide">        
 
       <div id="loginAlert" class="nas-apps-config-form-message nas-apps-config-form-message-error hide">
-        Wrong username/password
+        peer is unavailable
       </div>
 			<h2 style="text-align: center;">Sign in with your RiV-Mesh credentials<br>to connect to your RiV-Mesh account</h2>
       <form id="loginForm" class="form-horizontal nas-apps-config-form-left">
 
         <div class="nas-apps-config-form-field">
-          <label class="nas-apps-config-form-field-label" for="inputEmail">Email</label>      				
-          <input type="text" id="inputEmail" placeholder="Email">      				
+          <label class="nas-apps-config-form-field-label" for="inputEmail">Host</label>      				
+          <input type="text" id="inputHost" placeholder="Host">      				
         </div>
 
         <div class="nas-apps-config-form-field">
-          <label class="nas-apps-config-form-field-label" for="inputPassword">Password</label>      				
-          <input type="password" id="inputPassword" placeholder="Password">      				
+          <label class="nas-apps-config-form-field-label" for="inputPort">Port</label>      				
+          <input id="inputPort" placeholder="Port">      				
         </div>
 
         <div class="nas-apps-config-form-field">
-          <button id="loginBtn" type="submit" class="nas-apps-config-form-button" style="width: 110px">Login</button>  
+          <button id="loginBtn" type="submit" class="nas-apps-config-form-button" style="width: 110px">Add</button>  
         </div>
 
       </form>
@@ -63,11 +63,11 @@
       <div class="nas-apps-config-form-right">          
         <div>
           <a id="goToSignupBtn" href="#"><b>Sign Up</b></a>
-          <div class="nas-apps-config-form-link-info" id="signingUpPropositionMessage">Don't have an RiV-Mesh account? Start with a FREE 1,000 GB 30 day trial account</div>
+          <div class="nas-apps-config-form-link-info" id="signingUpPropositionMessage">Don't have an RiV-Mesh peer? Add it here</div>
         </div>
 
         <div>
-          <a id="forgotPassBtn" href='#' >Forgot Password?</a>
+          <a id="checkPeerBtn" href='#' >Check peer online</a>
         </div>          
         <br/>
 
@@ -92,7 +92,7 @@
 
       <div class=row>
         <div id="statusAlert" class="nas-apps-config-form-message hide">
-          Successfully linked
+          Successfully connected
         </div>
       </div>
 
@@ -150,28 +150,28 @@
     <div id="signupScreen" class="nas-apps-config-form-middle hide">        
 
       <div id="signupAlert" class="nas-apps-config-form-message nas-apps-config-form-message-error hide">
-        Wrong username/password
+        Wrong IP/port
       </div>
 
       <form id="signupForm" class="form-horizontal nas-apps-config-form-left">
 
         <div class="nas-apps-config-form-field">
-          <label class="nas-apps-config-form-field-label" for="inputEmailS">Email</label>              
-          <input type="text" id="inputEmailS" placeholder="Email">             
+          <label class="nas-apps-config-form-field-label" for="inputIPS">Host</label>              
+          <input type="text" id="inputIPS" placeholder="Host">             
         </div>
 
         <div class="nas-apps-config-form-field">
-          <label class="nas-apps-config-form-field-label" for="inputPasswordS">Password</label>              
-          <input type="password" id="inputPasswordS" placeholder="Password">             
+          <label class="nas-apps-config-form-field-label" for="inputPortS">Port</label>              
+          <input id="inputPortS" placeholder="Port">             
         </div>
 
         <div class="nas-apps-config-form-field">
-          <label class="nas-apps-config-form-field-label" for="inputPasswordConfirm">Confirm Password</label>              
-          <input type="password" id="inputPasswordConfirm" placeholder="Confirm Password">             
+          <label class="nas-apps-config-form-field-label" for="inputPortConfirm">Confirm port</label>              
+          <input id="inputPortConfirm" placeholder="Confirm port">             
         </div>
 
         <div class="nas-apps-config-form-field">
-          <button id="signupBtn" type="submit" class="nas-apps-config-form-button" style="width: 110px">Signup</button>             
+          <button id="signupBtn" type="submit" class="nas-apps-config-form-button" style="width: 110px">Add</button>             
         </div>
 
       </form>
@@ -179,7 +179,7 @@
       <div class="nas-apps-config-form-right">          
         <div>            
           <div class="nas-apps-config-form-link-info">
-            <b id="signingUpMessage">You are signing up for a free account. No payment information is required to continue and begin your evaluation of the service.</b>
+            <b id="signingUpMessage">If you are operating RiV-mesh peer and may create your pool request with your new per or use existing one <a href="https://github.com/RiV-chain/public-peers.">in GitHub</a></b>
           </div>
         </div>
 
@@ -197,11 +197,10 @@
 
     <div id="loginLoadingMessage" class="hide">Logging in </div>
     <div id="logoutLoadingMessage" class="hide">Logging out </div>
-    <div id="signupLoadingMessage" class="hide">Creating new account & linking it with your <span class="nas-os-name">device</span></div>
+    <div id="signupLoadingMessage" class="hide">Addeing new peer<span class="nas-os-name">device</span></div>
     <div id="loginSuccess" class="hide">Successfully linked your RiV-Mesh account with your <span class="nas-os-name">device</span>!</div>
-    <div id="wrongLoginOrPasswordMessage" class="hide">Wrong username/password</div>
-    <div id="passwordDoNotMatchMessage" class="hide">Passwords do not match</div>
-    <div id="passwordLengthDoNotMatchMessage" class="hide">Password should be 6 or more characters long</div>
+    <div id="ipOrDNError" class="hide">Peer host is uanavailable</div>
+    <div id="hostFormatError" class="hide">Host format is incorrect: should be an IP or domain name</div>
     <hr />
 
     <div class="nas-apps-config-form-bottom">
