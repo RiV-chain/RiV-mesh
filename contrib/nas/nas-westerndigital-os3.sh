@@ -22,9 +22,9 @@ if [ $PKGBRANCH = "master" ]; then
   PKGREPLACES=mesh-develop
 fi
 
-if [ $PKGARCH = "armv7hf" ]; then GOOS=linux GOARCH=arm GOARM=7 ./build
+if [ $PKGARCH = "arm" ]; then GOOS=linux GOARCH=arm GOARM=5 ./build
 else
-  echo "Specify PKGARCH=armv7hf"
+  echo "Specify PKGARCH=arm"
   exit 1
 fi
 
@@ -81,9 +81,9 @@ chmod -R u+rwX,go+rX,g-w /tmp/$PKGFOLDER
 chmod +x /tmp/$PKGFOLDER/*.sh
 curent_dir=$(pwd)
 
-cd /tmp/$PKGFOLDER/ && MyCloudOS5_mksapkg -E -s -m WDMyCloudEX4100
+cd /tmp/$PKGFOLDER/ && mksapkg -E -s -m WDMyCloudEX4
 
-cp /tmp/WDMyCloudEX4100_mesh_$PKGVERSION.bin* $curent_dir
+cp /tmp/WDMyCloudEX4_mesh_$PKGVERSION.bin* $curent_dir
 
 rm -rf /tmp/$PKGFOLDER
 
