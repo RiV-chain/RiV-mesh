@@ -14,7 +14,7 @@ PKGBRANCH=$(basename `git name-rev --name-only HEAD`)
 PKG=$(sh contrib/semver/name.sh)
 PKGVERSION=$(sh contrib/semver/version.sh --bare)
 PKGARCH=${PKGARCH-amd64}
-PKGNAME=$PKG-$PKGVERSION-$PKGARCH
+PKGNAME=$ENV_TAG-$PKGVERSION
 PKGFILE=$PKGNAME.deb
 PKGREPLACES=mesh
 
