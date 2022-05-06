@@ -64,7 +64,7 @@ EOF
 
 echo "coping ui package..."
 cp contrib/ui/nas-netgear-os6/package/apps /tmp/$PKGNAME/ -r
-cp contrib/ui/assets/nas/* /tmp/$PKGNAME/apps/mesh/www/assets/ -r
+cp contrib/ui/www/* /tmp/$PKGNAME/apps/mesh/www/ -r
 
 cat > /tmp/$PKGNAME/debian/changelog << EOF
 Please see https://github.com/RiV-chain/RiV-mesh/
