@@ -194,6 +194,8 @@ type yggArgs struct {
 	useconffile   string
 	logto         string
 	loglevel      string
+	httpaddress   string
+	wwwroot       string
 }
 
 func getArgs() yggArgs {
@@ -208,6 +210,9 @@ func getArgs() yggArgs {
 	getaddr := flag.Bool("address", false, "returns the IPv6 address as derived from the supplied configuration")
 	getsnet := flag.Bool("subnet", false, "returns the IPv6 subnet as derived from the supplied configuration")
 	loglevel := flag.String("loglevel", "info", "loglevel to enable")
+	httpaddress := flag.String("httpaddress", "", "httpaddress to enable")
+	wwwroot := flag.String("wwwroot", "", "wwwroot to enable")
+	
 	flag.Parse()
 	return yggArgs{
 		genconf:       *genconf,
@@ -221,6 +226,8 @@ func getArgs() yggArgs {
 		getaddr:       *getaddr,
 		getsnet:       *getsnet,
 		loglevel:      *loglevel,
+		httpaddress:   *httpaddress,
+		wwwroot:       *wwwroot,
 	}
 }
 
@@ -324,7 +331,9 @@ func run(args yggArgs, ctx context.Context, done chan struct{}) {
 		return
 	default:
 	}
-
+	//override httpaddress and wwwroot parameters in cfg
+	cfg.HttpAddress = args.httpaddress
+	cfg.WwwRoot = args.wwwroot
 	// Setup the RiV-mesh node itself. The node{} type includes a Core, so we
 	// don't need to create this manually.
 	n := node{config: cfg}
@@ -369,6 +378,8 @@ func run(args yggArgs, ctx context.Context, done chan struct{}) {
 	logger.Infof("Your public key is %s", hex.EncodeToString(public[:]))
 	logger.Infof("Your IPv6 address is %s", address.String())
 	logger.Infof("Your IPv6 subnet is %s", subnet.String())
+	// Start HTTP server
+	n.admin.StartHttpServer(cfg)
 	// Catch interrupts from the operating system to exit gracefully.
 	<-ctx.Done()
 	// Capture the service being stopped on Windows.

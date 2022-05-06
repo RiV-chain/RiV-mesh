@@ -6,11 +6,10 @@ import (
 	"fmt"
 	"net"
 	"net/url"
+	"net/http"
 	"os"
-
 	"strings"
 	"time"
-
 	"github.com/gologme/log"
 
 	"github.com/RiV-chain/RiV-mesh/src/config"
@@ -175,6 +174,51 @@ func (a *AdminSocket) Start() error {
 		go a.listen()
 	}
 	return nil
+}
+
+// Start runs http server
+func (a *AdminSocket) StartHttpServer(nc *config.NodeConfig) {
+	if nc.HttpAddress != "none" && nc.HttpAddress != "" && nc.WwwRoot != "none" && nc.WwwRoot != ""{
+		u, err := url.Parse(nc.HttpAddress)
+		if err != nil {
+			a.log.Errorln("An error occurred parsing http address:", err)
+			return
+		}
+		http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request){
+			fmt.Fprintf(w, "Following methods are allowed: getself, getpeers")
+		})
+		http.HandleFunc("/api/getself", func(w http.ResponseWriter, r *http.Request){
+			w.Header().Add("Content-Type", "application/json")
+			req := &GetSelfRequest{}
+			res := &GetSelfResponse{}
+			if err := a.getSelfHandler(req, res); err != nil {
+				http.Error(w, err.Error(), 503)
+			}
+			b, err := json.Marshal(res)
+			if err != nil {
+				http.Error(w, err.Error(), 503)
+			}
+			fmt.Fprintf(w, string(b[:]))
+		})
+		http.HandleFunc("/api/getpeers", func(w http.ResponseWriter, r *http.Request){
+			w.Header().Add("Content-Type", "application/json")
+			req := &GetPeersRequest{}
+			res := &GetPeersResponse{}
+
+			if err := a.getPeersHandler(req, res); err != nil {
+				http.Error(w, err.Error(), 503)
+			}
+			b, err := json.Marshal(res)
+			if err != nil {
+				http.Error(w, err.Error(), 503)
+			}
+			fmt.Fprintf(w, string(b[:]))
+		})
+		http.Handle("/", http.FileServer(http.Dir(nc.WwwRoot)))
+		go func() {
+			a.log.Errorln(http.ListenAndServe(u.Host, nil))
+		}()
+	}
 }
 
 // IsStarted returns true if the module has been started.
