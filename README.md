@@ -96,6 +96,20 @@ channel](https://t.me/rivchain).
 ## Public peers
 If you are operating RiV-mesh peer and may create your pool request with your new per or use existing one https://github.com/RiV-chain/public-peers
 
+## Known issues
+
+Log message:
+```
+An error occurred starting multicast: listen udp6 [::]:9001: socket: address family not supported by protocol
+```
+and
+```
+An error occurred starting TUN/TAP: operation not supported
+```
+
+#Caused by:
+The device has no IPv6 support
+
 ## License
 
 This code is released under the terms of the LGPLv3, but with an added exception
