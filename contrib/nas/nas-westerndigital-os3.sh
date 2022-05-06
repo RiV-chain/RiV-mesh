@@ -12,7 +12,7 @@ fi
 
 PKGBRANCH=$(basename `git name-rev --name-only HEAD`)
 PKG=$(sh contrib/semver/name.sh)
-PKGVERSION=0.4.3 #$(sh contrib/semver/version.sh --bare)
+PKGVERSION=$(sh contrib/semver/version.sh --bare)
 PKGARCH=${PKGARCH-amd64}
 PKGNAME=$PKG-$PKGVERSION-$PKGARCH
 PKGFOLDER=mesh
@@ -80,6 +80,7 @@ chmod -R 0755 /tmp/$PKGFOLDER/www/assets
 chmod -R u+rwX,go+rX,g-w /tmp/$PKGFOLDER
 chmod +x /tmp/$PKGFOLDER/*.sh
 curent_dir=$(pwd)
+echo "current folder=$curent_dir"
 
 cd /tmp/$PKGFOLDER/ && mksapkg -E -s -m WDMyCloudEX4
 
