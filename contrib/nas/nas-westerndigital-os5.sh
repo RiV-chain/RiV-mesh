@@ -30,6 +30,7 @@ fi
 
 echo "Building $PKGNAME"
 
+rm -rf /tmp/$PKGFOLDER
 mkdir -p /tmp/$PKGFOLDER/bin/
 mkdir -p /tmp/$PKGFOLDER/tmp/
 mkdir -p /tmp/$PKGFOLDER/lib/
