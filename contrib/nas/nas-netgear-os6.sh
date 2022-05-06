@@ -4,7 +4,7 @@
 # mesh and enables it in systemd. You can give it the PKGARCH= argument
 # i.e. PKGARCH=i386 sh contrib/deb/generate.sh
 
-if [ `pwd` != `git rev-parse --show-toplevel` ]
+if [ $(pwd) != $(git rev-parse --show-toplevel) ]
 then
   echo "You should run this script from the top-level directory of the git repo"
   exit 1
