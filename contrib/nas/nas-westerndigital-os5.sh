@@ -15,7 +15,7 @@ PKG=$(sh contrib/semver/name.sh)
 PKGVERSION=$(sh contrib/semver/version.sh --bare)
 PKGARCH=${PKGARCH-amd64}
 PKGNAME=$PKG-$PKGVERSION-$PKGARCH
-PKGFOLDER=meshpkg
+PKGFOLDER=mesh
 PKGREPLACES=mesh
 
 if [ $PKGBRANCH = "master" ]; then
