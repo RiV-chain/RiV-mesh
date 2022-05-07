@@ -1,5 +1,5 @@
 [elephantdrive]
 title="HTTP"
-desc="ElephantDrive Web interface"
+desc="RiV Mesh Web interface"
 port_forward="no"
-dst.ports="17017/tcp"
+dst.ports="19019/tcp"
