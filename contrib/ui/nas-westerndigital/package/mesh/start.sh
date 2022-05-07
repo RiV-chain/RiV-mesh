@@ -18,4 +18,4 @@ START_COMMAND="/usr/bin/mesh -useconffile '$config_file' -httpaddress 'http://lo
 echo "start.sh: starting (START_COMMAND=$START_COMMAND)" >> "$MESH_PACKAGE_LOG"
 
 
-(/usr/bin/mesh -useconffile "$config_file" -httpaddress "http://localhost:19019" -wwwroot "${INSTALL_PATH}/www" > "${INSTALL_PATH}/var/log/mesh.log") &
+(/usr/bin/mesh -useconffile "$config_file" -httpaddress "http://localhost:19019" -wwwroot "${INSTALL_PATH}/www" -logto "${INSTALL_PATH}/var/log/mesh.log") &
