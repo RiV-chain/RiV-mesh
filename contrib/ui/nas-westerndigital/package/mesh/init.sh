@@ -16,8 +16,8 @@ mkdir /var/www/mesh
 ln -s "$install_path/bin/mesh" /usr/bin
 ln -s "$install_path/bin/meshctl" /usr/bin
 
-# Web
-ln -s "$install_path/ui/mesh.png" /var/www/mesh
+# Web, probably, the app wil serve it by embedded server
+ln -s "$install_path/www/mesh.png" /var/www/mesh
 ln -s "$install_path/www/index.html" /var/www/mesh
 
 if [ -f $backup_config_file ]; then

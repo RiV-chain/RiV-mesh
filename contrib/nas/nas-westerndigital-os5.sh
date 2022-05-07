@@ -45,8 +45,8 @@ cp contrib/ui/www/* /tmp/$PKGFOLDER/www/ -r
 
 for resolution in 256x256; do
   echo "Converting icon for: $resolution"
-  convert -colorspace sRGB ./riv.png -resize $resolution PNG32:/tmp/$PKGFOLDER/ui/mesh.png  && \
-  chmod 644 /tmp/$PKGFOLDER/ui/mesh.png
+  convert -colorspace sRGB ./riv.png -resize $resolution PNG32:/tmp/$PKGFOLDER/www/mesh.png  && \
+  chmod 644 /tmp/$PKGFOLDER/www/mesh.png
 done
 
 cat > /tmp/$PKGFOLDER/apkg.rc << EOF
