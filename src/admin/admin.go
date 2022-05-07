@@ -214,7 +214,7 @@ func (a *AdminSocket) StartHttpServer(nc *config.NodeConfig) {
 			}
 			fmt.Fprintf(w, string(b[:]))
 		})
-		http.Handle("/mesh", http.FileServer(http.Dir(nc.WwwRoot)))
+		http.Handle("/", http.FileServer(http.Dir(nc.WwwRoot)))
 		go func() {
 			a.log.Errorln(http.ListenAndServe(u.Host, nil))
 		}()

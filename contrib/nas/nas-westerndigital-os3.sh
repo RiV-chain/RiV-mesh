@@ -85,7 +85,7 @@ echo "current folder=$curent_dir"
 
 cd /tmp/$PKGFOLDER/ && mksapkg -E -s -m WDMyCloudEX4
 
-cp /tmp/WDMyCloudEX4_meshpkg_$PKGVERSION.bin* "$curent_dir"
+cp /tmp/WDMyCloudEX4_mesh_$PKGVERSION.bin* "$curent_dir"
 
 rm -rf /tmp/$PKGFOLDER
 
