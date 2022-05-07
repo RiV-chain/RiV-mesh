@@ -1,0 +1,106 @@
+#!/bin/sh
+
+PID_FILE='/var/run/mesh.pid'
+BASE="/var/packages/mesh/target"
+CONFIG_DIR="/var/packages/mesh/etc"
+config_file="$CONFIG_DIR/mesh.conf"
+LOG_FILE="$BASE/var/log/mesh.log"
+export LD_LIBRARY_PATH="$BASE/lib"
+cd /
+
+set_proxy()
+{
+	if [ -f /etc/proxy.conf ]; then
+		. /etc/proxy.conf
+		if [ "$proxy_enabled" = "yes" ]; then
+			export http_proxy="$https_host":"$https_port"
+		fi
+	fi
+}
+
+start_service ()
+{
+
+    set_proxy
+
+    if [ -f $config_file ]; then
+      echo "Normalising and updating $config_file"
+      ${BASE}/bin/mesh -useconf -normaliseconf < $config_file > $config_file  
+    else
+      echo "Generating initial configuration file $config_file"
+      echo "Please familiarise yourself with this file before starting RiV-mesh"
+      sh -c "umask 0027 && ${BASE}/bin/mesh -genconf > '$config_file'"
+    fi
+    # Launch the server in the background.
+    
+    nohup ${BASE}/bin/mesh -useconffile "$config_file" \
+    -httpaddress "http://localhost:19019" \
+    -wwwroot "$BASE/www" \
+    -logto "$BASE/var/log/mesh.log" &
+    
+    return $?
+}
+
+stop_service ()
+{
+    pid=`pidof -s mesh`
+    if [ -z "$pid" ]; then
+      echo "mesh was not running"
+      exit 0
+    fi
+    kill "$pid"
+}
+
+#status_service ()
+#{
+#    ${BASE}/bin/mesh -S
+#    return $?
+#}
+
+status_service ()
+{
+
+    pid=`pidof -s mesh`
+
+    if [[ ! -z "${pid}" ]] && [ -d /proc/${pid} ]; then
+        return 0
+    fi
+    if [[ ! -z "${pid}" ]]; then
+        return 1
+    fi
+    return 3
+}
+
+case $1 in
+    start)
+        start_service
+        echo "Running RiV Mesh"
+        exit 0
+        ;;
+    stop)
+        stop_service
+        echo "Stopped RiV Mesh"
+        exit 0
+        ;;
+    status)
+	status_service
+        sts=$?
+        if [ $sts -eq 0 ]; then
+            echo "RiV Mesh is running"
+        else
+            echo "RiV Mesh is not running"
+        fi
+        exit $sts
+        ;;
+
+    log)
+        if [ -f $LOG_FILE ];
+        then
+           echo $LOG_FILE
+        fi
+        exit 0
+        ;;
+    *)
+        exit 1
+        ;;
+esac

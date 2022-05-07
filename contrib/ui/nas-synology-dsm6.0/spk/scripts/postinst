@@ -1,0 +1,15 @@
+#!/bin/bash
+DEBUG=true
+SH="$(readlink /proc/$$/exe)"
+if $DEBUG ; then
+	echo "" > /tmp/mesh.log
+	exec 2>>/tmp/mesh.log
+	SH="$SH -x"
+	set -x
+fi
+
+BASE="/var/packages/mesh
+
+ln -sf $BASE/target/dsm.mesh.conf /etc/nginx/conf.d/dsm.mesh.conf
+nginx -s reload
+exit 0

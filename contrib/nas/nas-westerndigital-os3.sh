@@ -56,8 +56,8 @@ Version: $PKGVERSION
 Packager: RiV Chain
 Email: vadym.vikulin@rivchain.org
 Homepage: https://github.com/RiV-chain/RiV-mesh
-Description: RiV-mesh is an early-stage implementation of a fully end-to-end encrypted IPv6
- network. It is lightweight, self-arranging, supported on multiple platforms and
+Description: RiV-mesh is an implementation of a fully end-to-end encrypted IPv6 network.
+ It is lightweight, self-arranging, supported on multiple platforms and
  allows pretty much any IPv6-capable application to communicate securely with
  other RiV-mesh nodes.
 Icon: mesh.png

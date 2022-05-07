@@ -57,11 +57,10 @@ Architecture: $PKGARCH
 Replaces: $PKGREPLACES
 Conflicts: $PKGREPLACES
 Maintainer: Vadym Vikulin <vadym.vikulin@rivchain.org>
-Description: RiV-mesh Network
- RiV-mesh is an early-stage implementation of a fully end-to-end encrypted IPv6
- network. It is lightweight, self-arranging, supported on multiple platforms and
+Description: RiV-mesh is an implementation of a fully end-to-end encrypted IPv6 network.
+ It is lightweight, self-arranging, supported on multiple platforms and
  allows pretty much any IPv6-capable application to communicate securely with
- other Mesh nodes.
+ other RiV-mesh nodes.
 EOF
 cat > /tmp/$PKGNAME/debian/copyright << EOF
 Please see https://github.com/RiV-chain/RiV-mesh/

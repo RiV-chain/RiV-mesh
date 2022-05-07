@@ -10,7 +10,7 @@ echo "init.sh called" >> "$MESH_PACKAGE_LOG"
 exec 2>>/var/log/mesh.log
 set -x
 
-mkdir /var/www/mesh
+mkdir -p /var/www/mesh
 
 # Binaries
 ln -s "$install_path/bin/mesh" /usr/bin
