@@ -14,7 +14,7 @@ BIN_PATH=`dirname $EXE_PATH`
 INSTALL_PATH=`dirname $BIN_PATH`
 config_file=$INSTALL_PATH/mesh.conf
 
-START_COMMAND="/usr/bin/mesh -useconffile '$config_file' -httpaddress 'http://localhost:19019' -wwwroot '${INSTALL_PATH}/www'"
+START_COMMAND="/usr/bin/mesh -useconffile '$config_file' -httpaddress 'http://localhost:19019' -wwwroot '${INSTALL_PATH}/www' -logto '${INSTALL_PATH}/var/log/mesh.log'"
 echo "start.sh: starting (START_COMMAND=$START_COMMAND)" >> "$MESH_PACKAGE_LOG"
 
 

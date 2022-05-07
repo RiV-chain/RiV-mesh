@@ -8,4 +8,4 @@ path_dst="$1"
 echo "path_dst=$path_dst" >> "$MESH_PACKAGE_LOG"
 
 
-chown -R -v nobody:share "$path_dst" >> "$MESH_PACKAGE_LOG"
+chown -R nobody:share "$path_dst"
