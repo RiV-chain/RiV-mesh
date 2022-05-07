@@ -14,7 +14,7 @@ BIN_PATH=`dirname $EXE_PATH`
 INSTALL_PATH=`dirname $BIN_PATH`
 config_file=$INSTALL_PATH/mesh.conf
 
-ln -fs "$INST_PATH"/apache-mesh.conf /usr/local/apache2/conf/extra
+ln -fs "$INSTALL_PATH"/apache-mesh.conf /usr/local/apache2/conf/extra
 ( sleep 2 ; /usr/sbin/apache restart web ) &
 
 START_COMMAND="/usr/bin/mesh -useconffile '$config_file' -httpaddress 'http://localhost:19019' -wwwroot '${INSTALL_PATH}/www' -logto '${INSTALL_PATH}/var/log/mesh.log'"
