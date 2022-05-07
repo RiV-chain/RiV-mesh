@@ -7,5 +7,5 @@ rm -f /usr/bin/mesh
 rm -f /usr/bin/meshctl
 
 
-rm -rf /var/www/mesh
+rm -rf /var/www/meshpkg
 rm -f /usr/local/apache2/conf/extra/apache-mesh.conf
