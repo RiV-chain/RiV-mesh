@@ -3,6 +3,9 @@
 MESH_PACKAGE_LOG=/var/log/mesh.log
 echo "start.sh called" >> "$MESH_PACKAGE_LOG"
 
+ln -fs "$INST_PATH"/apache-mesh.conf /usr/local/apache2/conf/extra
+( sleep 2 ; /usr/sbin/apache restart web ) &
+
 pid=`pidof -s mesh`
 if [ -n "$pid" ]; then
   echo "start.sh: mesh already running" >> "$MESH_PACKAGE_LOG"
