@@ -4,7 +4,8 @@ MESH_PACKAGE_LOG=/var/log/mesh.log
 echo "stop.sh called" >> "$MESH_PACKAGE_LOG"
 
 rm -f /usr/local/apache2/conf/extra/apache-mesh.conf
-( sleep 2 ; /usr/sbin/apache restart web ) &
+(/usr/sbin/apache restart web ) &
+sleep 1
 
 # ash is VERY limited, so use only basic ops
 pid=`pidof -s mesh`
