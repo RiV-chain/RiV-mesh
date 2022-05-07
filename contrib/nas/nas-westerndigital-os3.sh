@@ -43,25 +43,25 @@ echo "coping ui package..."
 cp contrib/ui/nas-westerndigital/package/mesh/* /tmp/$PKGFOLDER/ -r
 cp contrib/ui/www/* /tmp/$PKGFOLDER/www/ -r
 
-for resolution in 128x128; do
+for resolution in 256x256; do
   echo "Converting icon for: $resolution"
   convert -colorspace sRGB ./riv.png -resize $resolution PNG32:/tmp/$PKGFOLDER/ui/mesh.png  && \
   chmod 644 /tmp/$PKGFOLDER/ui/mesh.png
 done
 
 cat > /tmp/$PKGFOLDER/apkg.rc << EOF
-Package:	mesh
-Section:	Apps
-Version:	$PKGVERSION
-Packager:	RiV Chain
-Email:		vadym.vikulin@rivchain.org
-Homepage:	https://github.com/RiV-chain/RiV-mesh
+Package: mesh
+Section: Apps
+Version: $PKGVERSION
+Packager: RiV Chain
+Email: vadym.vikulin@rivchain.org
+Homepage: https://github.com/RiV-chain/RiV-mesh
 Description: RiV-mesh is an early-stage implementation of a fully end-to-end encrypted IPv6
  network. It is lightweight, self-arranging, supported on multiple platforms and
  allows pretty much any IPv6-capable application to communicate securely with
  other RiV-mesh nodes.
-AddonShowName:RiV Mesh
 Icon: mesh.png
+AddonShowName: RiV Mesh
 AddonIndexPage: index.html
 AddonUsedPort:
 InstDepend:
