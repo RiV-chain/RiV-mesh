@@ -10,15 +10,15 @@ echo "init.sh called" >> "$MESH_PACKAGE_LOG"
 exec 2>>/var/log/mesh.log
 set -x
 
-mkdir /var/www/meshpkg
+mkdir /var/www/mesh
 
 # Binaries
 ln -s "$install_path/bin/mesh" /usr/bin
 ln -s "$install_path/bin/meshctl" /usr/bin
 
 # Web, probably, the app wil serve it by embedded server
-ln -s "$install_path/www/meshpkg.png" /var/www/meshpkg
-ln -s "$install_path/www/index.html" /var/www/meshpkg
+ln -s "$install_path/www/mesh.png" /var/www/mesh
+ln -s "$install_path/www/index.html" /var/www/mesh
 
 if [ -f $backup_config_file ]; then
   echo "Backing up configuration file to /var/backups/mesh.conf"
