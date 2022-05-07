@@ -36,6 +36,7 @@ mkdir -p /tmp/$PKGNAME/debian/
 mkdir -p /tmp/$PKGNAME/DEBIAN/
 mkdir -p /tmp/$PKGNAME/apps/mesh/bin
 mkdir -p /tmp/$PKGNAME/apps/mesh/www
+mkdir -p /tmp/$PKGNAME/apps/mesh/var/log
 mkdir -p /tmp/$PKGNAME/apps/mesh/var/lib/mesh/hooks
 mkdir -p /tmp/$PKGNAME/usr/share/doc/mesh
 
@@ -97,6 +98,7 @@ EOF
 cp mesh /tmp/$PKGNAME/apps/mesh/bin
 cp meshctl /tmp/$PKGNAME/apps/mesh/bin
 ln -s /apps/mesh/bin/meshctl /tmp/$PKGNAME/usr/bin/meshctl
+ln -s /apps/mesh/var/log/mesh.log /tmp/$PKGNAME/apps/mesh/www/log
 chmod 0775 /tmp/$PKGNAME/DEBIAN/*
 chmod 755 /tmp/$PKGNAME/apps/mesh/bin/*
 

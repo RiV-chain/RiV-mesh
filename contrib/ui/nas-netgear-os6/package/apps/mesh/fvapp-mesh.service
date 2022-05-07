@@ -14,7 +14,7 @@ ExecStop=/bin/kill -HUP $MAINPID
 KillMode=process
 Restart=on-failure
 TimeoutStopSec=10
-StandardOutput=file:/apps/mesh/www/log/stdin.log
+StandardOutput=file:/apps/mesh/var/log/mesh.log
 StandardError=inherit
 
 [Install]
