@@ -8,7 +8,7 @@ if $DEBUG ; then
 	set -x
 fi
 
-BASE="/var/packages/mesh
+BASE="/var/packages/mesh"
 
 ln -sf $BASE/target/dsm.mesh.conf /etc/nginx/conf.d/dsm.mesh.conf
 nginx -s reload
