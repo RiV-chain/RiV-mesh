@@ -31,9 +31,23 @@ start_service ()
       echo "Please familiarise yourself with this file before starting RiV-mesh"
       sh -c "umask 0027 && ${BASE}/bin/mesh -genconf > '$config_file'"
     fi
+    
+    # Create the necessary file structure for /dev/net/tun
+    if ( [ ! -c /dev/net/tun ] ); then
+      if ( [ ! -d /dev/net ] ); then
+      mkdir -m 755 /dev/net
+    fi
+      mknod /dev/net/tun c 10 200
+      chmod 0755 /dev/net/tun
+    fi
+
+    # Load the tun module if not already loaded
+    if ( !(lsmod | grep -q "^tun\s") ); then
+      insmod /lib/modules/tun.ko
+    fi
     # Launch the server in the background.
     
-    nohup ${BASE}/bin/mesh -useconffile "$config_file" \
+    ${BASE}/bin/mesh -useconffile "$config_file" \
     -httpaddress "http://localhost:19019" \
     -wwwroot "$BASE/www" \
     -logto "$BASE/var/log/mesh.log" &
