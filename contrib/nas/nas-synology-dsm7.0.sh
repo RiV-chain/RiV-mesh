@@ -88,7 +88,10 @@ chmod -R 0755 /tmp/$PKGFOLDER/www/assets
 chmod -R u+rwX,go+rX,g-w /tmp/$PKGFOLDER
 chmod -R +x /tmp/$PKGNAME/scripts
 
-fakeroot /opt/tomcat/tool/Synology/pkgscripts-ng/include/pkg_util.sh make_package /tmp/$PKGFOLDER /tmp/$PKGNAME
+#see instruction how to deploy dev env:
+#https://global.download.synology.com/download/Document/Software/DeveloperGuide/Firmware/DSM/7.0/enu/DSM_Developer_Guide_7_0_Beta.pdf
+#Page 13
+fakeroot pkg_util.sh make_package /tmp/$PKGFOLDER /tmp/$PKGNAME
 rm -rf /tmp/$PKGFOLDER/
-fakeroot /opt/tomcat/tool/Synology/pkgscripts-ng/include/pkg_util.sh make_spk /tmp/$PKGNAME . $PKGNAME.spk
+fakeroot pkg_util.sh make_spk /tmp/$PKGNAME . $PKGNAME.spk
 
