@@ -55,7 +55,7 @@ for res in 16 24 32 48 64 72 256; do
   chmod 644 /tmp/$PKGFOLDER/ui/mesh-$res.png
 done
 
-echo "Converting icon for: 72x72"
+echo "Converting icon for: 64x64"
 convert -colorspace sRGB ./riv.png -resize 64x64 PNG32:/tmp/$PKGNAME/PACKAGE_ICON.PNG
 echo "Converting icon for: 256x256"
 convert -colorspace sRGB ./riv.png -resize 256x256 PNG32:/tmp/$PKGNAME/PACKAGE_ICON_256.PNG
