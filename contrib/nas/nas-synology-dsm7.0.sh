@@ -44,6 +44,8 @@ chmod 0775 /tmp/$PKGFOLDER/ -R
 echo "coping ui package..."
 cp contrib/ui/nas-synology-dsm6.0/package/* /tmp/$PKGFOLDER/ -r
 cp contrib/ui/nas-synology-dsm6.0/spk/* /tmp/$PKGNAME/ -r
+cp contrib/ui/nas-synology-dsm7.0/package/* /tmp/$PKGFOLDER/ -r
+cp contrib/ui/nas-synology-dsm7.0/spk/* /tmp/$PKGNAME/ -r
 cp contrib/ui/www/* /tmp/$PKGFOLDER/www/ -r
 
 for res in 16 24 32 48 64 72 256; do
@@ -54,7 +56,7 @@ for res in 16 24 32 48 64 72 256; do
 done
 
 echo "Converting icon for: 72x72"
-convert -colorspace sRGB ./riv.png -resize 72x72 PNG32:/tmp/$PKGNAME/PACKAGE_ICON.PNG
+convert -colorspace sRGB ./riv.png -resize 64x64 PNG32:/tmp/$PKGNAME/PACKAGE_ICON.PNG
 echo "Converting icon for: 256x256"
 convert -colorspace sRGB ./riv.png -resize 256x256 PNG32:/tmp/$PKGNAME/PACKAGE_ICON_256.PNG
 
@@ -73,7 +75,7 @@ dsmappname="org.mesh"
 arch="$PKGARCH"
 dsmuidir="ui"
 silent_upgrade="yes"
-os_min_ver="6.0-7320"
+os_min_ver="7.0-40000"
 EOF
 
 echo $PKGVERSION > /tmp/$PKGNAME/VERSION
@@ -86,7 +88,7 @@ chmod -R 0755 /tmp/$PKGFOLDER/www/assets
 chmod -R u+rwX,go+rX,g-w /tmp/$PKGFOLDER
 chmod -R +x /tmp/$PKGNAME/scripts
 
-fakeroot ./contrib/nas/tool/synology_pkg_util.sh make_package /tmp/$PKGFOLDER /tmp/$PKGNAME
+fakeroot /opt/tomcat/tool/Synology/pkgscripts-ng/include/pkg_util.sh make_package /tmp/$PKGFOLDER /tmp/$PKGNAME
 rm -rf /tmp/$PKGFOLDER/
-fakeroot ./contrib/nas/tool/synology_pkg_util.sh make_spk /tmp/$PKGNAME . $PKGNAME.spk
+fakeroot /opt/tomcat/tool/Synology/pkgscripts-ng/include/pkg_util.sh make_spk /tmp/$PKGNAME . $PKGNAME.spk
 

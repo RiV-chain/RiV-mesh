@@ -51,7 +51,7 @@ start_service ()
 
     # Launch the server in the background.
     ${BASE}/bin/mesh -useconffile "$config_file" \
-    -httpaddress "http://localhost:19019" \
+    -httpaddress "http://[::]:19019" \
     -wwwroot "$BASE/www" \
     -logto "$BASE/var/log/mesh.log" &
     
