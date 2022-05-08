@@ -45,8 +45,12 @@ start_service ()
     if ( !(lsmod | grep -q "^tun\s") ); then
       insmod /lib/modules/tun.ko
     fi
-    # Launch the server in the background.
     
+    #workaround for bin error:
+    #Not multicasting on eth0 due to error: listen tcp [xxxx]:0: bind: cannot assign requested address
+    sysctl net.ipv6.ip_nonlocal_bind=1
+
+    # Launch the server in the background.
     ${BASE}/bin/mesh -useconffile "$config_file" \
     -httpaddress "http://localhost:19019" \
     -wwwroot "$BASE/www" \
