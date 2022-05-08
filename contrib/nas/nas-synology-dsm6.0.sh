@@ -14,7 +14,7 @@ PKGBRANCH=$(basename `git name-rev --name-only HEAD`)
 PKG=$(sh contrib/semver/name.sh)
 PKGVERSION=$(sh contrib/nas/tool/synology_version.sh --bare)
 PKGARCH=${PKGARCH-amd64}
-PKGNAME=$PKG-$PKGVERSION-$PKGARCH
+PKGNAME=$ENV_TAG-$PKGARCH-$PKGVERSION
 PKGFOLDER=${PKGNAME}/package
 PKGREPLACES=mesh
 
@@ -88,4 +88,6 @@ chmod -R +x /tmp/$PKGNAME/scripts
 fakeroot ./contrib/nas/tool/synology_pkg_util.sh make_package /tmp/$PKGFOLDER /tmp/$PKGNAME
 rm -rf /tmp/$PKGFOLDER/
 fakeroot ./contrib/nas/tool/synology_pkg_util.sh make_spk /tmp/$PKGNAME .
+
+mv *.spk $PKGNAME.spk
 

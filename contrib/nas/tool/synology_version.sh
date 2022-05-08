@@ -19,8 +19,8 @@ fi
 
 #replace last dot with -
 STAG=$(echo $TAG | sed 's/v//' | sed 's/[^0123456789.].//' | sed 's/\.\([^.]*\)$/-\1/')
-#get tail after - and add 6000 for padding
-TAG_TAIL=$(($(echo $STAG | sed -n -e 's/^.*-//p')+6000))
+#get tail after - and do padding with 4 zeros
+TAG_TAIL=$(echo $STAG | sed -n -e 's/^.*-//p' | sed -e :a -e 's/^.\{1,3\}$/&0/;ta')
 #replace tail after -
 SYNO_VERSION=$(echo $STAG | sed "s/-.*/-$TAG_TAIL/")
 case "$*" in
