@@ -168,6 +168,8 @@ func (t *tcp) listen(listenaddr string, upgrade *TcpUpgrade) (*TcpListener, erro
 		t.waitgroup.Add(1)
 		go t.listener(&l, listenaddr)
 		return &l, nil
+	} else {
+		t.links.core.log.Errorln("Failed start listener: ", listenaddr)
 	}
 
 	return nil, err
