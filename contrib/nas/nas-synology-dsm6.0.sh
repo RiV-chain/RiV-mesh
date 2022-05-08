@@ -87,7 +87,7 @@ chmod -R +x /tmp/$PKGNAME/scripts
 
 fakeroot ./contrib/nas/tool/synology_pkg_util.sh make_package /tmp/$PKGFOLDER /tmp/$PKGNAME
 rm -rf /tmp/$PKGFOLDER/
-fakeroot ./contrib/nas/tool/synology_pkg_util.sh make_spk /tmp/$PKGNAME .
+fakeroot ./contrib/nas/tool/synology_pkg_util.sh make_spk /tmp/$PKGNAME . $PKGNAME.spk
 
-mv *.spk $PKGNAME.spk
+#mv *.spk $PKGNAME.spk
 
