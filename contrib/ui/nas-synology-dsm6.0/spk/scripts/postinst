@@ -8,8 +8,10 @@ if $DEBUG ; then
 	set -x
 fi
 
-BASE="/var/packages/mesh"
+BASE="/var/packages/mesh/target"
+LOG_FILE="$BASE/var/log/mesh.log"
 
-ln -sf $BASE/target/dsm.mesh.conf /etc/nginx/conf.d/dsm.mesh.conf
+ln -sf $LOG_FILE $BASE/www/log
+ln -sf $BASE/dsm.mesh.conf /etc/nginx/conf.d/dsm.mesh.conf
 nginx -s reload
 exit 0
