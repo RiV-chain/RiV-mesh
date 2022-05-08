@@ -1,4 +1,4 @@
-[elephantdrive]
+[mesh]
 title="HTTP"
 desc="RiV Mesh Web interface"
 port_forward="no"
