@@ -49,7 +49,7 @@ start_service ()
     #Not multicasting on eth0 due to error: listen tcp [xxxx]:0: bind: cannot assign requested address
     sysctl net.ipv6.ip_nonlocal_bind=1
 
-    # Launch the server in the background.
+    # Launch the mesh in the background.
     ${BASE}/bin/mesh -useconffile "$config_file" \
     -httpaddress "http://localhost:19019" \
     -wwwroot "$BASE/www" \

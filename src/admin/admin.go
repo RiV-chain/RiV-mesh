@@ -215,8 +215,10 @@ func (a *AdminSocket) StartHttpServer(nc *config.NodeConfig) {
 			fmt.Fprintf(w, string(b[:]))
 		})
 		http.Handle("/", http.FileServer(http.Dir(nc.WwwRoot)))
+		l, _ := net.Listen("tcp4", u.Host)
+		a.log.Infof("Listening: %s",u.Host)
 		go func() {
-			a.log.Errorln(http.ListenAndServe(u.Host, nil))
+			a.log.Errorln(http.Serve(l, nil))
 		}()
 	}
 }
