@@ -1,0 +1,46 @@
+#script called from qinstall.sh
+
+#SYS_QPKG_SERVICE_ENABLED="FALSE"
+QPKG_NAME="mesh"
+CONF=/etc/config/mesh.conf
+QPKG_DIR=$(/sbin/getcfg $QPKG_NAME Install_Path -f $CONF)
+QPKG_CONFIG=$CONF
+
+PKG_PRE_REMOVE="{
+  killall -q mesh
+  rm -rf /share/Web/$QPKG_NAME
+  [ -L /var/log/mesh.log ] && rm -f /var/log/mesh.log
+}"
+
+PKG_MAIN_REMOVE="{
+	$CMD_RM -f $CONF
+}"
+
+pkg_pre_install(){
+  killall -q mesh
+  rm -rf /share/Web/$QPKG_NAME
+  touch $CONF
+  chmod a+w $CONF
+}
+
+pkg_install(){
+
+    if [ -f $CONF ]; then
+       mkdir -p /var/backups
+       echo "Backing up configuration file to /var/backups/mesh.conf.`date +%Y%m%d`"
+       cp $config_file /var/backups/mesh.conf.`date +%Y%m%d`
+       echo "Normalising and updating $CONF"
+       ${QPKG_DIR}/bin/mesh -useconf -normaliseconf < /var/backups/mesh.conf.`date +%Y%m%d` > $CONF
+    else
+       echo "Generating initial configuration file $config_file"
+       echo "Please familiarise yourself with this file before starting RiV-mesh"
+       sh -c "umask 0027 && ${QPKG_DIR}/bin/mesh -genconf > '$CONF'"
+    fi
+
+  if ! grep '/etc/config/apache/extra/apache-mesh.conf' /etc/config/apache/apache.conf ; then
+    echo 'Include /etc/config/apache/extra/apache-mesh.conf' >> /etc/config/apache/apache.conf
+  fi
+  mv -f $SYS_QPKG_DIR/apache-mesh.conf /etc/config/apache/extra/
+  #Tested on TS-231 v.4.3.6
+  /usr/local/apache/bin/apachectl graceful
+}
