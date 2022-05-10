@@ -1,6 +1,6 @@
 #!/bin/sh
 
-BASE="/usr/local/AppCentral/mesh"
+BASE="/usr/local/AppCentral/mesh-nas-asustor"
 CONFIG_DIR="/usr/local/etc"
 
 MESH_PACKAGE_LOG=/tmp/mesh.log

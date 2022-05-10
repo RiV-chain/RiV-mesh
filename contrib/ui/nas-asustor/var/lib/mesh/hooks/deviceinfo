@@ -1,6 +1,0 @@
-#!/bin/sh
-echo vendor=Asustor
-echo vendorOperatingSystemName=ADM
-eval $(cat /etc/default/nas.conf | grep '\<Model\>\|\<Version\>')
-echo firmwareVersion="$Version"
-echo model=$Model

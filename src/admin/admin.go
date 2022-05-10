@@ -185,7 +185,7 @@ func (a *AdminSocket) StartHttpServer(nc *config.NodeConfig) {
 			return
 		}
 		http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request){
-			fmt.Fprintf(w, "Following methods are allowed: getself, getpeers")
+			fmt.Fprintf(w, "Following methods are allowed: getself, getpeers. litening"+u.Host)
 		})
 		http.HandleFunc("/api/getself", func(w http.ResponseWriter, r *http.Request){
 			w.Header().Add("Content-Type", "application/json")
@@ -215,8 +215,12 @@ func (a *AdminSocket) StartHttpServer(nc *config.NodeConfig) {
 			fmt.Fprintf(w, string(b[:]))
 		})
 		http.Handle("/", http.FileServer(http.Dir(nc.WwwRoot)))
-		l, _ := net.Listen("tcp4", u.Host)
-		a.log.Infof("Listening: %s",u.Host)
+		l, e := net.Listen("tcp4", u.Host)
+		if e != nil {
+			a.log.Errorln("%s\n", e)
+		} else {
+			a.log.Infof("Http server listening on %s\n", u.Host)
+		}
 		go func() {
 			a.log.Errorln(http.Serve(l, nil))
 		}()
