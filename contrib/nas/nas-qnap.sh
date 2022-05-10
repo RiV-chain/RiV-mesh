@@ -11,8 +11,8 @@ then
 fi
 
 PKGBRANCH=$(basename `git name-rev --name-only HEAD`)
-PKG=$(sh contrib/semver/name.sh)
-PKGVERSION=$(sh contrib/semver/version.sh --bare)
+PKG=$(sh contrib/semmsiver/name.sh)
+PKGVERSION=$(sh contrib/msi/msversion.sh --bare)
 PKGARCH=${PKGARCH-amd64}
 PKGFOLDER=$ENV_TAG-$PKGARCH-$PKGVERSION
 PKGFILE=mesh-$PKGFOLDER.qpkg
@@ -23,9 +23,9 @@ if [ $PKGBRANCH = "master" ]; then
 fi
 
 if [ $PKGARCH = "x86-64" ]; then GOOS=linux GOARCH=amd64 ./build
-elif [ $PKGARCH = "armv7" ]; then GOOS=linux GOARCH=arm GOARM=7 ./build
+elif [ $PKGARCH = "arm-x31" ]; then GOOS=linux GOARCH=arm GOARM=7 ./build
 else
-  echo "Specify PKGARCH=x86-64 or armv7"
+  echo "Specify PKGARCH=x86-64 or arm-x31"
   exit 1
 fi
 
@@ -33,27 +33,27 @@ echo "Building $PKGFOLDER"
 
 rm -rf /tmp/$PKGFOLDER
 
-mkdir -p /tmp/$PKGFOLDER/icons
-mkdir -p /tmp/$PKGFOLDER/au/bin
-mkdir -p /tmp/$PKGFOLDER/au/tmp
-mkdir -p /tmp/$PKGFOLDER/au/lib
-mkdir -p /tmp/$PKGFOLDER/au/www
-mkdir -p /tmp/$PKGFOLDER/au/var/log
-mkdir -p /tmp/$PKGFOLDER/au/var/lib/bin
+mkdir -p /tmp/$PKGFOLDER/mesh
+mkdir -p /tmp/$PKGFOLDER/mesh/icons
+mkdir -p /tmp/$PKGFOLDER/mesh/shared/bin
+mkdir -p /tmp/$PKGFOLDER/mesh/shared/tmp
+mkdir -p /tmp/$PKGFOLDER/mesh/shared/lib
+mkdir -p /tmp/$PKGFOLDER/mesh/shared/www
+mkdir -p /tmp/$PKGFOLDER/mesh/shared/var/log
 chmod 0775 /tmp/$PKGFOLDER/ -R
 
 echo "coping ui package..."
-cp contrib/ui/nas-qnap/package/* /tmp/$PKGFOLDER/ -r
-cp contrib/ui/nas-qnap/au/* /tmp/$PKGFOLDER/au -r
-cp contrib/ui/www/* /tmp/$PKGFOLDER/au/www/ -r
+cp contrib/ui/nas-qnap/package/* /tmp/$PKGFOLDER/mesh -r
+cp contrib/ui/nas-qnap/au/* /tmp/$PKGFOLDER/mesh/shared -r
+cp contrib/ui/www/* /tmp/$PKGFOLDER/mesh/shared/www/ -r
 
 echo "Converting icon for: 64x64"
-convert -colorspace sRGB ./riv.png -resize 64x64 /tmp/$PKGFOLDER/icons/mesh.png
+convert -colorspace sRGB ./riv.png -resize 64x64 /tmp/$PKGFOLDER/mesh/icons/mesh.gif
 echo "Converting icon for: 80x80"
-convert -colorspace sRGB ./riv.png -resize 80x80 /tmp/$PKGFOLDER/icons/mesh_80.png
-convert -colorspace sRGB ./riv.png -resize 64x64 /tmp/$PKGFOLDER/icons/mesh_gray.png
+convert -colorspace sRGB ./riv.png -resize 80x80 /tmp/$PKGFOLDER/mesh/icons/mesh_80.gif
+convert -colorspace sRGB ./riv.png -resize 64x64 /tmp/$PKGFOLDER/mesh/icons/mesh_gray.gif
 
-cat > /tmp/$PKGFOLDER/qdk.conf << EOF
+cat > /tmp/$PKGFOLDER/mesh/qpkg.cfg << EOF
 QPKG_DISPLAY_NAME="RiV Mesh"
 QPKG_NAME="mesh"
 QPKG_VER="$PKGVERSION"
@@ -67,13 +67,19 @@ QPKG_LICENSE="LGPLv3"
 QDK_BUILD_ARCH="$PKGARCH"
 EOF
 
+touch /tmp/$PKGFOLDER/mesh/qdk.conf
 
-cp mesh /tmp/$PKGFOLDER/au/bin
-cp meshctl /tmp/$PKGFOLDER/au/bin
-chmod +x /tmp/$PKGFOLDER/au/bin/*
-chmod 0775 /tmp/$PKGFOLDER/au/www -R
 
-cd /tmp/$PKGFOLDER && qbuild --force-config -v
+cp mesh /tmp/$PKGFOLDER/mesh/shared/bin
+cp meshctl /tmp/$PKGFOLDER/mesh/shared/bin
+chmod +x /tmp/$PKGFOLDER/mesh/shared/bin/*
+chmod 0775 /tmp/$PKGFOLDER/mesh/shared/www -R
+chmod -R u+rwX,go+rX,g-w /tmp/$PKGFOLDER
+
+export QDK_VERSION=2.2.3
+export QDK_PATH=/opt/tomcat/tool/Qnap
+
+cd /tmp/$PKGFOLDER/mesh && /opt/tomcat/tool/Qnap/bin/qbuild --force-config -v
 
 #rm -rf /tmp/$PKGFOLDER/
 #mv *.apk $PKGFILE

@@ -3,11 +3,10 @@ CONF="/etc/config/mesh.conf"
 QPKG_NAME="mesh"
 QPKG_DIR=$(/sbin/getcfg $QPKG_NAME Install_Path -f $CONF)
 CONFIG_DIR="/etc/config"
-export smb_conf_file=/etc/smb.conf
 
 start_service ()
 {
-
+    . /etc/init.d/vpn_common.sh && load_kernel_modules
     # Launch the mesh in the background.
     ${QPKG_DIR}/bin/mesh -useconffile "$CONF" \
     -httpaddress "http://127.0.0.1:19019" \
