@@ -107,7 +107,7 @@ and
 An error occurred starting TUN/TAP: operation not supported
 ```
 
-# Caused by:
+### Caused by:
 The device has no IPv6 support
 
 
@@ -116,7 +116,7 @@ Log message:
 An error occurred starting TUN/TAP: permission denied
 ```
 
-# Caused by:
+### Caused by:
 IPv6 support is not enabled. See the solution: https://github.com/yggdrasil-network/yggdrasil-go/issues/479#issuecomment-519512395
 
 ## License
