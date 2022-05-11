@@ -98,7 +98,7 @@ If you are operating RiV-mesh peer and may create your pool request with your ne
 
 ## Known issues
 
-Log message:
+1. Log message:
 ```
 An error occurred starting multicast: listen udp6 [::]:9001: socket: address family not supported by protocol
 ```
@@ -111,7 +111,7 @@ An error occurred starting TUN/TAP: operation not supported
 The device has no IPv6 support
 
 
-Log message:
+2. Log message:
 ```
 An error occurred starting TUN/TAP: permission denied
 ```
