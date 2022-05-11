@@ -1,19 +1,22 @@
 #!/bin/sh
+QPKG_CONF="/etc/config/qpkg.conf"
 CONF="/etc/config/mesh.conf"
 QPKG_NAME="mesh"
-QPKG_DIR=$SYS_QPKG_DIR
-CONFIG_DIR="/etc/config"
+QPKG_DIR=$(/sbin/getcfg $QPKG_NAME Install_Path -f $QPKG_CONF)
 
 start_service ()
 {
+    exec 2>>/tmp/mesh.log
+    set -x
+
     #enable ipv6    
     sysctl -w net.ipv6.conf.all.disable_ipv6=0
     sysctl -w net.ipv6.conf.default.disable_ipv6=0
 
-    . /etc/init.d/vpn_common.sh && load_kernel_modules
+    #. /etc/init.d/vpn_common.sh && load_kernel_modules
 
     if [ ! -f '/etc/config/apache/extra/apache-mesh.conf' ] ; then
-      ln -sf $SYS_QPKG_DIR/apache-mesh.conf /etc/config/apache/extra/
+      ln -sf $QPKG_DIR/apache-mesh.conf /etc/config/apache/extra/
       apache_reload=1
     fi    
     
@@ -50,12 +53,7 @@ stop_service ()
 
 case "$1" in
   start)
-    ENABLED=$(/sbin/getcfg $QPKG_NAME Enable -u -d FALSE -f $CONF)
-    if [ "$ENABLED" != "TRUE" ]; then
-        echo "$QPKG_NAME is disabled."
-        exit 1
-    fi
-    start_service
+  start_service
     ;;
 
   stop)
