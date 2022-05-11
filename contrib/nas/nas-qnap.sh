@@ -69,17 +69,16 @@ EOF
 
 touch /tmp/$PKGFOLDER/mesh/qdk.conf
 
-
 cp mesh /tmp/$PKGFOLDER/mesh/shared/bin
 cp meshctl /tmp/$PKGFOLDER/mesh/shared/bin
 chmod +x /tmp/$PKGFOLDER/mesh/shared/bin/*
 chmod 0775 /tmp/$PKGFOLDER/mesh/shared/www -R
 chmod -R u+rwX,go+rX,g-w /tmp/$PKGFOLDER
 
-export QDK_VERSION=2.2.3
-export QDK_PATH=/opt/tomcat/tool/Qnap
+curent_dir=$(pwd)
 
 cd /tmp/$PKGFOLDER/mesh && /opt/tomcat/tool/Qnap/bin/qbuild --force-config -v
 
-#rm -rf /tmp/$PKGFOLDER/
-#mv *.apk $PKGFILE
+mv build/*.qpkg $curent_dir/$PKGFILE
+
+rm -rf /tmp/$PKGFOLDER/
