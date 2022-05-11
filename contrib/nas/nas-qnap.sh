@@ -79,6 +79,6 @@ curent_dir=$(pwd)
 
 cd /tmp/$PKGFOLDER/mesh && /opt/tomcat/tool/Qnap/bin/qbuild --force-config -v
 
-mv build/*.qpkg $curent_dir/$PKGFILE
+mv build/*.qpkg "$curent_dir"/$PKGFILE
 
 rm -rf /tmp/$PKGFOLDER/
