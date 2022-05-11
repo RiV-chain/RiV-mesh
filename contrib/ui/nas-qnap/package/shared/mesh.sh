@@ -6,6 +6,12 @@ CONFIG_DIR="/etc/config"
 
 start_service ()
 {
+    #enable ipv6    
+    sysctl -w net.ipv6.conf.all.disable_ipv6=0
+    sysctl -w net.ipv6.conf.default.disable_ipv6=0
+    echo sbin/getcfg $QPKG_NAME Install_Path -f $CONF > /tmp/mesh.log
+    echo $SYS_QPKG_DIR/bin/mesh >> /tmp/mesh.log
+
     . /etc/init.d/vpn_common.sh && load_kernel_modules
     # Launch the mesh in the background.
     ${QPKG_DIR}/bin/mesh -useconffile "$CONF" \

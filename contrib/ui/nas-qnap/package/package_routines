@@ -3,13 +3,17 @@
 #SYS_QPKG_SERVICE_ENABLED="FALSE"
 QPKG_NAME="mesh"
 CONF=/etc/config/mesh.conf
-QPKG_DIR=$(/sbin/getcfg $QPKG_NAME Install_Path -f $CONF)
+QPKG_DIR=$SYS_QPKG_DIR/bin/mesh
 QPKG_CONFIG=$CONF
 
 PKG_PRE_REMOVE="{
   killall -q mesh
   rm -rf /share/Web/$QPKG_NAME
   [ -L /var/log/mesh.log ] && rm -f /var/log/mesh.log
+  grep -v '/etc/config/apache/extra/apache-mesh.conf' /etc/config/apache/apache.conf >> /etc/config/apache/apache.conf
+  rm -f /etc/config/apache/extra/apache-mesh.conf
+  /etc/init.d/Qthttpd.sh reload
+
 }"
 
 PKG_MAIN_REMOVE="{

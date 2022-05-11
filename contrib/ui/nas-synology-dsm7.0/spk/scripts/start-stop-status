@@ -30,7 +30,7 @@ start_service ()
       echo "Please familiarise yourself with this file before starting RiV-mesh"
       sh -c "umask 0027 && ${BASE}/bin/mesh -genconf > '$config_file'"
     fi
-    
+
     # Create the necessary file structure for /dev/net/tun
     if ( [ ! -c /dev/net/tun ] ); then
       if ( [ ! -d /dev/net ] ); then
