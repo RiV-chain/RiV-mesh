@@ -19,7 +19,6 @@ pkg_pre_install(){
   set -x
   killall -q mesh
   rm -rf /share/Web/$QPKG_NAME
-  ln -sf $SYS_QPKG_DIR/var/log/mesh.log $SYS_QPKG_DIR/www/log
 }
 
 pkg_install(){
@@ -37,4 +36,8 @@ pkg_install(){
   fi
   chmod a+w $CONF
 
+}
+
+pkg_post_install(){
+  ln -sf $SYS_QPKG_DIR/var/log/mesh.log $SYS_QPKG_DIR/www/log
 }
