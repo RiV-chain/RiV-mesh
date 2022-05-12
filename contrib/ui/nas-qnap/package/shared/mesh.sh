@@ -32,6 +32,21 @@ load_kernel_modules(){
           done
 }
 
+create_tun(){
+    if ( [ ! -c /dev/net/tun ] ); then
+      if ( [ ! -d /dev/net ] ); then
+      mkdir -m 755 /dev/net
+    fi
+      mknod /dev/net/tun c 10 200
+      chmod 0755 /dev/net/tun
+    fi
+
+    # Load the tun module if not already loaded
+    if ( !(lsmod | grep -q "^tun\s") ); then
+      insmod /lib/modules/tun.ko
+    fi
+}
+
 start_service ()
 {
     exec 2>>/tmp/mesh.log
@@ -40,7 +55,9 @@ start_service ()
     #enable ipv6    
     sysctl -w net.ipv6.conf.all.disable_ipv6=0
     sysctl -w net.ipv6.conf.default.disable_ipv6=0
-    
+
+    # Create the necessary file structure for /dev/net/tun
+    create_tun
     load_kernel_modules
 
     #. /etc/init.d/vpn_common.sh && load_kernel_modules
