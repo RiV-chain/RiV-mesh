@@ -3,8 +3,6 @@
 #SYS_QPKG_SERVICE_ENABLED="FALSE"
 QPKG_NAME="mesh"
 CONF=/etc/config/mesh.conf
-QPKG_DIR=$SYS_QPKG_DIR
-QPKG_CONFIG=$CONF
 
 PKG_PRE_REMOVE="{
   killall -q mesh
@@ -30,11 +28,11 @@ pkg_install(){
      echo "Backing up configuration file to /var/backups/mesh.conf.`date +%Y%m%d`"
      cp $config_file /var/backups/mesh.conf.`date +%Y%m%d`
      echo "Normalising and updating $CONF"
-     ${QPKG_DIR}/bin/mesh -useconf -normaliseconf < /var/backups/mesh.conf.`date +%Y%m%d` > $CONF
+     ${SYS_QPKG_DIR}/bin/mesh -useconf -normaliseconf < /var/backups/mesh.conf.`date +%Y%m%d` > $CONF
   else
      echo "Generating initial configuration file $config_file"
      echo "Please familiarise yourself with this file before starting RiV-mesh"
-     sh -c "umask 0027 && ${QPKG_DIR}/bin/mesh -genconf > '$CONF'"
+     sh -c "umask 0027 && ${SYS_QPKG_DIR}/bin/mesh -genconf > '$CONF'"
   fi
 
 }
