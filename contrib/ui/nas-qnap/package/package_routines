@@ -30,7 +30,7 @@ pkg_install(){
   if [ -f $CONF ]; then
      mkdir -p /var/backups
      echo "Backing up configuration file to /var/backups/mesh.conf.`date +%Y%m%d`"
-     cp $config_file /var/backups/mesh.conf.`date +%Y%m%d`
+     cp $CONF /var/backups/mesh.conf.`date +%Y%m%d`
      echo "Normalising and updating $CONF"
      ${SYS_QPKG_DIR}/bin/mesh -useconf -normaliseconf < /var/backups/mesh.conf.`date +%Y%m%d` > $CONF
   else
