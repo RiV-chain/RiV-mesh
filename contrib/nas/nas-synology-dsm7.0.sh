@@ -89,13 +89,6 @@ chmod -R u+rwX,go+rX,g-w /tmp/$PKGFOLDER
 chmod -R 0755 /tmp/$PKGNAME/scripts
 chmod -R 0755 /tmp/$PKGNAME/conf
 
-#see instruction how to deploy dev env:
-#https://global.download.synology.com/download/Document/Software/DeveloperGuide/Firmware/DSM/7.0/enu/DSM_Developer_Guide_7_0_Beta.pdf
-#Page 13
-#fakeroot pkg_util.sh make_package /tmp/$PKGFOLDER /tmp/$PKGNAME
-#rm -rf /tmp/$PKGFOLDER/
-#fakeroot pkg_util.sh make_spk /tmp/$PKGNAME . $PKGNAME.spk
-
 fakeroot ./contrib/nas/tool/synology_pkg_util.sh make_package /tmp/$PKGFOLDER /tmp/$PKGNAME
 rm -rf /tmp/$PKGFOLDER/
 fakeroot ./contrib/nas/tool/synology_pkg_util.sh make_spk /tmp/$PKGNAME . $PKGNAME.spk
