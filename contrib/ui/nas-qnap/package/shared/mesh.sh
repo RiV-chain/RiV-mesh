@@ -10,23 +10,23 @@ load_kernel_modules(){
           local KERNEL_MODULES_PATH="/lib/modules"
           for M in ${KERNEL_MODULES}; do
            if [ -f ${KERNEL_MODULES_PATH}/vpn/${M}.ko ]; then
-                execute /sbin/insmod ${KERNEL_MODULES_PATH}/vpn/${M}.ko
+                /sbin/insmod ${KERNEL_MODULES_PATH}/vpn/${M}.ko
                 continue
            fi
            if [ -f ${KERNEL_MODULES_PATH}/qvpn/${M}.ko ]; then
-                execute /sbin/insmod ${KERNEL_MODULES_PATH}/qvpn/${M}.ko
+                /sbin/insmod ${KERNEL_MODULES_PATH}/qvpn/${M}.ko
                 continue
            fi
            if [ -f ${KERNEL_MODULES_PATH}/misc/${M}.ko ]; then
-                execute /sbin/insmod ${KERNEL_MODULES_PATH}/misc/${M}.ko
+                /sbin/insmod ${KERNEL_MODULES_PATH}/misc/${M}.ko
                 continue
            fi
            if [ -f ${KERNEL_MODULES_PATH}/others/${M}.ko ]; then
-                execute /sbin/insmod ${KERNEL_MODULES_PATH}/others/${M}.ko
+                /sbin/insmod ${KERNEL_MODULES_PATH}/others/${M}.ko
                 continue
            fi
            if [ -f ${KERNEL_MODULES_PATH}/${KERNEL_VERSION}/${M}.ko ]; then
-                execute /sbin/insmod ${KERNEL_MODULES_PATH}/${KERNEL_VERSION}/${M}.ko
+                /sbin/insmod ${KERNEL_MODULES_PATH}/${KERNEL_VERSION}/${M}.ko
                 continue
            fi
           done
