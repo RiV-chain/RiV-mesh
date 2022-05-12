@@ -3,6 +3,34 @@ QPKG_CONF="/etc/config/qpkg.conf"
 CONF="/etc/config/mesh.conf"
 QPKG_NAME="mesh"
 QPKG_DIR=$(/sbin/getcfg $QPKG_NAME Install_Path -f $QPKG_CONF)
+KERNEL_MODULES+=" tun"
+
+load_kernel_modules(){
+          local KERNEL_VERSION=$(/bin/uname -r)
+          local KERNEL_MODULES_PATH="/lib/modules"
+          for M in ${KERNEL_MODULES}; do
+           if [ -f ${KERNEL_MODULES_PATH}/vpn/${M}.ko ]; then
+                execute /sbin/insmod ${KERNEL_MODULES_PATH}/vpn/${M}.ko
+                continue
+           fi
+           if [ -f ${KERNEL_MODULES_PATH}/qvpn/${M}.ko ]; then
+                execute /sbin/insmod ${KERNEL_MODULES_PATH}/qvpn/${M}.ko
+                continue
+           fi
+           if [ -f ${KERNEL_MODULES_PATH}/misc/${M}.ko ]; then
+                execute /sbin/insmod ${KERNEL_MODULES_PATH}/misc/${M}.ko
+                continue
+           fi
+           if [ -f ${KERNEL_MODULES_PATH}/others/${M}.ko ]; then
+                execute /sbin/insmod ${KERNEL_MODULES_PATH}/others/${M}.ko
+                continue
+           fi
+           if [ -f ${KERNEL_MODULES_PATH}/${KERNEL_VERSION}/${M}.ko ]; then
+                execute /sbin/insmod ${KERNEL_MODULES_PATH}/${KERNEL_VERSION}/${M}.ko
+                continue
+           fi
+          done
+}
 
 start_service ()
 {
@@ -12,6 +40,8 @@ start_service ()
     #enable ipv6    
     sysctl -w net.ipv6.conf.all.disable_ipv6=0
     sysctl -w net.ipv6.conf.default.disable_ipv6=0
+    
+    load_kernel_modules
 
     #. /etc/init.d/vpn_common.sh && load_kernel_modules
 
