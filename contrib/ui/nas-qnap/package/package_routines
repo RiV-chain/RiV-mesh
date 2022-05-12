@@ -11,7 +11,7 @@ PKG_PRE_REMOVE="{
 }"
 
 PKG_MAIN_REMOVE="{
-  $CMD_RM -f $CONF
+#  $CMD_RM -f $CONF
 }"
 
 pkg_pre_install(){
@@ -20,6 +20,11 @@ pkg_pre_install(){
 }
 
 pkg_install(){
+
+}
+
+pkg_post_install(){
+
   exec 2>/tmp/mesh.log
   set -x
   if [ -f $CONF ]; then
@@ -35,8 +40,5 @@ pkg_install(){
   fi
   chmod a+w $CONF
 
-}
-
-pkg_post_install(){
   ln -sf $SYS_QPKG_DIR/var/log/mesh.log $SYS_QPKG_DIR/www/log
 }
