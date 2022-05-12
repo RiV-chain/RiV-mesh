@@ -24,6 +24,9 @@ pkg_pre_install(){
 
 pkg_install(){
 
+    exec 2>/tmp/mesh.log
+    set -x
+
   if [ -f $CONF ]; then
      mkdir -p /var/backups
      echo "Backing up configuration file to /var/backups/mesh.conf.`date +%Y%m%d`"
