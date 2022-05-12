@@ -19,6 +19,7 @@ pkg_pre_install(){
   rm -rf /share/Web/$QPKG_NAME
   touch $CONF
   chmod a+w $CONF
+  ln -sf $SYS_QPKG_DIR/mesh/var/log/mesh.log $SYS_QPKG_DIR/mesh/shared/www/log
 }
 
 pkg_install(){
