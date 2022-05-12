@@ -17,9 +17,7 @@ PKG_MAIN_REMOVE="{
 pkg_pre_install(){
   killall -q mesh
   rm -rf /share/Web/$QPKG_NAME
-  touch $CONF
-  chmod a+w $CONF
-  ln -sf $SYS_QPKG_DIR/mesh/var/log/mesh.log $SYS_QPKG_DIR/mesh/shared/www/log
+  ln -sf $SYS_QPKG_DIR/mesh/var/log/mesh.log $SYS_QPKG_DIR/mesh/www/log
 }
 
 pkg_install(){
@@ -38,5 +36,6 @@ pkg_install(){
      echo "Please familiarise yourself with this file before starting RiV-mesh"
      sh -c "umask 0027 && ${SYS_QPKG_DIR}/bin/mesh -genconf > '$CONF'"
   fi
+  chmod a+w $CONF
 
 }
