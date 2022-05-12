@@ -1,5 +1,6 @@
 var ed = {
 	partnerId: 1126,
+	brand: 'RiV Mesh',
 	applicationName: 'RiV Mesh Synology DSM App',
 	nasOSName: 'Synology DSM',
 	nasVisitEDWebsiteLogin: "https://github.com/RiV-chain/RiV-mesh",
@@ -23,7 +24,11 @@ var ed = {
 	},
 	getNasAuthUrl: function () {
 		ed.setCookie('EdSynoToken', "");
-		return "/";
+		var url = ed.getCookie('origin');
+		if (url === undefined) {
+			url = window.location.protocol + "//" + window.location.hostname + ":" + 5000;
+		}
+		return url;
 	}
 };
 $(function () {
@@ -62,6 +67,10 @@ $(function () {
 	for (var k in query) {
 		if (k === 'SynoToken') {
 			ed.setCookie('EdSynoToken', query[k]);
+			refresh = true;
+			delete query[k];
+		} else if (k === 'origin') {
+			ed.setCookie('origin', query[k]);
 			refresh = true;
 			delete query[k];
 		}
