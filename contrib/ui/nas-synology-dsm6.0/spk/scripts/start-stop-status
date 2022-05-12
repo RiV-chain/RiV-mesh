@@ -9,12 +9,12 @@ cd /
 
 set_proxy()
 {
-	if [ -f /etc/proxy.conf ]; then
-		. /etc/proxy.conf
-		if [ "$proxy_enabled" = "yes" ]; then
-			export http_proxy="$https_host":"$https_port"
-		fi
-	fi
+    if [ -f /etc/proxy.conf ]; then
+         . /etc/proxy.conf
+         if [ "$proxy_enabled" = "yes" ]; then
+              export http_proxy="$https_host":"$https_port"
+         fi
+    fi
 }
 
 start_service ()
@@ -23,12 +23,15 @@ start_service ()
     set_proxy
 
     if [ -f $config_file ]; then
-      echo "Normalising and updating $config_file"
-      ${BASE}/bin/mesh -useconf -normaliseconf < $config_file > $config_file  
+       mkdir -p /var/backups
+       echo "Backing up configuration file to /var/backups/mesh.conf.`date +%Y%m%d`"
+       cp $config_file /var/backups/mesh.conf.`date +%Y%m%d`
+       echo "Normalising and updating /etc/mesh.conf"
+       ${BASE}/bin/mesh -useconf -normaliseconf < /var/backups/mesh.conf.`date +%Y%m%d` > $config_file
     else
-      echo "Generating initial configuration file $config_file"
-      echo "Please familiarise yourself with this file before starting RiV-mesh"
-      sh -c "umask 0027 && ${BASE}/bin/mesh -genconf > '$config_file'"
+       echo "Generating initial configuration file $config_file"
+       echo "Please familiarise yourself with this file before starting RiV-mesh"
+       sh -c "umask 0027 && ${BASE}/bin/mesh -genconf > '$config_file'"
     fi
     
     # Create the necessary file structure for /dev/net/tun
@@ -67,12 +70,6 @@ stop_service ()
     fi
     kill "$pid"
 }
-
-#status_service ()
-#{
-#    ${BASE}/bin/mesh -S
-#    return $?
-#}
 
 status_service ()
 {
