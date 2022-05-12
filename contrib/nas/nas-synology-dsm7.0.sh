@@ -86,7 +86,8 @@ cp LICENSE /tmp/$PKGNAME/
 
 chmod -R 0755 /tmp/$PKGFOLDER/www/assets
 chmod -R u+rwX,go+rX,g-w /tmp/$PKGFOLDER
-chmod -R +x /tmp/$PKGNAME/scripts
+chmod -R 0755 /tmp/$PKGNAME/scripts
+chmod -R 0755 /tmp/$PKGNAME/conf
 
 #see instruction how to deploy dev env:
 #https://global.download.synology.com/download/Document/Software/DeveloperGuide/Firmware/DSM/7.0/enu/DSM_Developer_Guide_7_0_Beta.pdf
