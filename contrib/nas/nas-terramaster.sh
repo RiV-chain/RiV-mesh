@@ -15,7 +15,7 @@ PKG=$(sh contrib/semmsiver/name.sh)
 PKGVERSION=$(sh contrib/msi/msversion.sh --bare)
 PKGARCH=${PKGARCH-amd64}
 PKGFOLDER=$ENV_TAG-$PKGARCH-$PKGVERSION
-PKGFILE=mesh-$PKGFOLDER.qpkg
+PKGFILE=mesh-$PKGFOLDER.tpk
 PKGREPLACES=mesh
 
 if [ $PKGBRANCH = "master" ]; then
@@ -69,16 +69,23 @@ EOF
 cp mesh /tmp/$PKGFOLDER/mesh/usr/bin
 cp meshctl /tmp/$PKGFOLDER/mesh/usr/bin
 cp riv.svg /tmp/$PKGFOLDER/mesh/usr/www/images/icons/mesh.svg
+ln -s /usr/mesh/var/log/mesh.log /tmp/$PKGFOLDER/mesh/usr/local/mesh/www/log
 chmod +x /tmp/$PKGFOLDER/mesh/usr/bin/*
 chmod 0775 /tmp/$PKGFOLDER/mesh/usr/www -R
 chmod -R u+rwX,go+rX,g-w /tmp/$PKGFOLDER
 
 curent_dir=$(pwd)
 
-cd /tmp/$PKGFOLDER/ 
+cd /tmp/$PKGFOLDER/
 
 cp $TERRAMASTER_TOOLS/makeapp .
 cp $TERRAMASTER_TOOLS/install-* .
 cp -r $TERRAMASTER_TOOLS/phpencode .
 
 ./makeapp mesh
+
+cd dist/$PKGFOLDER && mv *.tpk "$curent_dir"/$PKGFILE
+
+cd "$curent_dir"
+
+rm -rf /tmp/$PKGFOLDER/
