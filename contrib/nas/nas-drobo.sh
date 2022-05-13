@@ -16,7 +16,7 @@ PKGVERSION=$(sh contrib/semver/version.sh --bare)
 PKGARCH=${PKGARCH-amd64}
 PKGNAME=$ENV_TAG-$PKGARCH-$PKGVERSION
 PKGFOLDER=$PKGNAME/mesh
-PKGFILE=mesh-$ENV_TAG-$PKGARCH-$PKGVERSION.tar.gz
+PKGFILE=mesh-$PKGNAME.tar.gz
 PKGREPLACES=mesh
 
 if [ $PKGBRANCH = "master" ]; then
@@ -65,7 +65,9 @@ cd /tmp/$PKGFOLDER && tar czf ../mesh.tgz $(ls .)
 cd ../ && md5sum mesh.tgz > mesh.tgz.md5
 tar czf $PKGFILE mesh.tgz mesh.tgz.md5
 
-mv $PKGFILE $current_dir
+mv $PKGFILE "$current_dir"
+
+cd "$current_dir"
 
 rm -rf /tmp/$PKGNAME/
 
