@@ -65,7 +65,7 @@ cd /tmp/$PKGFOLDER && tar czf ../mesh.tgz $(ls .)
 cd ../ && md5sum mesh.tgz > mesh.tgz.md5
 tar czf $PKGFILE mesh.tgz mesh.tgz.md5
 
-mv $PKGFILE $current_dir
+mv $PKGFILE "$current_dir"
 
 rm -rf /tmp/$PKGNAME/
 
