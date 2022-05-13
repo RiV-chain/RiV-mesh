@@ -60,7 +60,7 @@ start()
     -wwwroot "$base_dir/www" \
     -logto "$base_dir/var/log/mesh.log" &    
     
-    if [ -z $(pidof mesh) ]; then
+    if [[ ! -z $(pidof mesh) ]]; then
 	echo 1 > $errorfile
 	echo "Application starting error" > $edstatusfile
     fi
