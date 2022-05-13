@@ -22,7 +22,12 @@ _install() {
 }
 
 _uninstall() {
-	echo 'uninstall successful'
+    pid=`pidof -s mesh`
+    if [ -z "$pid" ]; then
+       echo "mesh was not running"
+    else
+       kill "$pid"
+    fi
 }
 
 _update() {

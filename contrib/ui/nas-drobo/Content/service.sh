@@ -105,6 +105,7 @@ stop()
        echo 1 > "${errorfile}"
        echo "mesh was not running" > $statusfile
     else
+       kill "$pid"
        echo 0 > "${errorfile}"
        echo "Application is stopped" > $statusfile
     fi
