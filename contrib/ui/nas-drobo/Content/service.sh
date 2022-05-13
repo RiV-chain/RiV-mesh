@@ -9,13 +9,14 @@ base_dir=/mnt/DroboFS/Shares/DroboApps/mesh
 config_dir="$base_dir/config"
 config_file="$config_dir/mesh.conf"
 
-name="RiV Mesh"
+name="mesh"
 framework_version="2.1"
 description="RiV-mesh is an implementation of a fully end-to-end encrypted IPv6 network"
 depends=""
 webui="WebUI"
 
 errorfile=/tmp/DroboApps/mesh/error.txt
+pidfile=/tmp/DroboApps/mesh/pid.txt
 statusfile=/tmp/DroboApps/mesh/status.txt
 edstatusfile=$base_dir/var/lib/mesh/status
 
@@ -84,10 +85,11 @@ update_status()
 	# if we don't have file here. throw error into status and return
 	if [ -z $(pidof -s mesh) ]
 	then
+		echo "" > "$pidfile"
 		echo 1 > "${errorfile}"
 		echo "Configuration required" > $statusfile
-		return
         else
+        	echo $(pidof -s mesh) > "$pidfile"
         	echo 0 > "${errorfile}"
 		echo "Application is running" > $statusfile
 	fi
@@ -105,6 +107,7 @@ stop()
        echo 0 > "${errorfile}"
        echo "Application is stopped" > $statusfile
     fi
+    echo "" > "$pidfile"
 
 }
 
