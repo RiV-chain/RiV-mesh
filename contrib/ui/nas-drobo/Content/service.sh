@@ -60,10 +60,6 @@ start()
     -wwwroot "$base_dir/www" \
     -logto "$base_dir/var/log/mesh.log" &    
     
-    if [[ ! -z $(pidof mesh) ]]; then
-	echo 1 > $errorfile
-	echo "Application starting error" > $edstatusfile
-    fi
     sleep 1
     update_status
 }
@@ -74,7 +70,7 @@ update_status()
 	# wait until file appears
 	i=30
 
-	while [[ ! -z $(pidof mesh) ]] 
+	while [ -z $(pidof -s mesh) ] 
 	do
 		sleep 1
 		i=$((i-1))
@@ -86,7 +82,7 @@ update_status()
 	done
 
 	# if we don't have file here. throw error into status and return
-	if [[ ! -z $(pidof mesh) ]]
+	if [ -z $(pidof -s mesh) ]
 	then
 		echo 1 > "${errorfile}"
 		echo "Configuration required" > $statusfile
