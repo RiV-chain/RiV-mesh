@@ -14,7 +14,8 @@ PKGBRANCH=$(basename `git name-rev --name-only HEAD`)
 PKG=$(sh contrib/semver/name.sh)
 PKGVERSION=$(sh contrib/semver/version.sh --bare)
 PKGARCH=${PKGARCH-amd64}
-PKGFOLDER=$ENV_TAG-$PKGARCH-$PKGVERSION/mesh
+PKGNAME=$ENV_TAG-$PKGARCH-$PKGVERSION
+PKGFOLDER=$PKGNAME/mesh
 PKGFILE=mesh-$ENV_TAG-$PKGARCH-$PKGVERSION.tar.gz
 PKGREPLACES=mesh
 
@@ -32,8 +33,14 @@ echo "Building $PKGFOLDER"
 
 rm -rf /tmp/$PKGFOLDER
 
-mkdir -p /tmp/$PKGFOLDER/
-mkdir -p /tmp/$PKGFOLDER/log
+mkdir -p /tmp/$PKGFOLDER/bin
+mkdir -p /tmp/$PKGFOLDER/config
+mkdir -p /tmp/$PKGFOLDER/var/log
+mkdir -p /tmp/$PKGFOLDER/lib/modules
+for kernel in 3.2.96-3 3.2.58-2 3.2.58-1 3.2.58 3.2.27; do
+  echo "Loading tun module for Linux kernel $kernel"
+  wget -N ftp://updates.drobo.com/droboapps/kernelmodules/5N/3.2.96-3/tun.ko -P /tmp/$PKGFOLDER/lib/modules/$kernel
+done
 mkdir -p /tmp/$PKGFOLDER/tmp
 chmod 0775 /tmp/$PKGFOLDER/ -R
 
@@ -45,16 +52,20 @@ cat > /tmp/$PKGFOLDER/version.txt << EOF
 $PKGVERSION
 EOF
 
-cp mesh /tmp/$PKGFOLDER/
-cp meshctl /tmp/$PKGFOLDER/
+cp mesh /tmp/$PKGFOLDER/bin
+cp meshctl /tmp/$PKGFOLDER/bin
 cp LICENSE /tmp/$PKGFOLDER/
-chmod +x /tmp/$PKGFOLDER/mesh /tmp/$PKGFOLDER/meshctl
 chmod +x /tmp/$PKGFOLDER/*.sh
+chmod +x /tmp/$PKGFOLDER/bin/*
 chmod 0775 /tmp/$PKGFOLDER/www -R
+
+current_dir=$(pwd)
 
 cd /tmp/$PKGFOLDER && tar czf ../mesh.tgz $(ls .)
 cd ../ && md5sum mesh.tgz > mesh.tgz.md5
 tar czf $PKGFILE mesh.tgz mesh.tgz.md5
 
-#rm -rf /tmp/$PKGFOLDER/
-#mv *.apk $PKGFILE
+mv $PKGFILE $current_dir
+
+rm -rf /tmp/$PKGNAME/
+

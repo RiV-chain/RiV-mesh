@@ -16,14 +16,14 @@ _install() {
 			echo 3 > "${errorfile}"
 		fi
 	fi
-
+	ln -s $base_dir/var/log/mesh.log $base_dir/www/log
 	# install apache 2.x
 	#/usr/bin/DroboApps.sh install_version apache 2
 }
 
 _uninstall() {
-	LOG_SYMLINK=/var/log/mesh.log
-	[ -L $LOG_SYMLINK ] && rm -f $LOG_SYMLINK
+	#LOG_SYMLINK=/var/log/mesh.log
+	#[ -L $LOG_SYMLINK ] && rm -f $LOG_SYMLINK
 }
 
 _update() {

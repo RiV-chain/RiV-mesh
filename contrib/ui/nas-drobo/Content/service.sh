@@ -6,15 +6,14 @@
 
 prog_dir=`dirname \`realpath $0\``
 base_dir=/mnt/DroboFS/Shares/DroboApps/mesh
-config_dir=$base_dir/config
+config_dir="$base_dir/config"
+config_file="$config_dir/mesh.conf"
 
-name="mesh"
+name="RiV Mesh"
 framework_version="2.1"
-description="Secure cloud backup solution optimized for the Drobo platform"
+description="RiV-mesh is an implementation of a fully end-to-end encrypted IPv6 network"
 depends=""
 webui="WebUI"
-pidfile=/tmp/DroboApps/mesh/pid.txt
-daemon=$base_dir/mesh
 
 errorfile=/tmp/DroboApps/mesh/error.txt
 statusfile=/tmp/DroboApps/mesh/status.txt
@@ -22,32 +21,51 @@ edstatusfile=$base_dir/var/lib/mesh/status
 
 start()
 {
-	mkdir -p /tmp/DroboApps/mesh
-	# delete edstatufile before starting daemon to delete previous status
-	rm -f $edstatusfile
-	rm -f $errorfile
+    mkdir -p /tmp/DroboApps/mesh
+    # delete edstatufile before starting daemon to delete previous status
+    rm -f $edstatusfile
+    rm -f $errorfile
 
     if [ -f $config_file ]; then
        mkdir -p /var/backups
        echo "Backing up configuration file to /var/backups/mesh.conf.`date +%Y%m%d`"
        cp $config_file /var/backups/mesh.conf.`date +%Y%m%d`
        echo "Normalising and updating /etc/mesh.conf"
-       $daemon -useconf -normaliseconf < /var/backups/mesh.conf.`date +%Y%m%d` > $config_file
+       $base_dir/bin/mesh -useconf -normaliseconf < /var/backups/mesh.conf.`date +%Y%m%d` > $config_file
     else
        mkdir -p $config_dir
        echo "Generating initial configuration file $config_file"
        echo "Please familiarise yourself with this file before starting RiV-mesh"
-       sh -c "umask 0027 && $daemon -genconf > '$config_file'"
+       sh -c "umask 0027 && $base_dir/bin/mesh -genconf > '$config_file'"
     fi
-    
-    
 
-	if [ -z $(pidof mesh) ]; then
-		echo 1 > $errorfile
-		echo "Application starting error" > $edstatusfile
-	fi
-	sleep 1
-	update_status
+    # Create the necessary file structure for /dev/net/tun
+    if ( [ ! -c /dev/net/tun ] ); then
+      if ( [ ! -d /dev/net ] ); then
+      mkdir -m 755 /dev/net
+    fi
+      mknod /dev/net/tun c 10 200
+      chmod 0755 /dev/net/tun
+    fi
+
+    # Load the tun module if not already loaded
+    if ( !(lsmod | grep -q "^tun\s") ); then
+      KERNEL_VERSION=$(/bin/uname -r)
+      insmod $base_dir/lib/modules/$KERNEL_VERSION/tun.ko
+    fi
+
+    # Launch the mesh in the background.
+    ${base_dir}/bin/mesh -useconffile "$config_file" \
+    -httpaddress "http://localhost:19019" \
+    -wwwroot "$base_dir/www" \
+    -logto "$base_dir/var/log/mesh.log" &    
+    
+    if [ -z $(pidof mesh) ]; then
+	echo 1 > $errorfile
+	echo "Application starting error" > $edstatusfile
+    fi
+    sleep 1
+    update_status
 }
 
 update_status()
