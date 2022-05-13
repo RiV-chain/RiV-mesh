@@ -67,5 +67,7 @@ tar czf $PKGFILE mesh.tgz mesh.tgz.md5
 
 mv $PKGFILE "$current_dir"
 
+cd "$current_dir"
+
 rm -rf /tmp/$PKGNAME/
 
