@@ -16,7 +16,7 @@ PKGVERSION=$(sh contrib/semver/version.sh --bare)
 PKGARCH=${PKGARCH-amd64}
 PKGNAME=$ENV_TAG-$PKGARCH-$PKGVERSION
 PKGFOLDER=$PKGNAME/mesh
-PKGFILE=mesh-$ENV_TAG-$PKGARCH-$PKGVERSION.tar.gz
+PKGFILE=mesh-$PKGNAME.tar.gz
 PKGREPLACES=mesh
 
 if [ $PKGBRANCH = "master" ]; then
