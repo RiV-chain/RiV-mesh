@@ -72,9 +72,9 @@ update_status()
 {
 
 	# wait until file appears
-	i=60
+	i=30
 
-	while [ -z $(pidof mesh) ] 
+	while [[ ! -z $(pidof mesh) ]] 
 	do
 		sleep 1
 		i=$((i-1))
@@ -86,7 +86,7 @@ update_status()
 	done
 
 	# if we don't have file here. throw error into status and return
-	if [ -z $(pidof mesh) ] 
+	if [[ ! -z $(pidof mesh) ]]
 	then
 		echo 1 > "${errorfile}"
 		echo "Configuration required" > $statusfile
