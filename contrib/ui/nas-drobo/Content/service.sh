@@ -100,9 +100,15 @@ update_status()
 
 stop()
 {
-		killall $name
-		echo 0 > "${errorfile}"
-		echo "Application is stopped" > $statusfile
+    pid=`pidof -s mesh`
+    if [ -z "$pid" ]; then
+       echo 1 > "${errorfile}"
+       echo "mesh was not running" > $statusfile
+    else
+       echo 0 > "${errorfile}"
+       echo "Application is stopped" > $statusfile
+    fi
+
 }
 
 case "$1" in
