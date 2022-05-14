@@ -37,10 +37,27 @@ mkdir -p /tmp/$PKGFOLDER/bin
 mkdir -p /tmp/$PKGFOLDER/config
 mkdir -p /tmp/$PKGFOLDER/var/log
 mkdir -p /tmp/$PKGFOLDER/lib/modules
-for kernel in 3.2.96-3 3.2.58-2 3.2.58-1 3.2.58 3.2.27; do
-  echo "Loading tun module for Linux kernel $kernel"
-  wget -N ftp://updates.drobo.com/droboapps/kernelmodules/5N/3.2.96-3/tun.ko -P /tmp/$PKGFOLDER/lib/modules/$kernel
-done
+
+if [ $ENV_TAG = "nas-drobo-5n" ]; then
+   for kernel in 3.2.96-3 3.2.58-2 3.2.58-1 3.2.58 3.2.27; do
+     echo "Loading tun module for Linux kernel $kernel"
+     wget -N ftp://updates.drobo.com/droboapps/kernelmodules/5N/3.2.96-3/tun.ko -P /tmp/$PKGFOLDER/lib/modules/$kernel
+   done
+elif [ $ENV_TAG = "nas-drobo-5n2" ]; then
+   for kernel in 3.2.96-3 3.2.58-2; do
+     echo "Loading tun module for Linux kernel $kernel"
+     wget -N ftp://updates.drobo.com/droboapps/kernelmodules/5N2/3.2.96-3/tun.ko -P /tmp/$PKGFOLDER/lib/modules/$kernel
+   done
+elif [ $ENV_TAG = "nas-drobo-b810n" ]; then
+   for kernel in 3.2.96-3 3.2.58-2 3.2.58-1 3.2.58; do
+     echo "Loading tun module for Linux kernel $kernel"
+     wget -N ftp://updates.drobo.com/droboapps/kernelmodules/B810n/3.2.96-3/tun.ko -P /tmp/$PKGFOLDER/lib/modules/$kernel
+   done
+else
+  echo "Specify ENV_TAG=nas-drobo-5n or nas-drobo-5n2 or nas-drobo-b810n"
+  exit 1
+fi
+
 mkdir -p /tmp/$PKGFOLDER/tmp
 chmod 0775 /tmp/$PKGFOLDER/ -R
 
