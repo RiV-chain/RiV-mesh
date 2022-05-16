@@ -115,6 +115,9 @@ func (l *links) call(u *url.URL, sintf string) error {
 			}
 		}
 		l.tcp.call(u.Host, tcpOpts, sintf)
+	case "quic":
+		tcpOpts.upgrade = l.tcp.tls.forDialer
+		l.tcp.call(u.Host, tcpOpts, sintf)
 	default:
 		return errors.New("unknown call scheme: " + u.Scheme)
 	}
