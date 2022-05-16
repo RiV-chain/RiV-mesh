@@ -28,6 +28,7 @@ import (
 
 	"github.com/RiV-chain/RiV-mesh/src/address"
 	//"github.com/RiV-chain/RiV-mesh/src/util"
+	quicconn "github.com/vikulin/quic-conn"
 )
 
 const default_timeout = 6 * time.Second
@@ -145,6 +146,8 @@ func (t *tcp) listenURL(u *url.URL, sintf string) (*TcpListener, error) {
 		listener, err = t.listen(hostport, nil)
 	case "tls":
 		listener, err = t.listen(hostport, t.tls.forListener)
+	case "quic":
+		listener, err = t.listenQuic(hostport, t.tls)
 	default:
 		t.links.core.log.Errorln("Failed to add listener: listener", u.String(), "is not correctly formatted, ignoring")
 	}
@@ -163,6 +166,26 @@ func (t *tcp) listen(listenaddr string, upgrade *TcpUpgrade) (*TcpListener, erro
 		l := TcpListener{
 			Listener: listener,
 			opts:     tcpOptions{upgrade: upgrade},
+			stop:     make(chan struct{}),
+		}
+		t.waitgroup.Add(1)
+		go t.listener(&l, listenaddr)
+		return &l, nil
+	} else {
+		t.links.core.log.Errorln("Failed start listener: ", listenaddr)
+	}
+
+	return nil, err
+}
+
+func (t *tcp) listenQuic(listenaddr string, tls tcptls) (*TcpListener, error) {
+	var err error
+	listener, err := quicconn.Listen("udp", listenaddr, tls.config)
+	//update proto here?
+	if err == nil {
+		l := TcpListener{
+			Listener: listener,
+			opts:     tcpOptions{upgrade: tls.forListener},
 			stop:     make(chan struct{}),
 		}
 		t.waitgroup.Add(1)
