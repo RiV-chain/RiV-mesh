@@ -134,95 +134,105 @@ func (t *tcp) stop() error {
 func (t *tcp) listenURL(u *url.URL, sintf string) (*TcpListener, error) {
 	var listener *TcpListener
 	var err error
-	hostport := u.Host // Used for tcp and tls
+	var urlstring string
+	//reconstruct URL here
 	if len(sintf) != 0 {
-		host, port, err := net.SplitHostPort(hostport)
+		host, port, err := net.SplitHostPort(u.Host)
 		if err == nil {
-			hostport = fmt.Sprintf("[%s%%%s]:%s", host, sintf, port)
+			urlstring = fmt.Sprintf("%s://[%s%%%s]:%s", u.Scheme, host, sintf, port)
+		}
+		u, err = url.Parse(urlstring)
+		if err != nil {
+			t.links.core.log.Errorln("Failed to parse listener: listener", urlstring, "is not correctly formatted, ignoring")
 		}
 	}
 	switch u.Scheme {
 	case "tcp":
-		listener, err = t.listen(hostport, nil)
+		listener, err = t.listen(u, nil)
 	case "tls":
-		listener, err = t.listen(hostport, t.tls.forListener)
+		listener, err = t.listen(u, t.tls.forListener)
 	case "quic":
-		listener, err = t.listenQuic(hostport, t.tls)
+		listener, err = t.listenQuic(u, t.tls)
 	default:
 		t.links.core.log.Errorln("Failed to add listener: listener", u.String(), "is not correctly formatted, ignoring")
 	}
 	return listener, err
 }
 
-func (t *tcp) listen(listenaddr string, upgrade *TcpUpgrade) (*TcpListener, error) {
+func (t *tcp) listen(u *url.URL, upgrade *TcpUpgrade) (*TcpListener, error) {
 	var err error
 
 	ctx := t.links.core.ctx
 	lc := net.ListenConfig{
 		Control: t.tcpContext,
 	}
-	listener, err := lc.Listen(ctx, "tcp", listenaddr)
+	listener, err := lc.Listen(ctx, "tcp", u.Host)
 	if err == nil {
 		l := TcpListener{
 			Listener: listener,
-			opts:     tcpOptions{upgrade: upgrade},
+			opts:     tcpOptions{
+				upgrade: upgrade,
+			},
 			stop:     make(chan struct{}),
 		}
 		t.waitgroup.Add(1)
-		go t.listener(&l, listenaddr)
+		go t.listener(&l, u)
 		return &l, nil
 	} else {
-		t.links.core.log.Errorln("Failed start listener: ", listenaddr)
+		t.links.core.log.Errorln("Failed start listener: ", u.Host)
 	}
 
 	return nil, err
 }
 
-func (t *tcp) listenQuic(listenaddr string, tls tcptls) (*TcpListener, error) {
+func (t *tcp) listenQuic(u *url.URL, tls tcptls) (*TcpListener, error) {
 	var err error
-	listener, err := quicconn.Listen("udp", listenaddr, tls.config)
-	//update proto here?
+	listener, err := quicconn.Listen("udp", u.Host, tls.config)
 	if err == nil {
+		//update proto here?
+		//tls.forListener.name = "quic"
 		l := TcpListener{
 			Listener: listener,
-			opts:     tcpOptions{upgrade: tls.forListener},
+			opts:     tcpOptions{
+				upgrade: tls.forListener,
+			},
 			stop:     make(chan struct{}),
 		}
 		t.waitgroup.Add(1)
-		go t.listener(&l, listenaddr)
+		go t.listener(&l, u)
 		return &l, nil
 	} else {
-		t.links.core.log.Errorln("Failed start listener: ", listenaddr)
+		t.links.core.log.Errorln("Failed start listener: ", u.Host)
 	}
 
 	return nil, err
 }
 
 // Runs the listener, which spawns off goroutines for incoming connections.
-func (t *tcp) listener(l *TcpListener, listenaddr string) {
+func (t *tcp) listener(l *TcpListener, u *url.URL) {
 	defer t.waitgroup.Done()
 	if l == nil {
 		return
 	}
 	// Track the listener so that we can find it again in future
 	t.mutex.Lock()
-	if _, isIn := t.listeners[listenaddr]; isIn {
+	if _, isIn := t.listeners[u.Host]; isIn {
 		t.mutex.Unlock()
 		l.Listener.Close()
 		return
 	}
-	callproto := "TCP"
+	callproto := strings.ToUpper(u.Scheme)
 	if l.opts.upgrade != nil {
 		callproto = strings.ToUpper(l.opts.upgrade.name)
 	}
-	t.listeners[listenaddr] = l
+	t.listeners[u.Host] = l
 	t.mutex.Unlock()
 	// And here we go!
 	defer func() {
 		t.links.core.log.Infoln("Stopping", callproto, "listener on:", l.Listener.Addr().String())
 		l.Listener.Close()
 		t.mutex.Lock()
-		delete(t.listeners, listenaddr)
+		delete(t.listeners, u.Host)
 		t.mutex.Unlock()
 	}()
 	t.links.core.log.Infoln("Listening for", callproto, "on:", l.Listener.Addr().String())
@@ -263,15 +273,15 @@ func (t *tcp) startCalling(saddr string) bool {
 // If the dial is successful, it launches the handler.
 // When finished, it removes the outgoing call, so reconnection attempts can be made later.
 // This all happens in a separate goroutine that it spawns.
-func (t *tcp) call(saddr string, options tcpOptions, sintf string) {
+func (t *tcp) call(u *url.URL, options tcpOptions, sintf string) {
 	go func() {
-		callname := saddr
-		callproto := "TCP"
+		callname := u.Host
+		callproto := strings.ToUpper(u.Scheme)
 		if options.upgrade != nil {
 			callproto = strings.ToUpper(options.upgrade.name)
 		}
 		if sintf != "" {
-			callname = fmt.Sprintf("%s/%s/%s", callproto, saddr, sintf)
+			callname = fmt.Sprintf("%s/%s/%s", callproto, u.Host, sintf)
 		}
 		if !t.startCalling(callname) {
 			return
@@ -301,18 +311,19 @@ func (t *tcp) call(saddr string, options tcpOptions, sintf string) {
 				return
 			}
 			ctx, done := context.WithTimeout(t.links.core.ctx, default_timeout)
-			conn, err = dialer.(proxy.ContextDialer).DialContext(ctx, "tcp", saddr)
+			pathtokens := strings.Split(strings.Trim(u.Path, "/"), "/")
+			conn, err = dialer.(proxy.ContextDialer).DialContext(ctx, "tcp", pathtokens[0])
 			done()
 			if err != nil {
 				return
 			}
 			t.waitgroup.Add(1)
-			options.socksPeerAddr = saddr
+			options.socksPeerAddr = u.Host
 			if ch := t.handler(conn, false, options); ch != nil {
 				<-ch
 			}
 		} else {
-			dst, err := net.ResolveTCPAddr("tcp", saddr)
+			dst, err := net.ResolveIPAddr("ip", u.Host)
 			if err != nil {
 				return
 			}
@@ -370,7 +381,18 @@ func (t *tcp) call(saddr string, options tcpOptions, sintf string) {
 				}
 			}
 			ctx, done := context.WithTimeout(t.links.core.ctx, default_timeout)
-			conn, err = dialer.DialContext(ctx, "tcp", dst.String())
+			switch u.Scheme {
+			case "tcp":
+				conn, err = dialer.DialContext(ctx, "tcp", dst.String()+":"+u.Port())
+			case "tls":
+				conn, err = dialer.DialContext(ctx, "tcp", dst.String()+":"+u.Port())
+			case "quic":
+				conn, err = dialer.DialContext(ctx, "udp", dst.String()+":"+u.Port())
+			default:
+				t.links.core.log.Errorln("Unknown schema:", u.String(), " is not correctly formatted, ignoring")
+				return
+			}
+			
 			done()
 			if err != nil {
 				t.links.core.log.Debugf("Failed to dial %s: %s", callproto, err)

@@ -85,7 +85,7 @@ func (l *links) call(u *url.URL, sintf string) error {
 	}
 	switch u.Scheme {
 	case "tcp":
-		l.tcp.call(u.Host, tcpOpts, sintf)
+		l.tcp.call(u, tcpOpts, sintf)
 	case "socks":
 		tcpOpts.socksProxyAddr = u.Host
 		if u.User != nil {
@@ -94,8 +94,7 @@ func (l *links) call(u *url.URL, sintf string) error {
 			tcpOpts.socksProxyAuth.Password, _ = u.User.Password()
 		}
 		tcpOpts.upgrade = l.tcp.tls.forDialer // TODO make this configurable
-		pathtokens := strings.Split(strings.Trim(u.Path, "/"), "/")
-		l.tcp.call(pathtokens[0], tcpOpts, sintf)
+		l.tcp.call(u, tcpOpts, sintf)
 	case "tls":
 		tcpOpts.upgrade = l.tcp.tls.forDialer
 		// SNI headers must contain hostnames and not IP addresses, so we must make sure
@@ -114,11 +113,11 @@ func (l *links) call(u *url.URL, sintf string) error {
 				tcpOpts.tlsSNI = host
 			}
 		}
-		l.tcp.call(u.Host, tcpOpts, sintf)
+		l.tcp.call(u, tcpOpts, sintf)
 	case "quic":
 		//remove upgrade
 		//tcpOpts.upgrade = l.tcp.tls.forDialer
-		l.tcp.call(u.Host, tcpOpts, sintf)
+		l.tcp.call(u, tcpOpts, sintf)
 	default:
 		return errors.New("unknown call scheme: " + u.Scheme)
 	}
