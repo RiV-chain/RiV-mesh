@@ -74,6 +74,7 @@ func (t *tcptls) init(tcp *tcp) {
 		},
 		InsecureSkipVerify: true,
 		MinVersion:         tls.VersionTLS13,
+		NextProtos:   []string{"quic-riv-mesh"},
 	}
 }
 
