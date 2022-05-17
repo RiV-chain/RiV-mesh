@@ -136,14 +136,16 @@ func (t *tcp) listenURL(u *url.URL, sintf string) (*TcpListener, error) {
 	var err error
 	var urlstring string
 	//reconstruct URL here
+	
 	if len(sintf) != 0 {
 		host, port, err := net.SplitHostPort(u.Host)
 		if err == nil {
-			urlstring = fmt.Sprintf("%s://[%s%%%s]:%s", u.Scheme, host, sintf, port)
+			urlstring = fmt.Sprintf("%s://[%s%%25%s]:%s", u.Scheme, host, url.QueryEscape(sintf), port)
 		}
 		u, err = url.Parse(urlstring)
 		if err != nil {
-			t.links.core.log.Errorln("Failed to parse listener: listener", urlstring, "is not correctly formatted, ignoring")
+			t.links.core.log.Errorln("Failed to parse listener: url", urlstring, "is not correctly formatted, ignoring")
+			return nil, err
 		}
 	}
 	switch u.Scheme {
