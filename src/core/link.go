@@ -166,6 +166,8 @@ func (intf *link) handler() (chan struct{}, error) {
 		n, err = intf.conn.Write(metaBytes)
 		if err == nil && n != len(metaBytes) {
 			err = errors.New("incomplete metadata send")
+		} else {
+			intf.links.core.log.Debugln("DEBUG: sent meta: %d bites", n)
 		}
 	}) {
 		return nil, errors.New("timeout on metadata send")
