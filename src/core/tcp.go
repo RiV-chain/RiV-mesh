@@ -273,7 +273,7 @@ func (t *tcp) startCalling(saddr string) bool {
 // This all happens in a separate goroutine that it spawns.
 func (t *tcp) call(u *url.URL, options tcpOptions, sintf string) {
 	go func() {
-		t.links.core.log.Debugf("Started dial call for %s: ", u)
+		t.links.core.log.Debugf("Started dial call for %s ", u)
 		callname := u.Host
 		callproto := strings.ToUpper(u.Scheme)
 		if options.upgrade != nil {
@@ -322,7 +322,7 @@ func (t *tcp) call(u *url.URL, options tcpOptions, sintf string) {
 				<-ch
 			}
 		} else {
-			t.links.core.log.Debugf("Resolving IP %s: ", u.Host)
+			t.links.core.log.Debugf("Resolving IP %s ", u.Host)
 			dst, err := net.ResolveIPAddr("ip", u.Host)
 			if err != nil {
 				return
@@ -407,6 +407,7 @@ func (t *tcp) call(u *url.URL, options tcpOptions, sintf string) {
 }
 
 func (t *tcp) handler(sock net.Conn, incoming bool, options tcpOptions) chan struct{} {
+	t.links.core.log.Debugf("Started dial handler for %s ", sock)
 	defer t.waitgroup.Done() // Happens after sock.close
 	defer sock.Close()
 	t.setExtraOptions(sock)
