@@ -196,7 +196,7 @@ func (t *tcp) listenQuic(u *url.URL, tls tcptls) (*TcpListener, error) {
 		l := TcpListener{
 			Listener: listener,
 			opts:     tcpOptions{
-				upgrade: tls.forListener,
+				upgrade: nil,
 			},
 			stop:     make(chan struct{}),
 		}
