@@ -398,7 +398,6 @@ func (t *tcp) call(u *url.URL, options tcpOptions, sintf string) {
 				conn, err = dialer.DialContext(ctx, "tcp", dst.String()+":"+port)
 			case "quic":
 				conn, err = quicconn.Dial(dst.String()+":"+port, t.tls.config)
-				//conn, err = dialer.DialContext(ctx, "udp", dst.String()+":"+port)
 			default:
 				t.links.core.log.Errorln("Unknown schema:", u.String(), " is not correctly formatted, ignoring")
 				return
