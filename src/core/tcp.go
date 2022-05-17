@@ -240,7 +240,9 @@ func (t *tcp) listener(l *TcpListener, u *url.URL) {
 	}()
 	defer l.Stop()
 	for {
+		t.links.core.log.Infoln("Accepting listener for", u.String())
 		sock, err := l.Listener.Accept()
+		t.links.core.log.Infoln("Accepted listener for", sock)
 		if err != nil {
 			t.links.core.log.Errorln("Failed to accept connection:", err)
 			select {
@@ -395,7 +397,8 @@ func (t *tcp) call(u *url.URL, options tcpOptions, sintf string) {
 			case "tls":
 				conn, err = dialer.DialContext(ctx, "tcp", dst.String()+":"+port)
 			case "quic":
-				conn, err = dialer.DialContext(ctx, "udp", dst.String()+":"+port)
+				conn, err = quicconn.Dial(dst.String()+":"+port, t.tls.config)
+				//conn, err = dialer.DialContext(ctx, "udp", dst.String()+":"+port)
 			default:
 				t.links.core.log.Errorln("Unknown schema:", u.String(), " is not correctly formatted, ignoring")
 				return
