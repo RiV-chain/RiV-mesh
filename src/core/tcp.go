@@ -323,8 +323,14 @@ func (t *tcp) call(u *url.URL, options tcpOptions, sintf string) {
 			}
 		} else {
 			t.links.core.log.Debugf("Resolving IP %s ", u.Host)
-			dst, err := net.ResolveIPAddr("ip", u.Host)
+			host, port, _ := net.SplitHostPort(u.Host)
 			if err != nil {
+				t.links.core.log.Errorln("URL host:port parsing failed:", err.Error())
+				return
+			}
+			dst, err := net.ResolveIPAddr("ip", host)
+			if err != nil {
+				t.links.core.log.Errorln("Resolving failed:", err.Error())
 				return
 			}
 			if dst.IP.IsLinkLocalUnicast() {
@@ -336,6 +342,7 @@ func (t *tcp) call(u *url.URL, options tcpOptions, sintf string) {
 			dialer := net.Dialer{
 				Control: t.tcpContext,
 			}
+			t.links.core.log.Debugf("Dial created")
 			if sintf != "" {
 				dialer.Control = t.getControl(sintf)
 				ief, err := net.InterfaceByName(sintf)
@@ -381,13 +388,14 @@ func (t *tcp) call(u *url.URL, options tcpOptions, sintf string) {
 				}
 			}
 			ctx, done := context.WithTimeout(t.links.core.ctx, default_timeout)
+			t.links.core.log.Debugf("Starting dial contect for %s", dst.String()+":"+port)
 			switch u.Scheme {
 			case "tcp":
-				conn, err = dialer.DialContext(ctx, "tcp", dst.String()+":"+u.Port())
+				conn, err = dialer.DialContext(ctx, "tcp", dst.String()+":"+port)
 			case "tls":
-				conn, err = dialer.DialContext(ctx, "tcp", dst.String()+":"+u.Port())
+				conn, err = dialer.DialContext(ctx, "tcp", dst.String()+":"+port)
 			case "quic":
-				conn, err = dialer.DialContext(ctx, "udp", dst.String()+":"+u.Port())
+				conn, err = dialer.DialContext(ctx, "udp", dst.String()+":"+port)
 			default:
 				t.links.core.log.Errorln("Unknown schema:", u.String(), " is not correctly formatted, ignoring")
 				return
