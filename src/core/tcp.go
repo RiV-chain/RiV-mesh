@@ -223,21 +223,17 @@ func (t *tcp) listener(l *TcpListener, u *url.URL) {
 		l.Listener.Close()
 		return
 	}
-	callproto := strings.ToUpper(u.Scheme)
-	if l.opts.upgrade != nil {
-		callproto = strings.ToUpper(l.opts.upgrade.name)
-	}
 	t.listeners[u.Host] = l
 	t.mutex.Unlock()
 	// And here we go!
 	defer func() {
-		t.links.core.log.Infoln("Stopping", callproto, "listener on:", l.Listener.Addr().String())
+		t.links.core.log.Infoln("Stopping", u.String(), "listener on:", l.Listener.Addr().String())
 		l.Listener.Close()
 		t.mutex.Lock()
 		delete(t.listeners, u.Host)
 		t.mutex.Unlock()
 	}()
-	t.links.core.log.Infoln("Listening for", callproto, "on:", l.Listener.Addr().String())
+	t.links.core.log.Infoln("Listening for", u.String(), "on:", l.Listener.Addr().String())
 	go func() {
 		<-l.stop
 		l.Listener.Close()
@@ -277,6 +273,7 @@ func (t *tcp) startCalling(saddr string) bool {
 // This all happens in a separate goroutine that it spawns.
 func (t *tcp) call(u *url.URL, options tcpOptions, sintf string) {
 	go func() {
+		t.links.core.log.Debugf("Started dial call for %s: ", u)
 		callname := u.Host
 		callproto := strings.ToUpper(u.Scheme)
 		if options.upgrade != nil {
@@ -325,6 +322,7 @@ func (t *tcp) call(u *url.URL, options tcpOptions, sintf string) {
 				<-ch
 			}
 		} else {
+			t.links.core.log.Debugf("Resolving IP %s: ", u.Host)
 			dst, err := net.ResolveIPAddr("ip", u.Host)
 			if err != nil {
 				return
