@@ -62,7 +62,7 @@ Description: RiV-mesh is an implementation of a fully end-to-end encrypted IPv6 
  other RiV-mesh nodes.
 Icon: mesh.png
 AddonShowName: RiV Mesh
-AddonIndexPage: index.html
+AddonIndexPage: index.html?v=$PKGVERSION
 AddonUsedPort:
 InstDepend:
 InstConflict:
