@@ -176,6 +176,8 @@ github.com/viant/assertly v0.4.8/go.mod h1:aGifi++jvCrUaklKEKT0BU95igDNaqkvz+49u
 github.com/viant/toolbox v0.24.0/go.mod h1:OxMCG57V0PXuIP2HNQrtJf2CjqdmbrOx5EkMILuUhzM=
 github.com/vikulin/quic-conn v0.0.0-20220515191241-b30de4be78ff h1:gq8frzO5X5M+wRSvwPs3iDRAk6HcFhXhrValoxVPYi0=
 github.com/vikulin/quic-conn v0.0.0-20220515191241-b30de4be78ff/go.mod h1:Tbq0uSdJgK/CZqcd0Z8xw1XbMLN4CfhoN3n3Epx5bp8=
+github.com/vikulin/quic-conn v0.0.0-20220521141334-e67971356c51 h1:1ojpQ0L6Z1u91xd8wLSeLNpFUAIgIcHx1TsVjARtH2I=
+github.com/vikulin/quic-conn v0.0.0-20220521141334-e67971356c51/go.mod h1:Tbq0uSdJgK/CZqcd0Z8xw1XbMLN4CfhoN3n3Epx5bp8=
 github.com/vishvananda/netlink v1.1.0 h1:1iyaYNBLmP6L0220aDnYQpo1QEV4t4hJ+xEEhhJH8j0=
 github.com/vishvananda/netlink v1.1.0/go.mod h1:cTgwzPIzzgDAYoQrMm0EdrjRUBkTqKYppBueQtXaqoE=
 github.com/vishvananda/netns v0.0.0-20191106174202-0a2b9b5464df/go.mod h1:JP3t17pCcGlemwknint6hfoeCVQrEMVwxRLRjXpq+BU=

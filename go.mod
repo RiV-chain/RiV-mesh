@@ -37,7 +37,7 @@ require (
 	github.com/nxadm/tail v1.4.8 // indirect
 	github.com/onsi/ginkgo v1.16.4 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
-	github.com/vikulin/quic-conn v0.0.0-20220515191241-b30de4be78ff // indirect
+	github.com/vikulin/quic-conn v0.0.0-20220521141334-e67971356c51 // indirect
 	github.com/vishvananda/netns v0.0.0-20210104183010-2eb08e3e575f // indirect
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
 	golang.org/x/mod v0.4.2 // indirect
