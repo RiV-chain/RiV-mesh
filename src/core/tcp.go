@@ -28,7 +28,7 @@ import (
 
 	"github.com/RiV-chain/RiV-mesh/src/address"
 	//"github.com/RiV-chain/RiV-mesh/src/util"
-	quicconn "github.com/vikulin/quic-conn"
+	udtconn "github.com/oxtoacart/go-udt/udt"
 )
 
 const default_timeout = 6 * time.Second
@@ -153,8 +153,8 @@ func (t *tcp) listenURL(u *url.URL, sintf string) (*TcpListener, error) {
 		listener, err = t.listen(u, nil)
 	case "tls":
 		listener, err = t.listen(u, t.tls.forListener)
-	case "quic":
-		listener, err = t.listenQuic(u, t.tls)
+	case "udt":
+		listener, err = t.listenUdt(u, nil)
 	default:
 		t.links.core.log.Errorln("Failed to add listener: listener", u.String(), "is not correctly formatted, ignoring")
 	}
@@ -187,12 +187,12 @@ func (t *tcp) listen(u *url.URL, upgrade *TcpUpgrade) (*TcpListener, error) {
 	return nil, err
 }
 
-func (t *tcp) listenQuic(u *url.URL, tls tcptls) (*TcpListener, error) {
+func (t *tcp) listenUdt(u *url.URL, _ ) (*TcpListener, error) {
 	var err error
-	listener, err := quicconn.Listen("udp", u.Host, tls.config)
+	listener, err := udtconn.ListenUDT("udp", u.Host)
 	if err == nil {
 		//update proto here?
-		//tls.forListener.name = "quic"
+		//tls.forListener.name = "udt"
 		l := TcpListener{
 			Listener: listener,
 			opts:     tcpOptions{
@@ -396,8 +396,8 @@ func (t *tcp) call(u *url.URL, options tcpOptions, sintf string) {
 				conn, err = dialer.DialContext(ctx, "tcp", dst.String()+":"+port)
 			case "tls":
 				conn, err = dialer.DialContext(ctx, "tcp", dst.String()+":"+port)
-			case "quic":
-				conn, err = quicconn.DialContext(ctx, dst.String()+":"+port, t.tls.config)
+			case "udt":
+				conn, err = udtconn.DialUDT("udp", nil, dst.String()+":"+port)
 			default:
 				t.links.core.log.Errorln("Unknown schema:", u.String(), " is not correctly formatted, ignoring")
 				return

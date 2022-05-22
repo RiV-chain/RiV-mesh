@@ -114,7 +114,7 @@ func (l *links) call(u *url.URL, sintf string) error {
 			}
 		}
 		l.tcp.call(u, tcpOpts, sintf)
-	case "quic":
+	case "udt":
 		//remove upgrade
 		//tcpOpts.upgrade = l.tcp.tls.forDialer
 		l.tcp.call(u, tcpOpts, sintf)
