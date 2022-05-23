@@ -243,7 +243,7 @@ func (t *tcp) listener(l *TcpListener, u *url.URL) {
 	for {
 		t.links.core.log.Infoln("Accepting listener for", u.String())
 		sock, err := l.Listener.Accept()
-		t.links.core.log.Infoln("Accepted listener for", sock)
+		t.links.core.log.Infoln("Accepted listener for", u.String())
 		if err != nil {
 			t.links.core.log.Errorln("Failed to accept connection:", err)
 			select {

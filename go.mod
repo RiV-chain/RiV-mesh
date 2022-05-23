@@ -11,7 +11,7 @@ require (
 	github.com/hjson/hjson-go v3.1.0+incompatible
 	github.com/kardianos/minwinsvc v1.0.0
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/vikulin/go-udt v0.0.0-20220523102220-282b2a51e81c
+	github.com/vikulin/go-udt v0.0.0-20220523171635-49c224084af2
 	github.com/vishvananda/netlink v1.1.0
 	github.com/webview/webview v0.0.0-20220519192405-e8ffd3682584
 	golang.org/x/mobile v0.0.0-20220518205345-8578da9835fd
@@ -29,20 +29,14 @@ require (
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/furstenheim/nth_element v0.0.0-20190419153334-6ae3dd61145d // indirect
 	github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0 // indirect
-	github.com/lucas-clemente/quic-go v0.27.0 // indirect
-	github.com/marten-seemann/qtls-go1-16 v0.1.5 // indirect
-	github.com/marten-seemann/qtls-go1-17 v0.1.1 // indirect
-	github.com/marten-seemann/qtls-go1-18 v0.1.1 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/nxadm/tail v1.4.8 // indirect
-	github.com/odysseus654/go-udt v0.0.0-20200406040441-3520cae28f34 // indirect
 	github.com/onsi/ginkgo v1.16.4 // indirect
 	github.com/oxtoacart/bpool v0.0.0-20190530202638-03653db5a59c // indirect
 	github.com/oxtoacart/go-udt v0.0.0-20161028203247-64d8a4007794 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
-	github.com/vikulin/quic-conn v0.0.0-20220521141334-e67971356c51 // indirect
 	github.com/vishvananda/netns v0.0.0-20211101163701-50045581ed74 // indirect
 	golang.org/x/crypto v0.0.0-20220518034528-6f7dac969898 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
