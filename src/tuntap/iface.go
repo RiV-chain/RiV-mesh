@@ -19,6 +19,8 @@ func (tun *TunAdapter) read() {
 		bs := buf[begin:end]
 		if _, err := tun.rwc.Write(bs); err != nil {
 			tun.log.Debugln("Unable to send packet:", err)
+		} else {
+			tun.log.Debugln("Wrote packet %X:", bs)
 		}
 	}
 }
