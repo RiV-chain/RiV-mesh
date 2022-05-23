@@ -6,42 +6,48 @@ require (
 	github.com/Arceliar/ironwood v0.0.0-20220409035209-b7f71f05435a
 	github.com/Arceliar/phony v0.0.0-20210209235338-dde1a8dca979
 	github.com/cheggaaa/pb/v3 v3.0.8
-	github.com/gologme/log v1.2.0
+	github.com/gologme/log v1.3.0
 	github.com/hashicorp/go-syslog v1.0.0
 	github.com/hjson/hjson-go v3.1.0+incompatible
 	github.com/kardianos/minwinsvc v1.0.0
-	github.com/mitchellh/mapstructure v1.4.1
+	github.com/mitchellh/mapstructure v1.5.0
+	github.com/vikulin/go-udt v0.0.0-20220523102220-282b2a51e81c
 	github.com/vishvananda/netlink v1.1.0
-	github.com/webview/webview v0.0.0-20210330151455-f540d88dde4e
-	golang.org/x/mobile v0.0.0-20220414153400-ce6a79cf6a13
-	golang.org/x/net v0.0.0-20211101193420-4a448f8816b3
-	golang.org/x/sys v0.0.0-20211102192858-4dd72447c267
-	golang.org/x/text v0.3.8-0.20211004125949-5bd84dd9b33b
-	golang.zx2c4.com/wireguard v0.0.0-20211017052713-f87e87af0d9a
-	golang.zx2c4.com/wireguard/windows v0.4.12
+	github.com/webview/webview v0.0.0-20220519192405-e8ffd3682584
+	golang.org/x/mobile v0.0.0-20220518205345-8578da9835fd
+	golang.org/x/net v0.0.0-20220520000938-2e3eb7b945c2
+	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a
+	golang.org/x/text v0.3.8-0.20211105212822-18b340fc7af2
+	golang.zx2c4.com/wireguard v0.0.0-20220407013110-ef5c587f782d
+	golang.zx2c4.com/wireguard/windows v0.5.3
 )
 
 require (
 	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/cheekybits/genny v1.0.0 // indirect
-	github.com/fatih/color v1.12.0 // indirect
+	github.com/fatih/color v1.13.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
+	github.com/furstenheim/nth_element v0.0.0-20190419153334-6ae3dd61145d // indirect
 	github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0 // indirect
 	github.com/lucas-clemente/quic-go v0.27.0 // indirect
 	github.com/marten-seemann/qtls-go1-16 v0.1.5 // indirect
 	github.com/marten-seemann/qtls-go1-17 v0.1.1 // indirect
 	github.com/marten-seemann/qtls-go1-18 v0.1.1 // indirect
-	github.com/mattn/go-colorable v0.1.8 // indirect
-	github.com/mattn/go-isatty v0.0.13 // indirect
+	github.com/mattn/go-colorable v0.1.12 // indirect
+	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/nxadm/tail v1.4.8 // indirect
+	github.com/odysseus654/go-udt v0.0.0-20200406040441-3520cae28f34 // indirect
 	github.com/onsi/ginkgo v1.16.4 // indirect
+	github.com/oxtoacart/bpool v0.0.0-20190530202638-03653db5a59c // indirect
+	github.com/oxtoacart/go-udt v0.0.0-20161028203247-64d8a4007794 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/vikulin/quic-conn v0.0.0-20220521141334-e67971356c51 // indirect
-	github.com/vishvananda/netns v0.0.0-20210104183010-2eb08e3e575f // indirect
-	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
-	golang.org/x/mod v0.4.2 // indirect
-	golang.org/x/tools v0.1.8-0.20211022200916-316ba0b74098 // indirect
-	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
+	github.com/vishvananda/netns v0.0.0-20211101163701-50045581ed74 // indirect
+	golang.org/x/crypto v0.0.0-20220518034528-6f7dac969898 // indirect
+	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
+	golang.org/x/tools v0.1.10 // indirect
+	golang.org/x/xerrors v0.0.0-20220517211312-f3a8303e98df // indirect
+	golang.zx2c4.com/wintun v0.0.0-20211104114900-415007cec224 // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
 )
