@@ -398,12 +398,12 @@ func (t *tcp) call(u *url.URL, options tcpOptions, sintf string) {
 			case "tls":
 				conn, err = dialer.DialContext(ctx, "tcp", dst.String()+":"+port)
 			case "udt":
-				addr, err := net.ResolveUDPAddr("udp4", dst.String()+":"+port)
+				addr, err := net.ResolveUDPAddr("udp", dst.String()+":"+port)
 				if err != nil {
 					t.links.core.log.Debugf("Failed to resolve addresss %s: %s", dst.String()+":"+port, err)
 					return
 				}
-				conn, err = udtconn.DialUDTContext(ctx, "udp4", "0.0.0.0:0", addr, true)
+				conn, err = udtconn.DialUDTContext(ctx, "udp", ":", addr, true)
 			default:
 				t.links.core.log.Errorln("Unknown schema:", u.String(), " is not correctly formatted, ignoring")
 				return
