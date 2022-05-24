@@ -22,7 +22,7 @@ func (tun *TunAdapter) read() {
 		end := begin + n
 		bs := buf[begin:end]
 		if _, err := tun.rwc.Write(bs); err != nil {
-			tun.log.Debugln("Unable to send packet:", err)
+			tun.log.Debugln("Unable to send packet:", err, "\nError packet:", hex.EncodeToString(bs))
 		} else {
 			tun.log.Debugln("Wrote packet:", hex.EncodeToString(bs))
 		}
