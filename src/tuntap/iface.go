@@ -1,7 +1,7 @@
 package tuntap
 
 import (
-	"log"
+	"encoding/hex"
 )
 
 const TUN_OFFSET_BYTES = 4
@@ -24,7 +24,7 @@ func (tun *TunAdapter) read() {
 		if _, err := tun.rwc.Write(bs); err != nil {
 			tun.log.Debugln("Unable to send packet:", err)
 		} else {
-			log.Printf("Wrote packet: %X", bs)
+			tun.log.Debugln("Wrote packet:", hex.EncodeToString(bs))
 		}
 	}
 }
