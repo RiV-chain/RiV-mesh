@@ -35,7 +35,6 @@ require (
 	github.com/nxadm/tail v1.4.8 // indirect
 	github.com/onsi/ginkgo v1.16.4 // indirect
 	github.com/oxtoacart/bpool v0.0.0-20190530202638-03653db5a59c // indirect
-	github.com/oxtoacart/go-udt v0.0.0-20161028203247-64d8a4007794 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/vishvananda/netns v0.0.0-20211101163701-50045581ed74 // indirect
 	golang.org/x/crypto v0.0.0-20220518034528-6f7dac969898 // indirect
