@@ -24,7 +24,7 @@ func (tun *TunAdapter) read() {
 		if _, err := tun.rwc.Write(bs); err != nil {
 			tun.log.Debugln("Unable to send packet:", err, "\nError packet:", hex.EncodeToString(bs))
 		} else {
-			tun.log.Debugln("Wrote packet:", hex.EncodeToString(bs))
+			tun.log.Debugln("Wrote packet(read):", hex.EncodeToString(bs))
 		}
 	}
 }
@@ -48,6 +48,8 @@ func (tun *TunAdapter) write() {
 					tun.log.Errorln("TUN iface write error:", err)
 				}
 			})
+		} else {
+			tun.log.Debugln("Wrote packet(write):", hex.EncodeToString(bs))
 		}
 	}
 }
