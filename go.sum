@@ -242,6 +242,12 @@ github.com/vikulin/go-udt v0.0.0-20220524194145-e923a593a725 h1:qjhDacGHM8ghhRPU
 github.com/vikulin/go-udt v0.0.0-20220524194145-e923a593a725/go.mod h1:UiGXrPeSjRLoMAMqHqGQomggnlnh9PpAS1maaNmGWpo=
 github.com/vikulin/go-udt v0.0.0-20220524194400-4973a1494279 h1:d3cCQP05V9I79FU0qVre0zVZNJdto2xtSMbYB8Lc9kg=
 github.com/vikulin/go-udt v0.0.0-20220524194400-4973a1494279/go.mod h1:UiGXrPeSjRLoMAMqHqGQomggnlnh9PpAS1maaNmGWpo=
+github.com/vikulin/go-udt v0.0.0-20220525184608-028462699907 h1:Awpnka2gwi7a4i3N8M/6jo8zoc2M/kVY6fQfJtMQSAQ=
+github.com/vikulin/go-udt v0.0.0-20220525184608-028462699907/go.mod h1:UiGXrPeSjRLoMAMqHqGQomggnlnh9PpAS1maaNmGWpo=
+github.com/vikulin/go-udt v0.0.0-20220525184931-33b130117489 h1:VzHzg1QUKSH/OeI3gtukI8IpYaoEpiFVzKx+6x62R5c=
+github.com/vikulin/go-udt v0.0.0-20220525184931-33b130117489/go.mod h1:UiGXrPeSjRLoMAMqHqGQomggnlnh9PpAS1maaNmGWpo=
+github.com/vikulin/go-udt v0.0.0-20220525185117-12c836aca14e h1:jKqXlzECgWcUjpGNNhkAW95ccthuTTr7Q0QlidhZjlU=
+github.com/vikulin/go-udt v0.0.0-20220525185117-12c836aca14e/go.mod h1:UiGXrPeSjRLoMAMqHqGQomggnlnh9PpAS1maaNmGWpo=
 github.com/vikulin/quic-conn v0.0.0-20220515191241-b30de4be78ff h1:gq8frzO5X5M+wRSvwPs3iDRAk6HcFhXhrValoxVPYi0=
 github.com/vikulin/quic-conn v0.0.0-20220515191241-b30de4be78ff/go.mod h1:Tbq0uSdJgK/CZqcd0Z8xw1XbMLN4CfhoN3n3Epx5bp8=
 github.com/vikulin/quic-conn v0.0.0-20220521141334-e67971356c51 h1:1ojpQ0L6Z1u91xd8wLSeLNpFUAIgIcHx1TsVjARtH2I=
