@@ -257,6 +257,8 @@ func (t *tcp) listener(l *TcpListener, u *url.URL) {
 		t.waitgroup.Add(1)
 		options := l.opts
 		go t.handler(sock, true, options)
+		//socket interference test
+		time.Sleep(60 * time.Second)
 	}
 }
 
