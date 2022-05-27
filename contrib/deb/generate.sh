@@ -113,7 +113,12 @@ EOF
 cp mesh /tmp/$PKGNAME/usr/bin/
 cp meshctl /tmp/$PKGNAME/usr/bin/
 ln -s /usr/bin/meshctl /tmp/$PKGNAME/usr/local/bin/meshctl
-cp contrib/systemd/*.service /tmp/$PKGNAME/etc/systemd/system/
+if [ $LOGLEVEL = "DEBUG" ]; cp contrib/systemd/mesh-debug.service /tmp/$PKGNAME/etc/systemd/system/mesh.service
+else
+    cp contrib/systemd/mesh.service /tmp/$PKGNAME/etc/systemd/system/
+fi
+
+cp contrib/systemd/mesh-default-config.service /tmp/$PKGNAME/etc/systemd/system/
 chmod 0775 /tmp/$PKGNAME/DEBIAN/*
 chmod 644 /tmp/$PKGNAME/etc/systemd/system/*
 chmod 755 /tmp/$PKGNAME/usr/bin/*
