@@ -286,11 +286,13 @@ type linkConn struct {
 func (c *linkConn) Read(p []byte) (n int, err error) {
 	n, err = c.Conn.Read(p)
 	atomic.AddUint64(&c.rx, uint64(n))
+	intf.links.core.log.Debugln("Link read data: %s", hex.EncodeToString(p))
 	return
 }
 
 func (c *linkConn) Write(p []byte) (n int, err error) {
 	n, err = c.Conn.Write(p)
 	atomic.AddUint64(&c.tx, uint64(n))
+	intf.links.core.log.Debugln("Link write data: %s", hex.EncodeToString(p))
 	return
 }
