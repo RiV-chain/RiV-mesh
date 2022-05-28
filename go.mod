@@ -11,6 +11,7 @@ require (
 	github.com/hjson/hjson-go v3.1.0+incompatible
 	github.com/kardianos/minwinsvc v1.0.0
 	github.com/mitchellh/mapstructure v1.4.1
+	github.com/vikulin/quic-conn v0.0.0-20220528080447-7790d1059a2e
 	github.com/vishvananda/netlink v1.1.0
 	github.com/webview/webview v0.0.0-20210330151455-f540d88dde4e
 	golang.org/x/mobile v0.0.0-20220414153400-ce6a79cf6a13
@@ -37,7 +38,6 @@ require (
 	github.com/nxadm/tail v1.4.8 // indirect
 	github.com/onsi/ginkgo v1.16.4 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
-	github.com/vikulin/quic-conn v0.0.0-20220521141334-e67971356c51 // indirect
 	github.com/vishvananda/netns v0.0.0-20210104183010-2eb08e3e575f // indirect
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
 	golang.org/x/mod v0.4.2 // indirect
@@ -45,3 +45,5 @@ require (
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
 )
+
+replace github.com/lucas-clemente/quic-go => github.com/vikulin/quic-go v0.27.1-0.20220528070533-16e707f80d2c
