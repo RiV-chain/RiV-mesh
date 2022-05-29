@@ -11,7 +11,8 @@ require (
 	github.com/hjson/hjson-go v3.1.0+incompatible
 	github.com/kardianos/minwinsvc v1.0.0
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/vikulin/go-udt v0.0.0-20220527181111-b2a07fd84dd8
+	github.com/vikulin/go-udt v0.0.0-20220529084359-dd6a8672cc29
+	github.com/vikulin/udt-conn v0.0.0-20220529092304-bf4ff375506f
 	github.com/vishvananda/netlink v1.1.0
 	github.com/webview/webview v0.0.0-20220519192405-e8ffd3682584
 	golang.org/x/mobile v0.0.0-20220518205345-8578da9835fd

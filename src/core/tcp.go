@@ -28,7 +28,7 @@ import (
 
 	"github.com/RiV-chain/RiV-mesh/src/address"
 	//"github.com/RiV-chain/RiV-mesh/src/util"
-	udtconn "github.com/vikulin/go-udt/udt"
+	udtconn "github.com/vikulin/udt-conn"
 )
 
 const default_timeout = 6 * time.Second
@@ -190,7 +190,7 @@ func (t *tcp) listen(u *url.URL, upgrade *TcpUpgrade) (*TcpListener, error) {
 func (t *tcp) listenUdt(u *url.URL, _ tcptls) (*TcpListener, error) {
 	var err error
 	ctx := t.links.core.ctx
-	listener, err := udtconn.ListenUDTContext(ctx, "udp", u.Host)
+	listener, err := udtconn.ListenContext(ctx, "udp", u.Host)
 	if err == nil {
 		//update proto here?
 		//tls.forListener.name = "udt"
@@ -398,12 +398,7 @@ func (t *tcp) call(u *url.URL, options tcpOptions, sintf string) {
 			case "tls":
 				conn, err = dialer.DialContext(ctx, "tcp", dst.String()+":"+port)
 			case "udt":
-				addr, err := net.ResolveUDPAddr("udp", dst.String()+":"+port)
-				if err != nil {
-					t.links.core.log.Debugf("Failed to resolve addresss %s: %s", dst.String()+":"+port, err)
-					return
-				}
-				conn, err = udtconn.DialUDTContext(ctx, "udp", ":", addr, true)
+				conn, err = udtconn.DialContext(ctx, "udp", dst.String()+":"+port)
 			default:
 				t.links.core.log.Errorln("Unknown schema:", u.String(), " is not correctly formatted, ignoring")
 				return
