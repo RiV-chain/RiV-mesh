@@ -60,8 +60,12 @@ github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UV
 github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
 github.com/vikulin/go-udt v0.0.0-20220529084359-dd6a8672cc29 h1:pRc+tMrCNxKypDtb69NUSm6H0cwp3scYogwLH8P3bMM=
 github.com/vikulin/go-udt v0.0.0-20220529084359-dd6a8672cc29/go.mod h1:UiGXrPeSjRLoMAMqHqGQomggnlnh9PpAS1maaNmGWpo=
+github.com/vikulin/go-udt v0.0.0-20220529103753-73104e9eb896 h1:+xyOMyHG3xG9cUj+wFfKErsH+o/H7C9d24gaa16P1XE=
+github.com/vikulin/go-udt v0.0.0-20220529103753-73104e9eb896/go.mod h1:UiGXrPeSjRLoMAMqHqGQomggnlnh9PpAS1maaNmGWpo=
 github.com/vikulin/udt-conn v0.0.0-20220529092304-bf4ff375506f h1:p1czlWtEQTSE9j+MkRjxfmApR3yXGgi0DYp7m2TaU2Y=
 github.com/vikulin/udt-conn v0.0.0-20220529092304-bf4ff375506f/go.mod h1:Em38DxmLzueVhGdLSApVYzVYwuzp5jRiZUg+QbDi+KE=
+github.com/vikulin/udt-conn v0.0.0-20220529103901-da146c97801e h1:tdCAlsSG86mQcSFBH+0nZp2rGMjNWwsVlXBYiQcGyDA=
+github.com/vikulin/udt-conn v0.0.0-20220529103901-da146c97801e/go.mod h1:+JzfAjX8UxEx3pqSjYUjNEQC9xzIqqxb0b2+tUHSF1Y=
 github.com/vishvananda/netlink v1.1.0 h1:1iyaYNBLmP6L0220aDnYQpo1QEV4t4hJ+xEEhhJH8j0=
 github.com/vishvananda/netlink v1.1.0/go.mod h1:cTgwzPIzzgDAYoQrMm0EdrjRUBkTqKYppBueQtXaqoE=
 github.com/vishvananda/netns v0.0.0-20191106174202-0a2b9b5464df/go.mod h1:JP3t17pCcGlemwknint6hfoeCVQrEMVwxRLRjXpq+BU=
