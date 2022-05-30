@@ -190,7 +190,7 @@ func (t *tcp) listen(u *url.URL, upgrade *TcpUpgrade) (*TcpListener, error) {
 func (t *tcp) listenKcp(u *url.URL, _ tcptls) (*TcpListener, error) {
 	//keep tls for future encryption
 	var err error
-	listener, err := kcpconn.Listen(u.Host)
+	listener, err := kcpconn.ListenWithOptions(u.Host, nil, 10, 3)
 	if err == nil {
 		//update proto here?
 		//tls.forListener.name = "quic"
@@ -398,7 +398,7 @@ func (t *tcp) call(u *url.URL, options tcpOptions, sintf string) {
 			case "tls":
 				conn, err = dialer.DialContext(ctx, "tcp", dst.String()+":"+port)
 			case "kcp":
-				conn, err = kcpconn.Dial(dst.String()+":"+port)
+				conn, err = kcpconn.DialWithOptions(dst.String()+":"+port, nil, 10, 3)
 			default:
 				t.links.core.log.Errorln("Unknown schema:", u.String(), " is not correctly formatted, ignoring")
 				return
