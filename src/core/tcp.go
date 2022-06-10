@@ -21,7 +21,6 @@ import (
 	"net"
 	"net/url"
 	"strings"
-	"syscall"
 	"sync"
 	"time"
 
@@ -29,7 +28,7 @@ import (
 
 	"github.com/RiV-chain/RiV-mesh/src/address"
 	//"github.com/RiV-chain/RiV-mesh/src/util"
-	sctp "github.com/thebagchi/sctp-go"
+	quicconn "github.com/vikulin/quic-conn"
 )
 
 const default_timeout = 6 * time.Second
@@ -154,8 +153,8 @@ func (t *tcp) listenURL(u *url.URL, sintf string) (*TcpListener, error) {
 		listener, err = t.listen(u, nil)
 	case "tls":
 		listener, err = t.listen(u, t.tls.forListener)
-	case "sctp":
-		listener, err = t.listenSctp(u, t.tls)
+	case "quic":
+		listener, err = t.listenQuic(u, t.tls)
 	default:
 		t.links.core.log.Errorln("Failed to add listener: listener", u.String(), "is not correctly formatted, ignoring")
 	}
@@ -188,24 +187,12 @@ func (t *tcp) listen(u *url.URL, upgrade *TcpUpgrade) (*TcpListener, error) {
 	return nil, err
 }
 
-func (t *tcp) listenSctp(u *url.URL, _ tcptls) (*TcpListener, error) {
-
-	addr, err := sctp.MakeSCTPAddr("sctp4", u.Host)
-		
+func (t *tcp) listenQuic(u *url.URL, tls tcptls) (*TcpListener, error) {
+	var err error
+	listener, err := quicconn.Listen("udp", u.Host, tls.config)
 	if err == nil {
 		//update proto here?
 		//tls.forListener.name = "quic"
-		listener, _ := sctp.ListenSCTP(
-					"sctp4",
-					syscall.SOCK_STREAM,
-					addr,
-					&sctp.SCTPInitMsg{
-						NumOutStreams:  0xFFFF,
-						MaxInStreams:   0,
-						MaxAttempts:    0,
-						MaxInitTimeout: 0,
-					},
-				)
 		l := TcpListener{
 			Listener: listener,
 			opts:     tcpOptions{
@@ -409,20 +396,8 @@ func (t *tcp) call(u *url.URL, options tcpOptions, sintf string) {
 				conn, err = dialer.DialContext(ctx, "tcp", dst.String()+":"+port)
 			case "tls":
 				conn, err = dialer.DialContext(ctx, "tcp", dst.String()+":"+port)
-			case "sctp":
-				laddr, _ := sctp.MakeSCTPAddr("sctp4", "0.0.0.0:0")
-				raddr, _ := sctp.MakeSCTPAddr("sctp4", dst.String()+":"+port)
-				conn, err = sctp.DialSCTP(
-					"sctp4",
-					laddr,
-					raddr,
-					&sctp.SCTPInitMsg{
-						NumOutStreams:  0xFFFF,
-						MaxInStreams:   0,
-						MaxAttempts:    0,
-						MaxInitTimeout: 0,
-					},
-				)
+			case "quic":
+				conn, err = quicconn.DialContext(ctx, dst.String()+":"+port, t.tls.config)
 			default:
 				t.links.core.log.Errorln("Unknown schema:", u.String(), " is not correctly formatted, ignoring")
 				return
