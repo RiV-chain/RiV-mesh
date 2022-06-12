@@ -21,15 +21,14 @@ import (
 	"net"
 	"net/url"
 	"strings"
-	"syscall"
 	"sync"
 	"time"
-
+	"strconv"
 	"golang.org/x/net/proxy"
 
 	"github.com/RiV-chain/RiV-mesh/src/address"
 	//"github.com/RiV-chain/RiV-mesh/src/util"
-	sctp "github.com/vikulin/sctp-go"
+	sctp "github.com/vikulin/sctp"
 )
 
 const default_timeout = 6 * time.Second
@@ -190,22 +189,14 @@ func (t *tcp) listen(u *url.URL, upgrade *TcpUpgrade) (*TcpListener, error) {
 
 func (t *tcp) listenSctp(u *url.URL, _ tcptls) (*TcpListener, error) {
 
-	addr, err := sctp.MakeSCTPAddr("sctp4", u.Host)
+	addr := t.getAddress(u.Host)
+	
+	listener, err := sctp.NewSCTPListener(addr, sctp.InitMsg{}, sctp.OneToOne, false)
 		
 	if err == nil {
 		//update proto here?
 		//tls.forListener.name = "quic"
-		listener, _ := sctp.ListenSCTP(
-					"sctp4",
-					syscall.SOCK_STREAM,
-					addr,
-					&sctp.SCTPInitMsg{
-						NumOutStreams:  0x4,
-						MaxInStreams:   0x4,
-						MaxAttempts:    0x3,
-						MaxInitTimeout: 0xF,
-					},
-				)
+		
 		l := TcpListener{
 			Listener: listener,
 			opts:     tcpOptions{
@@ -221,6 +212,31 @@ func (t *tcp) listenSctp(u *url.URL, _ tcptls) (*TcpListener, error) {
 	}
 
 	return nil, err
+}
+
+//SCTP infrastructure
+func (t *tcp) getAddress(host string) *sctp.SCTPAddr {
+
+	//sctp supports multihoming but current implementation reuires only one path
+	ips := []net.IPAddr{}
+	ip, port, err := net.SplitHostPort(host)
+	if err != nil {
+		panic(err)
+	}
+	for _, i := range strings.Split(ip, ",") {
+		if a, err := net.ResolveIPAddr("ip", i); err == nil {
+			fmt.Sprintf("Resolved address '%s' to %s", i, a)
+			ips = append(ips, *a)
+		} else {
+			t.links.core.log.Errorln("Error resolving address '%s': %v", i, err)
+		}
+	}
+	p, _ := strconv.Atoi(port)
+	addr := &sctp.SCTPAddr{
+		IPAddrs: ips,
+		Port:    p,
+	}
+	return addr
 }
 
 // Runs the listener, which spawns off goroutines for incoming connections.
@@ -410,19 +426,13 @@ func (t *tcp) call(u *url.URL, options tcpOptions, sintf string) {
 			case "tls":
 				conn, err = dialer.DialContext(ctx, "tcp", dst.String()+":"+port)
 			case "sctp":
-				laddr, _ := sctp.MakeSCTPAddr("sctp4", "0.0.0.0:0")
-				raddr, _ := sctp.MakeSCTPAddr("sctp4", dst.String()+":"+port)
-				conn, err = sctp.DialSCTP(
-					"sctp4",
-					laddr,
-					raddr,
-					&sctp.SCTPInitMsg{
-						NumOutStreams:  0x4,
-						MaxInStreams:   0x4,
-						MaxAttempts:    0x3,
-						MaxInitTimeout: 0xF,
-					},
-				)
+				addr := t.getAddress(dst.String()+":"+port)
+				conn, err = sctp.NewSCTPConnection(addr.AddressFamily, sctp.InitMsg{}, sctp.OneToOne, false)
+				if err != nil {
+					t.links.core.log.Debugf("Failed to dial %s: %s", callproto, err)
+					return
+				}
+				err = conn.(*sctp.SCTPConn).Connect(addr)
 			default:
 				t.links.core.log.Errorln("Unknown schema:", u.String(), " is not correctly formatted, ignoring")
 				return

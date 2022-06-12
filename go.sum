@@ -189,6 +189,8 @@ github.com/vikulin/ironwood v0.0.0-20220612155930-6a49eb9ecb2f h1:k3ezh2fQL3n1T4
 github.com/vikulin/ironwood v0.0.0-20220612155930-6a49eb9ecb2f/go.mod h1:2IvNjS/oCqtjjyE7RkxNdLqTTjxiZhICndXcoD7Umv8=
 github.com/vikulin/ironwood v0.0.0-20220612160640-1137bf686778 h1:U0pweI3/kS4YtOmcQWZmXiHJ/wTJEr+3NPvakiz5e8I=
 github.com/vikulin/ironwood v0.0.0-20220612160640-1137bf686778/go.mod h1:2IvNjS/oCqtjjyE7RkxNdLqTTjxiZhICndXcoD7Umv8=
+github.com/vikulin/sctp v0.0.0-20220612201958-5559fff7972a h1:yGstxpSprwF+OC3pSckjYFlF9Qa0a9Vat2d7PFa4Rys=
+github.com/vikulin/sctp v0.0.0-20220612201958-5559fff7972a/go.mod h1:wbWp47D/qXkQrDuO8qSeUXdLN9qXNZzIgLGDQIoJlJU=
 github.com/vikulin/sctp-go v1.1.1-0.20220612172740-521ce8f9dd8e h1:ycZ3EgYRcInj4a/1/H3W6Fg/hKf50XVGJ+KbbHR2xlY=
 github.com/vikulin/sctp-go v1.1.1-0.20220612172740-521ce8f9dd8e/go.mod h1:LKvq0siGUkcL1/vkYR+1ydMXqCzGwEaZorc5VGOWXqw=
 github.com/vishvananda/netlink v1.1.0 h1:1iyaYNBLmP6L0220aDnYQpo1QEV4t4hJ+xEEhhJH8j0=
@@ -293,6 +295,8 @@ golang.org/x/sys v0.0.0-20210927094055-39ccf1dd6fa6/go.mod h1:oPkhp1MJrh7nUepCBc
 golang.org/x/sys v0.0.0-20211007075335-d3039528d8ac/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20211102192858-4dd72447c267 h1:7zYaz3tjChtpayGDzu6H0hDAUM5zIGA2XW7kRNgQ0jc=
 golang.org/x/sys v0.0.0-20211102192858-4dd72447c267/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a h1:dGzPydgVsqGcTRVwiLJ1jVbufYwmzD3LfVPLKsKg+0k=
+golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1/go.mod h1:bj7SfCRtBDWHUb9snDiAeCFNEtKQo2Wmx5Cou7ajbmo=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.1-0.20180807135948-17ff2d5776d2/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
