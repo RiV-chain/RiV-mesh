@@ -17,6 +17,7 @@ import (
 	"github.com/RiV-chain/RiV-mesh/src/address"
 	"github.com/RiV-chain/RiV-mesh/src/util"
 	"golang.org/x/net/proxy"
+	error_wrapper "github.com/go-errors/errors"
 	//"github.com/Arceliar/phony" // TODO? use instead of mutexes
 )
 
@@ -258,7 +259,7 @@ func (intf *link) handler() (chan struct{}, error) {
 	// TODO don't report an error if it's just a 'use of closed network connection'
 	if err != nil {
 		intf.links.core.log.Infof("Disconnected %s: %s, source %s; error: %s",
-			strings.ToUpper(intf.info.linkType), themString, intf.info.local, err)
+			strings.ToUpper(intf.info.linkType), themString, intf.info.local, err.(*error_wrapper.Error).ErrorStack())
 	} else {
 		intf.links.core.log.Infof("Disconnected %s: %s, source %s",
 			strings.ToUpper(intf.info.linkType), themString, intf.info.local)

@@ -29,7 +29,7 @@ import (
 
 	"github.com/RiV-chain/RiV-mesh/src/address"
 	//"github.com/RiV-chain/RiV-mesh/src/util"
-	sctp "github.com/thebagchi/sctp-go"
+	sctp "github.com/vikulin/sctp-go"
 )
 
 const default_timeout = 6 * time.Second

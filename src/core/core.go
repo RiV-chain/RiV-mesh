@@ -11,8 +11,8 @@ import (
 	"net/url"
 	"time"
 
-	iwe "github.com/Arceliar/ironwood/encrypted"
-	iwt "github.com/Arceliar/ironwood/types"
+	iwe "github.com/vikulin/ironwood/encrypted"
+	iwt "github.com/vikulin/ironwood/types"
 	"github.com/Arceliar/phony"
 	"github.com/gologme/log"
 

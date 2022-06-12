@@ -11,7 +11,7 @@ import (
 	"golang.org/x/net/icmp"
 	"golang.org/x/net/ipv6"
 
-	iwt "github.com/Arceliar/ironwood/types"
+	iwt "github.com/vikulin/ironwood/types"
 
 	"github.com/RiV-chain/RiV-mesh/src/address"
 	"github.com/RiV-chain/RiV-mesh/src/core"
