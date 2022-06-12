@@ -200,10 +200,10 @@ func (t *tcp) listenSctp(u *url.URL, _ tcptls) (*TcpListener, error) {
 					syscall.SOCK_STREAM,
 					addr,
 					&sctp.SCTPInitMsg{
-						NumOutStreams:  0xFFFF,
-						MaxInStreams:   0,
-						MaxAttempts:    0,
-						MaxInitTimeout: 0,
+						NumOutStreams:  0x4,
+						MaxInStreams:   0x4,
+						MaxAttempts:    0x3,
+						MaxInitTimeout: 0xF,
 					},
 				)
 		l := TcpListener{
@@ -417,10 +417,10 @@ func (t *tcp) call(u *url.URL, options tcpOptions, sintf string) {
 					laddr,
 					raddr,
 					&sctp.SCTPInitMsg{
-						NumOutStreams:  0xFFFF,
-						MaxInStreams:   0,
-						MaxAttempts:    0,
-						MaxInitTimeout: 0,
+						NumOutStreams:  0x4,
+						MaxInStreams:   0x4,
+						MaxAttempts:    0x3,
+						MaxInitTimeout: 0xF,
 					},
 				)
 			default:
