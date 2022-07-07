@@ -30,6 +30,13 @@
 #explanation:  
 #sid:  same as above (login result)
 
+
+
+CACHE="/usr/local/AppCentral/mesh/var/lib/mesh/access_key"
+if [ -f $CACHE ] && [ "$(expr $(date +%s) - $(date -r $CACHE +%s))" -lt 3600 ]; then
+   exit 0
+fi
+
 #we want read e.g.:
 #HTTP_COOKIE='access_key=sdu45KJFDHksadulf='
 IFS=';'
@@ -58,12 +65,12 @@ fi
 
 export REMOTE_ADDR="127.0.0.1" 
 export QUERY_STRING="act=login&apptag=mesh&account=${user}&password=${pwd}" 
-S=$(/usr/webman/portal/apis/appCentral/applogin.cgi | tail -n1 | tail -n1 | awk '{n=split($0,a,","); for (i=1; i<=n; i++) print a[i]}' | grep \"sid\" | sed 's/ "sid": //g' | sed 's/"//g')
+S=$(/usr/webman/portal/apis/appCentral/applogin.cgi | sed '/"sid"/!d; s/\s\+//g; s/.*"sid":"\([^"]*\)".*/\1/')
 if [ -z $S ]; then
 	exit 1
 else
 	export QUERY_STRING="act=logout&sid=$S" 
-	/usr/webman/portal/apis/login.cgi
+	/usr/webman/portal/apis/login.cgi >/dev/null
 	touch $CACHE
 	exit 0
 fi
