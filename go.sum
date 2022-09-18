@@ -191,6 +191,8 @@ github.com/vikulin/ironwood v0.0.0-20220612160640-1137bf686778 h1:U0pweI3/kS4YtO
 github.com/vikulin/ironwood v0.0.0-20220612160640-1137bf686778/go.mod h1:2IvNjS/oCqtjjyE7RkxNdLqTTjxiZhICndXcoD7Umv8=
 github.com/vikulin/sctp v0.0.0-20220612201958-5559fff7972a h1:yGstxpSprwF+OC3pSckjYFlF9Qa0a9Vat2d7PFa4Rys=
 github.com/vikulin/sctp v0.0.0-20220612201958-5559fff7972a/go.mod h1:wbWp47D/qXkQrDuO8qSeUXdLN9qXNZzIgLGDQIoJlJU=
+github.com/vikulin/sctp v0.0.0-20220918175656-42a353660650 h1:DkdOIKbM6cFE929oh/lepXaFMHTlK01OcnWL6252EB4=
+github.com/vikulin/sctp v0.0.0-20220918175656-42a353660650/go.mod h1:wbWp47D/qXkQrDuO8qSeUXdLN9qXNZzIgLGDQIoJlJU=
 github.com/vikulin/sctp-go v1.1.1-0.20220612172740-521ce8f9dd8e h1:ycZ3EgYRcInj4a/1/H3W6Fg/hKf50XVGJ+KbbHR2xlY=
 github.com/vikulin/sctp-go v1.1.1-0.20220612172740-521ce8f9dd8e/go.mod h1:LKvq0siGUkcL1/vkYR+1ydMXqCzGwEaZorc5VGOWXqw=
 github.com/vishvananda/netlink v1.1.0 h1:1iyaYNBLmP6L0220aDnYQpo1QEV4t4hJ+xEEhhJH8j0=

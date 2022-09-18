@@ -34,7 +34,7 @@ require (
 	github.com/nxadm/tail v1.4.8 // indirect
 	github.com/onsi/ginkgo v1.16.4 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
-	github.com/vikulin/sctp v0.0.0-20220612201958-5559fff7972a // indirect
+	github.com/vikulin/sctp v0.0.0-20220918175656-42a353660650 // indirect
 	github.com/vikulin/sctp-go v1.1.1-0.20220612172740-521ce8f9dd8e // indirect
 	github.com/vishvananda/netns v0.0.0-20210104183010-2eb08e3e575f // indirect
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
