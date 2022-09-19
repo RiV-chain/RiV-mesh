@@ -196,7 +196,7 @@ func (t *tcp) listenSctp(u *url.URL, _ tcptls) (*TcpListener, error) {
 	if err == nil {
 		//update proto here?
 		//tls.forListener.name = "quic"
-		
+		listener.SetEvents(sctp.SCTP_EVENT_DATA_IO)
 		l := TcpListener{
 			Listener: listener,
 			opts:     tcpOptions{
@@ -433,6 +433,7 @@ func (t *tcp) call(u *url.URL, options tcpOptions, sintf string) {
 					return
 				}
 				err = conn.(*sctp.SCTPConn).Connect(addr)
+				conn.(*sctp.SCTPConn).SetEvents(sctp.SCTP_EVENT_DATA_IO)
 			default:
 				t.links.core.log.Errorln("Unknown schema:", u.String(), " is not correctly formatted, ignoring")
 				return
