@@ -191,7 +191,7 @@ func (t *tcp) listenSctp(u *url.URL, _ tcptls) (*TcpListener, error) {
 
 	addr := t.getAddress(u.Host)
 	
-	listener, err := sctp.NewSCTPListener(addr, sctp.InitMsg{NumOstreams: 3, MaxInstreams: 5, MaxAttempts: 4, MaxInitTimeout: 8}, sctp.OneToOne, false)
+	listener, err := sctp.NewSCTPListener(addr, sctp.InitMsg{NumOstreams: 2, MaxInstreams: 2, MaxAttempts: 2, MaxInitTimeout: 5}, sctp.OneToOne, false)
 
 	if err == nil {
 		//update proto here?
@@ -427,7 +427,7 @@ func (t *tcp) call(u *url.URL, options tcpOptions, sintf string) {
 				conn, err = dialer.DialContext(ctx, "tcp", dst.String()+":"+port)
 			case "sctp":
 				addr := t.getAddress(dst.String()+":"+port)
-				conn, err = sctp.NewSCTPConnection(addr.AddressFamily, sctp.InitMsg{NumOstreams: 3, MaxInstreams: 5, MaxAttempts: 4, MaxInitTimeout: 8}, sctp.OneToOne, false)
+				conn, err = sctp.NewSCTPConnection(addr.AddressFamily, sctp.InitMsg{NumOstreams: 2, MaxInstreams: 2, MaxAttempts: 2, MaxInitTimeout: 5}, sctp.OneToOne, false)
 				if err != nil {
 					t.links.core.log.Debugf("Failed to dial %s: %s", callproto, err)
 					return
