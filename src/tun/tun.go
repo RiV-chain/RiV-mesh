@@ -1,10 +1,7 @@
-package tuntap
+package tun
 
 // This manages the tun driver to send/recv packets to/from applications
 
-// TODO: Crypto-key routing support
-// TODO: Set MTU of session properly
-// TODO: Reject packets that exceed session MTU with ICMPv6 for PMTU Discovery
 // TODO: Connection timeouts (call Conn.Close() when we want to time out)
 // TODO: Don't block in reader on writes that are pending searches
 
@@ -13,16 +10,13 @@ import (
 	"fmt"
 	"net"
 
-	//"sync"
-
 	"github.com/Arceliar/phony"
-	"github.com/gologme/log"
 	"golang.zx2c4.com/wireguard/tun"
 
 	"github.com/RiV-chain/RiV-mesh/src/address"
-	"github.com/RiV-chain/RiV-mesh/src/config"
 	"github.com/RiV-chain/RiV-mesh/src/defaults"
 	"github.com/RiV-chain/RiV-mesh/src/ipv6rwc"
+	"github.com/RiV-chain/RiV-mesh/src/util"
 )
 
 type MTU uint16
@@ -33,8 +27,7 @@ type MTU uint16
 // calling mesh.Start().
 type TunAdapter struct {
 	rwc         *ipv6rwc.ReadWriteCloser
-	config      *config.NodeConfig
-	log         *log.Logger
+	log         util.Logger
 	addr        address.Address
 	subnet      address.Subnet
 	mtu         uint64
@@ -43,6 +36,10 @@ type TunAdapter struct {
 	//mutex        sync.RWMutex // Protects the below
 	isOpen    bool
 	isEnabled bool // Used by the writer to drop sessionTraffic if not enabled
+	config    struct {
+		name InterfaceName
+		mtu  InterfaceMTU
+	}
 }
 
 // Gets the maximum supported MTU for the platform based on the defaults in
@@ -92,51 +89,40 @@ func MaximumMTU() uint64 {
 }
 
 // Init initialises the TUN module. You must have acquired a Listener from
-// the Mesh core before this point and it must not be in use elsewhere.
-func (tun *TunAdapter) Init(rwc *ipv6rwc.ReadWriteCloser, config *config.NodeConfig, log *log.Logger, options interface{}) error {
-	tun.rwc = rwc
-	tun.config = config
-	tun.log = log
-	return nil
-}
-
-// Start the setup process for the TUN adapter. If successful, starts the
-// reader actor to handle packets on that interface.
-func (tun *TunAdapter) Start() error {
-	var err error
-	phony.Block(tun, func() {
-		err = tun._start()
-	})
-	return err
+// the Mesh	 core before this point and it must not be in use elsewhere.
+func New(rwc *ipv6rwc.ReadWriteCloser, log util.Logger, opts ...SetupOption) (*TunAdapter, error) {
+	tun := &TunAdapter{
+		rwc: rwc,
+		log: log,
+	}
+	for _, opt := range opts {
+		tun._applyOption(opt)
+	}
+	return tun, tun._start()
 }
 
 func (tun *TunAdapter) _start() error {
 	if tun.isOpen {
 		return errors.New("TUN module is already started")
 	}
-	if tun.config == nil {
-		return errors.New("no configuration available to TUN")
-	}
-	tun.config.RLock()
-	defer tun.config.RUnlock()
 	tun.addr = tun.rwc.Address()
 	tun.subnet = tun.rwc.Subnet()
 	addr := fmt.Sprintf("%s/%d", net.IP(tun.addr[:]).String(), 8*len(address.GetPrefix())-1)
-	if tun.config.IfName == "none" || tun.config.IfName == "dummy" {
+	if tun.config.name == "none" || tun.config.name == "dummy" {
 		tun.log.Debugln("Not starting TUN as ifname is none or dummy")
 		tun.isEnabled = false
 		go tun.write()
 		return nil
 	}
-	mtu := tun.config.IfMTU
+	mtu := uint64(tun.config.mtu)
 	if tun.rwc.MaxMTU() < mtu {
 		mtu = tun.rwc.MaxMTU()
 	}
-	if err := tun.setup(tun.config.IfName, addr, mtu); err != nil {
+	if err := tun.setup(string(tun.config.name), addr, mtu); err != nil {
 		return err
 	}
 	if tun.MTU() != mtu {
-		tun.log.Warnf("Warning: Interface MTU %d automatically adjusted to %d (supported range is 1280-%d)", tun.config.IfMTU, tun.MTU(), MaximumMTU())
+		tun.log.Warnf("Warning: Interface MTU %d automatically adjusted to %d (supported range is 1280-%d)", tun.config.mtu, tun.MTU(), MaximumMTU())
 	}
 	tun.rwc.SetMTU(tun.MTU())
 	tun.isOpen = true
