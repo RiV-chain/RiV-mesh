@@ -19,16 +19,14 @@ package config
 import (
 	"crypto/ed25519"
 	"encoding/hex"
-	"sync"
 )
 
 // NodeConfig is the main configuration structure, containing configuration
 // options that are necessary for an RiV-mesh node to run. You will need to
 // supply one of these structs to the RiV-mesh core when starting a node.
 type NodeConfig struct {
-	sync.RWMutex        `json:"-"`
 	Peers               []string                   `comment:"List of connection strings for outbound peer connections in URI format,\ne.g. tls://a.b.c.d:e or socks://a.b.c.d:e/f.g.h.i:j. These connections\nwill obey the operating system routing table, therefore you should\nuse this section when you may connect via different interfaces."`
-	InterfacePeers      map[string][]string        `comment:"List of connection strings for outbound peer connections in URI format,\narranged by source interface, e.g. { \"eth0\": [ tls://a.b.c.d:e ] }.\nNote that SOCKS peerings will NOT be affected by this option and should\ngo in the \"Peers\" section instead."`
+	InterfacePeers      map[string][]string        `comment:"List of connection strings for outbound peer connections in URI format,\narranged by source interface, e.g. { \"eth0\": [ \"tls://a.b.c.d:e\" ] }.\nNote that SOCKS peerings will NOT be affected by this option and should\ngo in the \"Peers\" section instead."`
 	Listen              []string                   `comment:"Listen addresses for incoming connections. You will need to add\nlisteners in order to accept incoming peerings from non-local nodes.\nMulticast peer discovery will work regardless of any listeners set\nhere. Each listener should be specified in URI format as above, e.g.\ntls://0.0.0.0:0 or tls://[::]:0 to listen on all interfaces."`
 	AdminListen         string                     `comment:"Listen address for admin connections. Default is to listen for local\nconnections either on TCP/9001 or a UNIX socket depending on your\nplatform. Use this value for meshctl -endpoint=X. To disable\nthe admin socket, use the value \"none\" instead.\nExamples: unix:///var/run/mesh.sock, tcp://localhost:9001."`
 	HttpAddress         string                     `comment:"Listen address for admin rest requests and web interface. Default is to listen for local\nconnections on TCP/19019. To disable the admin rest interface,\nuse the value \"none\" instead. Example: http://localhost:19019."`

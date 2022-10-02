@@ -2,12 +2,13 @@ package core
 
 import (
 	"crypto/ed25519"
+	"fmt"
 	"sync/atomic"
 	"time"
 
 	//"encoding/hex"
 	"encoding/json"
-	"errors"
+	//"errors"
 	//"fmt"
 	"net"
 	"net/url"
@@ -15,20 +16,19 @@ import (
 	//"sort"
 	//"time"
 
-	"github.com/gologme/log"
+	"github.com/Arceliar/phony"
 	"github.com/RiV-chain/RiV-mesh/src/address"
+	"github.com/RiV-chain/RiV-mesh/src/util"
 	//"github.com/RiV-chain/RiV-mesh/src/crypto"
-	//"github.com/Arceliar/phony"
 )
 
-type Self struct {
+type SelfInfo struct {
 	Key    ed25519.PublicKey
 	Root   ed25519.PublicKey
 	Coords []uint64
 }
 
-
-type Peer struct {
+type PeerInfo struct {
 	Key     ed25519.PublicKey
 	Root    ed25519.PublicKey
 	Coords  []uint64
@@ -39,23 +39,26 @@ type Peer struct {
 	Uptime  time.Duration
 }
 
-type DHTEntry struct {
+type DHTEntryInfo struct {
 	Key  ed25519.PublicKey
 	Port uint64
 	Rest uint64
 }
 
-type PathEntry struct {
+type PathEntryInfo struct {
 	Key  ed25519.PublicKey
 	Path []uint64
 }
 
-type Session struct {
-	Key ed25519.PublicKey
+type SessionInfo struct {
+	Key     ed25519.PublicKey
+	RXBytes uint64
+	TXBytes uint64
+	Uptime  time.Duration
 }
 
-func (c *Core) GetSelf() Self {
-	var self Self
+func (c *Core) GetSelf() SelfInfo {
+	var self SelfInfo
 	s := c.PacketConn.PacketConn.Debug.GetSelf()
 	self.Key = s.Key
 	self.Root = s.Root
@@ -63,17 +66,17 @@ func (c *Core) GetSelf() Self {
 	return self
 }
 
-func (c *Core) GetPeers() []Peer {
-	var peers []Peer
+func (c *Core) GetPeers() []PeerInfo {
+	var peers []PeerInfo
 	names := make(map[net.Conn]string)
-	c.links.mutex.Lock()
-	for _, info := range c.links.links {
-		names[info.conn] = info.lname
-	}
-	c.links.mutex.Unlock()
+	phony.Block(&c.links, func() {
+		for _, info := range c.links._links {
+			names[info.conn] = info.lname
+		}
+	})
 	ps := c.PacketConn.PacketConn.Debug.GetPeers()
 	for _, p := range ps {
-		var info Peer
+		var info PeerInfo
 		info.Key = p.Key
 		info.Root = p.Root
 		info.Coords = p.Coords
@@ -92,11 +95,11 @@ func (c *Core) GetPeers() []Peer {
 	return peers
 }
 
-func (c *Core) GetDHT() []DHTEntry {
-	var dhts []DHTEntry
+func (c *Core) GetDHT() []DHTEntryInfo {
+	var dhts []DHTEntryInfo
 	ds := c.PacketConn.PacketConn.Debug.GetDHT()
 	for _, d := range ds {
-		var info DHTEntry
+		var info DHTEntryInfo
 		info.Key = d.Key
 		info.Port = d.Port
 		info.Rest = d.Rest
@@ -105,11 +108,11 @@ func (c *Core) GetDHT() []DHTEntry {
 	return dhts
 }
 
-func (c *Core) GetPaths() []PathEntry {
-	var paths []PathEntry
+func (c *Core) GetPaths() []PathEntryInfo {
+	var paths []PathEntryInfo
 	ps := c.PacketConn.PacketConn.Debug.GetPaths()
 	for _, p := range ps {
-		var info PathEntry
+		var info PathEntryInfo
 		info.Key = p.Key
 		info.Path = p.Path
 		paths = append(paths, info)
@@ -117,12 +120,15 @@ func (c *Core) GetPaths() []PathEntry {
 	return paths
 }
 
-func (c *Core) GetSessions() []Session {
-	var sessions []Session
+func (c *Core) GetSessions() []SessionInfo {
+	var sessions []SessionInfo
 	ss := c.PacketConn.Debug.GetSessions()
 	for _, s := range ss {
-		var info Session
+		var info SessionInfo
 		info.Key = s.Key
+		info.RXBytes = s.RX
+		info.TXBytes = s.TX
+		info.Uptime = s.Uptime
 		sessions = append(sessions, info)
 	}
 	return sessions
@@ -131,8 +137,17 @@ func (c *Core) GetSessions() []Session {
 // Listen starts a new listener (either TCP or TLS). The input should be a url.URL
 // parsed from a string of the form e.g. "tcp://a.b.c.d:e". In the case of a
 // link-local address, the interface should be provided as the second argument.
-func (c *Core) Listen(u *url.URL, sintf string) (*TcpListener, error) {
-	return c.links.tcp.listenURL(u, sintf)
+func (c *Core) Listen(u *url.URL, sintf string) (*Listener, error) {
+	switch u.Scheme {
+	case "tcp":
+		return c.links.tcp.listen(u, sintf)
+	case "tls":
+		return c.links.tls.listen(u, sintf)
+	case "unix":
+		return c.links.unix.listen(u, sintf)
+	default:
+		return nil, fmt.Errorf("unrecognised scheme %q", u.Scheme)
+	}
 }
 
 // Address gets the IPv6 address of the Mesh node. This is always a /128
@@ -160,7 +175,7 @@ func (c *Core) Subnet() net.IPNet {
 // may be useful if you want to redirect the output later. Note that this
 // expects a Logger from the github.com/gologme/log package and not from Go's
 // built-in log package.
-func (c *Core) SetLogger(log *log.Logger) {
+func (c *Core) SetLogger(log util.Logger) {
 	c.log = log
 }
 
@@ -170,52 +185,29 @@ func (c *Core) SetLogger(log *log.Logger) {
 // This adds the peer to the peer list, so that they will be called again if the
 // connection drops.
 
-func (c *Core) AddPeer(addr string, sintf string) error {
-	uri, err := url.Parse(addr)
+func (c *Core) AddPeer(peer string, intf string) error {
+	select {
+	case <-c.ctx.Done():
+		return nil
+	default:
+	}
+	u, err := url.Parse(peer)
 	if err != nil {
+		c.log.Errorln("Failed to parse peer url:", peer, err)
 		return err
 	}
-	if err := c.CallPeer(uri, sintf); err != nil {
-		// TODO: We maybe want this to write the peer to the persistent
-		// configuration even if a connection attempt fails, but first we'll need to
-		// move the code to check the peer URI so that we don't deliberately save a
-		// peer with a known bad URI. Loading peers from config should really do the
-		// same thing too but I don't think that happens today
+	if err := c.CallPeer(u, intf); err != nil {
+		c.log.Errorln("Failed to add peer:", err)
 		return err
-	}
-	c.config.RLock()
-	defer c.config.RUnlock()
-	if sintf == "" {
-		for _, peer := range c.config.Peers {
-			if peer == addr {
-				return errors.New("peer already added")
-			}
-		}
-		c.config.Peers = append(c.config.Peers, addr)
-	} else {
-		if _, ok := c.config.InterfacePeers[sintf]; ok {
-			for _, peer := range c.config.InterfacePeers[sintf] {
-				if peer == addr {
-					return errors.New("peer already added")
-				}
-			}
-		}
-		if _, ok := c.config.InterfacePeers[sintf]; !ok {
-			c.config.InterfacePeers[sintf] = []string{addr}
-		} else {
-			c.config.InterfacePeers[sintf] = append(c.config.InterfacePeers[sintf], addr)
-		}
 	}
 	return nil
 }
 
 func (c *Core) RemovePeers() error {
-	c.config.RLock()
-	defer c.config.RUnlock()
-	c.config.Peers = c.config.Peers[:0]
-	for k := range c.config.InterfacePeers {
-		delete(c.config.InterfacePeers, k)
-	}
+	c.config._peers = map[Peer]struct{}{}
+	//for k := range c.config.InterfacePeers {
+	//	delete(c.config.InterfacePeers, k)
+	//}
 
 	return nil
 }
@@ -223,8 +215,10 @@ func (c *Core) RemovePeers() error {
 
 // CallPeer calls a peer once. This should be specified in the peer URI format,
 // e.g.:
-// 		tcp://a.b.c.d:e
-//		socks://a.b.c.d:e/f.g.h.i:j
+//
+//	tcp://a.b.c.d:e
+//	socks://a.b.c.d:e/f.g.h.i:j
+//
 // This does not add the peer to the peer list, so if the connection drops, the
 // peer will not be called again automatically.
 func (c *Core) CallPeer(u *url.URL, sintf string) error {
@@ -238,7 +232,7 @@ func (c *Core) PublicKey() ed25519.PublicKey {
 // Hack to get the admin stuff working, TODO something cleaner
 
 type AddHandler interface {
-	AddHandler(name string, args []string, handlerfunc AddHandlerFunc) error
+	AddHandler(name, desc string, args []string, handlerfunc AddHandlerFunc) error
 }
 
 type AddHandlerFunc func(json.RawMessage) (interface{}, error)
@@ -246,16 +240,28 @@ type AddHandlerFunc func(json.RawMessage) (interface{}, error)
 // SetAdmin must be called after Init and before Start.
 // It sets the admin handler for NodeInfo and the Debug admin functions.
 func (c *Core) SetAdmin(a AddHandler) error {
-	if err := a.AddHandler("getNodeInfo", []string{"key"}, c.proto.nodeinfo.nodeInfoAdminHandler); err != nil {
+	if err := a.AddHandler(
+		"getNodeInfo", "Request nodeinfo from a remote node by its public key", []string{"key"},
+		c.proto.nodeinfo.nodeInfoAdminHandler,
+	); err != nil {
 		return err
 	}
-	if err := a.AddHandler("debug_remoteGetSelf", []string{"key"}, c.proto.getSelfHandler); err != nil {
+	if err := a.AddHandler(
+		"debug_remoteGetSelf", "Debug use only", []string{"key"},
+		c.proto.getSelfHandler,
+	); err != nil {
 		return err
 	}
-	if err := a.AddHandler("debug_remoteGetPeers", []string{"key"}, c.proto.getPeersHandler); err != nil {
+	if err := a.AddHandler(
+		"debug_remoteGetPeers", "Debug use only", []string{"key"},
+		c.proto.getPeersHandler,
+	); err != nil {
 		return err
 	}
-	if err := a.AddHandler("debug_remoteGetDHT", []string{"key"}, c.proto.getDHTHandler); err != nil {
+	if err := a.AddHandler(
+		"debug_remoteGetDHT", "Debug use only", []string{"key"},
+		c.proto.getDHTHandler,
+	); err != nil {
 		return err
 	}
 	return nil

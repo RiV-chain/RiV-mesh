@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"net"
+	"fmt"
 	"runtime"
 	"strings"
 	"time"
@@ -13,7 +13,7 @@ import (
 	"github.com/Arceliar/phony"
 
 	//"github.com/RiV-chain/RiV-mesh/src/crypto"
-	"github.com/RiV-chain/RiV-mesh/src/address"
+
 	"github.com/RiV-chain/RiV-mesh/src/version"
 )
 
@@ -154,18 +154,21 @@ func (m *nodeinfo) _sendRes(key keyArray) {
 type GetNodeInfoRequest struct {
 	Key string `json:"key"`
 }
-type GetNodeInfoResponse map[string]interface{}
+type GetNodeInfoResponse map[string]json.RawMessage
 
 func (m *nodeinfo) nodeInfoAdminHandler(in json.RawMessage) (interface{}, error) {
 	var req GetNodeInfoRequest
 	if err := json.Unmarshal(in, &req); err != nil {
 		return nil, err
 	}
+	if req.Key == "" {
+		return nil, fmt.Errorf("No remote public key supplied")
+	}
 	var key keyArray
 	var kbs []byte
 	var err error
 	if kbs, err = hex.DecodeString(req.Key); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Failed to decode public key: %w", err)
 	}
 	copy(key[:], kbs)
 	ch := make(chan []byte, 1)
@@ -176,14 +179,14 @@ func (m *nodeinfo) nodeInfoAdminHandler(in json.RawMessage) (interface{}, error)
 	defer timer.Stop()
 	select {
 	case <-timer.C:
-		return nil, errors.New("timeout")
+		return nil, errors.New("Timed out waiting for response")
 	case info := <-ch:
 		var msg json.RawMessage
 		if err := msg.UnmarshalJSON(info); err != nil {
 			return nil, err
 		}
-		ip := net.IP(address.AddrForKey(kbs)[:])
-		res := GetNodeInfoResponse{ip.String(): msg}
+		key := hex.EncodeToString(kbs[:])
+		res := GetNodeInfoResponse{key: msg}
 		return res, nil
 	}
 }
