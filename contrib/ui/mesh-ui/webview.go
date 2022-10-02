@@ -16,8 +16,8 @@ import (
     "log"
     "fmt"
     "os"
-	
-    "github.com/RiV-chain/RiV-mesh/src/admin"	
+
+    "github.com/RiV-chain/RiV-mesh/src/admin"
 )
 
 var riv_ctrl_path string
@@ -30,7 +30,7 @@ func main() {
     w.SetSize(690, 920, webview.HintFixed)
     /*1. Create ~/.riv-mesh folder if not existing
      *2. Create ~/.riv-mesh/mesh.conf if not existing
-     *3. If the file exists read Peers. 
+     *3. If the file exists read Peers.
      *3.1 Invoke add peers for each record
      */
     mesh_folder := ".riv-mesh"
@@ -210,7 +210,7 @@ func add_peers(uri string){
 }
 
 func remove_peers(){
-	run_command("removepeers")	
+	run_command("removepeers")
 }
 
 func get_self(w webview.WebView){
@@ -221,14 +221,12 @@ func get_self(w webview.WebView){
 		go setFieldValue(w, "ipv6", err.Error())
 		return
 	}
-	for ipv6, s := range res.Self {
-		//found ipv6
-		fmt.Printf("IPv6: %s\n", ipv6)		
-		go setFieldValue(w, "ipv6", ipv6)
-		//found subnet
-		fmt.Printf("Subnet: %s\n", s.Subnet)
-		go setFieldValue(w, "subnet", s.Subnet)
-	}
+	//found ipv6
+	fmt.Printf("IPv6: %s\n", res.IPAddress)
+	go setFieldValue(w, "ipv6", res.IPAddress)
+	//found subnet
+	fmt.Printf("Subnet: %s\n", res.Subnet)
+	go setFieldValue(w, "subnet", res.Subnet)
 	out = run_command("getPeers")
 	//go setFieldValue(w, "peers", string(out))
 }
@@ -246,7 +244,7 @@ func get_peers(w webview.WebView){
 	for _, s := range res.Peers {
 		m=append(m, s.Remote)
 	}
-	for k := range m {         
+	for k := range m {
 	    // Loop
 	    fmt.Println(k)
 	}

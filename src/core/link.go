@@ -9,23 +9,14 @@ import (
 	"net"
 	"net/url"
 	"strings"
-<<<<<<< HEAD
-	"sync"
 
-	"sync/atomic"
 	"time"
 
-	"github.com/RiV-chain/RiV-mesh/src/address"
-	"github.com/RiV-chain/RiV-mesh/src/util"
-	"golang.org/x/net/proxy"
-	//"github.com/Arceliar/phony" // TODO? use instead of mutexes
-=======
 	"sync/atomic"
-	"time"
 
 	"github.com/Arceliar/phony"
-	"github.com/yggdrasil-network/yggdrasil-go/src/address"
->>>>>>> 69632bacb516e8fd7ded1fbb6860d3f224429f08
+	"github.com/RiV-chain/RiV-mesh/src/address"
+	//"github.com/Arceliar/phony" // TODO? use instead of mutexes
 )
 
 type links struct {
@@ -36,6 +27,7 @@ type links struct {
 	unix   *linkUNIX          // UNIX interface support
 	socks  *linkSOCKS         // SOCKS interface support
 	_links map[linkInfo]*link // *link is nil if connection in progress
+	// TODO timeout (to remove from switch), read from config.ReadTimeout
 }
 
 // linkInfo is used as a map key
@@ -115,10 +107,10 @@ func (l *links) isConnectedTo(info linkInfo) bool {
 	return isConnected
 }
 
-func (l *links) call(u *url.URL, sintf string) (linkInfo, error) {
+func (l *links) call(u *url.URL, sintf string) error {
 	info := linkInfoFor(u.Scheme, sintf, u.Host)
 	if l.isConnectedTo(info) {
-		return info, nil
+		return nil
 	}
 	options := linkOptions{
 		pinnedEd25519Keys: map[keyArray]struct{}{},
@@ -126,7 +118,7 @@ func (l *links) call(u *url.URL, sintf string) (linkInfo, error) {
 	for _, pubkey := range u.Query()["key"] {
 		sigPub, err := hex.DecodeString(pubkey)
 		if err != nil {
-			return info, fmt.Errorf("pinned key contains invalid hex characters")
+			return fmt.Errorf("pinned key contains invalid hex characters")
 		}
 		var sigPubKey keyArray
 		copy(sigPubKey[:], sigPub)
@@ -179,9 +171,9 @@ func (l *links) call(u *url.URL, sintf string) (linkInfo, error) {
 		}()
 
 	default:
-		return info, errors.New("unknown call scheme: " + u.Scheme)
+		return errors.New("unknown call scheme: " + u.Scheme)
 	}
-	return info, nil
+	return nil
 }
 
 func (l *links) listen(u *url.URL, sintf string) (*Listener, error) {
@@ -226,7 +218,7 @@ func (intf *link) handler() error {
 
 	// Don't connect to this link more than once.
 	if intf.links.isConnectedTo(intf.info) {
-		return nil
+		return fmt.Errorf("already connected to this node")
 	}
 
 	// Mark the connection as in progress.

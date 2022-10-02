@@ -18,8 +18,6 @@ import (
 
 	"github.com/Arceliar/phony"
 	"github.com/RiV-chain/RiV-mesh/src/address"
-	"github.com/RiV-chain/RiV-mesh/src/util"
-	//"github.com/RiV-chain/RiV-mesh/src/crypto"
 )
 
 type SelfInfo struct {
@@ -175,7 +173,7 @@ func (c *Core) Subnet() net.IPNet {
 // may be useful if you want to redirect the output later. Note that this
 // expects a Logger from the github.com/gologme/log package and not from Go's
 // built-in log package.
-func (c *Core) SetLogger(log util.Logger) {
+func (c *Core) SetLogger(log Logger) {
 	c.log = log
 }
 
@@ -203,8 +201,29 @@ func (c *Core) AddPeer(peer string, intf string) error {
 	return nil
 }
 
+ func (c *Core) RemovePeer(uri string, sourceInterface string) error {
+	var err error
+	phony.Block(c, func() {
+		peer := Peer{uri, sourceInterface}
+		linkInfo, ok := c.config._peers[peer]
+		if !ok {
+			err = fmt.Errorf("peer not configured")
+			return
+		}
+		if ok && linkInfo != nil {
+			c.links.Act(nil, func() {
+				if link := c.links._links[*linkInfo]; link != nil {
+					_ = link.close()
+				}
+			})
+		}
+		delete(c.config._peers, peer)
+	})
+	return err
+}
+
 func (c *Core) RemovePeers() error {
-	c.config._peers = map[Peer]struct{}{}
+	c.config._peers = map[Peer]*linkInfo{}
 	//for k := range c.config.InterfacePeers {
 	//	delete(c.config.InterfacePeers, k)
 	//}

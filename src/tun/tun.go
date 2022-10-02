@@ -14,9 +14,9 @@ import (
 	"golang.zx2c4.com/wireguard/tun"
 
 	"github.com/RiV-chain/RiV-mesh/src/address"
+	"github.com/RiV-chain/RiV-mesh/src/core"
 	"github.com/RiV-chain/RiV-mesh/src/defaults"
 	"github.com/RiV-chain/RiV-mesh/src/ipv6rwc"
-	"github.com/RiV-chain/RiV-mesh/src/util"
 )
 
 type MTU uint16
@@ -27,7 +27,7 @@ type MTU uint16
 // calling mesh.Start().
 type TunAdapter struct {
 	rwc         *ipv6rwc.ReadWriteCloser
-	log         util.Logger
+	log         core.Logger
 	addr        address.Address
 	subnet      address.Subnet
 	mtu         uint64
@@ -90,7 +90,7 @@ func MaximumMTU() uint64 {
 
 // Init initialises the TUN module. You must have acquired a Listener from
 // the Mesh	 core before this point and it must not be in use elsewhere.
-func New(rwc *ipv6rwc.ReadWriteCloser, log util.Logger, opts ...SetupOption) (*TunAdapter, error) {
+func New(rwc *ipv6rwc.ReadWriteCloser, log core.Logger, opts ...SetupOption) (*TunAdapter, error) {
 	tun := &TunAdapter{
 		rwc: rwc,
 		log: log,
