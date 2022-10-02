@@ -201,7 +201,7 @@ func (c *Core) AddPeer(peer string, intf string) error {
 	return nil
 }
 
- func (c *Core) RemovePeer(uri string, sourceInterface string) error {
+func (c *Core) RemovePeer(uri string, sourceInterface string) error {
 	var err error
 	phony.Block(c, func() {
 		peer := Peer{uri, sourceInterface}
@@ -230,7 +230,6 @@ func (c *Core) RemovePeers() error {
 
 	return nil
 }
-
 
 // CallPeer calls a peer once. This should be specified in the peer URI format,
 // e.g.:

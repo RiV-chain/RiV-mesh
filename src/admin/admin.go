@@ -175,7 +175,34 @@ func (a *AdminSocket) SetupAdminHandlers() {
 			return res, nil
 		},
 	)
-
+	_ = a.AddHandler(
+		"addPeer", "Add a peer to the peer list", []string{"uri", "interface"},
+		func(in json.RawMessage) (interface{}, error) {
+			req := &AddPeerRequest{}
+			res := &AddPeerResponse{}
+			if err := json.Unmarshal(in, &req); err != nil {
+				return nil, err
+			}
+			if err := a.addPeerHandler(req, res); err != nil {
+				return nil, err
+			}
+			return res, nil
+		},
+	)
+	_ = a.AddHandler(
+		"removePeer", "Remove a peer from the peer list", []string{"uri", "interface"},
+		func(in json.RawMessage) (interface{}, error) {
+			req := &RemovePeerRequest{}
+			res := &RemovePeerResponse{}
+			if err := json.Unmarshal(in, &req); err != nil {
+				return nil, err
+			}
+			if err := a.removePeerHandler(req, res); err != nil {
+				return nil, err
+			}
+			return res, nil
+		},
+	)
         _ = a.AddHandler("addPeers", "Add peers to this node", []string{"uri", "[interface]"}, func(in json.RawMessage) (interface{}, error) {
                 req := &AddPeersRequest{}
                 res := &AddPeersResponse{}
