@@ -101,7 +101,7 @@ ln -s /apps/mesh/var/log/mesh.log /tmp/$PKGNAME/apps/mesh/www/log
 chmod 0775 /tmp/$PKGNAME/DEBIAN/*
 chmod 755 /tmp/$PKGNAME/apps/mesh/bin/*
 
-dpkg-deb --build --root-owner-group /tmp/$PKGNAME
+dpkg-deb -Zxz --build --root-owner-group /tmp/$PKGNAME
 
 cp /tmp/$PKGFILE .
 
