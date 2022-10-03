@@ -131,16 +131,15 @@ $(function () {
 				$('.nas-user-name').text(ed.getNasUser());
 			}
 			loginMode();
-			var k = Object.keys(response)
-			if (k.length !== 0) {
+			if (response.size !== 0) {
 				isLoggedInMode = true;
 				statusMode();
 			}
-			var self = response[k[0]];
+			var self = response;
 			checkInfoError(response);
 			$('#version').html((self.build_version !== null ? self.build_version : '&nbsp;') + (self.build_name !== null ? (' (' + self.build_name + ')') : ''));
 			$('.nas-apps-config-form-app-version').show();
-			$('#username').text(k[0]);
+			$('#username').text(self.address);
 			updateInfo(response);
 	}).fail(errorHandler);
 		$('#nasLoginAlert').hide();
