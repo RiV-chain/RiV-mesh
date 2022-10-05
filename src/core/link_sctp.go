@@ -55,7 +55,7 @@ func (l *linkSCTP) dial(url *url.URL, options linkOptions, sintf string) error {
 }
 
 func (l *linkSCTP) listen(url *url.URL, sintf string) (*Listener, error) {
-	_, cancel := context.WithCancel(l.core.ctx)
+	//_, cancel := context.WithCancel(l.core.ctx)
 	hostport := url.Host
 	if sintf != "" {
 		if host, port, err := net.SplitHostPort(hostport); err == nil {
@@ -66,7 +66,7 @@ func (l *linkSCTP) listen(url *url.URL, sintf string) (*Listener, error) {
 	listener, err := sctp.NewSCTPListener(addr, sctp.InitMsg{NumOstreams: 2, MaxInstreams: 2, MaxAttempts: 2, MaxInitTimeout: 5}, sctp.OneToOne, false)
 
 	if err != nil {
-		cancel()
+		//cancel()
 		return nil, err
 	}
 	listener.SetEvents(sctp.SCTP_EVENT_DATA_IO)
@@ -74,9 +74,9 @@ func (l *linkSCTP) listen(url *url.URL, sintf string) (*Listener, error) {
 		Listener: listener,
 		closed:   make(chan struct{}),
 	}
-	phony.Block(l, func() {
-		l._listeners[entry] = cancel
-	})
+	//phony.Block(l, func() {
+	//	l._listeners[entry] = cancel
+	//})
 	l.core.log.Printf("SCTP listener started on %s", listener.Addr())
 	go func() {
 		defer phony.Block(l, func() {
@@ -85,7 +85,7 @@ func (l *linkSCTP) listen(url *url.URL, sintf string) (*Listener, error) {
 		for {
 			conn, err := listener.Accept()
 			if err != nil {
-				cancel()
+				//cancel()
 				break
 			}
 			addr := conn.RemoteAddr().(*net.TCPAddr)
