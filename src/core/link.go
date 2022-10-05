@@ -26,6 +26,7 @@ type links struct {
 	tls    *linkTLS           // TLS interface support
 	unix   *linkUNIX          // UNIX interface support
 	socks  *linkSOCKS         // SOCKS interface support
+	sctp   *linkSCTP          // SCTP interface support
 	_links map[linkInfo]*link // *link is nil if connection in progress
 	// TODO timeout (to remove from switch), read from config.ReadTimeout
 }
@@ -169,7 +170,12 @@ func (l *links) call(u *url.URL, sintf string) error {
 				l.core.log.Warnf("Failed to dial UNIX %s: %s\n", u.Host, err)
 			}
 		}()
-
+        case "sctp":
+                go func() {
+                        if err := l.sctp.dial(u, options, sintf); err != nil {
+                                l.core.log.Warnf("Failed to dial SCTP %s: %s\n", u.Host, err)
+                        }
+                }()
 	default:
 		return errors.New("unknown call scheme: " + u.Scheme)
 	}
@@ -186,6 +192,8 @@ func (l *links) listen(u *url.URL, sintf string) (*Listener, error) {
 		listener, err = l.tls.listen(u, sintf)
 	case "unix":
 		listener, err = l.unix.listen(u, sintf)
+        case "sctp":
+                listener, err = l.sctp.listen(u, sintf)
 	default:
 		return nil, fmt.Errorf("unrecognised scheme %q", u.Scheme)
 	}

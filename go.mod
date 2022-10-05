@@ -12,18 +12,19 @@ require (
 	github.com/kardianos/minwinsvc v1.0.0
 	github.com/mitchellh/mapstructure v1.4.1
 	github.com/vishvananda/netlink v1.1.0
-	golang.org/x/mobile v0.0.0-20220722155234-aaac322e2105
+	github.com/webview/webview v0.0.0-20210330151455-f540d88dde4e
+	golang.org/x/mobile v0.0.0-20220928052126-fa6bcb076835
 	golang.org/x/net v0.0.0-20220722155237-a158d28d115b
 	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f
 	golang.org/x/text v0.3.8-0.20211004125949-5bd84dd9b33b
 	golang.zx2c4.com/wireguard v0.0.0-20211017052713-f87e87af0d9a
 	golang.zx2c4.com/wireguard/windows v0.4.12
-	github.com/webview/webview v0.0.0-20210330151455-f540d88dde4e
 )
 
 require (
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
+	github.com/vikulin/sctp v0.0.0-20220918193719-c8cee09143f6 // indirect
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
 	golang.org/x/tools v0.1.12 // indirect
