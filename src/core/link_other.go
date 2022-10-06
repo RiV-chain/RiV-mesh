@@ -22,6 +22,17 @@ import (
 	//"github.com/Arceliar/phony" // TODO? use instead of mutexes
 )
 
+type links struct {
+	phony.Inbox
+	core   *Core
+	tcp    *linkTCP           // TCP interface support
+	tls    *linkTLS           // TLS interface support
+	unix   *linkUNIX          // UNIX interface support
+	socks  *linkSOCKS         // SOCKS interface support
+	_links map[linkInfo]*link // *link is nil if connection in progress
+	// TODO timeout (to remove from switch), read from config.ReadTimeout
+}
+
 func (l *links) init(c *Core) error {
 	l.core = c
 	l.tcp = l.newLinkTCP()
