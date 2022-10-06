@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"net/url"
+	"encoding/json"
 	"strings"
 	"strconv"
 
@@ -88,9 +89,13 @@ func (l *linkSCTP) listen(url *url.URL, sintf string) (*Listener, error) {
 				//cancel()
 				break
 			}
-			addr := conn.RemoteAddr().(*net.TCPAddr)
-			name := fmt.Sprintf("sctp://%s", addr)
-			info := linkInfoFor("sctp", sintf, strings.SplitN(addr.IP.String(), "%", 2)[0])
+			addr := conn.RemoteAddr().(*sctp.SCTPAddr)
+			ips, err := json.Marshal(addr.IPAddrs)
+                        if err != nil {
+                                break
+                        }
+			name := fmt.Sprintf("sctp://%s", ips)
+			info := linkInfoFor("sctp", sintf, string(ips))
 			if err = l.handler(name, info, conn, linkOptions{}, true); err != nil {
 				l.core.log.Errorln("Failed to create inbound link:", err)
 			}
