@@ -32,6 +32,8 @@ func (l *links) init(c *Core) error {
 	l.tls = l.newLinkTLS(l.tcp)
 	l.unix = l.newLinkUNIX()
 	l.socks = l.newLinkSOCKS()
+	l.sctp = l.newLinkSCTP()
+
 	l._links = make(map[linkInfo]*link)
 
 	var listeners []ListenAddress
