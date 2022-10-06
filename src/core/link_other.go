@@ -4,21 +4,13 @@
 package core
 
 import (
-	"bytes"
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"io"
 	"net"
 	"net/url"
-	"strings"
-
-	"time"
-
-	"sync/atomic"
 
 	"github.com/Arceliar/phony"
-	"github.com/RiV-chain/RiV-mesh/src/address"
 	//"github.com/Arceliar/phony" // TODO? use instead of mutexes
 )
 
