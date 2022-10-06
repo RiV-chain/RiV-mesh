@@ -111,8 +111,8 @@ func run() int {
 		panic(err)
 	}
 	logger.Printf("Request sent")
-	js, _ := json.Marshal(send)
-	fmt.Println("sent:", string(js))
+	//js, _ := json.Marshal(send)
+	//fmt.Println("sent:", string(js))
 	if err := decoder.Decode(&recv); err != nil {
 		panic(err)
 	}
