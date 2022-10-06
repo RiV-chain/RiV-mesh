@@ -77,7 +77,7 @@ func (l *linkSCTP) listen(url *url.URL, sintf string) (*Listener, error) {
 	//phony.Block(l, func() {
 	//	l._listeners[entry] = cancel
 	//})
-	fmt.Sprintf("SCTP listener started on %s", listener.Addr())
+	l.core.log.Printf("SCTP listener started on %s", listener.Addr())
 	go func() {
 		defer phony.Block(l, func() {
 			delete(l._listeners, entry)
