@@ -24,7 +24,7 @@ require (
 require (
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
-	github.com/vikulin/sctp v0.0.0-20220918193719-c8cee09143f6 // indirect
+	github.com/vikulin/sctp v0.0.0-20221007165105-a2fb1402929e // indirect
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
 	golang.org/x/tools v0.1.12 // indirect
