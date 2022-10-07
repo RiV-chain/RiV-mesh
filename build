@@ -33,7 +33,7 @@ fi
 
 for CMD in ./cmd/mesh ./cmd/meshctl ./contrib/ui/mesh-ui ; do
   echo "Building: $CMD"
-  go build $ARGS -ldflags "$LDFLAGS" -gcflags "$GCFLAGS" $CMD
+  CGO_ENABLED=0 go build $ARGS -ldflags "$LDFLAGS" -gcflags "$GCFLAGS" $CMD
 
   if [ $UPX ]; then
     upx --brute $CMD
