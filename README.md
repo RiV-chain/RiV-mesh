@@ -119,6 +119,13 @@ An error occurred starting TUN/TAP: permission denied
 ### Caused by:
 IPv6 support is not enabled. See the solution: https://github.com/yggdrasil-network/yggdrasil-go/issues/479#issuecomment-519512395
 
+3. Mesh infinite output in log:
+ Connected SCTP ...
+ Disconnected SCTP ...
+
+### Caused by:
+Docker interface docker0 is conflicting with SCTP bind process. The issue can be resolved by removing docker.
+
 ## License
 
 This code is released under the terms of the LGPLv3, but with an added exception
