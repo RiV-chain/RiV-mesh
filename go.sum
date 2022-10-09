@@ -47,6 +47,10 @@ github.com/vikulin/sctp v0.0.0-20221007164225-10d5e6ecb1f3 h1:PjcompCCBrsiwQ6cl0
 github.com/vikulin/sctp v0.0.0-20221007164225-10d5e6ecb1f3/go.mod h1:wbWp47D/qXkQrDuO8qSeUXdLN9qXNZzIgLGDQIoJlJU=
 github.com/vikulin/sctp v0.0.0-20221007165105-a2fb1402929e h1:2L3RhOd9P1uAIH32fe2Yj1VhA5m9pwQxlfNcxxaDzGk=
 github.com/vikulin/sctp v0.0.0-20221007165105-a2fb1402929e/go.mod h1:wbWp47D/qXkQrDuO8qSeUXdLN9qXNZzIgLGDQIoJlJU=
+github.com/vikulin/sctp v0.0.0-20221009173008-ba8cb1782eb2 h1:TScABL/GNdjRpUD0aG8ppV7aOjWAh/jyLic9BUMVAmU=
+github.com/vikulin/sctp v0.0.0-20221009173008-ba8cb1782eb2/go.mod h1:wbWp47D/qXkQrDuO8qSeUXdLN9qXNZzIgLGDQIoJlJU=
+github.com/vikulin/sctp v0.0.0-20221009173321-b95fb2a7e8a8 h1:45QFbCDBaje6CtEVNzW3v961p9kg5OtkDqesrAXhr78=
+github.com/vikulin/sctp v0.0.0-20221009173321-b95fb2a7e8a8/go.mod h1:wbWp47D/qXkQrDuO8qSeUXdLN9qXNZzIgLGDQIoJlJU=
 github.com/vishvananda/netlink v1.1.0 h1:1iyaYNBLmP6L0220aDnYQpo1QEV4t4hJ+xEEhhJH8j0=
 github.com/vishvananda/netlink v1.1.0/go.mod h1:cTgwzPIzzgDAYoQrMm0EdrjRUBkTqKYppBueQtXaqoE=
 github.com/vishvananda/netns v0.0.0-20191106174202-0a2b9b5464df/go.mod h1:JP3t17pCcGlemwknint6hfoeCVQrEMVwxRLRjXpq+BU=

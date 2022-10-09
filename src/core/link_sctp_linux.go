@@ -49,7 +49,7 @@ func (l *linkSCTP) dial(url *url.URL, options linkOptions, sintf string) error {
 	}
 	addr := l.getAddress(dst.String()+":"+port)
 	var conn net.Conn
-	conn, err = sctp.NewSCTPConnection(addr.AddressFamily, sctp.InitMsg{NumOstreams: 2, MaxInstreams: 2, MaxAttempts: 2, MaxInitTimeout: 5}, sctp.OneToOne, false)
+	conn, err = sctp.NewSCTPConnection(addr, addr.AddressFamily, sctp.InitMsg{NumOstreams: 2, MaxInstreams: 2, MaxAttempts: 2, MaxInitTimeout: 5}, sctp.OneToOne, false)
 	if err != nil {
 		return err
 	}
