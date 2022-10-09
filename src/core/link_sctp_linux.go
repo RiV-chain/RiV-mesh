@@ -55,8 +55,8 @@ func (l *linkSCTP) dial(url *url.URL, options linkOptions, sintf string) error {
 		return err
 	}
 	err = conn.(*sctp.SCTPConn).Connect(raddress)
-	conn.(*sctp.SCTPConn).SetWriteBuffer(324288)
-	conn.(*sctp.SCTPConn).SetReadBuffer(324288)
+	//conn.(*sctp.SCTPConn).SetWriteBuffer(324288)
+	//conn.(*sctp.SCTPConn).SetReadBuffer(324288)
 	wbuf, _ := conn.(*sctp.SCTPConn).GetWriteBuffer()
 	rbuf, _ := conn.(*sctp.SCTPConn).GetReadBuffer()
 
@@ -107,8 +107,8 @@ func (l *linkSCTP) listen(url *url.URL, sintf string) (*Listener, error) {
                         }
 			name := fmt.Sprintf("sctp://%s", ips)
 			info := linkInfoFor("sctp", sintf, string(ips))
-			conn.(*sctp.SCTPConn).SetWriteBuffer(324288)
-			conn.(*sctp.SCTPConn).SetReadBuffer(324288)
+			//conn.(*sctp.SCTPConn).SetWriteBuffer(324288)
+			//conn.(*sctp.SCTPConn).SetReadBuffer(324288)
 			wbuf, _ := conn.(*sctp.SCTPConn).GetWriteBuffer()
 			rbuf, _ := conn.(*sctp.SCTPConn).GetReadBuffer()
 
