@@ -98,7 +98,7 @@ If you are operating RiV-mesh peer and may create your pool request with your ne
 
 ## Known issues
 
-1. Log message:
+### 1. Log message:
 ```
 An error occurred starting multicast: listen udp6 [::]:9001: socket: address family not supported by protocol
 ```
@@ -111,7 +111,7 @@ An error occurred starting TUN/TAP: operation not supported
 The device has no IPv6 support
 
 
-2. Log message:
+### 2. Log message:
 ```
 An error occurred starting TUN/TAP: permission denied
 ```
@@ -119,8 +119,9 @@ An error occurred starting TUN/TAP: permission denied
 ### Caused by:
 IPv6 support is not enabled. See the solution: https://github.com/yggdrasil-network/yggdrasil-go/issues/479#issuecomment-519512395
 
-3. Mesh infinite output in log:
+### 3. Mesh infinite output in log:
  Connected SCTP ...
+ 
  Disconnected SCTP ...
 
 ### Caused by:
