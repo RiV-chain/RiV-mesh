@@ -55,6 +55,8 @@ func (l *linkSCTP) dial(url *url.URL, options linkOptions, sintf string) error {
 		return err
 	}
 	err = conn.(*sctp.SCTPConn).Connect(raddress)
+	conn.(*sctp.SCTPConn).SetWriteBuffer(4096)
+	conn.(*sctp.SCTPConn).SetReadBuffer(4096)
 	conn.(*sctp.SCTPConn).SetEvents(sctp.SCTP_EVENT_DATA_IO)
 	return l.handler(url.String(), info, conn, options, false)
 }
@@ -100,6 +102,8 @@ func (l *linkSCTP) listen(url *url.URL, sintf string) (*Listener, error) {
                         }
 			name := fmt.Sprintf("sctp://%s", ips)
 			info := linkInfoFor("sctp", sintf, string(ips))
+			conn.(*sctp.SCTPConn).SetWriteBuffer(4096)
+			conn.(*sctp.SCTPConn).SetReadBuffer(4096)
 			if err = l.handler(name, info, conn, linkOptions{}, true); err != nil {
 				l.core.log.Errorln("Failed to create inbound link:", err)
 			}
