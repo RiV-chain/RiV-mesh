@@ -47,13 +47,14 @@ func (l *linkSCTP) dial(url *url.URL, options linkOptions, sintf string) error {
 	if err != nil {
 		return err
 	}
-	addr := l.getAddress(dst.String()+":"+port)
+	raddress := l.getAddress(dst.String()+":"+port)
 	var conn net.Conn
-	conn, err = sctp.NewSCTPConnection(addr, addr.AddressFamily, sctp.InitMsg{NumOstreams: 2, MaxInstreams: 2, MaxAttempts: 2, MaxInitTimeout: 5}, sctp.OneToOne, false)
+	laddress := l.getAddress("0.0.0.0:0")
+	conn, err = sctp.NewSCTPConnection(laddress, laddress.AddressFamily, sctp.InitMsg{NumOstreams: 2, MaxInstreams: 2, MaxAttempts: 2, MaxInitTimeout: 5}, sctp.OneToOne, false)
 	if err != nil {
 		return err
 	}
-	err = conn.(*sctp.SCTPConn).Connect(addr)
+	err = conn.(*sctp.SCTPConn).Connect(raddress)
 	conn.(*sctp.SCTPConn).SetEvents(sctp.SCTP_EVENT_DATA_IO)
 	return l.handler(url.String(), info, conn, options, false)
 }
