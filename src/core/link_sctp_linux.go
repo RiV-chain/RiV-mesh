@@ -57,11 +57,11 @@ func (l *linkSCTP) dial(url *url.URL, options linkOptions, sintf string) error {
 	err = conn.(*sctp.SCTPConn).Connect(raddress)
 	//conn.(*sctp.SCTPConn).SetWriteBuffer(324288)
 	//conn.(*sctp.SCTPConn).SetReadBuffer(324288)
-	wbuf, _ := conn.(*sctp.SCTPConn).GetWriteBuffer()
-	rbuf, _ := conn.(*sctp.SCTPConn).GetReadBuffer()
+	//wbuf, _ := conn.(*sctp.SCTPConn).GetWriteBuffer()
+	//rbuf, _ := conn.(*sctp.SCTPConn).GetReadBuffer()
 
-	l.core.log.Printf("Read buffer %d", rbuf)
-	l.core.log.Printf("Write buffer %d", wbuf)
+	//l.core.log.Printf("Read buffer %d", rbuf)
+	//l.core.log.Printf("Write buffer %d", wbuf)
 	conn.(*sctp.SCTPConn).SetEvents(sctp.SCTP_EVENT_DATA_IO)
 	return l.handler(url.String(), info, conn, options, false)
 }
