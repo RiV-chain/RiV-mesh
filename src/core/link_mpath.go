@@ -136,36 +136,14 @@ func (l *linkMPATH) connFor(url *url.URL, sintf string) (net.Conn, error) {
 		return nil, fmt.Errorf("no valid target hosts given")
 	}
 
-	allNetworkAddrs, err := net.InterfaceAddrs()
-
+	star := net.ParseIP("0.0.0.0")
 	dialers := make([]multipath.Dialer, 0)
 	trackers := make([]multipath.StatsTracker, 0)
-
-	if err == nil {
-		for _, addrCIDR := range allNetworkAddrs {
-			interfaceIP, _, _ := net.ParseCIDR(addrCIDR.String())
-			for _, rT := range remoteTargets {
-				isInterfaceIPv6 := interfaceIP.To4() == nil
-
-				if isInterfaceIPv6 {
-					// Skip ipv6 address family
-					continue
-				}
-
-				td := newOutboundDialer(interfaceIP, rT)
-				dialers = append(dialers, td)
-				trackers = append(trackers, multipath.NullTracker{})
-			}
-		}
-	} else {
-		star := net.ParseIP("0.0.0.0")
-		for _, rT := range remoteTargets {
-			td := newOutboundDialer(star, rT)
-			dialers = append(dialers, td)
-			trackers = append(trackers, multipath.NullTracker{})
-		}
+	for _, rT := range remoteTargets {
+		td := newOutboundDialer(star, rT)
+		dialers = append(dialers, td)
+		trackers = append(trackers, multipath.NullTracker{})
 	}
-
 	dialer := multipath.NewDialer("mpath", dialers)
 	//conn, err := dialer.DialContext(l.core.ctx, "tcp", remoteTargets[0].String())
 	conn, err := dialer.DialContext(l.core.ctx)
