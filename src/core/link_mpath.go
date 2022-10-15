@@ -49,8 +49,8 @@ func (l *linkMPATH) listen(url *url.URL, sintf string) (*Listener, error) {
 			hostport = fmt.Sprintf("[%s%%%s]:%s", host, sintf, port)
 		}
 	}
-	ctx, cancel := context.WithCancel(l.core.ctx)
-	listener, err := l.listenFor(url, ctx, sintf)
+	_, cancel := context.WithCancel(l.core.ctx)
+	listener, err := l.listenFor(url, sintf)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -154,7 +154,7 @@ func (l *linkMPATH) connFor(url *url.URL, sintf string) (net.Conn, error) {
 	return conn, nil
 }
 
-func (l *linkMPATH) listenFor(url *url.URL, ctx context.Context, sintf string) (net.Listener, error) {
+func (l *linkMPATH) listenFor(url *url.URL, sintf string) (net.Listener, error) {
 	//Public node url has following format: mpath://ip-1:port-1/ip-2:port-2.../ip-n:port-n
 	hosts := strings.Split(url.String(), "/")[2:]
 	localTargets := make([]string, 0)
@@ -181,7 +181,7 @@ func (l *linkMPATH) listenFor(url *url.URL, ctx context.Context, sintf string) (
 	listeners := make([]net.Listener, 0)
 	trackers := make([]multipath.StatsTracker, 0)
 	for _, lT := range localTargets {
-		l, err := l.listener.Listen(ctx, "tcp", lT)
+		l, err := l.listener.Listen(l.core.ctx, "tcp", lT)
 		if err != nil {
 			continue
 		}
