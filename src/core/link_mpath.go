@@ -112,7 +112,7 @@ func (l *linkMPATH) getAddr() *net.TCPAddr {
 	return addr
 }
 
-func (l *linkMPATH) connFor(url *url.URL, sintf string) (net.Conn, error) {
+func (l *linkMPATH) connFor(url *url.URL, sinterfaces string) (net.Conn, error) {
 	//Peer url has following format: mpath://host-1:port-1/host-2:port-2.../host-n:port-n
 	hosts := strings.Split(url.String(), "/")[2:]
 	remoteTargets := make([]net.Addr, 0)
@@ -123,7 +123,7 @@ func (l *linkMPATH) connFor(url *url.URL, sintf string) (net.Conn, error) {
 			continue
 		}
 		if dst.IP.IsLinkLocalUnicast() {
-			dst.Zone = sintf
+			dst.Zone = sinterfaces
 			if dst.Zone == "" {
 				l.core.log.Errorln("link-local address requires a zone in ", dst.String())
 				continue
@@ -136,14 +136,63 @@ func (l *linkMPATH) connFor(url *url.URL, sintf string) (net.Conn, error) {
 		return nil, fmt.Errorf("no valid target hosts given")
 	}
 
-	star := net.ParseIP("0.0.0.0")
 	dialers := make([]multipath.Dialer, 0)
 	trackers := make([]multipath.StatsTracker, 0)
-	for _, rT := range remoteTargets {
-		td := newOutboundDialer(star, rT)
-		dialers = append(dialers, td)
-		trackers = append(trackers, multipath.NullTracker{})
-		l.core.log.Printf("added outbound dialer for %s", rT.String())
+	if sinterfaces != "" {
+		sintfarray := strings.Split(sinterfaces, ",")
+		for i, dst := range remoteTargets {
+			//do a loop over all interfaces
+			//if number of remote targets > number
+			sintfindex := i % len(sintfarray)
+			sintf := sintfarray[sintfindex]
+			ief, err := net.InterfaceByName(sintf)
+			if err != nil {
+				return nil, fmt.Errorf("interface %q not found", sintf)
+			}
+			if ief.Flags&net.FlagUp == 0 {
+				return nil, fmt.Errorf("interface %q is not up", sintf)
+			}
+			addrs, err := ief.Addrs()
+			if err != nil {
+				return nil, fmt.Errorf("interface %q addresses not available: %w", sintf, err)
+			}
+			dstIp := dst.(*net.TCPAddr).IP
+			for addrindex, addr := range addrs {
+				src, _, err := net.ParseCIDR(addr.String())
+				if err != nil {
+					continue
+				}
+				if !src.IsGlobalUnicast() && !src.IsLinkLocalUnicast() {
+					continue
+				}
+				bothglobal := src.IsGlobalUnicast() == dstIp.IsGlobalUnicast()
+				bothlinklocal := src.IsLinkLocalUnicast() == dstIp.IsLinkLocalUnicast()
+				if !bothglobal && !bothlinklocal {
+					continue
+				}
+				if (src.To4() != nil) != (dstIp.To4() != nil) {
+					continue
+				}
+				if bothglobal || bothlinklocal || addrindex == len(addrs)-1 {
+					td := newOutboundDialer(src, dst)
+					dialers = append(dialers, td)
+					trackers = append(trackers, multipath.NullTracker{})
+					l.core.log.Printf("added outbound dialer for %s->%s", src.String(), dst.String())
+					break
+				}
+			}
+		}
+	} else {
+		star := net.ParseIP("0.0.0.0")
+		for _, dst := range remoteTargets {
+			td := newOutboundDialer(star, dst)
+			dialers = append(dialers, td)
+			trackers = append(trackers, multipath.NullTracker{})
+			l.core.log.Printf("added outbound dialer for %s", dst.String())
+		}
+	}
+	if len(dialers) == 0 {
+		return nil, fmt.Errorf("no suitable source address found on interface %q", sinterfaces)
 	}
 	dialer := multipath.NewDialer("mpath", dialers)
 	//conn, err := dialer.DialContext(l.core.ctx, "tcp", remoteTargets[0].String())
