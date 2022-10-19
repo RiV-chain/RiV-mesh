@@ -148,7 +148,7 @@ func (l *linkMPATH) connFor(url *url.URL, sinterfaces string) (net.Conn, error) 
 			for _, sintf := range sintfarray { 
 				src := net.ParseIP(sintf)
 				if src == nil {
-					l.core.log.Errorln("interface %s address incorrect: %w", sintf, err)
+					l.core.log.Errorln("interface %s address incorrect: %w", sintf)
 					continue
 				}
 				dstIp := dst.(*net.TCPAddr).IP
