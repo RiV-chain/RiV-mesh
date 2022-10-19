@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net"
 	"net/url"
+	"net/netip"
 	"strings"
 	"github.com/getlantern/multipath"
 
