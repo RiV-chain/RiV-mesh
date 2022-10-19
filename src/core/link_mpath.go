@@ -140,45 +140,43 @@ func (l *linkMPATH) connFor(url *url.URL, sinterfaces string) (net.Conn, error) 
 	trackers := make([]multipath.StatsTracker, 0)
 	if sinterfaces != "" {
 		sintfarray := strings.Split(sinterfaces, ",")
-		for i, dst := range remoteTargets {
-			//do a loop over all interfaces
-			//if number of remote targets > number
-			sintfindex := i % len(sintfarray)
-			sintf := sintfarray[sintfindex]
-			ief, err := net.InterfaceByName(sintf)
-			if err != nil {
-				return nil, fmt.Errorf("interface %q not found", sintf)
-			}
-			if ief.Flags&net.FlagUp == 0 {
-				return nil, fmt.Errorf("interface %q is not up", sintf)
-			}
-			addrs, err := ief.Addrs()
-			if err != nil {
-				return nil, fmt.Errorf("interface %q addresses not available: %w", sintf, err)
-			}
-			dstIp := dst.(*net.TCPAddr).IP
-			for addrindex, addr := range addrs {
-				src, _, err := net.ParseCIDR(addr.String())
+		for _, dst := range remoteTargets {
+			for _, sintf := range sintfarray { 
+				ief, err := net.InterfaceByName(sintf)
 				if err != nil {
-					continue
+					return nil, fmt.Errorf("interface %q not found", sintf)
 				}
-				if !src.IsGlobalUnicast() && !src.IsLinkLocalUnicast() {
-					continue
+				if ief.Flags&net.FlagUp == 0 {
+					return nil, fmt.Errorf("interface %q is not up", sintf)
 				}
-				bothglobal := src.IsGlobalUnicast() == dstIp.IsGlobalUnicast()
-				bothlinklocal := src.IsLinkLocalUnicast() == dstIp.IsLinkLocalUnicast()
-				if !bothglobal && !bothlinklocal {
-					continue
+				addrs, err := ief.Addrs()
+				if err != nil {
+					return nil, fmt.Errorf("interface %q addresses not available: %w", sintf, err)
 				}
-				if (src.To4() != nil) != (dstIp.To4() != nil) {
-					continue
-				}
-				if bothglobal || bothlinklocal || addrindex == len(addrs)-1 {
-					td := newOutboundDialer(src, dst)
-					dialers = append(dialers, td)
-					trackers = append(trackers, multipath.NullTracker{})
-					l.core.log.Printf("added outbound dialer for %s->%s", src.String(), dst.String())
-					break
+				dstIp := dst.(*net.TCPAddr).IP
+				for addrindex, addr := range addrs {
+					src, _, err := net.ParseCIDR(addr.String())
+					if err != nil {
+						continue
+					}
+					if !src.IsGlobalUnicast() && !src.IsLinkLocalUnicast() {
+						continue
+					}
+					bothglobal := src.IsGlobalUnicast() == dstIp.IsGlobalUnicast()
+					bothlinklocal := src.IsLinkLocalUnicast() == dstIp.IsLinkLocalUnicast()
+					if !bothglobal && !bothlinklocal {
+						continue
+					}
+					if (src.To4() != nil) != (dstIp.To4() != nil) {
+						continue
+					}
+					if bothglobal || bothlinklocal || addrindex == len(addrs)-1 {
+						td := newOutboundDialer(src, dst)
+						dialers = append(dialers, td)
+						trackers = append(trackers, multipath.NullTracker{})
+						l.core.log.Printf("added outbound dialer for %s->%s", src.String(), dst.String())
+						break
+					}
 				}
 			}
 		}
