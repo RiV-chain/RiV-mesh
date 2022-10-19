@@ -172,7 +172,6 @@ func (l *linkMPATH) connFor(url *url.URL, sinterfaces string) (net.Conn, error) 
 					dialers = append(dialers, td)
 					trackers = append(trackers, multipath.NullTracker{})
 					l.core.log.Printf("added outbound dialer for %s->%s", src.String(), dst.String())
-					break
 				}
 				
 			}
