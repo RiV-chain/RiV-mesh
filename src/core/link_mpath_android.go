@@ -145,12 +145,14 @@ func (l *linkMPATH) connFor(url *url.URL, sinterfaces string) (net.Conn, error) 
 	if sinterfaces != "" {
 		sintfarray := strings.Split(sinterfaces, ",")
 		for _, dst := range remoteTargets {
-			for _, sintf := range sintfarray { 
-				src := net.ParseIP(sintf)
-				if src == nil {
-					l.core.log.Errorln("interface %s address incorrect: %w", sintf)
+			for _, sintf := range sintfarray {
+				addr, err := netip.ParseAddr(sintf)
+				if err != nil {
+					l.core.log.Errorln("interface %s address incorrect: %w", sintf, err)
 					continue
 				}
+				src := net.ParseIP(addr.WithZone(""))
+				
 				dstIp := dst.(*net.TCPAddr).IP
 
 				if !src.IsGlobalUnicast() && !src.IsLinkLocalUnicast() {
