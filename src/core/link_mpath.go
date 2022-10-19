@@ -144,14 +144,17 @@ func (l *linkMPATH) connFor(url *url.URL, sinterfaces string) (net.Conn, error) 
 			for _, sintf := range sintfarray { 
 				ief, err := net.InterfaceByName(sintf)
 				if err != nil {
-					return nil, fmt.Errorf("interface %q not found", sintf)
+					l.core.log.Errorln("interface %q not found", sintf)
+					continue
 				}
 				if ief.Flags&net.FlagUp == 0 {
-					return nil, fmt.Errorf("interface %q is not up", sintf)
+					l.core.log.Errorln("interface %q is not up", sintf)
+					continue
 				}
 				addrs, err := ief.Addrs()
 				if err != nil {
-					return nil, fmt.Errorf("interface %q addresses not available: %w", sintf, err)
+					l.core.log.Errorln("interface %q addresses not available: %w", sintf, err)
+					continue
 				}
 				dstIp := dst.(*net.TCPAddr).IP
 				for addrindex, addr := range addrs {
