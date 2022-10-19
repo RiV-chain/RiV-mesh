@@ -152,7 +152,7 @@ func (l *linkMPATH) connFor(url *url.URL, sinterfaces string) (net.Conn, error) 
 					l.core.log.Errorln("interface %s address incorrect: %w", sintf, err)
 					continue
 				}
-				src := net.ParseIP(addr.WithZone(""))
+				src := net.ParseIP(addr.WithZone("").String())
 				
 				dstIp := dst.(*net.TCPAddr).IP
 
