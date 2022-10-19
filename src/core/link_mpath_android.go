@@ -146,32 +146,32 @@ func (l *linkMPATH) connFor(url *url.URL, sinterfaces string) (net.Conn, error) 
 		sintfarray := strings.Split(sinterfaces, ",")
 		for _, dst := range remoteTargets {
 			for _, sintf := range sintfarray { 
-				src, err := net.ParseIP(sintf)
-				if err != nil {
+				src := net.ParseIP(sintf)
+				if src == nil {
 					l.core.log.Errorln("interface %s address incorrect: %w", sintf, err)
 					continue
 				}
 				dstIp := dst.(*net.TCPAddr).IP
-				for addrindex, addr := range addrs {
-					if !src.IsGlobalUnicast() && !src.IsLinkLocalUnicast() {
-						continue
-					}
-					bothglobal := src.IsGlobalUnicast() == dstIp.IsGlobalUnicast()
-					bothlinklocal := src.IsLinkLocalUnicast() == dstIp.IsLinkLocalUnicast()
-					if !bothglobal && !bothlinklocal {
-						continue
-					}
-					if (src.To4() != nil) != (dstIp.To4() != nil) {
-						continue
-					}
-					if bothglobal || bothlinklocal || addrindex == len(addrs)-1 {
-						td := newOutboundDialer(src, dst)
-						dialers = append(dialers, td)
-						trackers = append(trackers, multipath.NullTracker{})
-						l.core.log.Printf("added outbound dialer for %s->%s", src.String(), dst.String())
-						break
-					}
+
+				if !src.IsGlobalUnicast() && !src.IsLinkLocalUnicast() {
+					continue
 				}
+				bothglobal := src.IsGlobalUnicast() == dstIp.IsGlobalUnicast()
+				bothlinklocal := src.IsLinkLocalUnicast() == dstIp.IsLinkLocalUnicast()
+				if !bothglobal && !bothlinklocal {
+					continue
+				}
+				if (src.To4() != nil) != (dstIp.To4() != nil) {
+					continue
+				}
+				if bothglobal || bothlinklocal {
+					td := newOutboundDialer(src, dst)
+					dialers = append(dialers, td)
+					trackers = append(trackers, multipath.NullTracker{})
+					l.core.log.Printf("added outbound dialer for %s->%s", src.String(), dst.String())
+					break
+				}
+				
 			}
 		}
 	} else {
