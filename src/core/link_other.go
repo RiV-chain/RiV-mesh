@@ -111,7 +111,7 @@ func (l *links) call(u *url.URL, sintf string) error {
 	case "mpath":
 		go func() {
 			if err := l.mpath.dial(u, options, sintf); err != nil {
-				l.core.log.Warnf("Failed to dial TCP %s: %s\n", u.Host, err)
+				l.core.log.Warnf("Failed to dial MPATH %s: %s\n", u.Host, err)
 			}
 		}()
 
