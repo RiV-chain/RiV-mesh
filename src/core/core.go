@@ -9,7 +9,8 @@ import (
 	"net/url"
 	"time"
 
-	iwe "github.com/Arceliar/ironwood/encrypted"
+	//iwe "github.com/Arceliar/ironwood/encrypted"
+	iwn "github.com/Arceliar/ironwood/network"
 	iwt "github.com/Arceliar/ironwood/types"
 	"github.com/Arceliar/phony"
 	"github.com/gologme/log"
@@ -25,7 +26,7 @@ type Core struct {
 	// We're going to keep our own copy of the provided config - that way we can
 	// guarantee that it will be covered by the mutex
 	phony.Inbox
-	*iwe.PacketConn
+	*iwn.PacketConn
 	ctx          context.Context
 	cancel       context.CancelFunc
 	secret       ed25519.PrivateKey
@@ -63,7 +64,7 @@ func New(secret ed25519.PrivateKey, logger Logger, opts ...SetupOption) (*Core, 
 	copy(c.secret, secret)
 	c.public = secret.Public().(ed25519.PublicKey)
 	var err error
-	if c.PacketConn, err = iwe.NewPacketConn(c.secret); err != nil {
+	if c.PacketConn, err = iwn.NewPacketConn(c.secret); err != nil {
 		return nil, fmt.Errorf("error creating encryption: %w", err)
 	}
 	c.config._peers = map[Peer]*linkInfo{}
