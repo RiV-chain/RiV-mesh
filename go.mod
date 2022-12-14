@@ -39,7 +39,7 @@ require (
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/oxtoacart/bpool v0.0.0-20190530202638-03653db5a59c // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
-	github.com/webview/webview v0.0.0-20210330151455-f540d88dde4e
+	github.com/webview/webview v0.0.0-20220407053700-a30ed552c840
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.19.1 // indirect
