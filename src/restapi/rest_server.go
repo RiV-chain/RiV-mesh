@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"os"
 	"sort"
 	"strconv"
 	"strings"
@@ -66,18 +67,24 @@ func NewRestServer(cfg RestServerCfg) (*RestServer, error) {
 		fs, err := zipfs.NewZipFileSystem(&pakReader.Reader, zipfs.ServeIndexForMissing())
 		if err == nil {
 			http.Handle("/", http.FileServer(fs))
-			a.docFsType = "zipfs"
+			a.docFsType = "on zipfs"
 		}
 	}
 	if a.docFsType == "" {
-		var nocache = func(fs http.Handler) http.HandlerFunc {
-			return func(w http.ResponseWriter, r *http.Request) {
-				addNoCacheHeaders(w)
-				fs.ServeHTTP(w, r)
+		if _, err := os.Stat(cfg.WwwRoot); err != nil {
+			if os.IsNotExist(err) {
+				a.docFsType = "not found"
+			} else {
+				var nocache = func(fs http.Handler) http.HandlerFunc {
+					return func(w http.ResponseWriter, r *http.Request) {
+						addNoCacheHeaders(w)
+						fs.ServeHTTP(w, r)
+					}
+				}
+				http.Handle("/", nocache(http.FileServer(http.Dir(cfg.WwwRoot))))
 			}
 		}
-		http.Handle("/", nocache(http.FileServer(http.Dir(cfg.WwwRoot))))
-		a.docFsType = "local fs"
+		a.docFsType = "on OS fs"
 	}
 
 	http.HandleFunc("/api", a.apiHandler)
@@ -107,7 +114,7 @@ func (a *RestServer) Serve() error {
 	if e != nil {
 		return fmt.Errorf("http server start error: %w", e)
 	} else {
-		a.Log.Infof("Http server is listening on %s and is supplied from %s %s\n", a.ListenAddress, a.docFsType, a.WwwRoot)
+		a.Log.Infof("Started http server listening on %s. Document root %s %s\n", a.ListenAddress, a.WwwRoot, a.docFsType)
 	}
 	go func() {
 		err := http.Serve(l, nil)
