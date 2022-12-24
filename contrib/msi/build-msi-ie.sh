@@ -121,11 +121,17 @@ var ie = new ActiveXObject("InternetExplorer.Application");
 ie.AddressBar = false;
 ie.MenuBar = false;
 ie.ToolBar = false;
-ie.height = 960
-ie.width = 706
-ie.resizable = false
+ie.StatusBar = false;
+ie.height = 960;
+ie.width = 706;
+ie.resizable = false;
+ie.TheaterMode = true;
+ie.TheaterMode = false;
+//don't write cache flag
+flags = 4;
+ie.Navigate("http://localhost:19019", flags);
+while (ie.busy) WScript.Sleep(100);
 ie.Visible = true;
-ie.Navigate("http://localhost:19019");
 EOF
 
 # Generate the wix.xml file
