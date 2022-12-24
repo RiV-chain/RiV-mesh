@@ -4,7 +4,6 @@
 package tun
 
 import (
-	"bytes"
 	"errors"
 	"log"
 	"net"
@@ -94,7 +93,7 @@ func (tun *TunAdapter) setupAddress(addr string) error {
 		return errors.New("Can't configure IPv6 address as TUN adapter is not present")
 	}
 	if intf, ok := tun.iface.(*wgtun.NativeTun); ok {
-		if address, err := net.ParsePrefix(addr); err == nil {
+		if address, err := netip.ParsePrefix(addr); err == nil {
 			luid := winipcfg.LUID(intf.LUID())
 			addresses := []netip.Prefix{address}
 
