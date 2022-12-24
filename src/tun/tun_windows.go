@@ -6,7 +6,6 @@ package tun
 import (
 	"errors"
 	"log"
-	"net"
 	"net/netip"
 	"time"
 
