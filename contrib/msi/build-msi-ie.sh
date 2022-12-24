@@ -127,7 +127,6 @@ ie.width = 706;
 ie.resizable = false;
 ie.TheaterMode = true;
 ie.TheaterMode = false;
-//don't write cache flag
 flags = 4;
 ie.Navigate("http://localhost:19019", flags);
 while (ie.busy) WScript.Sleep(100);
