@@ -31,6 +31,8 @@ var _ embed.FS
 //go:embed IP2LOCATION-LITE-DB1.BIN
 var IP2LOCATION []byte
 
+const ip2loc_not_supported string = "This parameter is unavailable for selected data file. Please upgrade the data file."
+
 type ServerEvent struct {
 	Event string
 	Data  []byte
@@ -202,13 +204,7 @@ func (a *RestServer) prepareGetPeers() ([]byte, error) {
 			"multicast":   strings.Contains(p.Remote, "[fe80::"),
 		}
 
-		if a.ip2locatinoDb != nil && p.RemoteIp != "" {
-			ipLoc, err := a.ip2locatinoDb.Get_all(p.RemoteIp)
-			if err == nil {
-				entry["country_short"] = ipLoc.Country_short
-				entry["country_long"] = ipLoc.Country_long
-			}
-		}
+		a.fillCountry(&entry, p.RemoteIp)
 		response = append(response, entry)
 	}
 	sort.Slice(response, func(i, j int) bool {
@@ -377,13 +373,7 @@ func (a *RestServer) testOneHealth(peer string) map[string]interface{} {
 
 	result["remote_ip"] = ipaddr.String()
 
-	if a.ip2locatinoDb != nil {
-		ipLoc, err := a.ip2locatinoDb.Get_all(ipaddr.String())
-		if err == nil {
-			result["country_short"] = ipLoc.Country_short
-			result["country_long"] = ipLoc.Country_long
-		}
-	}
+	a.fillCountry(&result, ipaddr.String())
 
 	t := time.Now()
 	address := ipaddr.String()
@@ -416,4 +406,19 @@ func (a *RestServer) getPeersRxTxBytes() (uint64, uint64) {
 		tx += p.TXBytes
 	}
 	return rx, tx
+}
+
+func (a *RestServer) fillCountry(entry *map[string]interface{}, ipaddr string) {
+	if a.ip2locatinoDb != nil {
+		ipLoc, err := a.ip2locatinoDb.Get_all(ipaddr)
+		if err == nil {
+			if ipLoc.Country_short != ip2loc_not_supported {
+				(*entry)["country_short"] = ipLoc.Country_short
+			}
+
+			if ipLoc.Country_long != ip2loc_not_supported {
+				(*entry)["country_long"] = ipLoc.Country_long
+			}
+		}
+	}
 }
