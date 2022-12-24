@@ -1,20 +1,25 @@
 var $ = id => document.getElementById(id)
 var $$ = clazz => document.getElementsByClassName(clazz)
 
-function setPingValue(peer, value) {
+function setHealth(d) {
   var cellText;
-  var peerCell = $(peer);
+  var peerCell = $(d.peer);
   if (!peerCell) return;
   var peerTable = $("peer_list");
-  if (value === "-1") {
-    var peerAddress = $("label_" + peer);
+  if("country_short" in d)
+    $("flag_" + d.peer).className = "big-flag fi fi-" + d.country_short.toLowerCase();
+  else
+    $("flag_" + d.peer).className = "fa fa-thin fa-share-nodes";
+
+  if (!("ping" in d)) {
+    var peerAddress = $("label_" + d.peer);
     peerAddress.style.color = "rgba(250,250,250,.5)";
   } else {
 
-    cellText = document.createTextNode(value);
+    cellText = document.createTextNode(d.ping.toFixed(2));
     peerCell.appendChild(cellText);
-
-    var peerCellTime = $("time_" + peer);
+    
+    var peerCellTime = $("time_" + d.peer);
     var cellTextTime = document.createTextNode("ms");
     peerCellTime.appendChild(cellTextTime);
   }
@@ -179,7 +184,7 @@ function add_table(peerList) {
       var row = document.createElement("tr");
       row.className = "is-hidden";
       var imgElement = document.createElement("td");
-      imgElement.className = "big-flag fi fi-" + ui.lookupCountryCodeByAddress(peer);
+      imgElement.setAttribute('id', "flag_" + peer);
       var peerAddress = document.createElement("td");
       var cellText = document.createTextNode(peer);
       peerAddress.appendChild(cellText);
@@ -236,55 +241,26 @@ function humanReadableSpeed(speed) {
   return val.toFixed(fixed) * 1 + ' ' + ['B/s', 'kB/s', 'MB/s', 'GB/s', 'TB/s'][i];
 }
 
-var ui = ui || {
-  countries: []
-};
+var ui = ui || {};
 
-ui.getAllPeers = () => {
-  if(! ("_allPeersPromise" in ui)) {
-    ui._allPeersPromise = new Promise((resolve, reject) => {
-        if("_allPeers" in ui) resolve(ui._allPeers);
-        else fetch('https://map.rivchain.org/rest/peers.json')
-          .then((response) => response.json())
-          .then((data) => {
-            // add country code to each peer
-            for (var c in data) {
-              let country = c.slice(0, -3);
-              let filtered = ui.countries.find((entry) => entry.name.toLowerCase() == country);
-              //let flagFile = filtered ? filtered["flag_4x3"] : "";
-              let flagCode = filtered ? filtered["code"] : "";
-              for (let peer in data[c]) {
-                data[c][peer].countryCode = flagCode;
-              }
-            }            
-            ui._allPeers = data;
-            resolve(ui._allPeers);          
-          })
-          .catch(reject);
-    }).finally(() => delete ui._allPeersPromise);
-  }
-  return ui._allPeersPromise;
-};
 
-ui.showAllPeers = () =>
-  ui.getAllPeers()
-    .then((peerList) => {
-      var peers = add_table(peerList);
-      //start peers test
-      fetch('api/ping', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(peers)
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-      });    
-    }).catch((error) => {
-      console.error(error);
-    });
-
+ui.showAllPeers = async () => {
+  try {
+    let response = await fetch('https://map.rivchain.org/rest/peers.json')
+    let peerList = await response.json();
+    var peers = add_table(peerList);
+        //start peers test
+    await fetch('api/health', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(peers)
+        });
+      } catch(e) {
+        console.error('Error:', e);
+      }
+}
 
 ui.getConnectedPeers = () =>
   fetch('api/peers')
@@ -299,10 +275,10 @@ ui.updateConnectedPeersHandler = (peers) => {
       let row = $("peers").appendChild(document.createElement('div'));
       row.className = "overflow-ellipsis"
       let flag =  row.appendChild(document.createElement("span"));
-      if(peer.multicast)
+      if(peer.multicast || !("country_short" in peer))
         flag.className = "fa fa-thin fa-share-nodes peer-connected-fl";
       else
-        flag.className = "fi fi-" + ui.lookupCountryCodeByAddress(peer.remote) + " peer-connected-fl";
+        flag.className = "fi fi-" + peer.country_short.toLowerCase() + " peer-connected-fl";
       row.append(peer.remote.replace(regexStrip, ""));
     });
   }
@@ -347,13 +323,6 @@ ui.updateConnectedPeers = () =>
       $("peers").innerText = error.message;
     });
 
-ui.lookupCountryCodeByAddress = (address) => {
-  for (var c in ui._allPeers)
-    for (let peer in ui._allPeers[c])
-      if(peer == address) 
-        return ui._allPeers[c][peer].countryCode;
-}
-
 ui.getSelfInfo = () =>
   fetch('api/self')
     .then((response) => response.json())
@@ -377,15 +346,14 @@ function main() {
   window.addEventListener("load", () => {
     $("showAllPeersBtn").addEventListener("click", ui.showAllPeers);
 
-    ui.getAllPeers().then(() => ui.updateConnectedPeers());
+    ui.updateConnectedPeers();
 
     ui.updateSelfInfo();
 
     ui.sse = new EventSource('/api/sse');
 
-    ui.sse.addEventListener("ping", (e) => {
-      let data = JSON.parse(e.data);
-      setPingValue(data.peer, data.value);
+    ui.sse.addEventListener("health", (e) => {
+      setHealth(JSON.parse(e.data));
     })
     
     ui.sse.addEventListener("peers", (e) => {
