@@ -37,6 +37,7 @@ type PeerInfo struct {
 	RXBytes  uint64
 	TXBytes  uint64
 	Uptime   time.Duration
+	RemoteIp string
 }
 
 type DHTEntryInfo struct {
@@ -70,12 +71,14 @@ func (c *Core) GetSelf() SelfInfo {
 func (c *Core) GetPeers() []PeerInfo {
 	var peers []PeerInfo
 	names := make(map[net.Conn]string)
+	ips := make(map[net.Conn]string)
 	phony.Block(&c.links, func() {
 		for _, info := range c.links._links {
 			if info == nil {
 				continue
 			}
 			names[info.conn] = info.lname
+			ips[info.conn] = info.info.remote
 		}
 	})
 	ps := c.PacketConn.PacketConn.Debug.GetPeers()
@@ -89,6 +92,14 @@ func (c *Core) GetPeers() []PeerInfo {
 		info.Remote = p.Conn.RemoteAddr().String()
 		if name := names[p.Conn]; name != "" {
 			info.Remote = name
+		}
+		info.RemoteIp = ips[p.Conn]
+		if info.RemoteIp = ips[p.Conn]; info.RemoteIp != "" {
+			//Cut port
+			host, err := url.Parse(fmt.Sprintf("http://%s", info.RemoteIp))
+			if err == nil {
+				info.RemoteIp = host.Hostname()
+			}
 		}
 		if linkconn, ok := p.Conn.(*linkConn); ok {
 			info.RXBytes = atomic.LoadUint64(&linkconn.rx)

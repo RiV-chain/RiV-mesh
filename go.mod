@@ -58,6 +58,7 @@ require (
 require (
 	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/fatih/color v1.12.0 // indirect
+	github.com/ip2location/ip2location-go/v9 v9.5.0
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/olekukonko/tablewriter v0.0.5

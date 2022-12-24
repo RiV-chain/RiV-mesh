@@ -1,6 +1,8 @@
 package restapi
 
 import (
+	"bytes"
+	"embed"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -8,6 +10,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"os"
 	"sort"
 	"strconv"
 	"strings"
@@ -20,7 +23,13 @@ import (
 	"github.com/RiV-chain/RiV-mesh/src/core"
 	"github.com/RiV-chain/RiV-mesh/src/defaults"
 	"github.com/RiV-chain/RiV-mesh/src/version"
+	"github.com/ip2location/ip2location-go/v9"
 )
+
+var _ embed.FS
+
+//go:embed IP2LOCATION-LITE-DB1.BIN
+var IP2LOCATION []byte
 
 type ServerEvent struct {
 	Event string
@@ -42,6 +51,7 @@ type RestServer struct {
 	serverEventNextId int
 	updateTimer       *time.Timer
 	docFsType         string
+	ip2locatinoDb     *ip2location.DB
 }
 
 func NewRestServer(cfg RestServerCfg) (*RestServer, error) {
@@ -66,24 +76,29 @@ func NewRestServer(cfg RestServerCfg) (*RestServer, error) {
 		fs, err := zipfs.NewZipFileSystem(&pakReader.Reader, zipfs.ServeIndexForMissing())
 		if err == nil {
 			http.Handle("/", http.FileServer(fs))
-			a.docFsType = "zipfs"
+			a.docFsType = "on zipfs"
 		}
 	}
 	if a.docFsType == "" {
-		var nocache = func(fs http.Handler) http.HandlerFunc {
-			return func(w http.ResponseWriter, r *http.Request) {
-				addNoCacheHeaders(w)
-				fs.ServeHTTP(w, r)
+		a.docFsType = "not found"
+		if _, err := os.Stat(cfg.WwwRoot); err == nil {
+			var nocache = func(fs http.Handler) http.HandlerFunc {
+				return func(w http.ResponseWriter, r *http.Request) {
+					addNoCacheHeaders(w)
+					fs.ServeHTTP(w, r)
+				}
 			}
+			http.Handle("/", nocache(http.FileServer(http.Dir(cfg.WwwRoot))))
+			a.docFsType = "on OS fs"
+		} else {
+			a.Log.Warnln("Document root get stat error: ", err)
 		}
-		http.Handle("/", nocache(http.FileServer(http.Dir(cfg.WwwRoot))))
-		a.docFsType = "local fs"
 	}
 
 	http.HandleFunc("/api", a.apiHandler)
 	http.HandleFunc("/api/self", a.apiSelfHandler)
 	http.HandleFunc("/api/peers", a.apiPeersHandler)
-	http.HandleFunc("/api/ping", a.apiPingHandler)
+	http.HandleFunc("/api/health", a.apiHealthHandler)
 	http.HandleFunc("/api/sse", a.apiSseHandler)
 
 	var _ = a.Core.PeersChangedSignal.Connect(func(data interface{}) {
@@ -98,8 +113,19 @@ func NewRestServer(cfg RestServerCfg) (*RestServer, error) {
 		default:
 		}
 	})
+
+	a.ip2locatinoDb, err = ip2location.OpenDBWithReader(nopCloser{bytes.NewReader(IP2LOCATION)})
+	if err != nil {
+		a.Log.Errorf("load ip2location DB failed: %w", err)
+	}
 	return a, nil
 }
+
+type nopCloser struct {
+	*bytes.Reader
+}
+
+func (nopCloser) Close() error { return nil }
 
 // Start http server
 func (a *RestServer) Serve() error {
@@ -107,7 +133,7 @@ func (a *RestServer) Serve() error {
 	if e != nil {
 		return fmt.Errorf("http server start error: %w", e)
 	} else {
-		a.Log.Infof("Http server is listening on %s and is supplied from %s %s\n", a.ListenAddress, a.docFsType, a.WwwRoot)
+		a.Log.Infof("Started http server listening on %s. Document root %s %s\n", a.ListenAddress, a.WwwRoot, a.docFsType)
 	}
 	go func() {
 		err := http.Serve(l, nil)
@@ -162,18 +188,28 @@ func (a *RestServer) prepareGetPeers() ([]byte, error) {
 	response := make([]map[string]interface{}, 0, len(peers))
 	for _, p := range peers {
 		addr := a.Core.AddrForKey(p.Key)
-		response = append(response, map[string]interface{}{
+		entry := map[string]interface{}{
 			"address":     net.IP(addr[:]).String(),
 			"key":         hex.EncodeToString(p.Key),
 			"port":        p.Port,
 			"priority":    uint64(p.Priority), // can't be uint8 thanks to gobind
 			"coords":      p.Coords,
 			"remote":      p.Remote,
+			"remote_ip":   p.RemoteIp,
 			"bytes_recvd": p.RXBytes,
 			"bytes_sent":  p.TXBytes,
 			"uptime":      p.Uptime.Seconds(),
 			"multicast":   strings.Contains(p.Remote, "[fe80::"),
-		})
+		}
+
+		if a.ip2locatinoDb != nil && p.RemoteIp != "" {
+			ipLoc, err := a.ip2locatinoDb.Get_all(p.RemoteIp)
+			if err == nil {
+				entry["country_short"] = ipLoc.Country_short
+				entry["country_long"] = ipLoc.Country_long
+			}
+		}
+		response = append(response, entry)
 	}
 	sort.Slice(response, func(i, j int) bool {
 		if !response[i]["multicast"].(bool) && response[j]["multicast"].(bool) {
@@ -255,7 +291,7 @@ func (a *RestServer) apiPeersHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *RestServer) apiPingHandler(w http.ResponseWriter, r *http.Request) {
+func (a *RestServer) apiHealthHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
 		peer_list := []string{}
@@ -266,7 +302,7 @@ func (a *RestServer) apiPingHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		go a.ping(peer_list)
+		go a.testAllHealth(peer_list)
 		http.Error(w, "Accepted", http.StatusAccepted)
 	default:
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
@@ -313,27 +349,61 @@ func (a *RestServer) sendSseUpdate() {
 	a.serverEvents <- ServerEvent{Event: "coord", Data: data}
 }
 
-func (a *RestServer) ping(peers []string) {
+func (a *RestServer) testAllHealth(peers []string) {
 	for _, u := range peers {
 		go func(u string) {
-			data, _ := json.Marshal(map[string]string{"peer": u, "value": strconv.FormatInt(check(u), 10)})
-			a.serverEvents <- ServerEvent{Event: "ping", Data: data}
+			health := a.testOneHealth(u)
+			data, _ := json.Marshal(health)
+			a.serverEvents <- ServerEvent{Event: "health", Data: data}
 		}(u)
 	}
 }
 
-func check(peer string) int64 {
-	u, e := url.Parse(peer)
-	if e != nil {
-		return -1
+func (a *RestServer) testOneHealth(peer string) map[string]interface{} {
+	result := map[string]interface{}{
+		"peer": peer,
 	}
-	t := time.Now()
-	_, err := net.DialTimeout("tcp", u.Host, 5*time.Second)
+	u, err := url.Parse(peer)
 	if err != nil {
-		return -1
+		result["error"] = err.Error()
+		return result
+	}
+
+	ipaddr, err := net.ResolveIPAddr("ip", u.Hostname())
+	if err != nil {
+		result["error"] = err.Error()
+		return result
+	}
+
+	result["remote_ip"] = ipaddr.String()
+
+	if a.ip2locatinoDb != nil {
+		ipLoc, err := a.ip2locatinoDb.Get_all(ipaddr.String())
+		if err == nil {
+			result["country_short"] = ipLoc.Country_short
+			result["country_long"] = ipLoc.Country_long
+		}
+	}
+
+	t := time.Now()
+	address := ipaddr.String()
+	intPort, err := strconv.Atoi(u.Port())
+	if err == nil {
+		tcpaddr := net.TCPAddr{
+			IP:   ipaddr.IP,
+			Port: intPort,
+		}
+		address = tcpaddr.String()
+	}
+
+	_, err = net.DialTimeout("tcp", address, 5*time.Second)
+	if err != nil {
+		result["error"] = err.Error()
+		return result
 	}
 	d := time.Since(t)
-	return d.Milliseconds()
+	result["ping"] = d.Milliseconds()
+	return result
 }
 
 func (a *RestServer) getPeersRxTxBytes() (uint64, uint64) {
