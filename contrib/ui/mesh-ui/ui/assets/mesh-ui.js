@@ -23,6 +23,7 @@ function setHealth(d) {
     var cellTextTime = document.createTextNode("ms");
     peerCellTime.appendChild(cellTextTime);
   }
+  $("peer-" + d.peer).checked = ui.connectedPeersAddress.indexOf(d.peer) >= 0;
   peerCell.parentNode.classList.remove("is-hidden");
   //sort table
   moveRowToOrderPos(peerTable, 2, peerCell.parentNode)
@@ -177,7 +178,6 @@ function add_table(peerList) {
 
   // creating all cells
   for (var c in peerList) {
-    let counter = 1;
     for (let peer in peerList[c]) {
       peers.push(peer);
       // creates a table row
@@ -196,7 +196,7 @@ function add_table(peerList) {
       var peerSelect = document.createElement("td");
       var chk = document.createElement('input');
       chk.setAttribute('type', 'checkbox');
-      chk.setAttribute('id', "peer-" + counter);
+      chk.setAttribute('id', "peer-" + peer);
       peerSelect.appendChild(chk);
 
       row.appendChild(imgElement);
@@ -269,6 +269,7 @@ ui.getConnectedPeers = () =>
 ui.updateConnectedPeersHandler = (peers) => {
   ui.updateStatus(peers);
   $("peers").innerText = "";
+  ui.connectedPeersAddress = peers.map(peer => peer.remote);
   if(peers) {
     const regexStrip = /%[^\]]*/gm;
     peers.forEach(peer => {
