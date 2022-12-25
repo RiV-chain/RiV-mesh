@@ -16,7 +16,7 @@ function setHealth(d) {
     peerAddress.style.color = "rgba(250,250,250,.5)";
   } else {
 
-    cellText = document.createTextNode(d.ping.toFixed(2));
+    cellText = document.createTextNode(d.ping.toFixed(0));
     peerCell.appendChild(cellText);
     
     var peerCellTime = $("time_" + d.peer);
