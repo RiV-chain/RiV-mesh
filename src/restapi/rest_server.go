@@ -208,14 +208,16 @@ func (a *RestServer) prepareGetPeers() ([]byte, error) {
 		response = append(response, entry)
 	}
 	sort.Slice(response, func(i, j int) bool {
-		if !response[i]["multicast"].(bool) && response[j]["multicast"].(bool) {
-			return true
+		if response[i]["multicast"].(bool) != response[j]["multicast"].(bool) {
+			return (!response[i]["multicast"].(bool) && response[j]["multicast"].(bool))
 		}
-		if response[i]["priority"].(uint64) < response[j]["priority"].(uint64) {
-			return true
+
+		if response[i]["priority"].(uint64) != response[j]["priority"].(uint64) {
+			return response[i]["priority"].(uint64) < response[j]["priority"].(uint64)
 		}
-		if response[i]["address"].(string) < response[j]["address"].(string) {
-			return true
+
+		if cmp := strings.Compare(response[i]["address"].(string), response[j]["address"].(string)); cmp != 0 {
+			return cmp < 0
 		}
 		return response[i]["port"].(uint64) < response[j]["port"].(uint64)
 	})
@@ -272,7 +274,7 @@ func (a *RestServer) apiPeersHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		fmt.Fprint(w, string(b[:]))
+		fmt.Fprint(w, string(b))
 	case "POST":
 		_ = handlePost()
 	case "PUT":
