@@ -214,6 +214,9 @@ func (a *RestServer) prepareGetPeers() ([]byte, error) {
 		if response[i]["priority"].(uint64) < response[j]["priority"].(uint64) {
 			return true
 		}
+		if response[i]["address"].(string) < response[j]["address"].(string) {
+			return true
+		}
 		return response[i]["port"].(uint64) < response[j]["port"].(uint64)
 	})
 	return json.Marshal(response)
