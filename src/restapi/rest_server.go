@@ -116,6 +116,7 @@ func NewRestServer(cfg RestServerCfg) (*RestServer, error) {
 	a.AddHandler(ApiHandler{pattern: "/api/health", desc: "POST - Run peers health check task", handler: a.apiHealthHandler})
 	a.AddHandler(ApiHandler{pattern: "/api/sse", desc: "GET - Return server side events", handler: a.apiSseHandler})
 	a.AddHandler(ApiHandler{pattern: "/api/dht", desc: "GET - Show known DHT entries", handler: a.apiDhtHandler})
+	a.AddHandler(ApiHandler{pattern: "/api/sessions", desc: "GET - Show established traffic sessions with remote nodes", handler: a.apiSessionsHandler})
 
 	var _ = a.Core.PeersChangedSignal.Connect(func(data interface{}) {
 		b, err := a.prepareGetPeers()
@@ -241,6 +242,38 @@ func (a *RestServer) apiDhtHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		fmt.Fprint(w, string(b[:]))
+	default:
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func (a *RestServer) apiSessionsHandler(w http.ResponseWriter, r *http.Request) {
+	addNoCacheHeaders(w)
+	switch r.Method {
+	case "GET":
+		w.Header().Add("Content-Type", "application/json")
+		sessions := a.Core.GetSessions()
+		result := make([]map[string]interface{}, 0, len(sessions))
+		for _, s := range sessions {
+			addr := a.Core.AddrForKey(s.Key)
+			entry := map[string]interface{}{
+				"address":     net.IP(addr[:]).String(),
+				"key":         hex.EncodeToString(s.Key),
+				"bytes_recvd": s.RXBytes,
+				"bytes_sent":  s.TXBytes,
+				"uptime":      s.Uptime.Seconds(),
+			}
+			result = append(result, entry)
+		}
+		sort.SliceStable(result, func(i, j int) bool {
+			return strings.Compare(result[i]["key"].(string), result[j]["key"].(string)) < 0
+		})
+		b, err := json.Marshal(result)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusServiceUnavailable)
+			return
+		}
+		fmt.Fprint(w, string(b))
 	default:
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 	}
