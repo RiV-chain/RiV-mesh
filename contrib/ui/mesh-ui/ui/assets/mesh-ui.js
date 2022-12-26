@@ -9,7 +9,7 @@ function setHealth(d) {
   if("country_short" in d)
     $("flag_" + d.peer).className = "big-flag fi fi-" + d.country_short.toLowerCase();
   else
-    $("flag_" + d.peer).className = "fa fa-thin fa-share-nodes";
+    $("flag_" + d.peer).className = "fas fa-thin fa-share-nodes";
 
   if (!("ping" in d)) {
     var peerAddress = $("label_" + d.peer);
@@ -234,11 +234,13 @@ function humanReadableSpeed(speed) {
   var i = speed < 1 ? 0 : Math.floor(Math.log(speed) / Math.log(1024));
   var val = speed / Math.pow(1024, i);
   var fixed = 2;
-  if((val.toFixed() * 1) > 9) {
+  if((val.toFixed() * 1) > 99) {
+    i+=1;
+    val /= 1024
+  } else if((val.toFixed() * 1) > 9) {
     fixed = 1;
-    val = val / 10
   }
-  return val.toFixed(fixed) * 1 + ' ' + ['B/s', 'kB/s', 'MB/s', 'GB/s', 'TB/s'][i];
+  return val.toFixed(fixed) + ' ' + ['B/s', 'kB/s', 'MB/s', 'GB/s', 'TB/s'][i];
 }
 
 var ui = ui || {};
@@ -277,7 +279,7 @@ ui.updateConnectedPeersHandler = (peers) => {
       row.className = "overflow-ellipsis"
       let flag =  row.appendChild(document.createElement("span"));
       if(peer.multicast || !("country_short" in peer))
-        flag.className = "fa fa-thin fa-share-nodes peer-connected-fl";
+        flag.className = "fas fa-thin fa-share-nodes peer-connected-fl";
       else
         flag.className = "fi fi-" + peer.country_short.toLowerCase() + " peer-connected-fl";
       row.append(peer.remote.replace(regexStrip, ""));

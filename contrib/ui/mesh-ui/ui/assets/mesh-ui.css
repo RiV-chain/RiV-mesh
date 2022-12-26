@@ -79,7 +79,9 @@ td.fi {
 
 .peer-connected-fl {
   width: 2em;
-  background-position: 0;
+  background-position: center;
+  text-align: center;
+  display: inline-block;
 }
 
 footer {
