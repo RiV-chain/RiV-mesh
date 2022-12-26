@@ -119,7 +119,7 @@ func NewRestServer(cfg RestServerCfg) (*RestServer, error) {
 	a.AddHandler(ApiHandler{pattern: "/api/sessions", desc: "GET - Show established traffic sessions with remote nodes", handler: a.apiSessionsHandler})
 
 	var _ = a.Core.PeersChangedSignal.Connect(func(data interface{}) {
-		b, err := a.prepareGetPeers()
+		b, err := json.Marshal(a.prepareGetPeers())
 		if err != nil {
 			a.Log.Errorf("get peers failed: %w", err)
 			return
@@ -193,7 +193,6 @@ func (a *RestServer) apiSelfHandler(w http.ResponseWriter, r *http.Request) {
 	addNoCacheHeaders(w)
 	switch r.Method {
 	case "GET":
-		w.Header().Add("Content-Type", "application/json")
 		self := a.Core.GetSelf()
 		snet := a.Core.Subnet()
 		var result = map[string]interface{}{
@@ -205,14 +204,9 @@ func (a *RestServer) apiSelfHandler(w http.ResponseWriter, r *http.Request) {
 			"subnet":        snet.String(),
 			"coords":        self.Coords,
 		}
-		b, err := json.Marshal(result)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusServiceUnavailable)
-			return
-		}
-		fmt.Fprint(w, string(b[:]))
+		writeJson(w, result)
 	default:
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		writeError(w, http.StatusMethodNotAllowed)
 	}
 }
 
@@ -220,7 +214,6 @@ func (a *RestServer) apiDhtHandler(w http.ResponseWriter, r *http.Request) {
 	addNoCacheHeaders(w)
 	switch r.Method {
 	case "GET":
-		w.Header().Add("Content-Type", "application/json")
 		dht := a.Core.GetDHT()
 		result := make([]map[string]interface{}, 0, len(dht))
 		for _, d := range dht {
@@ -236,14 +229,9 @@ func (a *RestServer) apiDhtHandler(w http.ResponseWriter, r *http.Request) {
 		sort.SliceStable(result, func(i, j int) bool {
 			return strings.Compare(result[i]["key"].(string), result[j]["key"].(string)) < 0
 		})
-		b, err := json.Marshal(result)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusServiceUnavailable)
-			return
-		}
-		fmt.Fprint(w, string(b[:]))
+		writeJson(w, result)
 	default:
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		writeError(w, http.StatusMethodNotAllowed)
 	}
 }
 
@@ -251,7 +239,6 @@ func (a *RestServer) apiSessionsHandler(w http.ResponseWriter, r *http.Request) 
 	addNoCacheHeaders(w)
 	switch r.Method {
 	case "GET":
-		w.Header().Add("Content-Type", "application/json")
 		sessions := a.Core.GetSessions()
 		result := make([]map[string]interface{}, 0, len(sessions))
 		for _, s := range sessions {
@@ -268,18 +255,13 @@ func (a *RestServer) apiSessionsHandler(w http.ResponseWriter, r *http.Request) 
 		sort.SliceStable(result, func(i, j int) bool {
 			return strings.Compare(result[i]["key"].(string), result[j]["key"].(string)) < 0
 		})
-		b, err := json.Marshal(result)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusServiceUnavailable)
-			return
-		}
-		fmt.Fprint(w, string(b))
+		writeJson(w, result)
 	default:
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		writeError(w, http.StatusMethodNotAllowed)
 	}
 }
 
-func (a *RestServer) prepareGetPeers() ([]byte, error) {
+func (a *RestServer) prepareGetPeers() []map[string]interface{} {
 	peers := a.Core.GetPeers()
 	response := make([]map[string]interface{}, 0, len(peers))
 	for _, p := range peers {
@@ -315,7 +297,7 @@ func (a *RestServer) prepareGetPeers() ([]byte, error) {
 		}
 		return response[i]["port"].(uint64) < response[j]["port"].(uint64)
 	})
-	return json.Marshal(response)
+	return response
 }
 
 func (a *RestServer) apiPeersHandler(w http.ResponseWriter, r *http.Request) {
@@ -365,13 +347,7 @@ func (a *RestServer) apiPeersHandler(w http.ResponseWriter, r *http.Request) {
 	addNoCacheHeaders(w)
 	switch r.Method {
 	case "GET":
-		w.Header().Add("Content-Type", "application/json")
-		b, err := a.prepareGetPeers()
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		fmt.Fprint(w, string(b))
+		writeJson(w, a.prepareGetPeers())
 	case "POST":
 		peers, err := handlePost()
 		if err != nil {
@@ -381,16 +357,16 @@ func (a *RestServer) apiPeersHandler(w http.ResponseWriter, r *http.Request) {
 		if handleDelete() == nil {
 			if peers, err := handlePost(); err == nil {
 				saveConfig(peers)
-				http.Error(w, "No content", http.StatusNoContent)
+				writeError(w, http.StatusNoContent)
 			}
 		}
 	case "DELETE":
 		if handleDelete() == nil {
 			saveConfig([]string{})
-			http.Error(w, "No content", http.StatusNoContent)
+			writeError(w, http.StatusNoContent)
 		}
 	default:
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		writeError(w, http.StatusMethodNotAllowed)
 	}
 }
 
@@ -406,9 +382,9 @@ func (a *RestServer) apiHealthHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		go a.testAllHealth(peer_list)
-		http.Error(w, "Accepted", http.StatusAccepted)
+		writeError(w, http.StatusAccepted)
 	default:
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		writeError(w, http.StatusMethodNotAllowed)
 	}
 }
 
@@ -441,7 +417,7 @@ func (a *RestServer) apiSseHandler(w http.ResponseWriter, r *http.Request) {
 			a.updateTimer = time.NewTimer(time.Second * 5)
 		}
 	default:
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		writeError(w, http.StatusMethodNotAllowed)
 	}
 }
 
@@ -528,4 +504,18 @@ func (a *RestServer) fillCountry(entry *map[string]interface{}, ipaddr string) {
 			}
 		}
 	}
+}
+
+func writeError(w http.ResponseWriter, status int) {
+	http.Error(w, http.StatusText(status), status)
+}
+
+func writeJson(w http.ResponseWriter, data any) {
+	b, err := json.Marshal(data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Add("Content-Type", "application/json")
+	fmt.Fprint(w, string(b))
 }
