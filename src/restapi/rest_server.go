@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"gerace.dev/zipfs"
+	"golang.org/x/exp/slices"
 
 	"github.com/RiV-chain/RiV-mesh/src/core"
 	"github.com/RiV-chain/RiV-mesh/src/defaults"
@@ -38,12 +39,20 @@ type ServerEvent struct {
 	Data  []byte
 }
 
+type ApiHandler struct {
+	pattern string // Context path pattern
+	desc    string // What does the endpoint do?
+	//	args    []string            // List of human-readable argument names
+	handler func(w http.ResponseWriter, r *http.Request) // First is input map, second is output
+}
+
 type RestServerCfg struct {
 	Core          *core.Core
 	Log           core.Logger
 	ListenAddress string
 	WwwRoot       string
 	ConfigFn      string
+	handlers      []ApiHandler
 }
 
 type RestServer struct {
@@ -97,11 +106,15 @@ func NewRestServer(cfg RestServerCfg) (*RestServer, error) {
 		}
 	}
 
-	http.HandleFunc("/api", a.apiHandler)
-	http.HandleFunc("/api/self", a.apiSelfHandler)
-	http.HandleFunc("/api/peers", a.apiPeersHandler)
-	http.HandleFunc("/api/health", a.apiHealthHandler)
-	http.HandleFunc("/api/sse", a.apiSseHandler)
+	a.AddHandler(ApiHandler{pattern: "/api", desc: "\tGET - API documentation", handler: a.apiHandler})
+	a.AddHandler(ApiHandler{pattern: "/api/self", desc: "GET - Show details about this node", handler: a.apiSelfHandler})
+	a.AddHandler(ApiHandler{pattern: "/api/peers", desc: `GET - Show directly connected peers 
+			POST - Append peers to the peers list
+			PUT - Set peers list
+			DELETE - Remove all peers from this node
+			Request header "Riv-Save-Config: true" persists changes`, handler: a.apiPeersHandler})
+	a.AddHandler(ApiHandler{pattern: "/api/health", desc: "POST - Run peers health check task", handler: a.apiHealthHandler})
+	a.AddHandler(ApiHandler{pattern: "/api/sse", desc: "GET - Return server side events", handler: a.apiSseHandler})
 
 	var _ = a.Core.PeersChangedSignal.Connect(func(data interface{}) {
 		b, err := a.prepareGetPeers()
@@ -131,6 +144,9 @@ func (nopCloser) Close() error { return nil }
 
 // Start http server
 func (a *RestServer) Serve() error {
+	sort.SliceStable(a.handlers, func(i, j int) bool {
+		return strings.Compare(a.handlers[i].pattern, a.handlers[j].pattern) < 0
+	})
 	l, e := net.Listen("tcp4", a.listenUrl.Host)
 	if e != nil {
 		return fmt.Errorf("http server start error: %w", e)
@@ -146,6 +162,16 @@ func (a *RestServer) Serve() error {
 	return nil
 }
 
+// AddHandler is called for each admin function to add the handler and help documentation to the API.
+func (a *RestServer) AddHandler(handler ApiHandler) error {
+	if idx := slices.IndexFunc(a.handlers, func(h ApiHandler) bool { return h.pattern == handler.pattern }); idx >= 0 {
+		return errors.New("handler " + handler.pattern + " already exists")
+	}
+	a.handlers = append(a.handlers, handler)
+	http.HandleFunc(handler.pattern, handler.handler)
+	return nil
+}
+
 func addNoCacheHeaders(w http.ResponseWriter) {
 	w.Header().Add("Cache-Control", "no-cache, no-store, must-revalidate")
 	w.Header().Add("Pragma", "no-cache")
@@ -155,7 +181,10 @@ func addNoCacheHeaders(w http.ResponseWriter) {
 func (a *RestServer) apiHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "*")
-	fmt.Fprintf(w, "Following methods are allowed: GET /api/self, getpeers. litening")
+	w.Header().Add("Content-Type", "text/plain")
+	for _, h := range a.handlers {
+		fmt.Fprintf(w, "%s\t\t%s\n\n", h.pattern, h.desc)
+	}
 }
 
 func (a *RestServer) apiSelfHandler(w http.ResponseWriter, r *http.Request) {
@@ -232,21 +261,26 @@ func (a *RestServer) apiPeersHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		return err
 	}
-	var handlePost = func() error {
+
+	var handlePost = func() ([]string, error) {
 		var peers []string
 		err := json.NewDecoder(r.Body).Decode(&peers)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
-			return err
+			return nil, err
 		}
 
 		for _, peer := range peers {
 			if err := a.Core.AddPeer(peer, ""); err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
-				return err
+				return nil, err
 			}
 		}
 
+		return peers, nil
+	}
+
+	var saveConfig = func(peers []string) {
 		if len(a.ConfigFn) > 0 {
 			saveHeaders := r.Header["Riv-Save-Config"]
 			if len(saveHeaders) > 0 && saveHeaders[0] == "true" {
@@ -262,9 +296,7 @@ func (a *RestServer) apiPeersHandler(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 		}
-		return nil
 	}
-
 	addNoCacheHeaders(w)
 	switch r.Method {
 	case "GET":
@@ -276,15 +308,20 @@ func (a *RestServer) apiPeersHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		fmt.Fprint(w, string(b))
 	case "POST":
-		_ = handlePost()
+		peers, err := handlePost()
+		if err != nil {
+			saveConfig(peers)
+		}
 	case "PUT":
 		if handleDelete() == nil {
-			if handlePost() == nil {
+			if peers, err := handlePost(); err == nil {
+				saveConfig(peers)
 				http.Error(w, "No content", http.StatusNoContent)
 			}
 		}
 	case "DELETE":
 		if handleDelete() == nil {
+			saveConfig([]string{})
 			http.Error(w, "No content", http.StatusNoContent)
 		}
 	default:
