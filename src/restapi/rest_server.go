@@ -115,6 +115,7 @@ func NewRestServer(cfg RestServerCfg) (*RestServer, error) {
 			Request header "Riv-Save-Config: true" persists changes`, handler: a.apiPeersHandler})
 	a.AddHandler(ApiHandler{pattern: "/api/health", desc: "POST - Run peers health check task", handler: a.apiHealthHandler})
 	a.AddHandler(ApiHandler{pattern: "/api/sse", desc: "GET - Return server side events", handler: a.apiSseHandler})
+	a.AddHandler(ApiHandler{pattern: "/api/dht", desc: "GET - Show known DHT entries", handler: a.apiDhtHandler})
 
 	var _ = a.Core.PeersChangedSignal.Connect(func(data interface{}) {
 		b, err := a.prepareGetPeers()
@@ -203,6 +204,37 @@ func (a *RestServer) apiSelfHandler(w http.ResponseWriter, r *http.Request) {
 			"subnet":        snet.String(),
 			"coords":        self.Coords,
 		}
+		b, err := json.Marshal(result)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusServiceUnavailable)
+			return
+		}
+		fmt.Fprint(w, string(b[:]))
+	default:
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func (a *RestServer) apiDhtHandler(w http.ResponseWriter, r *http.Request) {
+	addNoCacheHeaders(w)
+	switch r.Method {
+	case "GET":
+		w.Header().Add("Content-Type", "application/json")
+		dht := a.Core.GetDHT()
+		result := make([]map[string]interface{}, 0, len(dht))
+		for _, d := range dht {
+			addr := a.Core.AddrForKey(d.Key)
+			entry := map[string]interface{}{
+				"address": net.IP(addr[:]).String(),
+				"key":     hex.EncodeToString(d.Key),
+				"port":    d.Port,
+				"rest":    d.Rest,
+			}
+			result = append(result, entry)
+		}
+		sort.SliceStable(result, func(i, j int) bool {
+			return strings.Compare(result[i]["key"].(string), result[j]["key"].(string)) < 0
+		})
 		b, err := json.Marshal(result)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusServiceUnavailable)
