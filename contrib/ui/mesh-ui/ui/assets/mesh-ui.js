@@ -234,11 +234,13 @@ function humanReadableSpeed(speed) {
   var i = speed < 1 ? 0 : Math.floor(Math.log(speed) / Math.log(1024));
   var val = speed / Math.pow(1024, i);
   var fixed = 2;
-  if((val.toFixed() * 1) > 9) {
+  if((val.toFixed() * 1) > 99) {
+    i+=1;
+    val /= 1024
+  } else if((val.toFixed() * 1) > 9) {
     fixed = 1;
-    val = val / 10
   }
-  return val.toFixed(fixed) * 1 + ' ' + ['B/s', 'kB/s', 'MB/s', 'GB/s', 'TB/s'][i];
+  return val.toFixed(fixed) + ' ' + ['B/s', 'kB/s', 'MB/s', 'GB/s', 'TB/s'][i];
 }
 
 var ui = ui || {};
