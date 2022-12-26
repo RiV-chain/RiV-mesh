@@ -9,7 +9,7 @@ function setHealth(d) {
   if("country_short" in d)
     $("flag_" + d.peer).className = "big-flag fi fi-" + d.country_short.toLowerCase();
   else
-    $("flag_" + d.peer).className = "fa fa-thin fa-share-nodes";
+    $("flag_" + d.peer).className = "fas fa-thin fa-share-nodes";
 
   if (!("ping" in d)) {
     var peerAddress = $("label_" + d.peer);
@@ -279,7 +279,7 @@ ui.updateConnectedPeersHandler = (peers) => {
       row.className = "overflow-ellipsis"
       let flag =  row.appendChild(document.createElement("span"));
       if(peer.multicast || !("country_short" in peer))
-        flag.className = "fa fa-thin fa-share-nodes peer-connected-fl";
+        flag.className = "fas fa-thin fa-share-nodes peer-connected-fl";
       else
         flag.className = "fi fi-" + peer.country_short.toLowerCase() + " peer-connected-fl";
       row.append(peer.remote.replace(regexStrip, ""));
