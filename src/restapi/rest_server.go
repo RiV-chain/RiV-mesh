@@ -123,7 +123,7 @@ func NewRestServer(cfg RestServerCfg) (*RestServer, error) {
 	a.AddHandler(ApiHandler{pattern: "/api/sessions", desc: "GET - Show established traffic sessions with remote nodes", handler: a.apiSessionsHandler})
 	a.AddHandler(ApiHandler{pattern: "/api/nodeinfo/$key", desc: "GET - Request nodeinfo from a remote node by its public key", handler: a.apiNodeinfoHandler})
 
-	var _ = a.Core.PeersChangedSignal.Connect(func(data interface{}) {
+	var _ = a.Core.PeersChangedSignal.Connect(func(data any) {
 		b, err := json.Marshal(a.prepareGetPeers())
 		if err != nil {
 			a.Log.Errorf("get peers failed: %w", err)
@@ -200,7 +200,7 @@ func (a *RestServer) apiSelfHandler(w http.ResponseWriter, r *http.Request) {
 	case "GET":
 		self := a.Core.GetSelf()
 		snet := a.Core.Subnet()
-		var result = map[string]interface{}{
+		var result = map[string]any{
 			"build_name":    a.Core.GetSelf(),
 			"build_version": version.BuildVersion(),
 			"key":           hex.EncodeToString(self.Key[:]),
@@ -220,10 +220,10 @@ func (a *RestServer) apiDhtHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
 		dht := a.Core.GetDHT()
-		result := make([]map[string]interface{}, 0, len(dht))
+		result := make([]map[string]any, 0, len(dht))
 		for _, d := range dht {
 			addr := a.Core.AddrForKey(d.Key)
-			entry := map[string]interface{}{
+			entry := map[string]any{
 				"address": net.IP(addr[:]).String(),
 				"key":     hex.EncodeToString(d.Key),
 				"port":    d.Port,
@@ -245,10 +245,10 @@ func (a *RestServer) apiSessionsHandler(w http.ResponseWriter, r *http.Request) 
 	switch r.Method {
 	case "GET":
 		sessions := a.Core.GetSessions()
-		result := make([]map[string]interface{}, 0, len(sessions))
+		result := make([]map[string]any, 0, len(sessions))
 		for _, s := range sessions {
 			addr := a.Core.AddrForKey(s.Key)
-			entry := map[string]interface{}{
+			entry := map[string]any{
 				"address":     net.IP(addr[:]).String(),
 				"key":         hex.EncodeToString(s.Key),
 				"bytes_recvd": s.RXBytes,
@@ -266,12 +266,12 @@ func (a *RestServer) apiSessionsHandler(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func (a *RestServer) prepareGetPeers() []map[string]interface{} {
+func (a *RestServer) prepareGetPeers() []map[string]any {
 	peers := a.Core.GetPeers()
-	response := make([]map[string]interface{}, 0, len(peers))
+	response := make([]map[string]any, 0, len(peers))
 	for _, p := range peers {
 		addr := a.Core.AddrForKey(p.Key)
-		entry := map[string]interface{}{
+		entry := map[string]any{
 			"address":     net.IP(addr[:]).String(),
 			"key":         hex.EncodeToString(p.Key),
 			"port":        p.Port,
@@ -462,8 +462,8 @@ func (a *RestServer) testAllHealth(peers []string) {
 	}
 }
 
-func (a *RestServer) testOneHealth(peer string) map[string]interface{} {
-	result := map[string]interface{}{
+func (a *RestServer) testOneHealth(peer string) map[string]any {
+	result := map[string]any{
 		"peer": peer,
 	}
 	u, err := url.Parse(peer)
@@ -515,7 +515,7 @@ func (a *RestServer) getPeersRxTxBytes() (uint64, uint64) {
 	return rx, tx
 }
 
-func (a *RestServer) fillCountry(entry *map[string]interface{}, ipaddr string) {
+func (a *RestServer) fillCountry(entry *map[string]any, ipaddr string) {
 	if a.ip2locatinoDb != nil {
 		ipLoc, err := a.ip2locatinoDb.Get_all(ipaddr)
 		if err == nil {
