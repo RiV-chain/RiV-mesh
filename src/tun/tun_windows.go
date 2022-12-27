@@ -31,7 +31,17 @@ func (tun *TunAdapter) setup(ifname string, addr string, mtu uint64) error {
 		if guid, err = windows.GUIDFromString("{f1369c05-0344-40ed-a772-bfb4770abdd0}"); err != nil {
 			return err
 		}
-		if iface, err = wgtun.CreateTUNWithRequestedGUID(ifname, &guid, int(mtu)); err != nil {
+		for i := 0; i < 15; i++ {
+			if i > 0 {
+				time.Sleep(time.Second)
+				log.Printf("Retrying adapter creation after failure because system just booted (T+%v): %v", windows.DurationSinceBoot(), err)
+			}
+			iface, err = wgtun.CreateTUNWithRequestedGUID(ifname, &guid, int(mtu))
+			if err == nil || windows.DurationSinceBoot() > time.Minute*10 {
+				break
+			}
+		}
+		if err != nil {
 			return err
 		}
 		tun.iface = iface
