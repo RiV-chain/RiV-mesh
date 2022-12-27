@@ -23,6 +23,8 @@ import (
 
 	"github.com/RiV-chain/RiV-mesh/src/core"
 	"github.com/RiV-chain/RiV-mesh/src/defaults"
+	"github.com/RiV-chain/RiV-mesh/src/multicast"
+	"github.com/RiV-chain/RiV-mesh/src/tun"
 	"github.com/RiV-chain/RiV-mesh/src/version"
 	"github.com/ip2location/ip2location-go/v9"
 )
@@ -48,6 +50,8 @@ type ApiHandler struct {
 
 type RestServerCfg struct {
 	Core          *core.Core
+	Tun           *tun.TunAdapter
+	Multicast     *multicast.Multicast
 	Log           core.Logger
 	ListenAddress string
 	WwwRoot       string
@@ -117,6 +121,7 @@ func NewRestServer(cfg RestServerCfg) (*RestServer, error) {
 	a.AddHandler(ApiHandler{pattern: "/api/sse", desc: "GET - Return server side events", handler: a.apiSseHandler})
 	a.AddHandler(ApiHandler{pattern: "/api/dht", desc: "GET - Show known DHT entries", handler: a.apiDhtHandler})
 	a.AddHandler(ApiHandler{pattern: "/api/sessions", desc: "GET - Show established traffic sessions with remote nodes", handler: a.apiSessionsHandler})
+	a.AddHandler(ApiHandler{pattern: "/api/nodeinfo/$key", desc: "GET - Request nodeinfo from a remote node by its public key", handler: a.apiNodeinfoHandler})
 
 	var _ = a.Core.PeersChangedSignal.Connect(func(data interface{}) {
 		b, err := json.Marshal(a.prepareGetPeers())
@@ -170,7 +175,7 @@ func (a *RestServer) AddHandler(handler ApiHandler) error {
 		return errors.New("handler " + handler.pattern + " already exists")
 	}
 	a.handlers = append(a.handlers, handler)
-	http.HandleFunc(handler.pattern, handler.handler)
+	http.HandleFunc(strings.Split(handler.pattern, "$")[0], handler.handler)
 	return nil
 }
 
@@ -367,6 +372,25 @@ func (a *RestServer) apiPeersHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	default:
 		writeError(w, http.StatusMethodNotAllowed)
+	}
+}
+
+func (a *RestServer) apiNodeinfoHandler(w http.ResponseWriter, r *http.Request) {
+	addNoCacheHeaders(w)
+	switch r.Method {
+	case "GET":
+		cnt := strings.Split(r.URL.Path, "/")
+		if len(cnt) != 4 {
+			http.Error(w, "No remote public key supplied", http.StatusBadRequest)
+			return
+		}
+		if result, err := a.Core.GetNodeInfo(cnt[3]); err == nil {
+			writeJson(w, result)
+		} else {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
+	default:
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 	}
 }
 

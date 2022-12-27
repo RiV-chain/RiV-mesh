@@ -314,3 +314,7 @@ func (c *Core) SetAdmin(a AddHandler) error {
 	}
 	return nil
 }
+
+func (c *Core) GetNodeInfo(key string) (map[string]any, error) {
+	return c.proto.nodeinfo.getNodeInfo(key)
+}

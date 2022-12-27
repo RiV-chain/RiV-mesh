@@ -174,3 +174,31 @@ func (m *nodeinfo) nodeInfoAdminHandler(in json.RawMessage) (interface{}, error)
 		return res, nil
 	}
 }
+
+func (m *nodeinfo) getNodeInfo(keyStr string) (map[string]any, error) {
+	var key keyArray
+	var kbs []byte
+	var err error
+	if kbs, err = hex.DecodeString(keyStr); err != nil {
+		return nil, fmt.Errorf("failed to decode public key: %w", err)
+	}
+	copy(key[:], kbs)
+	ch := make(chan []byte, 1)
+	m.sendReq(nil, key, func(info json.RawMessage) {
+		ch <- info
+	})
+	timer := time.NewTimer(6 * time.Second)
+	defer timer.Stop()
+	select {
+	case <-timer.C:
+		return nil, errors.New("timed out waiting for response")
+	case info := <-ch:
+		var msg json.RawMessage
+		if err := msg.UnmarshalJSON(info); err != nil {
+			return nil, err
+		}
+		key := hex.EncodeToString(kbs[:])
+		res := map[string]any{key: msg}
+		return res, nil
+	}
+}

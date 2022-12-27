@@ -265,32 +265,6 @@ func run(args yggArgs, ctx context.Context) {
 		}
 	}
 
-	// Setup the REST socket.
-	{
-		//override httpaddress and wwwroot parameters in cfg
-		if len(cfg.HttpAddress) == 0 {
-			cfg.HttpAddress = args.httpaddress
-		}
-		if len(cfg.WwwRoot) == 0 {
-			cfg.WwwRoot = args.wwwroot
-		}
-
-		if n.rest_server, err = restapi.NewRestServer(restapi.RestServerCfg{
-			Core:          n.core,
-			Log:           logger,
-			ListenAddress: cfg.HttpAddress,
-			WwwRoot:       cfg.WwwRoot,
-			ConfigFn:      args.useconffile,
-		}); err != nil {
-			logger.Errorln(err)
-		} else {
-			err = n.rest_server.Serve()
-			if err != nil {
-				logger.Errorln(err)
-			}
-		}
-	}
-
 	// Setup the admin socket.
 	{
 		options := []admin.SetupOption{
@@ -335,6 +309,34 @@ func run(args yggArgs, ctx context.Context) {
 		}
 		if n.admin != nil && n.tun != nil {
 			n.tun.SetupAdminHandlers(n.admin)
+		}
+	}
+
+	// Setup the REST socket.
+	{
+		//override httpaddress and wwwroot parameters in cfg
+		if len(cfg.HttpAddress) == 0 {
+			cfg.HttpAddress = args.httpaddress
+		}
+		if len(cfg.WwwRoot) == 0 {
+			cfg.WwwRoot = args.wwwroot
+		}
+
+		if n.rest_server, err = restapi.NewRestServer(restapi.RestServerCfg{
+			Core:          n.core,
+			Tun:           n.tun,
+			Multicast:     n.multicast,
+			Log:           logger,
+			ListenAddress: cfg.HttpAddress,
+			WwwRoot:       cfg.WwwRoot,
+			ConfigFn:      args.useconffile,
+		}); err != nil {
+			logger.Errorln(err)
+		} else {
+			err = n.rest_server.Serve()
+			if err != nil {
+				logger.Errorln(err)
+			}
 		}
 	}
 
