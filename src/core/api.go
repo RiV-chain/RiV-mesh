@@ -315,6 +315,35 @@ func (c *Core) SetAdmin(a AddHandler) error {
 	return nil
 }
 
-func (c *Core) GetNodeInfo(key string) (map[string]any, error) {
-	return c.proto.nodeinfo.getNodeInfo(key)
+func applyAdminCall(handlerfunc AddHandlerFunc, key string) (result map[string]any, err error) {
+	var in []byte
+	if in, err = json.Marshal(map[string]any{"key": key}); err != nil {
+		return
+	}
+	var out1 any
+	if out1, err = handlerfunc(in); err != nil {
+		return
+	}
+	var out2 []byte
+	if out2, err = json.Marshal(out1); err != nil {
+		return
+	}
+	err = json.Unmarshal(out2, &result)
+	return
+}
+
+func (c *Core) GetNodeInfo(key string) (result map[string]any, err error) {
+	return applyAdminCall(c.proto.nodeinfo.nodeInfoAdminHandler, key)
+}
+
+func (c *Core) RemoteGetSelf(key string) (map[string]any, error) {
+	return applyAdminCall(c.proto.getSelfHandler, key)
+}
+
+func (c *Core) RemoteGetPeers(key string) (map[string]any, error) {
+	return applyAdminCall(c.proto.getSelfHandler, key)
+}
+
+func (c *Core) RemoteGetDHT(key string) (map[string]any, error) {
+	return applyAdminCall(c.proto.getDHTHandler, key)
 }

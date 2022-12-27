@@ -121,7 +121,10 @@ func NewRestServer(cfg RestServerCfg) (*RestServer, error) {
 	a.AddHandler(ApiHandler{pattern: "/api/sse", desc: "GET - Return server side events", handler: a.apiSseHandler})
 	a.AddHandler(ApiHandler{pattern: "/api/dht", desc: "GET - Show known DHT entries", handler: a.apiDhtHandler})
 	a.AddHandler(ApiHandler{pattern: "/api/sessions", desc: "GET - Show established traffic sessions with remote nodes", handler: a.apiSessionsHandler})
-	a.AddHandler(ApiHandler{pattern: "/api/nodeinfo/$key", desc: "GET - Request nodeinfo from a remote node by its public key", handler: a.apiNodeinfoHandler})
+	a.AddHandler(ApiHandler{pattern: "/api/remote/nodeinfo/$key", desc: "GET - Request nodeinfo from a remote node by its public key", handler: a.apiRemoteNodeinfoHandler})
+	a.AddHandler(ApiHandler{pattern: "/api/remote/self/$key", desc: "GET - Request self from a remote node by its public key", handler: a.apiRemoteSelfHandler})
+	a.AddHandler(ApiHandler{pattern: "/api/remote/peers/$key", desc: "GET - Request peers from a remote node by its public key", handler: a.apiRemotePeersHandler})
+	a.AddHandler(ApiHandler{pattern: "/api/remote/dht/$key", desc: "GET - Request dht from a remote node by its public key", handler: a.apiRemoteDHTHandler})
 
 	var _ = a.Core.PeersChangedSignal.Connect(func(data any) {
 		b, err := json.Marshal(a.prepareGetPeers())
@@ -375,16 +378,16 @@ func (a *RestServer) apiPeersHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *RestServer) apiNodeinfoHandler(w http.ResponseWriter, r *http.Request) {
+func applyKeyParameterized(w http.ResponseWriter, r *http.Request, fn func(key string) (map[string]any, error)) {
 	addNoCacheHeaders(w)
 	switch r.Method {
 	case "GET":
 		cnt := strings.Split(r.URL.Path, "/")
-		if len(cnt) != 4 {
+		if len(cnt) != 5 {
 			http.Error(w, "No remote public key supplied", http.StatusBadRequest)
 			return
 		}
-		if result, err := a.Core.GetNodeInfo(cnt[3]); err == nil {
+		if result, err := fn(cnt[4]); err == nil {
 			writeJson(w, result)
 		} else {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -392,6 +395,22 @@ func (a *RestServer) apiNodeinfoHandler(w http.ResponseWriter, r *http.Request) 
 	default:
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 	}
+}
+
+func (a *RestServer) apiRemoteNodeinfoHandler(w http.ResponseWriter, r *http.Request) {
+	applyKeyParameterized(w, r, a.Core.GetNodeInfo)
+}
+
+func (a *RestServer) apiRemoteSelfHandler(w http.ResponseWriter, r *http.Request) {
+	applyKeyParameterized(w, r, a.Core.RemoteGetSelf)
+}
+
+func (a *RestServer) apiRemotePeersHandler(w http.ResponseWriter, r *http.Request) {
+	applyKeyParameterized(w, r, a.Core.RemoteGetPeers)
+}
+
+func (a *RestServer) apiRemoteDHTHandler(w http.ResponseWriter, r *http.Request) {
+	applyKeyParameterized(w, r, a.Core.RemoteGetDHT)
 }
 
 func (a *RestServer) apiHealthHandler(w http.ResponseWriter, r *http.Request) {
