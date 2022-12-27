@@ -357,13 +357,13 @@ func (a *RestServer) apiPeersHandler(w http.ResponseWriter, r *http.Request) {
 		if handleDelete() == nil {
 			if peers, err := handlePost(); err == nil {
 				saveConfig(peers)
-				writeError(w, http.StatusNoContent)
+				w.WriteHeader(http.StatusNoContent)
 			}
 		}
 	case "DELETE":
 		if handleDelete() == nil {
 			saveConfig([]string{})
-			writeError(w, http.StatusNoContent)
+			w.WriteHeader(http.StatusNoContent)
 		}
 	default:
 		writeError(w, http.StatusMethodNotAllowed)
@@ -382,7 +382,7 @@ func (a *RestServer) apiHealthHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		go a.testAllHealth(peer_list)
-		writeError(w, http.StatusAccepted)
+		w.WriteHeader(http.StatusAccepted)
 	default:
 		writeError(w, http.StatusMethodNotAllowed)
 	}
