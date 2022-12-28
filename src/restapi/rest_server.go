@@ -117,6 +117,7 @@ func NewRestServer(cfg RestServerCfg) (*RestServer, error) {
 			PUT - Set peers list
 			DELETE - Remove all peers from this node
 			Request header "Riv-Save-Config: true" persists changes`, handler: a.apiPeersHandler})
+	a.AddHandler(ApiHandler{pattern: "/api/getpaths", desc: "GET - Show established paths through this node", handler: a.apiPathsHandler})
 	a.AddHandler(ApiHandler{pattern: "/api/health", desc: "POST - Run peers health check task", handler: a.apiHealthHandler})
 	a.AddHandler(ApiHandler{pattern: "/api/sse", desc: "GET - Return server side events", handler: a.apiSseHandler})
 	a.AddHandler(ApiHandler{pattern: "/api/dht", desc: "GET - Show known DHT entries", handler: a.apiDhtHandler})
@@ -231,6 +232,30 @@ func (a *RestServer) apiDhtHandler(w http.ResponseWriter, r *http.Request) {
 				"key":     hex.EncodeToString(d.Key),
 				"port":    d.Port,
 				"rest":    d.Rest,
+			}
+			result = append(result, entry)
+		}
+		sort.SliceStable(result, func(i, j int) bool {
+			return strings.Compare(result[i]["key"].(string), result[j]["key"].(string)) < 0
+		})
+		writeJson(w, result)
+	default:
+		writeError(w, http.StatusMethodNotAllowed)
+	}
+}
+
+func (a *RestServer) apiPathsHandler(w http.ResponseWriter, r *http.Request) {
+	addNoCacheHeaders(w)
+	switch r.Method {
+	case "GET":
+		paths := a.Core.GetPaths()
+		result := make([]map[string]any, 0, len(paths))
+		for _, d := range paths {
+			addr := a.Core.AddrForKey(d.Key)
+			entry := map[string]any{
+				"address": net.IP(addr[:]).String(),
+				"key":     hex.EncodeToString(d.Key),
+				"path":    d.Path,
 			}
 			result = append(result, entry)
 		}
