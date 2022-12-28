@@ -204,7 +204,7 @@ func (a *RestServer) apiSelfHandler(w http.ResponseWriter, r *http.Request) {
 		self := a.Core.GetSelf()
 		snet := a.Core.Subnet()
 		var result = map[string]any{
-			"build_name":    a.Core.GetSelf(),
+			"build_name":    version.BuildName(),
 			"build_version": version.BuildVersion(),
 			"key":           hex.EncodeToString(self.Key[:]),
 			"private_key":   hex.EncodeToString(self.PrivateKey[:]),
