@@ -117,7 +117,7 @@ func NewRestServer(cfg RestServerCfg) (*RestServer, error) {
 			PUT - Set peers list
 			DELETE - Remove all peers from this node
 			Request header "Riv-Save-Config: true" persists changes`, handler: a.apiPeersHandler})
-	a.AddHandler(ApiHandler{pattern: "/api/getpaths", desc: "GET - Show established paths through this node", handler: a.apiPathsHandler})
+	a.AddHandler(ApiHandler{pattern: "/api/paths", desc: "GET - Show established paths through this node", handler: a.apiPathsHandler})
 	a.AddHandler(ApiHandler{pattern: "/api/health", desc: "POST - Run peers health check task", handler: a.apiHealthHandler})
 	a.AddHandler(ApiHandler{pattern: "/api/sse", desc: "GET - Return server side events", handler: a.apiSseHandler})
 	a.AddHandler(ApiHandler{pattern: "/api/dht", desc: "GET - Show known DHT entries", handler: a.apiDhtHandler})
