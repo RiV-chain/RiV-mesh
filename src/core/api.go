@@ -341,7 +341,7 @@ func (c *Core) RemoteGetSelf(key string) (map[string]any, error) {
 }
 
 func (c *Core) RemoteGetPeers(key string) (map[string]any, error) {
-	return applyAdminCall(c.proto.getSelfHandler, key)
+	return applyAdminCall(c.proto.getPeersHandler, key)
 }
 
 func (c *Core) RemoteGetDHT(key string) (map[string]any, error) {
