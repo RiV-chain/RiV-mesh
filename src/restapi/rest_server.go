@@ -27,6 +27,7 @@ import (
 	"github.com/RiV-chain/RiV-mesh/src/tun"
 	"github.com/RiV-chain/RiV-mesh/src/version"
 	"github.com/ip2location/ip2location-go/v9"
+	"github.com/slonm/tableprinter"
 )
 
 var _ embed.FS
@@ -193,6 +194,7 @@ func (a *RestServer) apiHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "*")
 	w.Header().Add("Content-Type", "text/plain")
+	fmt.Fprintf(w, "Common query params: fmt=table|json\t\tResponse format\n\n")
 	for _, h := range a.handlers {
 		fmt.Fprintf(w, "%s\t\t%s\n\n", h.pattern, h.desc)
 	}
@@ -213,7 +215,7 @@ func (a *RestServer) apiSelfHandler(w http.ResponseWriter, r *http.Request) {
 			"subnet":        snet.String(),
 			"coords":        self.Coords,
 		}
-		writeJson(w, result)
+		writeJson(w, r, result)
 	default:
 		writeError(w, http.StatusMethodNotAllowed)
 	}
@@ -238,7 +240,7 @@ func (a *RestServer) apiDhtHandler(w http.ResponseWriter, r *http.Request) {
 		sort.SliceStable(result, func(i, j int) bool {
 			return strings.Compare(result[i]["key"].(string), result[j]["key"].(string)) < 0
 		})
-		writeJson(w, result)
+		writeJson(w, r, result)
 	default:
 		writeError(w, http.StatusMethodNotAllowed)
 	}
@@ -262,7 +264,7 @@ func (a *RestServer) apiPathsHandler(w http.ResponseWriter, r *http.Request) {
 		sort.SliceStable(result, func(i, j int) bool {
 			return strings.Compare(result[i]["key"].(string), result[j]["key"].(string)) < 0
 		})
-		writeJson(w, result)
+		writeJson(w, r, result)
 	default:
 		writeError(w, http.StatusMethodNotAllowed)
 	}
@@ -288,7 +290,7 @@ func (a *RestServer) apiSessionsHandler(w http.ResponseWriter, r *http.Request) 
 		sort.SliceStable(result, func(i, j int) bool {
 			return strings.Compare(result[i]["key"].(string), result[j]["key"].(string)) < 0
 		})
-		writeJson(w, result)
+		writeJson(w, r, result)
 	default:
 		writeError(w, http.StatusMethodNotAllowed)
 	}
@@ -300,17 +302,19 @@ func (a *RestServer) prepareGetPeers() []map[string]any {
 	for _, p := range peers {
 		addr := a.Core.AddrForKey(p.Key)
 		entry := map[string]any{
-			"address":     net.IP(addr[:]).String(),
-			"key":         hex.EncodeToString(p.Key),
-			"port":        p.Port,
-			"priority":    uint64(p.Priority), // can't be uint8 thanks to gobind
-			"coords":      p.Coords,
-			"remote":      p.Remote,
-			"remote_ip":   p.RemoteIp,
-			"bytes_recvd": p.RXBytes,
-			"bytes_sent":  p.TXBytes,
-			"uptime":      p.Uptime.Seconds(),
-			"multicast":   strings.Contains(p.Remote, "[fe80::"),
+			"address":       net.IP(addr[:]).String(),
+			"key":           hex.EncodeToString(p.Key),
+			"port":          p.Port,
+			"priority":      uint64(p.Priority), // can't be uint8 thanks to gobind
+			"coords":        p.Coords,
+			"remote":        p.Remote,
+			"remote_ip":     p.RemoteIp,
+			"bytes_recvd":   p.RXBytes,
+			"bytes_sent":    p.TXBytes,
+			"uptime":        p.Uptime.Seconds(),
+			"multicast":     strings.Contains(p.Remote, "[fe80::"),
+			"country_short": "",
+			"country_long":  "",
 		}
 
 		a.fillCountry(&entry, p.RemoteIp)
@@ -380,7 +384,7 @@ func (a *RestServer) apiPeersHandler(w http.ResponseWriter, r *http.Request) {
 	addNoCacheHeaders(w)
 	switch r.Method {
 	case "GET":
-		writeJson(w, a.prepareGetPeers())
+		writeJson(w, r, a.prepareGetPeers())
 	case "POST":
 		peers, err := handlePost()
 		if err != nil {
@@ -408,12 +412,12 @@ func applyKeyParameterized(w http.ResponseWriter, r *http.Request, fn func(key s
 	switch r.Method {
 	case "GET":
 		cnt := strings.Split(r.URL.Path, "/")
-		if len(cnt) != 5 {
+		if len(cnt) != 5 || cnt[4] == "" {
 			http.Error(w, "No remote public key supplied", http.StatusBadRequest)
 			return
 		}
 		if result, err := fn(cnt[4]); err == nil {
-			writeJson(w, result)
+			writeJson(w, r, result)
 		} else {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
@@ -578,12 +582,19 @@ func writeError(w http.ResponseWriter, status int) {
 	http.Error(w, http.StatusText(status), status)
 }
 
-func writeJson(w http.ResponseWriter, data any) {
-	b, err := json.Marshal(data)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+func writeJson(w http.ResponseWriter, r *http.Request, data any) {
+	if r.URL.Query().Has("fmt") && r.URL.Query()["fmt"][0] == "table" {
+		w.Header().Add("Content-Type", "text/plain; charset=utf-8")
+		printer := tableprinter.New(w)
+		printer.RowLengthTitle = func(int) bool { return false }
+		printer.Print(data)
+	} else {
+		b, err := json.Marshal(data)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Add("Content-Type", "application/json; charset=utf-8")
+		fmt.Fprint(w, string(b))
 	}
-	w.Header().Add("Content-Type", "application/json")
-	fmt.Fprint(w, string(b))
 }

@@ -6,7 +6,7 @@ function setHealth(d) {
   var peerCell = $(d.peer);
   if (!peerCell) return;
   var peerTable = $("peer_list");
-  if("country_short" in d)
+  if(d.country_short)
     $("flag_" + d.peer).className = "big-flag fi fi-" + d.country_short.toLowerCase();
   else
     $("flag_" + d.peer).className = "fas fa-thin fa-share-nodes";
@@ -278,7 +278,7 @@ ui.updateConnectedPeersHandler = (peers) => {
       let row = $("peers").appendChild(document.createElement('div'));
       row.className = "overflow-ellipsis"
       let flag =  row.appendChild(document.createElement("span"));
-      if(peer.multicast || !("country_short" in peer))
+      if(peer.multicast || !peer.country_short)
         flag.className = "fas fa-thin fa-share-nodes peer-connected-fl";
       else
         flag.className = "fi fi-" + peer.country_short.toLowerCase() + " peer-connected-fl";
