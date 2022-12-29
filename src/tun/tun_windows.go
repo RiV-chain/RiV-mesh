@@ -5,19 +5,20 @@ package tun
 
 import (
 	"errors"
+
+	"golang.org/x/sys/windows"
 	"log"
 	"net/netip"
 	"time"
+	_ "unsafe"
 
-	"github.com/RiV-chain/RiV-mesh/src/defaults"
-	"golang.org/x/sys/windows"
-
+	"golang.zx2c4.com/wintun"
 	wgtun "golang.zx2c4.com/wireguard/tun"
 	"golang.zx2c4.com/wireguard/windows/elevate"
 	"golang.zx2c4.com/wireguard/windows/tunnel/winipcfg"
-)
 
-// This is to catch Windows platforms
+	"github.com/RiV-chain/RiV-mesh/src/defaults"
+)
 
 // Configures the TUN adapter with the correct IPv6 address and MTU.
 func (tun *TunAdapter) setup(ifname string, addr string, mtu uint64) error {
@@ -31,19 +32,16 @@ func (tun *TunAdapter) setup(ifname string, addr string, mtu uint64) error {
 		if guid, err = windows.GUIDFromString("{f1369c05-0344-40ed-a772-bfb4770abdd0}"); err != nil {
 			return err
 		}
-		for i := 0; i < 15; i++ {
-			if i > 0 {
-				time.Sleep(time.Second)
-				log.Printf("Retrying adapter creation after failure because system just booted (T+%v): %v", windows.DurationSinceBoot(), err)
-			}
-			iface, err = wgtun.CreateTUNWithRequestedGUID(ifname, &guid, int(mtu))
-			if err == nil || windows.DurationSinceBoot() > time.Minute*10 {
-				break
-			}
-		}
+
+		iface, err = wgtun.CreateTUNWithRequestedGUID(ifname, &guid, int(mtu))
 		if err != nil {
-			return err
+			wintun.Uninstall()
+			iface, err = wgtun.CreateTUNWithRequestedGUID(ifname, &guid, int(mtu))
+			if err != nil {
+				return err
+			}
 		}
+
 		tun.iface = iface
 		for i := 1; i < 10; i++ {
 			if err = tun.setupAddress(addr); err != nil {

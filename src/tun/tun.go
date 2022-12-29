@@ -103,6 +103,8 @@ func New(core *core.Core, log core.Logger, opts ...SetupOption) (*TunAdapter, er
 	return tun, tun._start()
 }
 
+// Start the setup process for the TUN adapter. If successful, starts the
+// read/write goroutines to handle packets on that interface.
 func (tun *TunAdapter) _start() error {
 	if tun.isOpen {
 		return errors.New("TUN module is already started")
@@ -143,8 +145,6 @@ func (tun *TunAdapter) IsStarted() bool {
 	return isOpen
 }
 
-// Start the setup process for the TUN adapter. If successful, starts the
-// read/write goroutines to handle packets on that interface.
 func (tun *TunAdapter) Stop() error {
 	var err error
 	phony.Block(tun, func() {
