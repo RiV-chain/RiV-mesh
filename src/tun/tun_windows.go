@@ -70,7 +70,7 @@ func (tun *TunAdapter) setup(ifname string, addr string, mtu uint64) error {
 		}
 		iface, err = CreateTUNWithRequestedGUID(ifname, &guid, int(mtu))
 		if err != nil {
-			wgtun.Uninstall()
+			wintun.Uninstall()
 			iface, err = CreateTUNWithRequestedGUID(ifname, &guid, int(mtu))
 			if err != nil {
 				return err
