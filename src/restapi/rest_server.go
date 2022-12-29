@@ -123,6 +123,8 @@ func NewRestServer(cfg RestServerCfg) (*RestServer, error) {
 	a.AddHandler(ApiHandler{pattern: "/api/sse", desc: "GET - Return server side events", handler: a.apiSseHandler})
 	a.AddHandler(ApiHandler{pattern: "/api/dht", desc: "GET - Show known DHT entries", handler: a.apiDhtHandler})
 	a.AddHandler(ApiHandler{pattern: "/api/sessions", desc: "GET - Show established traffic sessions with remote nodes", handler: a.apiSessionsHandler})
+	a.AddHandler(ApiHandler{pattern: "/api/tun", desc: "GET - Show information about the node's TUN interface", handler: a.apiTunHandler})
+	a.AddHandler(ApiHandler{pattern: "/api/multicastinterfaces", desc: "GET - Show which interfaces multicast is enabled on", handler: a.apiMulticastinterfacesHandler})
 	a.AddHandler(ApiHandler{pattern: "/api/remote/nodeinfo/$key", desc: "GET - Request nodeinfo from a remote node by its public key", handler: a.apiRemoteNodeinfoHandler})
 	a.AddHandler(ApiHandler{pattern: "/api/remote/self/$key", desc: "GET - Request self from a remote node by its public key", handler: a.apiRemoteSelfHandler})
 	a.AddHandler(ApiHandler{pattern: "/api/remote/peers/$key", desc: "GET - Request peers from a remote node by its public key", handler: a.apiRemotePeersHandler})
@@ -291,6 +293,45 @@ func (a *RestServer) apiSessionsHandler(w http.ResponseWriter, r *http.Request) 
 			return strings.Compare(result[i]["key"].(string), result[j]["key"].(string)) < 0
 		})
 		writeJson(w, r, result)
+	default:
+		writeError(w, http.StatusMethodNotAllowed)
+	}
+}
+
+func (a *RestServer) apiTunHandler(w http.ResponseWriter, r *http.Request) {
+	addNoCacheHeaders(w)
+	switch r.Method {
+	case "GET":
+		if a.Tun == nil {
+			writeError(w, http.StatusInternalServerError)
+			return
+		}
+		isStarted := a.Tun.IsStarted()
+		res := map[string]any{"enabled": isStarted}
+		if isStarted {
+			res["name"] = a.Tun.Name()
+			res["MTU"] = a.Tun.MTU()
+		}
+
+		writeJson(w, r, res)
+	default:
+		writeError(w, http.StatusMethodNotAllowed)
+	}
+}
+
+func (a *RestServer) apiMulticastinterfacesHandler(w http.ResponseWriter, r *http.Request) {
+	addNoCacheHeaders(w)
+	switch r.Method {
+	case "GET":
+		if a.Multicast == nil {
+			writeError(w, http.StatusInternalServerError)
+			return
+		}
+		res := []string{}
+		for _, v := range a.Multicast.Interfaces() {
+			res = append(res, v.Name)
+		}
+		writeJson(w, r, res)
 	default:
 		writeError(w, http.StatusMethodNotAllowed)
 	}
