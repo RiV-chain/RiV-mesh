@@ -156,9 +156,9 @@ func (tun *TunAdapter) Stop() error {
 func (tun *TunAdapter) _stop() error {
 	tun.isOpen = false
 	// by TUN, e.g. readers/writers, sessions
-	//if tun.iface != nil {
-	// Just in case we failed to start up the iface for some reason, this can apparently happen on Windows
-	//	tun.iface.Close()
-	//}
+	if tun.iface != nil {
+		// Just in case we failed to start up the iface for some reason, this can apparently happen on Windows
+		tun.iface.Close()
+	}
 	return nil
 }

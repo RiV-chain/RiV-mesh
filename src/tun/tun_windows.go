@@ -68,8 +68,16 @@ func (tun *TunAdapter) setup(ifname string, addr string, mtu uint64) error {
 		if guid, err = windows.GUIDFromString("{f1369c05-0344-40ed-a772-bfb4770abdd0}"); err != nil {
 			return err
 		}
-		//OpenTUNWithName is needed for Windows 7 when TUN is not being uninstalled
-		iface, err = OpenTUNWithName(ifname, int(mtu))
+		//Waiting for OS to boot up
+		for i := 1; i < 10; i++ {
+			//OpenTUNWithName is needed for Windows 7 when TUN is not being uninstalled
+			iface, err = OpenTUNWithName(ifname, int(mtu))
+			if i > 8 {
+				return err
+			} else {
+				time.Sleep(time.Duration(2*i) * time.Second)
+			}
+		}
 		if err != nil {
 			iface, err = CreateTUNWithRequestedGUID(ifname, &guid, int(mtu))
 			if err != nil {
