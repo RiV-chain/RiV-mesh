@@ -220,31 +220,6 @@ func CreateTUNWithRequestedGUID(ifname string, requestedGUID *windows.GUID, mtu 
 	return tun, nil
 }
 
-// OpenTUNWithName opens a Wintun interface with the given name
-func OpenTUNWithName(ifname string, mtu int) (wgtun.Device, error) {
-	wt, err := wintun.OpenAdapter(ifname)
-	if err != nil {
-		return nil, fmt.Errorf("Error opening interface: %w", err)
-	}
-
-	tun := &NativeTun{
-		wt:        wt,
-		name:      ifname,
-		handle:    windows.InvalidHandle,
-		events:    make(chan wgtun.Event, 10),
-		forcedMTU: mtu,
-	}
-
-	tun.session, err = wt.StartSession(0x800000) // Ring capacity, 8 MiB
-	if err != nil {
-		tun.wt.Close()
-		close(tun.events)
-		return nil, fmt.Errorf("Error starting session: %w", err)
-	}
-	tun.readWait = tun.session.ReadWaitEvent()
-	return tun, nil
-}
-
 func (tun *NativeTun) Name() (string, error) {
 	return tun.name, nil
 }
