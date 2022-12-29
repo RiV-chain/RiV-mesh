@@ -68,12 +68,15 @@ func (tun *TunAdapter) setup(ifname string, addr string, mtu uint64) error {
 		if guid, err = windows.GUIDFromString("{f1369c05-0344-40ed-a772-bfb4770abdd0}"); err != nil {
 			return err
 		}
-		iface, err = CreateTUNWithRequestedGUID(ifname, &guid, int(mtu))
+		iface, err = OpenTUNWithName(ifname, int(mtu))
 		if err != nil {
-			wintun.Uninstall()
 			iface, err = CreateTUNWithRequestedGUID(ifname, &guid, int(mtu))
 			if err != nil {
-				return err
+				wintun.Uninstall()
+				iface, err = CreateTUNWithRequestedGUID(ifname, &guid, int(mtu))
+				if err != nil {
+					return err
+				}
 			}
 		}
 		tun.iface = iface
@@ -229,8 +232,8 @@ func CreateTUNWithRequestedGUID(ifname string, requestedGUID *windows.GUID, mtu 
 	return tun, nil
 }
 
-// CreateTUNWithName opens a Wintun interface with the given name
-func CreateTUNWithName(ifname string, mtu int) (wgtun.Device, error) {
+// OpenTUNWithName opens a Wintun interface with the given name
+func OpenTUNWithName(ifname string, mtu int) (wgtun.Device, error) {
 	wt, err := wintun.OpenAdapter(ifname)
 	if err != nil {
 		return nil, fmt.Errorf("Error opening interface: %w", err)
