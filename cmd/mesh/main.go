@@ -12,13 +12,11 @@ import (
 	"os/signal"
 	"regexp"
 	"strings"
-	"sync"
 	"syscall"
 
 	"github.com/gologme/log"
 	gsyslog "github.com/hashicorp/go-syslog"
 	"github.com/hjson/hjson-go"
-	"github.com/kardianos/minwinsvc"
 
 	//"github.com/RiV-chain/RiV-mesh/src/address"
 	"github.com/RiV-chain/RiV-mesh/src/admin"
@@ -358,21 +356,33 @@ func run(args yggArgs, ctx context.Context) {
 	n.core.Stop()
 }
 
+func registerSigHandler(siglist ...os.Signal) context.Context {
+
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, siglist...)
+
+	rootCtx := context.Background()
+	taskCtx, cancelFn := context.WithCancel(rootCtx)
+
+	go func() {
+		sig := <-sigCh
+		log.Println("received signal:", sig)
+
+		// reset handler to not trigger any more events
+		// (since we're terminating right?)
+		signal.Reset(syscall.SIGINT, syscall.SIGTERM)
+
+		// let sub-task know to wrap up - cancel taskCtx
+		cancelFn()
+	}()
+
+	return taskCtx
+}
+
 func main() {
 	args := getArgs()
 
-	// Catch interrupts from the operating system to exit gracefully.
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-
-	// Capture the service being stopped on Windows.
-	minwinsvc.SetOnExit(cancel)
-
 	// Start the node, block and then wait for it to shut down.
-	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		run(args, ctx)
-	}()
-	wg.Wait()
+	ctx := registerSigHandler(syscall.SIGINT, syscall.SIGTERM)
+	run(args, ctx)
 }
