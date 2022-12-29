@@ -12,6 +12,7 @@ import (
 	"os/signal"
 	"regexp"
 	"strings"
+	"sync"
 	"syscall"
 
 	"github.com/gologme/log"
@@ -382,7 +383,13 @@ func registerSigHandler(siglist ...os.Signal) context.Context {
 func main() {
 	args := getArgs()
 
-	// Start the node, block and then wait for it to shut down.
 	ctx := registerSigHandler(syscall.SIGINT, syscall.SIGTERM)
-	run(args, ctx)
+	// Start the node, block and then wait for it to shut down.
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		run(args, ctx)
+	}()
+	wg.Wait()
 }
