@@ -68,6 +68,7 @@ func (tun *TunAdapter) setup(ifname string, addr string, mtu uint64) error {
 		if guid, err = windows.GUIDFromString("{f1369c05-0344-40ed-a772-bfb4770abdd0}"); err != nil {
 			return err
 		}
+		//OpenTUNWithName is needed for Windows 7 when TUN is not being uninstalled
 		iface, err = OpenTUNWithName(ifname, int(mtu))
 		if err != nil {
 			iface, err = CreateTUNWithRequestedGUID(ifname, &guid, int(mtu))
@@ -195,12 +196,6 @@ func procyield(cycles uint32)
 //go:linkname nanotime runtime.nanotime
 func nanotime() int64
 
-// CreateTUN creates a Wintun interface with the given name. Should a Wintun
-// interface with the same name exist, it is reused.
-func CreateTUN(ifname string, mtu int) (wgtun.Device, error) {
-	return CreateTUNWithRequestedGUID(ifname, WintunStaticRequestedGUID, mtu)
-}
-
 // CreateTUNWithRequestedGUID creates a Wintun interface with the given name and
 // a requested GUID. Should a Wintun interface with the same name exist, it is reused.
 func CreateTUNWithRequestedGUID(ifname string, requestedGUID *windows.GUID, mtu int) (wgtun.Device, error) {
@@ -209,17 +204,12 @@ func CreateTUNWithRequestedGUID(ifname string, requestedGUID *windows.GUID, mtu 
 		return nil, fmt.Errorf("Error creating interface: %w", err)
 	}
 
-	forcedMTU := 1420
-	if mtu > 0 {
-		forcedMTU = mtu
-	}
-
 	tun := &NativeTun{
 		wt:        wt,
 		name:      ifname,
 		handle:    windows.InvalidHandle,
 		events:    make(chan wgtun.Event, 10),
-		forcedMTU: forcedMTU,
+		forcedMTU: mtu,
 	}
 
 	tun.session, err = wt.StartSession(0x800000) // Ring capacity, 8 MiB
@@ -239,17 +229,12 @@ func OpenTUNWithName(ifname string, mtu int) (wgtun.Device, error) {
 		return nil, fmt.Errorf("Error opening interface: %w", err)
 	}
 
-	forcedMTU := 1420
-	if mtu > 0 {
-		forcedMTU = mtu
-	}
-
 	tun := &NativeTun{
 		wt:        wt,
 		name:      ifname,
 		handle:    windows.InvalidHandle,
 		events:    make(chan wgtun.Event, 10),
-		forcedMTU: forcedMTU,
+		forcedMTU: mtu,
 	}
 
 	tun.session, err = wt.StartSession(0x800000) // Ring capacity, 8 MiB
@@ -303,7 +288,6 @@ func (tun *NativeTun) ForceMTU(mtu int) {
 }
 
 // Note: Read() and Write() assume the caller comes only from a single thread; there's no locking.
-
 func (tun *NativeTun) Read(buff []byte, offset int) (int, error) {
 	tun.running.Add(1)
 	defer tun.running.Done()
