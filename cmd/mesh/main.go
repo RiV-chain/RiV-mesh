@@ -18,6 +18,7 @@ import (
 	"github.com/gologme/log"
 	gsyslog "github.com/hashicorp/go-syslog"
 	"github.com/hjson/hjson-go"
+	"github.com/kardianos/minwinsvc"
 
 	//"github.com/RiV-chain/RiV-mesh/src/address"
 	"github.com/RiV-chain/RiV-mesh/src/admin"
@@ -357,7 +358,7 @@ func run(args yggArgs, ctx context.Context) {
 	n.core.Stop()
 }
 
-func registerSigHandler(siglist ...os.Signal) context.Context {
+func registerSigHandler(siglist ...os.Signal) (context.Context, context.CancelFunc) {
 
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, siglist...)
@@ -377,13 +378,17 @@ func registerSigHandler(siglist ...os.Signal) context.Context {
 		cancelFn()
 	}()
 
-	return taskCtx
+	return taskCtx, cancelFn
 }
 
 func main() {
 	args := getArgs()
 
-	ctx := registerSigHandler(syscall.SIGINT, syscall.SIGTERM)
+	ctx, cancel := registerSigHandler(syscall.SIGINT, syscall.SIGTERM)
+
+	// Capture the service being stopped on Windows.
+	minwinsvc.SetOnExit(cancel)
+
 	// Start the node, block and then wait for it to shut down.
 	var wg sync.WaitGroup
 	wg.Add(1)
