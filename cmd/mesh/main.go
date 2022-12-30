@@ -358,11 +358,33 @@ func run(args yggArgs, ctx context.Context) {
 	n.core.Stop()
 }
 
+func registerSigHandler(siglist ...os.Signal) (context.Context, context.CancelFunc) {
+
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, siglist...)
+
+	rootCtx := context.Background()
+	taskCtx, cancelFn := context.WithCancel(rootCtx)
+
+	go func() {
+		sig := <-sigCh
+		log.Println("received signal:", sig)
+
+		// reset handler to not trigger any more events
+		// (since we're terminating right?)
+		signal.Reset(syscall.SIGINT, syscall.SIGTERM)
+
+		// let sub-task know to wrap up - cancel taskCtx
+		cancelFn()
+	}()
+
+	return taskCtx, cancelFn
+}
+
 func main() {
 	args := getArgs()
 
-	// Catch interrupts from the operating system to exit gracefully.
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	ctx, cancel := registerSigHandler(syscall.SIGINT, syscall.SIGTERM)
 
 	// Capture the service being stopped on Windows.
 	minwinsvc.SetOnExit(cancel)
