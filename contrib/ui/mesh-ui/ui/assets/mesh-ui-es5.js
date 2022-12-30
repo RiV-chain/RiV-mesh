@@ -12,25 +12,34 @@ var $$ = function $$(clazz) {
   return document.getElementsByClassName(clazz);
 };
 function setHealth(d) {
-  var cellText;
-  var peerCell = $(d.peer);
-  if (!peerCell) return;
-  var peerTable = $("peer_list");
-  if (d.country_short) $("flag_" + d.peer).className = "big-flag fi fi-" + d.country_short.toLowerCase();else $("flag_" + d.peer).className = "fas fa-thin fa-share-nodes";
+  // creates a table row
+  var row = document.createElement("tr");
+  var imgElement = document.createElement("td");
+  var peerAddress = document.createElement("td");
+  peerAddress.innerText = d.peer;
+  var peerPing = document.createElement("td");
+  peerPing.setAttribute('id', d.peer);
+  var peerPingTime = document.createElement("td");
+  var peerSelect = document.createElement("td");
+  var chk = document.createElement('input');
+  chk.setAttribute('type', 'checkbox');
+  chk.checked = ui.connectedPeersAddress.indexOf(d.peer) >= 0;
+  peerSelect.appendChild(chk);
+  row.appendChild(imgElement);
+  row.appendChild(peerAddress);
+  row.appendChild(peerPing);
+  row.appendChild(peerPingTime);
+  row.appendChild(peerSelect);
+  if (d.country_short) imgElement.className = "big-flag fi fi-" + d.country_short.toLowerCase();else imgElement.className = "fas fa-thin fa-share-nodes";
   if (!("ping" in d)) {
-    var peerAddress = $("label_" + d.peer);
     peerAddress.style.color = "rgba(250,250,250,.5)";
   } else {
-    cellText = document.createTextNode(d.ping.toFixed(0));
-    peerCell.appendChild(cellText);
-    var peerCellTime = $("time_" + d.peer);
-    var cellTextTime = document.createTextNode("ms");
-    peerCellTime.appendChild(cellTextTime);
+    peerPing.innerText = d.ping.toFixed(0);
+    peerPingTime.appendChild(document.createTextNode("ms"));
   }
-  $("peer-" + d.peer).checked = ui.connectedPeersAddress.indexOf(d.peer) >= 0;
-  peerCell.parentNode.classList.remove("is-hidden");
+
   //sort table
-  moveRowToOrderPos(peerTable, 2, peerCell.parentNode);
+  insertRowToOrderPos($("peer_list"), 2, row);
 }
 function cmpTime(a, b) {
   return a.textContent.trim() === "" ? 1 : a.textContent.trim() // using `.textContent.trim()` for test
@@ -38,14 +47,14 @@ function cmpTime(a, b) {
     numeric: true
   });
 }
-function moveRowToOrderPos(table, col, row) {
-  var tb = table.tBodies[0],
-    tr = tb.rows;
+function insertRowToOrderPos(tb, col, row) {
+  var tr = tb.rows;
   var i = 0;
   for (; i < tr.length && cmpTime(row.cells[col], tr[i].cells[col]) >= 0; ++i);
-  if (i < tr.length && i != row.rowIndex) {
-    tb.deleteRow(row.rowIndex);
+  if (i < tr.length) {
     tb.insertBefore(row, tr[i]);
+  } else {
+    tb.appendChild(row);
   }
 }
 function openTab(element, tabName) {
@@ -117,26 +126,22 @@ function showInfo(text) {
   };
   setTimeout(button.onclick, 2000);
 }
-function showWindow(text) {
+function showWindow() {
   var info = $("notification_window");
   var message = $("info_window");
-  message.innerHTML = text;
   info.classList.remove("is-hidden");
   var button_info_close = $("info_win_close");
   button_info_close.onclick = function () {
-    message.value = "";
     info.classList.add("is-hidden");
-    $("peer_list").remove();
+    $("peer_list").innerHTML = "";
   };
   var button_window_close = $("window_close");
   button_window_close.onclick = function () {
-    message.value = "";
     info.classList.add("is-hidden");
-    $("peer_list").remove();
+    $("peer_list").innerHTML = "";
   };
   var button_window_save = $("window_save");
   button_window_save.onclick = function () {
-    message.value = "";
     info.classList.add("is-hidden");
     //todo save peers
     var peers = document.querySelectorAll('*[id^="peer-"]');
@@ -158,58 +163,8 @@ function showWindow(text) {
     }).catch(function (error) {
       console.error('Error:', error);
     });
-    $("peer_list").remove();
+    $("peer_list").innerHTML = "";
   };
-}
-function add_table(peerList) {
-  var peers = [];
-  //const countries = Object.keys(peerList);
-  // get the reference for the body
-  var body = document.createElement("div");
-  // creates a <table> element and a <tbody> element
-  var tbl = document.createElement("table");
-  tbl.setAttribute('id', "peer_list");
-  //tbl.setAttribute('cellpadding', '10');
-  var tblBody = document.createElement("tbody");
-
-  // creating all cells
-  for (var c in peerList) {
-    for (var peer in peerList[c]) {
-      peers.push(peer);
-      // creates a table row
-      var row = document.createElement("tr");
-      row.className = "is-hidden";
-      var imgElement = document.createElement("td");
-      imgElement.setAttribute('id', "flag_" + peer);
-      var peerAddress = document.createElement("td");
-      var cellText = document.createTextNode(peer);
-      peerAddress.appendChild(cellText);
-      peerAddress.setAttribute('id', "label_" + peer);
-      var peerPing = document.createElement("td");
-      peerPing.setAttribute('id', peer);
-      var peerPingTime = document.createElement("td");
-      peerPingTime.setAttribute('id', "time_" + peer);
-      var peerSelect = document.createElement("td");
-      var chk = document.createElement('input');
-      chk.setAttribute('type', 'checkbox');
-      chk.setAttribute('id', "peer-" + peer);
-      peerSelect.appendChild(chk);
-      row.appendChild(imgElement);
-      row.appendChild(peerAddress);
-      row.appendChild(peerPing);
-      row.appendChild(peerPingTime);
-      row.appendChild(peerSelect);
-      tblBody.appendChild(row);
-    }
-  }
-  // put the <tbody> in the <table>
-  tbl.appendChild(tblBody);
-  // appends <table> into <body>
-  body.appendChild(tbl);
-  // sets the border attribute of tbl to 2;
-  //tbl.setAttribute("border", "0");
-  showWindow(body.innerHTML);
-  return peers;
 }
 function togglePrivKeyVisibility() {
   if (this.classList.contains("fa-eye")) {
@@ -227,10 +182,10 @@ function humanReadableSpeed(speed) {
   var i = speed < 1 ? 0 : Math.floor(Math.log(speed) / Math.log(1024));
   var val = speed / Math.pow(1024, i);
   var fixed = 2;
-  if((val.toFixed() * 1) > 99) {
-    i+=1;
-    val /= 1024
-  } else if((val.toFixed() * 1) > 9) {
+  if (val.toFixed() * 1 > 99) {
+    i += 1;
+    val /= 1024;
+  } else if (val.toFixed() * 1 > 9) {
     fixed = 1;
   }
   return val.toFixed(fixed) + ' ' + ['B/s', 'kB/s', 'MB/s', 'GB/s', 'TB/s'][i];
@@ -250,8 +205,11 @@ ui.showAllPeers = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRunti
         return response.json();
       case 6:
         peerList = _context.sent;
-        peers = add_table(peerList); //start peers test
-        _context.next = 10;
+        showWindow();
+        peers = Object.values(peerList).flatMap(function (x) {
+          return Object.keys(x);
+        }); //start peers test
+        _context.next = 11;
         return fetch('api/health', {
           method: 'POST',
           headers: {
@@ -259,18 +217,18 @@ ui.showAllPeers = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRunti
           },
           body: JSON.stringify(peers)
         });
-      case 10:
-        _context.next = 15;
+      case 11:
+        _context.next = 16;
         break;
-      case 12:
-        _context.prev = 12;
+      case 13:
+        _context.prev = 13;
         _context.t0 = _context["catch"](0);
         console.error('Error:', _context.t0);
-      case 15:
+      case 16:
       case "end":
         return _context.stop();
     }
-  }, _callee, null, [[0, 12]]);
+  }, _callee, null, [[0, 13]]);
 }));
 ui.getConnectedPeers = function () {
   return fetch('api/peers').then(function (response) {
@@ -289,7 +247,7 @@ ui.updateConnectedPeersHandler = function (peers) {
       var row = $("peers").appendChild(document.createElement('div'));
       row.className = "overflow-ellipsis";
       var flag = row.appendChild(document.createElement("span"));
-      if (peer.multicast || !d.country_short) flag.className = "fas fa-thin fa-share-nodes peer-connected-fl";else flag.className = "fi fi-" + peer.country_short.toLowerCase() + " peer-connected-fl";
+      if (peer.multicast || !peer.country_short) flag.className = "fas fa-thin fa-share-nodes peer-connected-fl";else flag.className = "fi fi-" + peer.country_short.toLowerCase() + " peer-connected-fl";
       row.append(peer.remote.replace(regexStrip, ""));
     });
   }
