@@ -308,7 +308,7 @@ function main() {
 
     ui.updateSelfInfo();
 
-    ui.sse = new EventSource('/api/sse');
+    ui.sse = new EventSource('api/sse');
 
     ui.sse.addEventListener("health", (e) => {
       setHealth(JSON.parse(e.data));

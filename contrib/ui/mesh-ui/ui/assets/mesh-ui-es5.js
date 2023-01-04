@@ -322,7 +322,7 @@ function main() {
     $("showAllPeersBtn").addEventListener("click", ui.showAllPeers);
     ui.updateConnectedPeers();
     ui.updateSelfInfo();
-    ui.sse = new EventSource('/api/sse');
+    ui.sse = new EventSource('api/sse');
     ui.sse.addEventListener("health", function (e) {
       setHealth(JSON.parse(e.data));
     });
