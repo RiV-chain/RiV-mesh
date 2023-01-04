@@ -159,7 +159,7 @@ function showWindow() {
         'Content-Type': 'application/json',
         'Riv-Save-Config': 'true'
       },
-      body: JSON.stringify(peer_list)
+      body: JSON.stringify(peer_list.map(x => {return {"url": x}})),
     }).catch(function (error) {
       console.error('Error:', error);
     });

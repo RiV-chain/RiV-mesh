@@ -114,8 +114,8 @@ func NewRestServer(cfg RestServerCfg) (*RestServer, error) {
 	a.AddHandler(ApiHandler{pattern: "/api", desc: "\tGET - API documentation", handler: a.apiHandler})
 	a.AddHandler(ApiHandler{pattern: "/api/self", desc: "GET - Show details about this node", handler: a.apiSelfHandler})
 	a.AddHandler(ApiHandler{pattern: "/api/peers", desc: `GET - Show directly connected peers 
-			POST - Append peers to the peers list
-			PUT - Set peers list
+			POST - Append peers to the peers list. Request body [{ "uri":"tcp://xxx.xxx.xxx.xxx:yyyy", "interface":"eth0" }, ...], interface is optional
+			PUT - Set peers list. Request body [{ "uri":"tcp://xxx.xxx.xxx.xxx:yyyy", "interface":"eth0" }, ...], interface is optional
 			DELETE - Remove all peers from this node
 			Request header "Riv-Save-Config: true" persists changes`, handler: a.apiPeersHandler})
 	a.AddHandler(ApiHandler{pattern: "/api/paths", desc: "GET - Show established paths through this node", handler: a.apiPathsHandler})
@@ -387,31 +387,36 @@ func (a *RestServer) apiPeersHandler(w http.ResponseWriter, r *http.Request) {
 		return err
 	}
 
-	var handlePost = func() ([]string, error) {
-		var peers []string
-		err := json.NewDecoder(r.Body).Decode(&peers)
+	var handlePost = func() (peers []map[string]any, err error) {
+		err = json.NewDecoder(r.Body).Decode(&peers)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
-			return nil, err
+			return
 		}
 
 		for _, peer := range peers {
-			if err := a.Core.AddPeer(peer, ""); err != nil {
+			if err = a.Core.AddPeer(peer["url"].(string), peer["interface"].(string)); err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
-				return nil, err
+				return
 			}
 		}
 
-		return peers, nil
+		return
 	}
 
-	var saveConfig = func(peers []string) {
+	var saveConfig = func(peers []map[string]any) {
 		if len(a.ConfigFn) > 0 {
 			saveHeaders := r.Header["Riv-Save-Config"]
 			if len(saveHeaders) > 0 && saveHeaders[0] == "true" {
 				cfg, err := defaults.ReadConfig(a.ConfigFn)
 				if err == nil {
-					cfg.Peers = peers
+					for _, peer := range peers {
+						if peer["interface"] == "" {
+							cfg.Peers = append(cfg.Peers, peer["url"].(string))
+						} else {
+							cfg.InterfacePeers[peer["interface"].(string)] = append(cfg.InterfacePeers[peer["interface"].(string)], peer["url"].(string))
+						}
+					}
 					err := defaults.WriteConfig(a.ConfigFn, cfg)
 					if err != nil {
 						a.Log.Errorln("Config file read error:", err)
@@ -440,7 +445,7 @@ func (a *RestServer) apiPeersHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	case "DELETE":
 		if handleDelete() == nil {
-			saveConfig([]string{})
+			saveConfig(nil)
 			w.WriteHeader(http.StatusNoContent)
 		}
 	default:
