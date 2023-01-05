@@ -11,7 +11,8 @@
             "mode": "debug",
             "program": "cmd/mesh/main.go",
             "args": [
-                "-autoconf"
+                "-useconffile",
+                "/etc/mesh.conf",
             ],
             "console": "integratedTerminal",
             "asRoot": true,
