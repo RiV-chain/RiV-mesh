@@ -64,7 +64,7 @@ function redirect() {
       .then(() => {
         window.location.replace(ep);
       }).catch((error) => {
-        document.getElementById("error").innerHTML = "Mesh service connection error<br>Waiting for connection....";
+        document.getElementById("error").innerHTML = "Loading....";
         setTimeout(redirect, 1000);
       });
 }
