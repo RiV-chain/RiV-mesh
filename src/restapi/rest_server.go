@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"net/url"
@@ -118,6 +119,7 @@ func NewRestServer(cfg RestServerCfg) (*RestServer, error) {
 			PUT - Set peers list. Request body [{ "uri":"tcp://xxx.xxx.xxx.xxx:yyyy", "interface":"eth0" }, ...], interface is optional
 			DELETE - Remove all peers from this node
 			Request header "Riv-Save-Config: true" persists changes`, handler: a.apiPeersHandler})
+	a.AddHandler(ApiHandler{pattern: "/api/publicpeers", desc: "GET - Show public peers loaded from URL which configured in mesh.conf file", handler: a.apiPublicPeersHandler})
 	a.AddHandler(ApiHandler{pattern: "/api/paths", desc: "GET - Show established paths through this node", handler: a.apiPathsHandler})
 	a.AddHandler(ApiHandler{pattern: "/api/health", desc: "POST - Run peers health check task", handler: a.apiHealthHandler})
 	a.AddHandler(ApiHandler{pattern: "/api/sse", desc: "GET - Return server side events", handler: a.apiSseHandler})
@@ -243,6 +245,44 @@ func (a *RestServer) apiDhtHandler(w http.ResponseWriter, r *http.Request) {
 			return strings.Compare(result[i]["key"].(string), result[j]["key"].(string)) < 0
 		})
 		writeJson(w, r, result)
+	default:
+		writeError(w, http.StatusMethodNotAllowed)
+	}
+}
+
+func (a *RestServer) apiPublicPeersHandler(w http.ResponseWriter, r *http.Request) {
+	addNoCacheHeaders(w)
+	switch r.Method {
+	case "GET":
+		var response *http.Response
+		var result []byte
+		cfg, err := defaults.ReadConfig(a.ConfigFn)
+		if err == nil {
+			u := cfg.PublicPeersUrl
+			response, err = http.Get(u)
+			if err != nil {
+				a.Log.Errorln("Error read public peers url:", u, " ", err)
+				http.Error(w, "Error read public peers url", http.StatusInternalServerError)
+				return
+			}
+			if response.StatusCode > 200 {
+				a.Log.Errorln("Error read public peers url. Response code: ", response.StatusCode, ", Error message: ", response.Status)
+				writeError(w, response.StatusCode)
+				return
+			}
+			result, err = io.ReadAll(response.Body)
+			if err != nil {
+				a.Log.Errorln("Error read public peers url:", u, " ", err)
+				http.Error(w, "Error read public peers url", http.StatusInternalServerError)
+				return
+			}
+		} else {
+			a.Log.Errorln("Config file read error:", err)
+			http.Error(w, "Error read public peers url", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Add("Content-Type", "application/json; charset=utf-8")
+		fmt.Fprint(w, string(result))
 	default:
 		writeError(w, http.StatusMethodNotAllowed)
 	}
@@ -419,7 +459,7 @@ func (a *RestServer) apiPeersHandler(w http.ResponseWriter, r *http.Request) {
 					}
 					err := defaults.WriteConfig(a.ConfigFn, cfg)
 					if err != nil {
-						a.Log.Errorln("Config file read error:", err)
+						a.Log.Errorln("Config file write error:", err)
 					}
 				} else {
 					a.Log.Errorln("Config file read error:", err)
