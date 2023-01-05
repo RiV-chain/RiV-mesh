@@ -113,8 +113,13 @@ func (c *Core) _addPeerLoop() {
 			if err != nil {
 				c.log.Errorln("Failed to parse peer url:", peer, err)
 			}
-			if err := c.CallPeer(u, intf); err != nil {
+			info, err := c.CallPeer(u, intf)
+			if err != nil {
 				c.log.Errorln("Failed to add peer:", err)
+			} else {
+				phony.Block(c, func() {
+					c.config._peers[Peer{u.String(), intf}] = &info
+				})
 			}
 		}(peer.URI, peer.SourceInterface) // TODO: this should be acted and not in a goroutine?
 	}

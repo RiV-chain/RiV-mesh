@@ -40,10 +40,10 @@ func (l *linkSOCKS) dial(url *url.URL, options linkOptions) error {
 	dial := &linkDial{
 		url: url,
 	}
-	return l.handler(dial, info, conn, options, false)
+	return l.handler(dial, info, conn, options, false, false)
 }
 
-func (l *linkSOCKS) handler(dial *linkDial, info linkInfo, conn net.Conn, options linkOptions, incoming bool) error {
+func (l *linkSOCKS) handler(dial *linkDial, info linkInfo, conn net.Conn, options linkOptions, incoming bool, removed bool) error {
 	return l.links.create(
 		conn,              // connection
 		dial,              // connection URL
@@ -52,5 +52,6 @@ func (l *linkSOCKS) handler(dial *linkDial, info linkInfo, conn net.Conn, option
 		incoming,          // not incoming
 		false,             // not forced
 		options,           // connection options
+		removed,
 	)
 }

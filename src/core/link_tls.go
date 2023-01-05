@@ -170,5 +170,5 @@ func (l *linkTLS) generateConfig() (*tls.Config, error) {
 }
 
 func (l *linkTLS) handler(dial *linkDial, name string, info linkInfo, conn net.Conn, options linkOptions, incoming, force bool) error {
-	return l.tcp.handler(dial, name, info, conn, options, incoming, force)
+	return l.tcp.handler(dial, name, info, conn, options, incoming, force, false)
 }

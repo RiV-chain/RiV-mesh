@@ -45,7 +45,7 @@ func (l *linkMPATH) dial(url *url.URL, options linkOptions, sintf string) error 
 		url:   url,
 		sintf: sintf,
 	}
-	return l.handler(dial, name, info, conn, options, false, false)
+	return l.handler(dial, name, info, conn, options, false, false, false)
 }
 
 func (l *linkMPATH) listen(url *url.URL, sintf string) (*Listener, error) {
@@ -84,7 +84,7 @@ func (l *linkMPATH) listen(url *url.URL, sintf string) (*Listener, error) {
 			raddr := conn.RemoteAddr().(*net.TCPAddr)
 			name := fmt.Sprintf("mpath://%s", raddr)
 			info := linkInfoFor("mpath", sintf, strings.SplitN(raddr.IP.String(), "%", 2)[0])
-			if err = l.handler(nil, name, info, conn, linkOptionsForListener(url), true, raddr.IP.IsLinkLocalUnicast()); err != nil {
+			if err = l.handler(nil, name, info, conn, linkOptionsForListener(url), true, raddr.IP.IsLinkLocalUnicast(), false); err != nil {
 				l.core.log.Errorln("Failed to create inbound link:", err)
 			}
 		}
@@ -95,7 +95,7 @@ func (l *linkMPATH) listen(url *url.URL, sintf string) (*Listener, error) {
 	return entry, nil
 }
 
-func (l *linkMPATH) handler(dial *linkDial, name string, info linkInfo, conn net.Conn, options linkOptions, incoming, force bool) error {
+func (l *linkMPATH) handler(dial *linkDial, name string, info linkInfo, conn net.Conn, options linkOptions, incoming, force bool, removed bool) error {
 	return l.links.create(
 		conn,     // connection
 		dial,     // connection URL
@@ -104,6 +104,7 @@ func (l *linkMPATH) handler(dial *linkDial, name string, info linkInfo, conn net
 		incoming, // not incoming
 		force,    // not forced
 		options,  // connection options
+		removed,
 	)
 }
 

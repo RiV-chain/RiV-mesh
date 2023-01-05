@@ -48,7 +48,7 @@ func (l *linkUNIX) dial(url *url.URL, options linkOptions, _ string) error {
 	dial := &linkDial{
 		url: url,
 	}
-	return l.handler(dial, url.String(), info, conn, options, false)
+	return l.handler(dial, url.String(), info, conn, options, false, false)
 }
 
 func (l *linkUNIX) listen(url *url.URL, _ string) (*Listener, error) {
@@ -77,7 +77,7 @@ func (l *linkUNIX) listen(url *url.URL, _ string) (*Listener, error) {
 				break
 			}
 			info := linkInfoFor("unix", "", url.String())
-			if err = l.handler(nil, url.String(), info, conn, linkOptionsForListener(url), true); err != nil {
+			if err = l.handler(nil, url.String(), info, conn, linkOptionsForListener(url), true, false); err != nil {
 				l.core.log.Errorln("Failed to create inbound link:", err)
 			}
 		}
@@ -88,7 +88,7 @@ func (l *linkUNIX) listen(url *url.URL, _ string) (*Listener, error) {
 	return entry, nil
 }
 
-func (l *linkUNIX) handler(dial *linkDial, name string, info linkInfo, conn net.Conn, options linkOptions, incoming bool) error {
+func (l *linkUNIX) handler(dial *linkDial, name string, info linkInfo, conn net.Conn, options linkOptions, incoming bool, removed bool) error {
 	return l.links.create(
 		conn,     // connection
 		dial,     // connection URL
@@ -97,5 +97,6 @@ func (l *linkUNIX) handler(dial *linkDial, name string, info linkInfo, conn net.
 		incoming, // not incoming
 		false,    // not forced
 		options,  // connection options
+		removed,
 	)
 }

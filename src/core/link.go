@@ -40,6 +40,7 @@ type link struct {
 	info     linkInfo
 	incoming bool
 	force    bool
+	removed  bool
 }
 
 type linkOptions struct {
@@ -84,7 +85,7 @@ func (l *links) isConnectedTo(info linkInfo) bool {
 	return isConnected
 }
 
-func (l *links) create(conn net.Conn, dial *linkDial, name string, info linkInfo, incoming, force bool, options linkOptions) error {
+func (l *links) create(conn net.Conn, dial *linkDial, name string, info linkInfo, incoming, force bool, options linkOptions, removed bool) error {
 	intf := link{
 		conn: &linkConn{
 			Conn: conn,
@@ -96,6 +97,7 @@ func (l *links) create(conn net.Conn, dial *linkDial, name string, info linkInfo
 		info:     info,
 		incoming: incoming,
 		force:    force,
+		removed:  removed,
 	}
 	go func() {
 		if err := intf.handler(dial); err != nil {
@@ -220,6 +222,9 @@ func (intf *link) handler(dial *linkDial) error {
 		retry = func(attempt int) {
 			// intf.links.core.log.Infof("Retrying %s (attempt %d of 5)...", dial.url.String(), attempt)
 			errch := make(chan error, 1)
+			if intf.removed {
+				return
+			}
 			if _, err := intf.links.call(dial.url, dial.sintf, errch); err != nil {
 				return
 			}

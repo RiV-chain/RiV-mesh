@@ -403,7 +403,8 @@ func (m *Multicast) listen() {
 			if err != nil {
 				m.log.Debugln("Call from multicast failed, parse error:", addr.String(), err)
 			}
-			if err := m.core.CallPeer(u, from.Zone); err != nil {
+			_, err = m.core.CallPeer(u, from.Zone)
+			if err != nil {
 				m.log.Debugln("Call from multicast failed:", err)
 			}
 		}

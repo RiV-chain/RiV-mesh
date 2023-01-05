@@ -233,11 +233,11 @@ func (c *Core) RemovePeer(uri string, sourceInterface string) error {
 			return
 		}
 		if ok && linkInfo != nil {
-			c.links.Act(nil, func() {
-				if link := c.links._links[*linkInfo]; link != nil {
-					_ = link.close()
-				}
-			})
+			if link := c.links._links[*linkInfo]; link != nil {
+				_ = link.close()
+				link.removed = true
+			}
+			delete(c.links._links, *linkInfo)
 		}
 		delete(c.config._peers, peer)
 	})
@@ -246,16 +246,12 @@ func (c *Core) RemovePeer(uri string, sourceInterface string) error {
 
 func (c *Core) RemovePeers() error {
 	phony.Block(c, func() {
-		for peer, linkInfo := range c.config._peers {
-			if linkInfo != nil {
-				c.links.Act(nil, func() {
-					if link := c.links._links[*linkInfo]; link != nil {
-						_ = link.close()
-					}
-				})
-			}
-			delete(c.config._peers, peer)
+		for _, link := range c.links._links {
+			_ = link.close()
+			link = nil
 		}
+		c.links._links = make(map[linkInfo]*link)
+		c.config._peers = make(map[Peer]*linkInfo)
 	})
 	return nil
 }
@@ -268,9 +264,8 @@ func (c *Core) RemovePeers() error {
 //
 // This does not add the peer to the peer list, so if the connection drops, the
 // peer will not be called again automatically.
-func (c *Core) CallPeer(u *url.URL, sintf string) error {
-	_, err := c.links.call(u, sintf, nil)
-	return err
+func (c *Core) CallPeer(u *url.URL, sintf string) (info linkInfo, err error) {
+	return c.links.call(u, sintf, nil)
 }
 
 func (c *Core) PublicKey() ed25519.PublicKey {
