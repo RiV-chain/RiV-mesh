@@ -324,7 +324,7 @@ func (a *RestServer) apiMulticastinterfacesHandler(w http.ResponseWriter, r *htt
 	switch r.Method {
 	case "GET":
 		if a.Multicast == nil {
-			writeError(w, http.StatusInternalServerError)
+			http.Error(w, "Multicast module isn't started", http.StatusInternalServerError)
 			return
 		}
 		res := []string{}
