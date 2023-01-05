@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net"
 	"net/http"
 	"net/url"
@@ -270,7 +270,7 @@ func (a *RestServer) apiPublicPeersHandler(w http.ResponseWriter, r *http.Reques
 				writeError(w, response.StatusCode)
 				return
 			}
-			result, err = ioutil.ReadAll(response.Body)
+			result, err = io.ReadAll(response.Body)
 			if err != nil {
 				a.Log.Errorln("Error read public peers url:", u, " ", err)
 				http.Error(w, "Error read public peers url", http.StatusInternalServerError)
