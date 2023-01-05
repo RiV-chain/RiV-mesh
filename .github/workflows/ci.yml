@@ -63,7 +63,7 @@ jobs:
       - name: Install webkit2gtk-4.0
         uses: awalsh128/cache-apt-pkgs-action@latest
         with:
-          packages: libwebkit2gtk-4.0-dev
+          packages: libwebkit2gtk-4.0-dev gtk+-3.0 webkit2gtk-4.0
           version: 1.0
 
       - name: Set up Go
