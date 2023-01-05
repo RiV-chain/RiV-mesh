@@ -19,6 +19,8 @@ var defaultConfig = ""      // LDFLAGS='-X github.com/yggdrasil-network/yggdrasi
 var defaultAdminListen = "" // LDFLAGS='-X github.com/yggdrasil-network/yggdrasil-go/src/defaults.defaultAdminListen=unix://path/to/sock'
 
 type defaultParameters struct {
+	//Public peers URL
+	DefaultPublicPeersUrl string
 
 	//Network domain
 	DefaultNetworkDomain NetworkDomainConfig
@@ -46,6 +48,8 @@ type platformDefaultParameters struct {
 // Defines defaults for the all platforms.
 func define() defaultParameters {
 	return defaultParameters{
+
+		DefaultPublicPeersUrl: "https://map.rivchain.org/rest/peers.json",
 
 		// Network domain
 		DefaultNetworkDomain: NetworkDomainConfig{
@@ -84,6 +88,7 @@ func GenerateConfig() *config.NodeConfig {
 	cfg.IfMTU = defaults.DefaultIfMTU
 	cfg.NodeInfoPrivacy = false
 	cfg.NetworkDomain = define().DefaultNetworkDomain
+	cfg.PublicPeersUrl = define().DefaultPublicPeersUrl
 
 	return cfg
 }

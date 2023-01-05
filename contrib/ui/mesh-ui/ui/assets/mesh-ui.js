@@ -202,7 +202,7 @@ var ui = ui || {};
 
 ui.showAllPeers = async () => {
   try {
-    let response = await fetch('https://map.rivchain.org/rest/peers.json')
+    let response = await fetch('api/publicpeers')
     let peerList = await response.json();
     showWindow();
     const peers = Object.values(peerList).flatMap(x => Object.keys(x));

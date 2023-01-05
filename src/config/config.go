@@ -40,6 +40,7 @@ type NodeConfig struct {
 	NodeInfoPrivacy     bool                       `comment:"By default, nodeinfo contains some defaults including the platform,\narchitecture and RiV-mesh version. These can help when surveying\nthe network and diagnosing network routing problems. Enabling\nnodeinfo privacy prevents this, so that only items specified in\n\"NodeInfo\" are sent back if specified."`
 	NodeInfo            map[string]interface{}     `comment:"Optional node info. This must be a { \"key\": \"value\", ... } map\nor set as null. This is entirely optional but, if set, is visible\nto the whole network on request."`
 	NetworkDomain       NetworkDomainConfig        `comment:"Address prefix used by mesh.\nThe current implementation requires this to be a multiple of 8 bits + 7 bits.4\nNodes that configure this differently will be unable to communicate with each other using IP packets."`
+	PublicPeersUrl      string                     `comment:"Public peers URL which contains all peers in JSON format grouped by a country."`
 }
 
 type MulticastInterfaceConfig struct {
