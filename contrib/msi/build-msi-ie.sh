@@ -220,6 +220,14 @@ cat > wix.xml << EOF
               DiskId="1"
               Source="meshctl.exe"
               KeyPath="yes"/>
+            <Environment
+              Id="PATH"
+              Name="PATH"
+              Value="[INSTALLDIR]"
+              Permanent="yes"
+              Part="last"
+              Action="set"
+              System="yes"/>
           </Component>
 
           <Component Id="UIExecutable" Guid="ef9f30e0-8274-4526-835b-51bc09b5b1b7">
