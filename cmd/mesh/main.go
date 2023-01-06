@@ -66,7 +66,7 @@ func setLogLevel(loglevel string, logger *log.Logger) {
 	}
 }
 
-type yggArgs struct {
+type rivArgs struct {
 	genconf       bool
 	useconf       bool
 	normaliseconf bool
@@ -82,7 +82,7 @@ type yggArgs struct {
 	wwwroot       string
 }
 
-func getArgs() yggArgs {
+func getArgs() rivArgs {
 	genconf := flag.Bool("genconf", false, "print a new config to stdout")
 	useconf := flag.Bool("useconf", false, "read HJSON/JSON config from stdin")
 	useconffile := flag.String("useconffile", "", "read HJSON/JSON config from specified file path")
@@ -98,7 +98,7 @@ func getArgs() yggArgs {
 	wwwroot := flag.String("wwwroot", "", "wwwroot to enable")
 
 	flag.Parse()
-	return yggArgs{
+	return rivArgs{
 		genconf:       *genconf,
 		useconf:       *useconf,
 		useconffile:   *useconffile,
@@ -115,7 +115,7 @@ func getArgs() yggArgs {
 	}
 }
 
-func run(args yggArgs, ctx context.Context) {
+func run(args rivArgs, ctx context.Context) {
 	// Create a new logger that logs output to stdout.
 	var logger *log.Logger
 	switch args.logto {

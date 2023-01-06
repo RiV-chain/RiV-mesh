@@ -1,4 +1,4 @@
-name: Yggdrasil
+name: RiV-mesh
 
 on:
   push:
@@ -71,7 +71,7 @@ jobs:
         with:
           go-version: ${{ matrix.goversion }}
 
-      - name: Build Yggdrasil
+      - name: Build RiV-mesh
         run: go build -v ./...
 
       - name: Unit tests
@@ -95,7 +95,7 @@ jobs:
         with:
           go-version: ${{ matrix.goversion }}
 
-      - name: Build Yggdrasil
+      - name: Build RiV-mesh
         run: go build -v ./...
 
       - name: Unit tests
@@ -119,7 +119,7 @@ jobs:
         with:
           go-version: ${{ matrix.goversion }}
 
-      - name: Build Yggdrasil
+      - name: Build RiV-mesh
         run: go build -v ./...
 
       - name: Unit tests
