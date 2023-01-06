@@ -181,6 +181,14 @@ cat > wix.xml << EOF
               DiskId="1"
               Source="meshctl.exe"
               KeyPath="yes"/>
+            <Environment
+              Id="UpdatePath"
+              Name="PATH"
+              Value="[MeshInstallFolder]"
+              Permanent="no"
+              Part="last"
+              Action="set"
+              System="yes"/>
           </Component>
 
           <Component Id="ConfigScript" Guid="64a3733b-c98a-4732-85f3-20cd7da1a785">

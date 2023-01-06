@@ -67,6 +67,5 @@ require (
 	github.com/ip2location/ip2location-go/v9 v9.5.0
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
-	github.com/olekukonko/tablewriter v0.0.5
 	github.com/vishvananda/netns v0.0.0-20210104183010-2eb08e3e575f // indirect
 )
