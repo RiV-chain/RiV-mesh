@@ -337,43 +337,60 @@ func (a *RestServer) apiMulticastinterfacesHandler(w http.ResponseWriter, r *htt
 	}
 }
 
-func (a *RestServer) prepareGetPeers() []map[string]any {
+type Peer struct {
+	Address       string   `json:"address"`
+	Key           string   `json:"key"`
+	Port          uint64   `json:"port"`
+	Priority      uint64   `json:"priority"`
+	Coords        []uint64 `json:"coords"`
+	Remote        string   `json:"remote"`
+	Rremote_ip    string   `json:"rremote_ip"`
+	Bytes_recvd   uint64   `json:"bytes_recvd"`
+	Bytes_sent    uint64   `json:"bytes_sent"`
+	Uptime        float64  `json:"uptime"`
+	Multicast     bool     `json:"multicast"`
+	Country_short string   `json:"country_short"`
+	Country_long  string   `json:"country_long"`
+}
+
+func (a *RestServer) prepareGetPeers() []Peer {
 	peers := a.Core.GetPeers()
-	response := make([]map[string]any, 0, len(peers))
+	response := make([]Peer, 0, len(peers))
 	for _, p := range peers {
 		addr := a.Core.AddrForKey(p.Key)
-		entry := map[string]any{
-			"address":       net.IP(addr[:]).String(),
-			"key":           hex.EncodeToString(p.Key),
-			"port":          p.Port,
-			"priority":      uint64(p.Priority), // can't be uint8 thanks to gobind
-			"coords":        p.Coords,
-			"remote":        p.Remote,
-			"remote_ip":     p.RemoteIp,
-			"bytes_recvd":   p.RXBytes,
-			"bytes_sent":    p.TXBytes,
-			"uptime":        p.Uptime.Seconds(),
-			"multicast":     strings.Contains(p.Remote, "[fe80::"),
-			"country_short": "",
-			"country_long":  "",
+		entry := Peer{
+			net.IP(addr[:]).String(),
+			hex.EncodeToString(p.Key),
+			p.Port,
+			uint64(p.Priority), // can't be uint8 thanks to gobind
+			p.Coords,
+			p.Remote,
+			p.RemoteIp,
+			p.RXBytes,
+			p.TXBytes,
+			p.Uptime.Seconds(),
+			strings.Contains(p.Remote, "[fe80::"),
+			"",
+			"",
 		}
 
-		a.fillCountry(&entry, p.RemoteIp)
+		entry.Country_short, entry.Country_long = a.getCountry(p.RemoteIp)
+
 		response = append(response, entry)
 	}
 	sort.Slice(response, func(i, j int) bool {
-		if response[i]["multicast"].(bool) != response[j]["multicast"].(bool) {
-			return (!response[i]["multicast"].(bool) && response[j]["multicast"].(bool))
+		if response[i].Multicast != response[j].Multicast {
+			return (!response[i].Multicast && response[j].Multicast)
 		}
 
-		if response[i]["priority"].(uint64) != response[j]["priority"].(uint64) {
-			return response[i]["priority"].(uint64) < response[j]["priority"].(uint64)
+		if response[i].Priority != response[j].Priority {
+			return response[i].Priority < response[j].Priority
 		}
 
-		if cmp := strings.Compare(response[i]["address"].(string), response[j]["address"].(string)); cmp != 0 {
+		if cmp := strings.Compare(response[i].Address, response[j].Address); cmp != 0 {
 			return cmp < 0
 		}
-		return response[i]["port"].(uint64) < response[j]["port"].(uint64)
+		return response[i].Port < response[j].Port
 	})
 	return response
 }
@@ -574,7 +591,7 @@ func (a *RestServer) testOneHealth(peer string) map[string]any {
 
 	result["remote_ip"] = ipaddr.String()
 
-	a.fillCountry(&result, ipaddr.String())
+	result["country_short"], result["country_long"] = a.getCountry(ipaddr.String())
 
 	t := time.Now()
 	address := ipaddr.String()
@@ -609,19 +626,20 @@ func (a *RestServer) getPeersRxTxBytes() (uint64, uint64) {
 	return rx, tx
 }
 
-func (a *RestServer) fillCountry(entry *map[string]any, ipaddr string) {
+func (a *RestServer) getCountry(ipaddr string) (country_short string, country_long string) {
 	if a.ip2locatinoDb != nil {
 		ipLoc, err := a.ip2locatinoDb.Get_all(ipaddr)
 		if err == nil {
 			if ipLoc.Country_short != ip2loc_not_supported {
-				(*entry)["country_short"] = ipLoc.Country_short
+				country_short = ipLoc.Country_short
 			}
 
 			if ipLoc.Country_long != ip2loc_not_supported {
-				(*entry)["country_long"] = ipLoc.Country_long
+				country_long = ipLoc.Country_long
 			}
 		}
 	}
+	return
 }
 
 func writeError(w http.ResponseWriter, status int) {
