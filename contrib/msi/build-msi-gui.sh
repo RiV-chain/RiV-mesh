@@ -199,7 +199,7 @@ cat > wix.xml << EOF
             <Environment
               Id="UpdatePath"
               Name="PATH"
-              Value="[INSTALLDIR]"
+              Value="[MeshInstallFolder]"
               Permanent="no"
               Part="last"
               Action="set"
