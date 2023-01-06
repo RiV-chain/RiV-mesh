@@ -21,7 +21,7 @@ import (
 	"github.com/kardianos/minwinsvc"
 
 	//"github.com/RiV-chain/RiV-mesh/src/address"
-	"github.com/RiV-chain/RiV-mesh/src/admin"
+
 	"github.com/RiV-chain/RiV-mesh/src/config"
 	"github.com/RiV-chain/RiV-mesh/src/defaults"
 
@@ -37,7 +37,6 @@ type node struct {
 	core        *core.Core
 	tun         *tun.TunAdapter
 	multicast   *multicast.Multicast
-	admin       *admin.AdminSocket
 	rest_server *restapi.RestServer
 }
 
@@ -198,10 +197,9 @@ func run(args yggArgs, ctx context.Context) {
 		}
 	}
 	// Have we got a working configuration? If we don't then it probably means
-	// that neither -autoconf, -useconf or -useconffile were set above. Stop
-	// if we don't.
+	// that neither -autoconf, -useconf or -useconffile were set above.
 	if cfg == nil {
-		panic("broken configuration")
+		return
 	}
 	n := &node{}
 	// Have we been asked for the node address yet? If so, print it and then stop.
@@ -265,19 +263,6 @@ func run(args yggArgs, ctx context.Context) {
 		}
 	}
 
-	// Setup the admin socket.
-	{
-		options := []admin.SetupOption{
-			admin.ListenAddress(cfg.AdminListen),
-		}
-		if n.admin, err = admin.New(n.core, logger, options...); err != nil {
-			panic(err)
-		}
-		if n.admin != nil {
-			n.admin.SetupAdminHandlers()
-		}
-	}
-
 	// Setup the multicast module.
 	{
 		options := []multicast.SetupOption{}
@@ -293,9 +278,6 @@ func run(args yggArgs, ctx context.Context) {
 		if n.multicast, err = multicast.New(n.core, logger, options...); err != nil {
 			panic(err)
 		}
-		if n.admin != nil && n.multicast != nil {
-			n.multicast.SetupAdminHandlers(n.admin)
-		}
 	}
 
 	// Setup the TUN module.
@@ -306,9 +288,6 @@ func run(args yggArgs, ctx context.Context) {
 		}
 		if n.tun, err = tun.New(n.core, logger, options...); err != nil {
 			panic(err)
-		}
-		if n.admin != nil && n.tun != nil {
-			n.tun.SetupAdminHandlers(n.admin)
 		}
 	}
 
@@ -352,7 +331,6 @@ func run(args yggArgs, ctx context.Context) {
 	<-ctx.Done()
 
 	// Shut down the node.
-	_ = n.admin.Stop()
 	_ = n.multicast.Stop()
 	_ = n.tun.Stop()
 	n.core.Stop()

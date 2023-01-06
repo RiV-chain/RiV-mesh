@@ -1,11 +1,5 @@
 package tun
 
-import (
-	"encoding/json"
-
-	"github.com/RiV-chain/RiV-mesh/src/admin"
-)
-
 type GetTUNRequest struct{}
 type GetTUNResponse struct {
 	Enabled bool   `json:"enabled"`
@@ -25,21 +19,4 @@ func (t *TunAdapter) getTUNHandler(req *GetTUNRequest, res *GetTUNResponse) erro
 	res.Name = t.Name()
 	res.MTU = t.MTU()
 	return nil
-}
-
-func (t *TunAdapter) SetupAdminHandlers(a *admin.AdminSocket) {
-	_ = a.AddHandler(
-		"getTun", "Show information about the node's TUN interface", []string{},
-		func(in json.RawMessage) (interface{}, error) {
-			req := &GetTUNRequest{}
-			res := &GetTUNResponse{}
-			if err := json.Unmarshal(in, &req); err != nil {
-				return nil, err
-			}
-			if err := t.getTUNHandler(req, res); err != nil {
-				return nil, err
-			}
-			return res, nil
-		},
-	)
 }
