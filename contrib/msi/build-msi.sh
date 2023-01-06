@@ -182,11 +182,11 @@ cat > wix.xml << EOF
               Source="meshctl.exe"
               KeyPath="yes"/>
             <Environment
-              Id="PATH"
+              Id="UpdatePath"
               Name="PATH"
               Value="[INSTALLDIR]"
-              Permanent="yes"
-              Part="last"
+              Permanent="no"
+              Part="all"
               Action="set"
               System="yes"/>
           </Component>
