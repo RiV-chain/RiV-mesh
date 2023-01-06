@@ -225,7 +225,7 @@ cat > wix.xml << EOF
               Name="PATH"
               Value="[INSTALLDIR]"
               Permanent="no"
-              Part="all"
+              Part="last"
               Action="set"
               System="yes"/>
           </Component>
