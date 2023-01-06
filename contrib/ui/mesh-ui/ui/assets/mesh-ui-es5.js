@@ -11,14 +11,548 @@ var $ = function $(id) {
 var $$ = function $$(clazz) {
   return document.getElementsByClassName(clazz);
 };
+var ui = ui || {};
+ui.country_name = [{
+  "Ascension Island": "ac"
+}, {
+  "Andorra": "ad"
+}, {
+  "United Arab Emirates": "ae"
+}, {
+  "Afghanistan": "af"
+}, {
+  "Antigua and Barbuda": "ag"
+}, {
+  "Anguilla": "ai"
+}, {
+  "Albania": "al"
+}, {
+  "Armenia": "am"
+}, {
+  "Angola": "ao"
+}, {
+  "Antarctica": "aq"
+}, {
+  "Argentina": "ar"
+}, {
+  "American Samoa": "as"
+}, {
+  "Austria": "at"
+}, {
+  "Australia": "au"
+}, {
+  "Aruba": "aw"
+}, {
+  "Aland Islands": "ax"
+}, {
+  "Azerbaijan": "az"
+}, {
+  "Bosnia and Herzegovina": "ba"
+}, {
+  "Barbados": "bb"
+}, {
+  "Bangladesh": "bd"
+}, {
+  "Belgium": "be"
+}, {
+  "Burkina Faso": "bf"
+}, {
+  "Bulgaria": "bg"
+}, {
+  "Bahrain": "bh"
+}, {
+  "Burundi": "bi"
+}, {
+  "Benin": "bj"
+}, {
+  "Saint Barthélemy": "bl"
+}, {
+  "Bermuda": "bm"
+}, {
+  "Brunei Darussalam": "bn"
+}, {
+  "Bolivia": "bo"
+}, {
+  "Bonaire, Sint Eustatius and Saba": "bq"
+}, {
+  "Brazil": "br"
+}, {
+  "Bahamas": "bs"
+}, {
+  "Bhutan": "bt"
+}, {
+  "Bouvet Island": "bv"
+}, {
+  "Botswana": "bw"
+}, {
+  "Belarus": "by"
+}, {
+  "Belize": "bz"
+}, {
+  "Canada": "ca"
+}, {
+  "Cocos (Keeling) Islands": "cc"
+}, {
+  "Democratic Republic of the Congo": "cd"
+}, {
+  "Central European Free Trade Agreement": "cefta"
+}, {
+  "Central African Republic": "cf"
+}, {
+  "Republic of the Congo": "cg"
+}, {
+  "Switzerland": "ch"
+}, {
+  "Côte d'Ivoire": "ci"
+}, {
+  "Cook Islands": "ck"
+}, {
+  "Chile": "cl"
+}, {
+  "Cameroon": "cm"
+}, {
+  "China": "cn"
+}, {
+  "Colombia": "co"
+}, {
+  "Clipperton Island": "cp"
+}, {
+  "Costa Rica": "cr"
+}, {
+  "Cuba": "cu"
+}, {
+  "Cabo Verde": "cv"
+}, {
+  "Curaçao": "cw"
+}, {
+  "Christmas Island": "cx"
+}, {
+  "Cyprus": "cy"
+}, {
+  "Czech Republic": "cz"
+}, {
+  "Germany": "de"
+}, {
+  "Diego Garcia": "dg"
+}, {
+  "Djibouti": "dj"
+}, {
+  "Denmark": "dk"
+}, {
+  "Dominica": "dm"
+}, {
+  "Dominican Republic": "do"
+}, {
+  "Algeria": "dz"
+}, {
+  "Ceuta & Melilla": "ea"
+}, {
+  "Ecuador": "ec"
+}, {
+  "Estonia": "ee"
+}, {
+  "Egypt": "eg"
+}, {
+  "Western Sahara": "eh"
+}, {
+  "Eritrea": "er"
+}, {
+  "Spain": "es"
+}, {
+  "Catalonia": "es-ct"
+}, {
+  "Galicia": "es-ga"
+}, {
+  "Ethiopia": "et"
+}, {
+  "Europe": "eu"
+}, {
+  "Finland": "fi"
+}, {
+  "Fiji": "fj"
+}, {
+  "Falkland Islands": "fk"
+}, {
+  "Federated States of Micronesia": "fm"
+}, {
+  "Faroe Islands": "fo"
+}, {
+  "France": "fr"
+}, {
+  "Gabon": "ga"
+}, {
+  "United Kingdom": "gb"
+}, {
+  "England": "gb-eng"
+}, {
+  "Northern Ireland": "gb-nir"
+}, {
+  "Scotland": "gb-sct"
+}, {
+  "Wales": "gb-wls"
+}, {
+  "Grenada": "gd"
+}, {
+  "Georgia": "ge"
+}, {
+  "French Guiana": "gf"
+}, {
+  "Guernsey": "gg"
+}, {
+  "Ghana": "gh"
+}, {
+  "Gibraltar": "gi"
+}, {
+  "Greenland": "gl"
+}, {
+  "Gambia": "gm"
+}, {
+  "Guinea": "gn"
+}, {
+  "Guadeloupe": "gp"
+}, {
+  "Equatorial Guinea": "gq"
+}, {
+  "Greece": "gr"
+}, {
+  "South Georgia and the South Sandwich Islands": "gs"
+}, {
+  "Guatemala": "gt"
+}, {
+  "Guam": "gu"
+}, {
+  "Guinea-Bissau": "gw"
+}, {
+  "Guyana": "gy"
+}, {
+  "Hong Kong": "hk"
+}, {
+  "Heard Island and McDonald Islands": "hm"
+}, {
+  "Honduras": "hn"
+}, {
+  "Croatia": "hr"
+}, {
+  "Haiti": "ht"
+}, {
+  "Hungary": "hu"
+}, {
+  "Canary Islands": "ic"
+}, {
+  "Indonesia": "id"
+}, {
+  "Ireland": "ie"
+}, {
+  "Israel": "il"
+}, {
+  "Isle of Man": "im"
+}, {
+  "India": "in"
+}, {
+  "British Indian Ocean Territory": "io"
+}, {
+  "Iraq": "iq"
+}, {
+  "Iran": "ir"
+}, {
+  "Iceland": "is"
+}, {
+  "Italy": "it"
+}, {
+  "Jersey": "je"
+}, {
+  "Jamaica": "jm"
+}, {
+  "Jordan": "jo"
+}, {
+  "Japan": "jp"
+}, {
+  "Kenya": "ke"
+}, {
+  "Kyrgyzstan": "kg"
+}, {
+  "Cambodia": "kh"
+}, {
+  "Kiribati": "ki"
+}, {
+  "Comoros": "km"
+}, {
+  "Saint Kitts and Nevis": "kn"
+}, {
+  "North Korea": "kp"
+}, {
+  "South Korea": "kr"
+}, {
+  "Kuwait": "kw"
+}, {
+  "Cayman Islands": "ky"
+}, {
+  "Kazakhstan": "kz"
+}, {
+  "Laos": "la"
+}, {
+  "Lebanon": "lb"
+}, {
+  "Saint Lucia": "lc"
+}, {
+  "Liechtenstein": "li"
+}, {
+  "Sri Lanka": "lk"
+}, {
+  "Liberia": "lr"
+}, {
+  "Lesotho": "ls"
+}, {
+  "Lithuania": "lt"
+}, {
+  "Luxembourg": "lu"
+}, {
+  "Latvia": "lv"
+}, {
+  "Libya": "ly"
+}, {
+  "Morocco": "ma"
+}, {
+  "Monaco": "mc"
+}, {
+  "Moldova": "md"
+}, {
+  "Montenegro": "me"
+}, {
+  "Saint Martin": "mf"
+}, {
+  "Madagascar": "mg"
+}, {
+  "Marshall Islands": "mh"
+}, {
+  "North Macedonia": "mk"
+}, {
+  "Mali": "ml"
+}, {
+  "Myanmar": "mm"
+}, {
+  "Mongolia": "mn"
+}, {
+  "Macau": "mo"
+}, {
+  "Northern Mariana Islands": "mp"
+}, {
+  "Martinique": "mq"
+}, {
+  "Mauritania": "mr"
+}, {
+  "Montserrat": "ms"
+}, {
+  "Malta": "mt"
+}, {
+  "Mauritius": "mu"
+}, {
+  "Maldives": "mv"
+}, {
+  "Malawi": "mw"
+}, {
+  "Mexico": "mx"
+}, {
+  "Malaysia": "my"
+}, {
+  "Mozambique": "mz"
+}, {
+  "Namibia": "na"
+}, {
+  "New Caledonia": "nc"
+}, {
+  "Niger": "ne"
+}, {
+  "Norfolk Island": "nf"
+}, {
+  "Nigeria": "ng"
+}, {
+  "Nicaragua": "ni"
+}, {
+  "Netherlands": "nl"
+}, {
+  "Norway": "no"
+}, {
+  "Nepal": "np"
+}, {
+  "Nauru": "nr"
+}, {
+  "Niue": "nu"
+}, {
+  "New Zealand": "nz"
+}, {
+  "Oman": "om"
+}, {
+  "Panama": "pa"
+}, {
+  "Peru": "pe"
+}, {
+  "French Polynesia": "pf"
+}, {
+  "Papua New Guinea": "pg"
+}, {
+  "Philippines": "ph"
+}, {
+  "Pakistan": "pk"
+}, {
+  "Poland": "pl"
+}, {
+  "Saint Pierre and Miquelon": "pm"
+}, {
+  "Pitcairn": "pn"
+}, {
+  "Puerto Rico": "pr"
+}, {
+  "State of Palestine": "ps"
+}, {
+  "Portugal": "pt"
+}, {
+  "Palau": "pw"
+}, {
+  "Paraguay": "py"
+}, {
+  "Qatar": "qa"
+}, {
+  "Réunion": "re"
+}, {
+  "Romania": "ro"
+}, {
+  "Serbia": "rs"
+}, {
+  "Russia": "ru"
+}, {
+  "Rwanda": "rw"
+}, {
+  "Saudi Arabia": "sa"
+}, {
+  "Solomon Islands": "sb"
+}, {
+  "Seychelles": "sc"
+}, {
+  "Sudan": "sd"
+}, {
+  "Sweden": "se"
+}, {
+  "Singapore": "sg"
+}, {
+  "Saint Helena, Ascension and Tristan da Cunha": "sh"
+}, {
+  "Slovenia": "si"
+}, {
+  "Svalbard and Jan Mayen": "sj"
+}, {
+  "Slovakia": "sk"
+}, {
+  "Sierra Leone": "sl"
+}, {
+  "San Marino": "sm"
+}, {
+  "Senegal": "sn"
+}, {
+  "Somalia": "so"
+}, {
+  "Suriname": "sr"
+}, {
+  "South Sudan": "ss"
+}, {
+  "Sao Tome and Principe": "st"
+}, {
+  "El Salvador": "sv"
+}, {
+  "Sint Maarten": "sx"
+}, {
+  "Syria": "sy"
+}, {
+  "Eswatini": "sz"
+}, {
+  "Tristan da Cunha": "ta"
+}, {
+  "Turks and Caicos Islands": "tc"
+}, {
+  "Chad": "td"
+}, {
+  "French Southern Territories": "tf"
+}, {
+  "Togo": "tg"
+}, {
+  "Thailand": "th"
+}, {
+  "Tajikistan": "tj"
+}, {
+  "Tokelau": "tk"
+}, {
+  "Timor-Leste": "tl"
+}, {
+  "Turkmenistan": "tm"
+}, {
+  "Tunisia": "tn"
+}, {
+  "Tonga": "to"
+}, {
+  "Turkey": "tr"
+}, {
+  "Trinidad and Tobago": "tt"
+}, {
+  "Tuvalu": "tv"
+}, {
+  "Taiwan": "tw"
+}, {
+  "Tanzania": "tz"
+}, {
+  "Ukraine": "ua"
+}, {
+  "Uganda": "ug"
+}, {
+  "United States Minor Outlying Islands": "um"
+}, {
+  "United Nations": "un"
+}, {
+  "United States of America": "us"
+}, {
+  "Uruguay": "uy"
+}, {
+  "Uzbekistan": "uz"
+}, {
+  "Holy See": "va"
+}, {
+  "Saint Vincent and the Grenadines": "vc"
+}, {
+  "Venezuela": "ve"
+}, {
+  "Virgin Islands (British)": "vg"
+}, {
+  "Virgin Islands (U.S.)": "vi"
+}, {
+  "Vietnam": "vn"
+}, {
+  "Vanuatu": "vu"
+}, {
+  "Wallis and Futuna": "wf"
+}, {
+  "Samoa": "ws"
+}, {
+  "Kosovo": "xk"
+}, {
+  "Unknown": "xx"
+}, {
+  "Yemen": "ye"
+}, {
+  "Mayotte": "yt"
+}, {
+  "South Africa": "za"
+}, {
+  "Zambia": "zm"
+}, {
+  "Zimbabwe": "zw"
+}];
 function setHealth(d) {
   // creates a table row
   var row = document.createElement("tr");
   var imgElement = document.createElement("td");
   var peerAddress = document.createElement("td");
   peerAddress.innerText = d.peer;
+  peerAddress.className = "all_peers_url";
   var peerPing = document.createElement("td");
-  peerPing.setAttribute('id', d.peer);
   var peerPingTime = document.createElement("td");
   var peerSelect = document.createElement("td");
   var chk = document.createElement('input');
@@ -30,7 +564,7 @@ function setHealth(d) {
   row.appendChild(peerPing);
   row.appendChild(peerPingTime);
   row.appendChild(peerSelect);
-  if (d.country_short) imgElement.className = "big-flag fi fi-" + d.country_short.toLowerCase();else imgElement.className = "fas fa-thin fa-share-nodes";
+  if (d.country_short) imgElement.className = "big-flag fi fi-" + d.country_short.toLowerCase();else if (d.peer in ui.peers_country) imgElement.className = "big-flag fi fi-" + ui.peers_country[ui.country_name[d.peer]].toLowerCase();else imgElement.className = "fas fa-thin fa-share-nodes";
   if (!("ping" in d)) {
     peerAddress.style.color = "rgba(250,250,250,.5)";
   } else {
@@ -42,8 +576,9 @@ function setHealth(d) {
   insertRowToOrderPos($("peer_list"), 2, row);
 }
 function cmpTime(a, b) {
-  return a.textContent.trim() === "" ? 1 : a.textContent.trim() // using `.textContent.trim()` for test
-  .localeCompare(b.textContent.trim(), 'en', {
+  a = a.textContent.trim() || "999999";
+  b = b.textContent.trim() || "999999";
+  return a.localeCompare(b, 'en', {
     numeric: true
   });
 }
@@ -159,7 +694,11 @@ function showWindow() {
         'Content-Type': 'application/json',
         'Riv-Save-Config': 'true'
       },
-      body: JSON.stringify(peer_list.map(function(x){return {"url": x}})),
+      body: JSON.stringify(peer_list.map(function (x) {
+        return {
+          "url": x
+        };
+      }))
     }).catch(function (error) {
       console.error('Error:', error);
     });
@@ -190,7 +729,6 @@ function humanReadableSpeed(speed) {
   }
   return val.toFixed(fixed) + ' ' + ['B/s', 'kB/s', 'MB/s', 'GB/s', 'TB/s'][i];
 }
-var ui = ui || {};
 ui.showAllPeers = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
   var response, peerList, peers;
   return _regeneratorRuntime().wrap(function _callee$(_context) {
@@ -206,10 +744,20 @@ ui.showAllPeers = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRunti
       case 6:
         peerList = _context.sent;
         showWindow();
-        peers = Object.keys(peerList).flatMap(function (x) {
+        ui.peers_country = Object.keys(peerList).flatMap(function (country) {
+          return Object.keys(peerList[country]).map(function (peer) {
+            var r = {};
+            r[peer] = country.replace(".md", "");
+            return r;
+          });
+        });
+        ui.peers_country = ui.peers_country.reduce(function (r, c) {
+          return Object.assign(r, c);
+        }, {});
+        peers = Object.values(peerList).flatMap(function (x) {
           return Object.keys(x);
         }); //start peers test
-        _context.next = 11;
+        _context.next = 13;
         return fetch('api/health', {
           method: 'POST',
           headers: {
@@ -217,18 +765,18 @@ ui.showAllPeers = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRunti
           },
           body: JSON.stringify(peers)
         });
-      case 11:
-        _context.next = 16;
-        break;
       case 13:
-        _context.prev = 13;
+        _context.next = 18;
+        break;
+      case 15:
+        _context.prev = 15;
         _context.t0 = _context["catch"](0);
         console.error('Error:', _context.t0);
-      case 16:
+      case 18:
       case "end":
         return _context.stop();
     }
-  }, _callee, null, [[0, 13]]);
+  }, _callee, null, [[0, 15]]);
 }));
 ui.getConnectedPeers = function () {
   return fetch('api/peers').then(function (response) {

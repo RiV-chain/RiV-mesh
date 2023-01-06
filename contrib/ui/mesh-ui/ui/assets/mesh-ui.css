@@ -105,3 +105,10 @@ footer {
   padding-right: 20px;
   padding-left: 20px;
 }
+
+.all_peers_url {
+  max-width: 450px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
