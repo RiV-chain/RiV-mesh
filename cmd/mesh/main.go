@@ -21,7 +21,7 @@ import (
 	"github.com/kardianos/minwinsvc"
 
 	//"github.com/RiV-chain/RiV-mesh/src/address"
-	"github.com/RiV-chain/RiV-mesh/src/admin"
+
 	"github.com/RiV-chain/RiV-mesh/src/config"
 	"github.com/RiV-chain/RiV-mesh/src/defaults"
 
@@ -37,7 +37,6 @@ type node struct {
 	core        *core.Core
 	tun         *tun.TunAdapter
 	multicast   *multicast.Multicast
-	admin       *admin.AdminSocket
 	rest_server *restapi.RestServer
 }
 
@@ -67,7 +66,7 @@ func setLogLevel(loglevel string, logger *log.Logger) {
 	}
 }
 
-type yggArgs struct {
+type rivArgs struct {
 	genconf       bool
 	useconf       bool
 	normaliseconf bool
@@ -83,7 +82,7 @@ type yggArgs struct {
 	wwwroot       string
 }
 
-func getArgs() yggArgs {
+func getArgs() rivArgs {
 	genconf := flag.Bool("genconf", false, "print a new config to stdout")
 	useconf := flag.Bool("useconf", false, "read HJSON/JSON config from stdin")
 	useconffile := flag.String("useconffile", "", "read HJSON/JSON config from specified file path")
@@ -99,7 +98,7 @@ func getArgs() yggArgs {
 	wwwroot := flag.String("wwwroot", "", "wwwroot to enable")
 
 	flag.Parse()
-	return yggArgs{
+	return rivArgs{
 		genconf:       *genconf,
 		useconf:       *useconf,
 		useconffile:   *useconffile,
@@ -116,7 +115,7 @@ func getArgs() yggArgs {
 	}
 }
 
-func run(args yggArgs, ctx context.Context) {
+func run(args rivArgs, ctx context.Context) {
 	// Create a new logger that logs output to stdout.
 	var logger *log.Logger
 	switch args.logto {
@@ -198,10 +197,9 @@ func run(args yggArgs, ctx context.Context) {
 		}
 	}
 	// Have we got a working configuration? If we don't then it probably means
-	// that neither -autoconf, -useconf or -useconffile were set above. Stop
-	// if we don't.
+	// that neither -autoconf, -useconf or -useconffile were set above.
 	if cfg == nil {
-		panic("broken configuration")
+		return
 	}
 	n := &node{}
 	// Have we been asked for the node address yet? If so, print it and then stop.
@@ -265,19 +263,6 @@ func run(args yggArgs, ctx context.Context) {
 		}
 	}
 
-	// Setup the admin socket.
-	{
-		options := []admin.SetupOption{
-			admin.ListenAddress(cfg.AdminListen),
-		}
-		if n.admin, err = admin.New(n.core, logger, options...); err != nil {
-			panic(err)
-		}
-		if n.admin != nil {
-			n.admin.SetupAdminHandlers()
-		}
-	}
-
 	// Setup the multicast module.
 	{
 		options := []multicast.SetupOption{}
@@ -293,9 +278,6 @@ func run(args yggArgs, ctx context.Context) {
 		if n.multicast, err = multicast.New(n.core, logger, options...); err != nil {
 			panic(err)
 		}
-		if n.admin != nil && n.multicast != nil {
-			n.multicast.SetupAdminHandlers(n.admin)
-		}
 	}
 
 	// Setup the TUN module.
@@ -306,9 +288,6 @@ func run(args yggArgs, ctx context.Context) {
 		}
 		if n.tun, err = tun.New(n.core, logger, options...); err != nil {
 			panic(err)
-		}
-		if n.admin != nil && n.tun != nil {
-			n.tun.SetupAdminHandlers(n.admin)
 		}
 	}
 
@@ -352,7 +331,6 @@ func run(args yggArgs, ctx context.Context) {
 	<-ctx.Done()
 
 	// Shut down the node.
-	_ = n.admin.Stop()
 	_ = n.multicast.Stop()
 	_ = n.tun.Stop()
 	n.core.Stop()

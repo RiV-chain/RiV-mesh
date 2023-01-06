@@ -27,21 +27,16 @@ require (
 )
 
 require (
+	github.com/slonm/tableprinter v0.0.0-20221229121956-b07fe357aedc
 	github.com/vorot93/golang-signals v0.0.0-20170221070717-d9e83421ce45
 	github.com/webview/webview v0.0.0-20221220082822-77e021440a0f
+	golang.org/x/exp v0.0.0-20221217163422-3c43f8badb15
+	golang.zx2c4.com/wintun v0.0.0-20211104114900-415007cec224
 )
 
 require (
 	github.com/jchv/go-winloader v0.0.0-20210711035445-715c2860da7e // indirect
 	github.com/kataras/tablewriter v0.0.0-20180708051242-e063d29b7c23 // indirect
-	github.com/lxn/walk v0.0.0-20210112085537-c389da54e794 // indirect
-	github.com/lxn/win v0.0.0-20210218163916-a377121e959e // indirect
-	github.com/slonm/tableprinter v0.0.0-20221229121956-b07fe357aedc // indirect
-	golang.org/x/exp v0.0.0-20221217163422-3c43f8badb15 // indirect
-	golang.org/x/mod v0.6.0 // indirect
-	golang.org/x/tools v0.2.0 // indirect
-	golang.zx2c4.com/wintun v0.0.0-20211104114900-415007cec224 // indirect
-	gopkg.in/Knetic/govaluate.v3 v3.0.0 // indirect
 )
 
 require (
@@ -72,6 +67,5 @@ require (
 	github.com/ip2location/ip2location-go/v9 v9.5.0
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
-	github.com/olekukonko/tablewriter v0.0.5
 	github.com/vishvananda/netns v0.0.0-20210104183010-2eb08e3e575f // indirect
 )

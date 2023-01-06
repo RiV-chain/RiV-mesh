@@ -21,7 +21,7 @@ type CmdLineEnv struct {
 
 func newCmdLineEnv() CmdLineEnv {
 	var cmdLineEnv CmdLineEnv
-	cmdLineEnv.endpoint = defaults.GetDefaults().DefaultAdminListen
+	cmdLineEnv.endpoint = defaults.Define().DefaultHttpAddress
 	return cmdLineEnv
 }
 
@@ -37,11 +37,9 @@ func (cmdLineEnv *CmdLineEnv) parseFlagsAndArgs() {
 		fmt.Println()
 		fmt.Println("Examples:")
 		fmt.Println("  - ", os.Args[0], "list")
-		fmt.Println("  - ", os.Args[0], "getPeers")
-		fmt.Println("  - ", os.Args[0], "-v getSelf")
-		fmt.Println("  - ", os.Args[0], "setTunTap name=auto mtu=1500 tap_mode=false")
-		fmt.Println("  - ", os.Args[0], "-endpoint=tcp://localhost:9001 getDHT")
-		fmt.Println("  - ", os.Args[0], "-endpoint=unix:///var/run/ygg.sock getDHT")
+		fmt.Println("  - ", os.Args[0], "peers")
+		fmt.Println("  - ", os.Args[0], "-v self")
+		fmt.Println("  - ", os.Args[0], "-endpoint=http://localhost:19019 DHT")
 	}
 
 	server := flag.String("endpoint", cmdLineEnv.endpoint, "Admin socket endpoint")
@@ -72,17 +70,17 @@ func (cmdLineEnv *CmdLineEnv) setEndpoint(logger *log.Logger) {
 			if err := hjson.Unmarshal(config, &dat); err != nil {
 				panic(err)
 			}
-			if ep, ok := dat["AdminListen"].(string); ok && (ep != "none" && ep != "") {
+			if ep, ok := dat["HttpAddress"].(string); ok && (ep != "none" && ep != "") {
 				cmdLineEnv.endpoint = ep
-				logger.Println("Found platform default config file", defaults.GetDefaults().DefaultConfigFile)
-				logger.Println("Using endpoint", cmdLineEnv.endpoint, "from AdminListen")
+				logger.Println("Found platform default config file", defaults.Define().DefaultHttpAddress)
+				logger.Println("Using endpoint", cmdLineEnv.endpoint, "from HttpAddress")
 			} else {
-				logger.Println("Configuration file doesn't contain appropriate AdminListen option")
-				logger.Println("Falling back to platform default", defaults.GetDefaults().DefaultAdminListen)
+				logger.Println("Configuration file doesn't contain appropriate HttpAddress option")
+				logger.Println("Falling back to platform default", defaults.Define().DefaultHttpAddress)
 			}
 		} else {
 			logger.Println("Can't open config file from default location", defaults.GetDefaults().DefaultConfigFile)
-			logger.Println("Falling back to platform default", defaults.GetDefaults().DefaultAdminListen)
+			logger.Println("Falling back to platform default", defaults.Define().DefaultHttpAddress)
 		}
 	} else {
 		cmdLineEnv.endpoint = cmdLineEnv.server

@@ -198,7 +198,7 @@ ui.showAllPeers = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRunti
       case 0:
         _context.prev = 0;
         _context.next = 3;
-        return fetch('https://map.rivchain.org/rest/peers.json');
+        return fetch('api/publicpeers');
       case 3:
         response = _context.sent;
         _context.next = 6;
@@ -206,7 +206,7 @@ ui.showAllPeers = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRunti
       case 6:
         peerList = _context.sent;
         showWindow();
-        peers = Object.values(peerList).flatMap(function (x) {
+        peers = Object.keys(peerList).flatMap(function (x) {
           return Object.keys(x);
         }); //start peers test
         _context.next = 11;

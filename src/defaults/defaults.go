@@ -15,10 +15,14 @@ import (
 type MulticastInterfaceConfig = config.MulticastInterfaceConfig
 type NetworkDomainConfig = config.NetworkDomainConfig
 
-var defaultConfig = ""      // LDFLAGS='-X github.com/yggdrasil-network/yggdrasil-go/src/defaults.defaultConfig=/path/to/config
-var defaultAdminListen = "" // LDFLAGS='-X github.com/yggdrasil-network/yggdrasil-go/src/defaults.defaultAdminListen=unix://path/to/sock'
+var defaultConfig = "" // LDFLAGS='-X github.com/yggdrasil-network/yggdrasil-go/src/defaults.defaultConfig=/path/to/config
 
 type defaultParameters struct {
+	//Default Http address
+	DefaultHttpAddress string
+
+	//Public peers URL
+	DefaultPublicPeersUrl string
 
 	//Network domain
 	DefaultNetworkDomain NetworkDomainConfig
@@ -28,8 +32,6 @@ type defaultParameters struct {
 // specific platform. These values are populated in the relevant defaults_*.go
 // for the platform being targeted. They must be set.
 type platformDefaultParameters struct {
-	// Admin socket
-	DefaultAdminListen string
 
 	// Configuration (used for meshctl)
 	DefaultConfigFile string
@@ -44,8 +46,12 @@ type platformDefaultParameters struct {
 }
 
 // Defines defaults for the all platforms.
-func define() defaultParameters {
+func Define() defaultParameters {
 	return defaultParameters{
+
+		DefaultHttpAddress: "http://localhost:19019",
+
+		DefaultPublicPeersUrl: "https://map.rivchain.org/rest/peers.json",
 
 		// Network domain
 		DefaultNetworkDomain: NetworkDomainConfig{
@@ -58,9 +64,6 @@ func GetDefaults() platformDefaultParameters {
 	defaults := getDefaults()
 	if defaultConfig != "" {
 		defaults.DefaultConfigFile = defaultConfig
-	}
-	if defaultAdminListen != "" {
-		defaults.DefaultAdminListen = defaultAdminListen
 	}
 	return defaults
 }
@@ -75,7 +78,6 @@ func GenerateConfig() *config.NodeConfig {
 	cfg := new(config.NodeConfig)
 	cfg.NewKeys()
 	cfg.Listen = []string{}
-	cfg.AdminListen = defaults.DefaultAdminListen
 	cfg.Peers = []string{}
 	cfg.InterfacePeers = map[string][]string{}
 	cfg.AllowedPublicKeys = []string{}
@@ -83,7 +85,9 @@ func GenerateConfig() *config.NodeConfig {
 	cfg.IfName = defaults.DefaultIfName
 	cfg.IfMTU = defaults.DefaultIfMTU
 	cfg.NodeInfoPrivacy = false
-	cfg.NetworkDomain = define().DefaultNetworkDomain
+	cfg.HttpAddress = Define().DefaultHttpAddress
+	cfg.NetworkDomain = Define().DefaultNetworkDomain
+	cfg.PublicPeersUrl = Define().DefaultPublicPeersUrl
 
 	return cfg
 }

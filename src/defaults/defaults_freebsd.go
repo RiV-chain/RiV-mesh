@@ -7,8 +7,6 @@ package defaults
 // may be replaced by the running configuration.
 func getDefaults() platformDefaultParameters {
 	return platformDefaultParameters{
-		// Admin
-		DefaultAdminListen: "tcp://localhost:9001",
 
 		// Configuration (used for meshctl)
 		DefaultConfigFile: "/usr/local/etc/mesh.conf",
