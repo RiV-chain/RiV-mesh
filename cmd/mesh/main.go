@@ -279,17 +279,6 @@ func run(args rivArgs, sigCh chan os.Signal) {
 		}
 	}
 
-	// Setup the TUN module.
-	{
-		options := []tun.SetupOption{
-			tun.InterfaceName(cfg.IfName),
-			tun.InterfaceMTU(cfg.IfMTU),
-		}
-		if n.tun, err = tun.New(n.core, logger, options...); err != nil {
-			panic(err)
-		}
-	}
-
 	// Setup the REST socket.
 	{
 		//override httpaddress and wwwroot parameters in cfg
@@ -315,6 +304,17 @@ func run(args rivArgs, sigCh chan os.Signal) {
 			if err != nil {
 				logger.Errorln(err)
 			}
+		}
+	}
+
+	// Setup the TUN module.
+	{
+		options := []tun.SetupOption{
+			tun.InterfaceName(cfg.IfName),
+			tun.InterfaceMTU(cfg.IfMTU),
+		}
+		if n.tun, err = tun.New(n.core, logger, options...); err != nil {
+			panic(err)
 		}
 	}
 
