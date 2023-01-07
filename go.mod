@@ -27,7 +27,7 @@ require (
 )
 
 require (
-	github.com/slonm/tableprinter v0.0.0-20230106133006-8d0895e1d9d1
+	github.com/slonm/tableprinter v0.0.0-20230107100804-643098716018
 	github.com/vorot93/golang-signals v0.0.0-20170221070717-d9e83421ce45
 	github.com/webview/webview v0.0.0-20221220082822-77e021440a0f
 	golang.org/x/exp v0.0.0-20221217163422-3c43f8badb15

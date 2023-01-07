@@ -87,6 +87,8 @@ github.com/slonm/tableprinter v0.0.0-20221229121956-b07fe357aedc h1:VzACE+MTrlNE
 github.com/slonm/tableprinter v0.0.0-20221229121956-b07fe357aedc/go.mod h1:YmJPt1/lE7S0lGtDQgSIufprvm+agsqx9n7cO6Gq6JQ=
 github.com/slonm/tableprinter v0.0.0-20230106133006-8d0895e1d9d1 h1:7Z3PJLB0XKjx/Tnx6yT2gw5omvDswtvd3hSb522uwaA=
 github.com/slonm/tableprinter v0.0.0-20230106133006-8d0895e1d9d1/go.mod h1:YmJPt1/lE7S0lGtDQgSIufprvm+agsqx9n7cO6Gq6JQ=
+github.com/slonm/tableprinter v0.0.0-20230107100804-643098716018 h1:HkpfBQEfSVno7l+8Oio1pyHuL5NU2ltcAx+TcsXhtzI=
+github.com/slonm/tableprinter v0.0.0-20230107100804-643098716018/go.mod h1:YmJPt1/lE7S0lGtDQgSIufprvm+agsqx9n7cO6Gq6JQ=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
