@@ -68,7 +68,12 @@ img {
   display: block;
 }
 
-body, #notification_windowx {
+#notification_windowx {
+  max-width: 650px;
+  margin: auto;
+}
+
+body {
   max-width: 690px;
   margin: auto;
 }
@@ -107,7 +112,7 @@ footer {
 }
 
 .all_peers_url {
-  max-width: 450px;
+  max-width: 410px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
