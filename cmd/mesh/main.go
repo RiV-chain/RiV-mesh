@@ -334,7 +334,7 @@ func run(args rivArgs, sigCh chan os.Signal) {
 		sigCh <- os.Interrupt
 		//there is a pause in handler. If the handler is finished other routines are not running.
 		//Slee code gives a chance to run Stop methods.
-		time.Sleep(30 * time.Second)
+		time.Sleep(10 * time.Second)
 	})
 	// Block until we are told to shut down.
 	<-sigCh
