@@ -11,6 +11,7 @@ import (
 	"os/signal"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/gologme/log"
 	gsyslog "github.com/hashicorp/go-syslog"
@@ -328,14 +329,13 @@ func run(args rivArgs, sigCh chan os.Signal) {
 	//Windows service shutdown service
 	minwinsvc.SetOnExit(func() {
 		logger.Infof("Shutting down service ...")
-		_ = n.multicast.Stop()
-		_ = n.tun.Stop()
-		n.core.Stop()
-		os.Exit(0)
+		sigCh <- os.Interrupt
+		//there is a pause in handler. If the handler is finished other routines are not running.
+		//Slee code gives a chance to run Stop methods.
+		time.Sleep(30 * time.Second)
 	})
 	// Block until we are told to shut down.
 	<-sigCh
-
 	_ = n.multicast.Stop()
 	_ = n.tun.Stop()
 	n.core.Stop()
