@@ -112,7 +112,8 @@ footer {
 }
 
 .all_peers_url {
-  max-width: 410px;
+  width: 100%;
+  max-width: 192px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
