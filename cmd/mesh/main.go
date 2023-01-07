@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"crypto/ed25519"
 	"encoding/hex"
 	"encoding/json"
@@ -12,8 +11,6 @@ import (
 	"os/signal"
 	"regexp"
 	"strings"
-	"sync"
-	"syscall"
 
 	"github.com/gologme/log"
 	gsyslog "github.com/hashicorp/go-syslog"
@@ -115,7 +112,7 @@ func getArgs() rivArgs {
 	}
 }
 
-func run(args rivArgs, ctx context.Context) {
+func run(args rivArgs, sigCh chan os.Signal) {
 	// Create a new logger that logs output to stdout.
 	var logger *log.Logger
 	switch args.logto {
@@ -327,52 +324,28 @@ func run(args rivArgs, ctx context.Context) {
 	logger.Infof("Your public key is %s", hex.EncodeToString(public[:]))
 	logger.Infof("Your IPv6 address is %s", address.String())
 	logger.Infof("Your IPv6 subnet is %s", subnet.String())
-	// Block until we are told to shut down.
-	<-ctx.Done()
 
-	// Shut down the node.
+	//Windows service shutdown service
+	minwinsvc.SetOnExit(func() {
+		logger.Infof("Shutting down service ...")
+		_ = n.multicast.Stop()
+		_ = n.tun.Stop()
+		n.core.Stop()
+		os.Exit(0)
+	})
+	// Block until we are told to shut down.
+	<-sigCh
+
 	_ = n.multicast.Stop()
 	_ = n.tun.Stop()
 	n.core.Stop()
 }
 
-func registerSigHandler(siglist ...os.Signal) (context.Context, context.CancelFunc) {
-
-	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, siglist...)
-
-	rootCtx := context.Background()
-	taskCtx, cancelFn := context.WithCancel(rootCtx)
-
-	go func() {
-		sig := <-sigCh
-		log.Println("received signal:", sig)
-
-		// reset handler to not trigger any more events
-		// (since we're terminating right?)
-		signal.Reset(syscall.SIGINT, syscall.SIGTERM)
-
-		// let sub-task know to wrap up - cancel taskCtx
-		cancelFn()
-	}()
-
-	return taskCtx, cancelFn
-}
-
 func main() {
 	args := getArgs()
 
-	ctx, cancel := registerSigHandler(syscall.SIGINT, syscall.SIGTERM)
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, os.Interrupt)
 
-	// Capture the service being stopped on Windows.
-	minwinsvc.SetOnExit(cancel)
-
-	// Start the node, block and then wait for it to shut down.
-	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		run(args, ctx)
-	}()
-	wg.Wait()
+	run(args, sigCh)
 }
