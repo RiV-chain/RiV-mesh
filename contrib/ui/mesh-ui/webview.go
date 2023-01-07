@@ -65,7 +65,7 @@ function redirect() {
         window.location.replace(ep);
       }).catch((error) => {
         document.getElementById("error").innerHTML = "Loading....";
-        setTimeout(redirect, 1000);
+        setTimeout(redirect, 5000);
       });
 }
 redirect();

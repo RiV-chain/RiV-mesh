@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"crypto/ed25519"
 	"encoding/hex"
 	"encoding/json"
@@ -14,6 +13,7 @@ import (
 	"strings"
 	"sync"
 	"syscall"
+	"time"
 
 	"github.com/gologme/log"
 	gsyslog "github.com/hashicorp/go-syslog"
@@ -115,7 +115,7 @@ func getArgs() rivArgs {
 	}
 }
 
-func run(args rivArgs, ctx context.Context) {
+func run(args rivArgs, sigCh chan os.Signal) {
 	// Create a new logger that logs output to stdout.
 	var logger *log.Logger
 	switch args.logto {
@@ -280,17 +280,6 @@ func run(args rivArgs, ctx context.Context) {
 		}
 	}
 
-	// Setup the TUN module.
-	{
-		options := []tun.SetupOption{
-			tun.InterfaceName(cfg.IfName),
-			tun.InterfaceMTU(cfg.IfMTU),
-		}
-		if n.tun, err = tun.New(n.core, logger, options...); err != nil {
-			panic(err)
-		}
-	}
-
 	// Setup the REST socket.
 	{
 		//override httpaddress and wwwroot parameters in cfg
@@ -319,6 +308,17 @@ func run(args rivArgs, ctx context.Context) {
 		}
 	}
 
+	// Setup the TUN module.
+	{
+		options := []tun.SetupOption{
+			tun.InterfaceName(cfg.IfName),
+			tun.InterfaceMTU(cfg.IfMTU),
+		}
+		if n.tun, err = tun.New(n.core, logger, options...); err != nil {
+			panic(err)
+		}
+	}
+
 	// Make some nice output that tells us what our IPv6 address and subnet are.
 	// This is just logged to stdout for the user.
 	address := n.core.Address()
@@ -327,52 +327,33 @@ func run(args rivArgs, ctx context.Context) {
 	logger.Infof("Your public key is %s", hex.EncodeToString(public[:]))
 	logger.Infof("Your IPv6 address is %s", address.String())
 	logger.Infof("Your IPv6 subnet is %s", subnet.String())
-	// Block until we are told to shut down.
-	<-ctx.Done()
 
-	// Shut down the node.
+	//Windows service shutdown service
+	minwinsvc.SetOnExit(func() {
+		logger.Infof("Shutting down service ...")
+		sigCh <- os.Interrupt
+		//there is a pause in handler. If the handler is finished other routines are not running.
+		//Slee code gives a chance to run Stop methods.
+		time.Sleep(10 * time.Second)
+	})
+	// Block until we are told to shut down.
+	<-sigCh
 	_ = n.multicast.Stop()
 	_ = n.tun.Stop()
 	n.core.Stop()
 }
 
-func registerSigHandler(siglist ...os.Signal) (context.Context, context.CancelFunc) {
-
-	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, siglist...)
-
-	rootCtx := context.Background()
-	taskCtx, cancelFn := context.WithCancel(rootCtx)
-
-	go func() {
-		sig := <-sigCh
-		log.Println("received signal:", sig)
-
-		// reset handler to not trigger any more events
-		// (since we're terminating right?)
-		signal.Reset(syscall.SIGINT, syscall.SIGTERM)
-
-		// let sub-task know to wrap up - cancel taskCtx
-		cancelFn()
-	}()
-
-	return taskCtx, cancelFn
-}
-
 func main() {
 	args := getArgs()
 
-	ctx, cancel := registerSigHandler(syscall.SIGINT, syscall.SIGTERM)
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
-	// Capture the service being stopped on Windows.
-	minwinsvc.SetOnExit(cancel)
-
-	// Start the node, block and then wait for it to shut down.
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		run(args, ctx)
+		run(args, sigCh)
 	}()
 	wg.Wait()
 }
