@@ -384,7 +384,7 @@ type Peer struct {
 	Priority      uint64   `json:"priority"`
 	Coords        []uint64 `json:"coords"`
 	Remote        string   `json:"remote"`
-	Rremote_ip    string   `json:"rremote_ip"`
+	Rremote_ip    string   `json:"remote_ip"`
 	Bytes_recvd   uint64   `json:"bytes_recvd"`
 	Bytes_sent    uint64   `json:"bytes_sent"`
 	Uptime        float64  `json:"uptime"`
