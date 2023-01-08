@@ -514,7 +514,8 @@ func applyKeyParameterized(w http.ResponseWriter, r *http.Request, fn func(key s
 	addNoCacheHeaders(w)
 	switch r.Method {
 	case "GET":
-		cnt := strings.Split(r.URL.Path, "/")
+		path := r.URL.Path
+		cnt := strings.Split(path, "/")
 		if len(cnt) != 5 || cnt[4] == "" {
 			http.Error(w, "No remote public key supplied", http.StatusBadRequest)
 			return
@@ -522,7 +523,7 @@ func applyKeyParameterized(w http.ResponseWriter, r *http.Request, fn func(key s
 		if result, err := fn(cnt[4]); err == nil {
 			writeJson(w, r, result)
 		} else {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			http.Error(w, err.Error()+" path:"+path, http.StatusBadRequest)
 		}
 	default:
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
