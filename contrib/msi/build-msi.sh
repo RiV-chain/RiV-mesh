@@ -49,14 +49,6 @@ then
   )
 fi
 
-#Build winres
-go-winres simply --icon riv.ico --file-version $PKGVERSION --file-description "RiV-mesh (c) service, 2022 RIV CHAIN" \
---product-version $PKGVERSION --product-name "RiV-mesh" --copyright "Copyright (c) 2022, RIV CHAIN"
-cp *.syso cmd/mesh
-go-winres simply --file-version $PKGVERSION --file-description "RiV-mesh (c) CLI, 2022 RIV CHAIN" \
---product-version $PKGVERSION --product-name "RiV-mesh" --copyright "Copyright (c) 2022, RIV CHAIN" --manifest cli
-cp *.syso cmd/meshctl
-
 # Build Mesh!
 [ "${PKGARCH}" == "x64" ] && GOOS=windows GOARCH=amd64 CGO_ENABLED=0 ./build
 [ "${PKGARCH}" == "x86" ] && GOOS=windows GOARCH=386 CGO_ENABLED=0 ./build
