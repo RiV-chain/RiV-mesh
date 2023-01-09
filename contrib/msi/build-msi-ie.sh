@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # This script generates an MSI file for Mesh for a given architecture. It
-# needs to run on Windows within MSYS2 and Go 1.13 or later must be installed on
+# needs to run on Windows within MSYS2 and Go 1.19 or later must be installed on
 # the system and within the PATH. This is ran currently by Appveyor or GitHub Actions (see
 # appveyor.yml in the repository root) for both x86 and x64.
 #
@@ -9,6 +9,8 @@
 
 # Get arch from command line if given
 PKGARCH=$1
+SIGN=$2
+
 if [ "${PKGARCH}" == "" ];
 then
   echo "tell me the architecture: x86, x64, arm or arm64"
@@ -96,6 +98,9 @@ cp *.syso cmd/mesh
 go-winres simply --file-version $PKGVERSION --file-description "RiV-mesh (c) CLI, 2022 RIV CHAIN" \
 --product-version $PKGVERSION --product-name "RiV-mesh" --copyright "Copyright (c) 2022, RIV CHAIN" --manifest cli
 cp *.syso cmd/meshctl
+
+#Sign Mesh binaries
+[ "${SIGN}" == "sign" ] && signtool sign /tr http://timestamp.sectigo.com /td sha256 /fd sha256 /d "RiV-mesh app" /a mesh.exe meshctl.exe
 
 if [ $PKGARCH = "x64" ]; then
   PKGWINTUNDLL=wintun/bin/amd64/wintun.dll
@@ -339,3 +344,6 @@ CANDLEFLAGS="-nologo"
 LIGHTFLAGS="-nologo -spdb -sice:ICE71 -sice:ICE61"
 wixbin/candle $CANDLEFLAGS -out ${PKGNAME}-${PKGVERSION}-${PKGARCH}.wixobj -arch ${PKGARCH} wix.xml && \
 wixbin/light $LIGHTFLAGS -ext WixUIExtension -ext WixUtilExtension.dll -out ${PKGNAME}-${PKGVERSION}-${PKGARCH}-win7-ie.msi ${PKGNAME}-${PKGVERSION}-${PKGARCH}.wixobj
+
+#Sign MSI
+[ "${SIGN}" == "sign" ] && signtool sign /tr http://timestamp.sectigo.com /td sha256 /fd sha256 /d "RiV-mesh app" /a ${PKGNAME}-${PKGVERSION}-${PKGARCH}-win7-ie.msi

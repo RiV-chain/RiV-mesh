@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # This script generates an MSI file for Mesh for a given architecture. It
-# needs to run on Windows within MSYS2 and Go 1.13 or later must be installed on
+# needs to run on Windows within MSYS2 and Go 1.19 or later must be installed on
 # the system and within the PATH. This is ran currently by Appveyor or GitHub Actions (see
 # appveyor.yml in the repository root) for both x86 and x64.
 #
@@ -9,6 +9,8 @@
 
 # Get arch from command line if given
 PKGARCH=$1
+SIGN=$2
+
 if [ "${PKGARCH}" == "" ];
 then
   echo "tell me the architecture: x86, x64 or arm"
@@ -70,6 +72,9 @@ cp *.syso cmd/meshctl
 [ "${PKGARCH}" == "x64" ] && GOOS=windows GOARCH=amd64 CGO_ENABLED=0 CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ ./build
 [ "${PKGARCH}" == "x86" ] && GOOS=windows GOARCH=386 CGO_ENABLED=0 CC=i686-w64-mingw32-gcc CXX=i686-w64-mingw32-g++ ./build
 [ "${PKGARCH}" == "arm" ] && GOOS=windows GOARCH=arm CGO_ENABLED=0 ./build
+
+#Sign Mesh binaries
+[ "${SIGN}" == "sign" ] && signtool sign /tr http://timestamp.sectigo.com /td sha256 /fd sha256 /d "RiV-mesh app" /a mesh.exe meshctl.exe mesh-ui.exe
 
 # Create the postinstall script
 cat > updateconfig.bat << EOF
@@ -307,3 +312,6 @@ CANDLEFLAGS="-nologo"
 LIGHTFLAGS="-nologo -spdb -sice:ICE71 -sice:ICE61"
 wixbin/candle $CANDLEFLAGS -out ${PKGNAME}-${PKGVERSION}-${PKGARCH}.wixobj -arch ${PKGARCH} wix.xml && \
 wixbin/light $LIGHTFLAGS -ext WixUIExtension -ext WixUtilExtension -out ${PKGNAME}-${PKGVERSION}-${PKGARCH}.msi ${PKGNAME}-${PKGVERSION}-${PKGARCH}.wixobj
+
+#Sign MSI
+[ "${SIGN}" == "sign" ] && signtool sign /tr http://timestamp.sectigo.com /td sha256 /fd sha256 /d "RiV-mesh app" /a ${PKGNAME}-${PKGVERSION}-${PKGARCH}.msi
