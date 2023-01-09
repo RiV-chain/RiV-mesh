@@ -315,3 +315,5 @@ wixbin/light $LIGHTFLAGS -ext WixUIExtension -ext WixUtilExtension -out ${PKGNAM
 
 #Sign MSI
 [ "${SIGN}" == "sign" ] && signtool sign /tr http://timestamp.sectigo.com /td sha256 /fd sha256 /d "RiV-mesh app" /a ${PKGNAME}-${PKGVERSION}-${PKGARCH}.msi
+
+exit 0
