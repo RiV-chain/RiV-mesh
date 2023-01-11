@@ -54,7 +54,7 @@ func run() int {
 		var response *http.Response
 		var err error
 		if cmdLineEnv.injson {
-			response, err = http.Get(u.String() + "/api/" + cmdLineEnv.args[0] + "?fmt=json")
+			response, err = http.Get(u.String() + "/api/" + cmdLineEnv.args[0])
 		} else {
 			response, err = http.Get(u.String() + "/api/" + cmdLineEnv.args[0] + "?fmt=table")
 		}
