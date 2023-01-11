@@ -31,6 +31,21 @@ import (
 	"github.com/slonm/tableprinter"
 )
 
+//	@title			RiV-mesh API
+//	@version		0.1
+//	@description	This is RiV-mesh client API documentation.
+//	@termsOfService	http://swagger.io/terms/
+
+//	@contact.name	Development team
+//	@contact.url	https://github.com/RiV-chain/RiV-mesh
+//	@contact.email	support@rivchain.org
+
+//	@license.name	LGPL3
+//	@license.url	https://github.com/RiV-chain/RiV-mesh/blob/develop/LICENSE
+
+//	@host		localhost:19019
+//	@BasePath	/api
+
 var _ embed.FS
 
 //go:embed IP2LOCATION-LITE-DB1.BIN
@@ -263,6 +278,11 @@ func (a *RestServer) getApiHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// @Summary		Show details about this node. The output contains following fields: Address, Public Key, Port, Priority, Coordinates, Remote URL, Remote IP, Bytes received, Bytes sent, Uptime, Multicast flag, Country code, Country
+// @Produce		json
+// @Success		200		{string}	string		"ok"
+// @Failure		400		{error}		error		"Method not allowed"
+// @Router		/self [get]
 func (a *RestServer) getApiSelfHandler(w http.ResponseWriter, r *http.Request) {
 	self := a.Core.GetSelf()
 	snet := a.Core.Subnet()
@@ -278,6 +298,11 @@ func (a *RestServer) getApiSelfHandler(w http.ResponseWriter, r *http.Request) {
 	writeJson(w, r, result)
 }
 
+// @Summary		Show known DHT entries. The output contains following fields: Address, Public Key, Port, Rest
+// @Produce		json
+// @Success		200		{string}	string		"ok"
+// @Failure		400		{error}		error		"Method not allowed"
+// @Router		/dht [get]
 func (a *RestServer) getApiDhtHandler(w http.ResponseWriter, r *http.Request) {
 	dht := a.Core.GetDHT()
 	result := make([]map[string]any, 0, len(dht))
@@ -297,6 +322,12 @@ func (a *RestServer) getApiDhtHandler(w http.ResponseWriter, r *http.Request) {
 	writeJson(w, r, result)
 }
 
+// @Summary		Show public peers which is result of output PublicPeersURL in mesh.conf.
+// @Produce		json
+// @Success		200		{string}	string		"ok"
+// @Failure		400		{error}		error		"Method not allowed"
+// @Failure		500		{error}		error		"Internal server error"
+// @Router		/publicpeers [get]
 func (a *RestServer) getApiPublicPeersHandler(w http.ResponseWriter, r *http.Request) {
 	var response *http.Response
 	var result []byte
@@ -329,6 +360,11 @@ func (a *RestServer) getApiPublicPeersHandler(w http.ResponseWriter, r *http.Req
 	fmt.Fprint(w, string(result))
 }
 
+// @Summary		Show established paths through this node. The output contains following fields: Address, Public Key, Path
+// @Produce		json
+// @Success		200		{string}	string		"ok"
+// @Failure		400		{error}		error		"Method not allowed"
+// @Router		/paths [get]
 func (a *RestServer) getApiPathsHandler(w http.ResponseWriter, r *http.Request) {
 	paths := a.Core.GetPaths()
 	result := make([]map[string]any, 0, len(paths))
@@ -347,6 +383,11 @@ func (a *RestServer) getApiPathsHandler(w http.ResponseWriter, r *http.Request) 
 	writeJson(w, r, result)
 }
 
+// @Summary		Show established traffic sessions with remote nodes. The output contains following fields: Address, Byte received, Byte sent, Public Key, Uptime
+// @Produce		json
+// @Success		200		{string}	string		"ok"
+// @Failure		400		{error}		error		"Method not allowed"
+// @Router		/sessions [get]
 func (a *RestServer) getApiSessionsHandler(w http.ResponseWriter, r *http.Request) {
 	sessions := a.Core.GetSessions()
 	result := make([]map[string]any, 0, len(sessions))
@@ -367,6 +408,12 @@ func (a *RestServer) getApiSessionsHandler(w http.ResponseWriter, r *http.Reques
 	writeJson(w, r, result)
 }
 
+// @Summary		Show information about the node's TUN interface. The output contains following fields: name, MTU.
+// @Produce		json
+// @Success		200		{string}	string		"ok"
+// @Failure		400		{error}		error		"Method not allowed"
+// @Failure		500		{error}		error		"Internal server error"
+// @Router		/tun [get]
 func (a *RestServer) getApiTunHandler(w http.ResponseWriter, r *http.Request) {
 	if a.Tun == nil {
 		writeError(w, http.StatusInternalServerError)
@@ -382,6 +429,12 @@ func (a *RestServer) getApiTunHandler(w http.ResponseWriter, r *http.Request) {
 	writeJson(w, r, res)
 }
 
+// @Summary		Show which interfaces multicast is enabled on.
+// @Produce		json
+// @Success		200		{string}	string		"ok"
+// @Failure		400		{error}		error		"Method not allowed"
+// @Failure		500		{error}		error		"Internal server error"
+// @Router		/multicastinterfaces [get]
 func (a *RestServer) getApiMulticastinterfacesHandler(w http.ResponseWriter, r *http.Request) {
 	if a.Multicast == nil {
 		http.Error(w, "Multicast module isn't started", http.StatusInternalServerError)
@@ -456,6 +509,11 @@ func (a *RestServer) getApiPeersHandler(w http.ResponseWriter, r *http.Request) 
 	writeJson(w, r, a.prepareGetPeers())
 }
 
+// @Summary		Add new peers.
+// @Produce		json
+// @Success		200		{string}	string		"ok"
+// @Failure		403		{error}		error		"Bad request"
+// @Router		/sse [get]
 func (a *RestServer) postApiPeersHandler(w http.ResponseWriter, r *http.Request) {
 	peers, err := a.doPostPeers(w, r)
 	if err != nil {
@@ -463,6 +521,11 @@ func (a *RestServer) postApiPeersHandler(w http.ResponseWriter, r *http.Request)
 	}
 }
 
+// @Summary		Update peer list.
+// @Produce		json
+// @Success		204		{string}	string		"No content"
+// @Failure		403		{error}		error		"Bad request"
+// @Router		/sse [get]
 func (a *RestServer) putApiPeersHandler(w http.ResponseWriter, r *http.Request) {
 	if a.doDeletePeers(w, r) == nil {
 		if peers, err := a.doPostPeers(w, r); err == nil {
@@ -472,6 +535,11 @@ func (a *RestServer) putApiPeersHandler(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
+// @Summary		Remove peers from list.
+// @Produce		json
+// @Success		204		{string}	string		"No content"
+// @Failure		403		{error}		error		"Bad request"
+// @Router		/sse [get]
 func (a *RestServer) deleteApiPeersHandler(w http.ResponseWriter, r *http.Request) {
 	if a.doDeletePeers(w, r) == nil {
 		a.saveConfig(nil, r)
@@ -541,18 +609,42 @@ func applyKeyParameterized(w http.ResponseWriter, r *http.Request, fn func(key s
 	}
 }
 
+// @Summary		Show NodeInfo of a remote node.
+// @Produce		json
+// @Param		key	path			string				true	"Public key string"
+// @Success		200		{string}	string		"ok"
+// @Failure		400		{error}		error		"Method not allowed"
+// @Router		/remote/nodeinfo/{key} [get]
 func (a *RestServer) getApiRemoteNodeinfoHandler(w http.ResponseWriter, r *http.Request) {
 	applyKeyParameterized(w, r, a.Core.GetNodeInfo)
 }
 
+// @Summary		Show details about a remote node.
+// @Produce		json
+// @Param		key	path			string				true	"Public key string"
+// @Success		200		{string}	string		"ok"
+// @Failure		400		{error}		error		"Method not allowed"
+// @Router		/remote/self/{key} [get]
 func (a *RestServer) getApiRemoteSelfHandler(w http.ResponseWriter, r *http.Request) {
 	applyKeyParameterized(w, r, a.Core.RemoteGetSelf)
 }
 
+// @Summary		Show connected peers to a remote node.
+// @Produce		json
+// @Param		key	path			string				true	"Public key string"
+// @Success		200		{string}	string		"ok"
+// @Failure		400		{error}		error		"Method not allowed"
+// @Router		/remote/peers/{key} [get]
 func (a *RestServer) getApiRemotePeersHandler(w http.ResponseWriter, r *http.Request) {
 	applyKeyParameterized(w, r, a.Core.RemoteGetPeers)
 }
 
+// @Summary		Show DHT entries of a remote node.
+// @Produce		json
+// @Param		key	path			string				true	"Public key string"
+// @Success		200		{string}	string		"ok"
+// @Failure		400		{error}		error		"Method not allowed"
+// @Router		/remote/dht/{key} [get]
 func (a *RestServer) getApiRemoteDHTHandler(w http.ResponseWriter, r *http.Request) {
 	applyKeyParameterized(w, r, a.Core.RemoteGetDHT)
 }
@@ -570,6 +662,11 @@ func (a *RestServer) postApiHealthHandler(w http.ResponseWriter, r *http.Request
 	w.WriteHeader(http.StatusAccepted)
 }
 
+// @Summary		Return server side events. The output contains following fields: id, event, data.
+// @Produce		json
+// @Success		200		{string}	string		"ok"
+// @Failure		400		{error}		error		"Method not allowed"
+// @Router		/sse [get]
 func (a *RestServer) getApiSseHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "text/event-stream")
 Loop:
