@@ -7,6 +7,19 @@ ui.country_name["united-states"] = "us";
 ui.country_name["czechia"] = "cz";
 
 function setHealth(d) {
+  var style = window.getComputedStyle($("peer_list"));
+  if(style.display === 'none') {
+    return;
+  }
+
+  let trs = $("peer_list").rows;
+  //remove duplications
+  for (let i=0; i < trs.length; ++i) {
+    if(trs[i].cells[1].textContent == d.peer) {
+      tb.deleteRow(1);
+      break;
+    }
+  }
   // creates a table row
   var row = document.createElement("tr");
   var imgElement = document.createElement("td");
@@ -19,6 +32,7 @@ function setHealth(d) {
   var chk = document.createElement('input');
   chk.setAttribute('type', 'checkbox');
   chk.checked = ui.connectedPeersAddress.indexOf(d.peer) >= 0;
+  chk.setAttribute('id', "peer-" + d.peer);  
   peerSelect.appendChild(chk);
 
   row.appendChild(imgElement);

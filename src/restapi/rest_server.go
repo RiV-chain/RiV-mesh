@@ -517,7 +517,7 @@ func (a *RestServer) getApiPeersHandler(w http.ResponseWriter, r *http.Request) 
 func (a *RestServer) postApiPeersHandler(w http.ResponseWriter, r *http.Request) {
 	peers, err := a.doPostPeers(w, r)
 	if err != nil {
-		a.saveConfig(peers, r)
+		a.savePeers(peers, r)
 	}
 }
 
@@ -529,7 +529,7 @@ func (a *RestServer) postApiPeersHandler(w http.ResponseWriter, r *http.Request)
 func (a *RestServer) putApiPeersHandler(w http.ResponseWriter, r *http.Request) {
 	if a.doDeletePeers(w, r) == nil {
 		if peers, err := a.doPostPeers(w, r); err == nil {
-			a.saveConfig(peers, r)
+			a.savePeers(peers, r)
 			w.WriteHeader(http.StatusNoContent)
 		}
 	}
@@ -542,7 +542,7 @@ func (a *RestServer) putApiPeersHandler(w http.ResponseWriter, r *http.Request) 
 // @Router		/sse [get]
 func (a *RestServer) deleteApiPeersHandler(w http.ResponseWriter, r *http.Request) {
 	if a.doDeletePeers(w, r) == nil {
-		a.saveConfig(nil, r)
+		a.savePeers(nil, r)
 		w.WriteHeader(http.StatusNoContent)
 	}
 }
@@ -555,7 +555,7 @@ func (a *RestServer) doDeletePeers(w http.ResponseWriter, r *http.Request) error
 	return err
 }
 
-func (a *RestServer) doPostPeers(w http.ResponseWriter, r *http.Request) (peers []map[string]any, err error) {
+func (a *RestServer) doPostPeers(w http.ResponseWriter, r *http.Request) (peers []map[string]string, err error) {
 	err = json.NewDecoder(r.Body).Decode(&peers)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -563,7 +563,7 @@ func (a *RestServer) doPostPeers(w http.ResponseWriter, r *http.Request) (peers 
 	}
 
 	for _, peer := range peers {
-		if err = a.Core.AddPeer(peer["url"].(string), peer["interface"].(string)); err != nil {
+		if err = a.Core.AddPeer(peer["url"], peer["interface"]); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -572,17 +572,19 @@ func (a *RestServer) doPostPeers(w http.ResponseWriter, r *http.Request) (peers 
 	return
 }
 
-func (a *RestServer) saveConfig(peers []map[string]any, r *http.Request) {
+func (a *RestServer) savePeers(peers []map[string]string, r *http.Request) {
 	if len(a.ConfigFn) > 0 {
 		saveHeaders := r.Header["Riv-Save-Config"]
 		if len(saveHeaders) > 0 && saveHeaders[0] == "true" {
 			cfg, err := defaults.ReadConfig(a.ConfigFn)
 			if err == nil {
+				cfg.Peers = []string{}
+				cfg.InterfacePeers = map[string][]string{}
 				for _, peer := range peers {
 					if peer["interface"] == "" {
-						cfg.Peers = append(cfg.Peers, peer["url"].(string))
+						cfg.Peers = append(cfg.Peers, peer["url"])
 					} else {
-						cfg.InterfacePeers[peer["interface"].(string)] = append(cfg.InterfacePeers[peer["interface"].(string)], peer["url"].(string))
+						cfg.InterfacePeers[peer["interface"]] = append(cfg.InterfacePeers[peer["interface"]], peer["url"])
 					}
 				}
 				err := defaults.WriteConfig(a.ConfigFn, cfg)
