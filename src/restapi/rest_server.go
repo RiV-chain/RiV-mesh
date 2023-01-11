@@ -31,21 +31,6 @@ import (
 	"github.com/slonm/tableprinter"
 )
 
-//	@title			RiV-mesh API
-//	@version		0.1
-//	@description	This is RiV-mesh client API documentation.
-//	@termsOfService	http://swagger.io/terms/
-
-//	@contact.name	Development team
-//	@contact.url	https://github.com/RiV-chain/RiV-mesh
-//	@contact.email	support@rivchain.org
-
-//	@license.name	LGPL3
-//	@license.url	https://github.com/RiV-chain/RiV-mesh/blob/develop/LICENSE
-
-//	@host		localhost:19019
-//	@BasePath	/api
-
 var _ embed.FS
 
 //go:embed IP2LOCATION-LITE-DB1.BIN
@@ -219,11 +204,6 @@ func (a *RestServer) apiHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// @Summary		Show details about this node. The output contains following fields: Address, Public Key, Port, Priority, Coordinates, Remote URL, Remote IP, Bytes received, Bytes sent, Uptime, Multicast flag, Country code, Country
-// @Produce		json
-// @Success		200		{string}	string		"ok"
-// @Failure		400		{error}		error		"Method not allowed"
-// @Router		/self [get]
 func (a *RestServer) apiSelfHandler(w http.ResponseWriter, r *http.Request) {
 	addNoCacheHeaders(w)
 	switch r.Method {
@@ -245,11 +225,6 @@ func (a *RestServer) apiSelfHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// @Summary		Show known DHT entries. The output contains following fields: Address, Public Key, Port, Rest
-// @Produce		json
-// @Success		200		{string}	string		"ok"
-// @Failure		400		{error}		error		"Method not allowed"
-// @Router		/dht [get]
 func (a *RestServer) apiDhtHandler(w http.ResponseWriter, r *http.Request) {
 	addNoCacheHeaders(w)
 	switch r.Method {
@@ -275,12 +250,6 @@ func (a *RestServer) apiDhtHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// @Summary		Show public peers which is result of output PublicPeersURL in mesh.conf.
-// @Produce		json
-// @Success		200		{string}	string		"ok"
-// @Failure		400		{error}		error		"Method not allowed"
-// @Failure		500		{error}		error		"Internal server error"
-// @Router		/publicpeers [get]
 func (a *RestServer) apiPublicPeersHandler(w http.ResponseWriter, r *http.Request) {
 	addNoCacheHeaders(w)
 	switch r.Method {
@@ -319,11 +288,6 @@ func (a *RestServer) apiPublicPeersHandler(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-// @Summary		Show established paths through this node. The output contains following fields: Address, Public Key, Path
-// @Produce		json
-// @Success		200		{string}	string		"ok"
-// @Failure		400		{error}		error		"Method not allowed"
-// @Router		/paths [get]
 func (a *RestServer) apiPathsHandler(w http.ResponseWriter, r *http.Request) {
 	addNoCacheHeaders(w)
 	switch r.Method {
@@ -348,11 +312,6 @@ func (a *RestServer) apiPathsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// @Summary		Show established traffic sessions with remote nodes. The output contains following fields: Address, Byte received, Byte sent, Public Key, Uptime
-// @Produce		json
-// @Success		200		{string}	string		"ok"
-// @Failure		400		{error}		error		"Method not allowed"
-// @Router		/sessions [get]
 func (a *RestServer) apiSessionsHandler(w http.ResponseWriter, r *http.Request) {
 	addNoCacheHeaders(w)
 	switch r.Method {
@@ -379,12 +338,6 @@ func (a *RestServer) apiSessionsHandler(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-// @Summary		Show information about the node's TUN interface. The output contains following fields: name, MTU.
-// @Produce		json
-// @Success		200		{string}	string		"ok"
-// @Failure		400		{error}		error		"Method not allowed"
-// @Failure		500		{error}		error		"Internal server error"
-// @Router		/tun [get]
 func (a *RestServer) apiTunHandler(w http.ResponseWriter, r *http.Request) {
 	addNoCacheHeaders(w)
 	switch r.Method {
@@ -406,12 +359,6 @@ func (a *RestServer) apiTunHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// @Summary		Show which interfaces multicast is enabled on.
-// @Produce		json
-// @Success		200		{string}	string		"ok"
-// @Failure		400		{error}		error		"Method not allowed"
-// @Failure		500		{error}		error		"Internal server error"
-// @Router		/multicastinterfaces [get]
 func (a *RestServer) apiMulticastinterfacesHandler(w http.ResponseWriter, r *http.Request) {
 	addNoCacheHeaders(w)
 	switch r.Method {
@@ -583,42 +530,18 @@ func applyKeyParameterized(w http.ResponseWriter, r *http.Request, fn func(key s
 	}
 }
 
-// @Summary		Show NodeInfo of a remote node.
-// @Produce		json
-// @Param		key	path			string				true	"Public key string"
-// @Success		200		{string}	string		"ok"
-// @Failure		400		{error}		error		"Method not allowed"
-// @Router		/remote/nodeinfo/{key} [get]
 func (a *RestServer) apiRemoteNodeinfoHandler(w http.ResponseWriter, r *http.Request) {
 	applyKeyParameterized(w, r, a.Core.GetNodeInfo)
 }
 
-// @Summary		Show details about a remote node.
-// @Produce		json
-// @Param		key	path			string				true	"Public key string"
-// @Success		200		{string}	string		"ok"
-// @Failure		400		{error}		error		"Method not allowed"
-// @Router		/remote/self/{key} [get]
 func (a *RestServer) apiRemoteSelfHandler(w http.ResponseWriter, r *http.Request) {
 	applyKeyParameterized(w, r, a.Core.RemoteGetSelf)
 }
 
-// @Summary		Show connected peers to a remote node.
-// @Produce		json
-// @Param		key	path			string				true	"Public key string"
-// @Success		200		{string}	string		"ok"
-// @Failure		400		{error}		error		"Method not allowed"
-// @Router		/remote/peers/{key} [get]
 func (a *RestServer) apiRemotePeersHandler(w http.ResponseWriter, r *http.Request) {
 	applyKeyParameterized(w, r, a.Core.RemoteGetPeers)
 }
 
-// @Summary		Show DHT entries of a remote node.
-// @Produce		json
-// @Param		key	path			string				true	"Public key string"
-// @Success		200		{string}	string		"ok"
-// @Failure		400		{error}		error		"Method not allowed"
-// @Router		/remote/dht/{key} [get]
 func (a *RestServer) apiRemoteDHTHandler(w http.ResponseWriter, r *http.Request) {
 	applyKeyParameterized(w, r, a.Core.RemoteGetDHT)
 }
@@ -641,11 +564,6 @@ func (a *RestServer) apiHealthHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// @Summary		Return server side events. The output contains following fields: id, event, data.
-// @Produce		json
-// @Success		200		{string}	string		"ok"
-// @Failure		400		{error}		error		"Method not allowed"
-// @Router		/sse [get]
 func (a *RestServer) apiSseHandler(w http.ResponseWriter, r *http.Request) {
 	addNoCacheHeaders(w)
 	switch r.Method {
