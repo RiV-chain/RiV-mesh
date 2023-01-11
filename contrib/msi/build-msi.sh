@@ -92,7 +92,7 @@ then
 fi
 
 #Sign Mesh binaries
-[ "${SIGN}" == "sign" ] && cmd "/c signtool sign /tr http://timestamp.sectigo.com /td sha256 /fd sha256 /f $CERT_PATH /a mesh.exe meshctl.exe"
+[ "${SIGN}" == "sign" ] && cmd ""/c signtool sign /tr http://timestamp.sectigo.com /td sha256 /fd sha256 /f $CERT_PATH /a mesh.exe meshctl.exe""
 
 if [ $PKGARCH = "x64" ]; then
   PKGWINTUNDLL=wintun/bin/amd64/wintun.dll
@@ -253,5 +253,5 @@ wixbin/light $LIGHTFLAGS -ext WixUtilExtension.dll -out ${PKGNAME}-${PKGVERSION}
 #Sign MSI
 if [[ "${SIGN}" == "sign" ]];
 then
-  cmd "/c signtool sign /tr http://timestamp.sectigo.com /td sha256 /fd sha256 /f $CERT_PATH /a ${PKGNAME}-${PKGVERSION}-${PKGARCH}-nogui.msi"
+  cmd ""/c signtool sign /tr http://timestamp.sectigo.com /td sha256 /fd sha256 /f $CERT_PATH /a ${PKGNAME}-${PKGVERSION}-${PKGARCH}-nogui.msi""
 fi
