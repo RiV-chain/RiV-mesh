@@ -513,7 +513,7 @@ func (a *RestServer) getApiPeersHandler(w http.ResponseWriter, r *http.Request) 
 // @Produce		json
 // @Success		200		{string}	string		"ok"
 // @Failure		403		{error}		error		"Bad request"
-// @Router		/sse [get]
+// @Router		/peers [post]
 func (a *RestServer) postApiPeersHandler(w http.ResponseWriter, r *http.Request) {
 	peers, err := a.doPostPeers(w, r)
 	if err != nil {
@@ -525,7 +525,7 @@ func (a *RestServer) postApiPeersHandler(w http.ResponseWriter, r *http.Request)
 // @Produce		json
 // @Success		204		{string}	string		"No content"
 // @Failure		403		{error}		error		"Bad request"
-// @Router		/sse [get]
+// @Router		/peers [put]
 func (a *RestServer) putApiPeersHandler(w http.ResponseWriter, r *http.Request) {
 	if a.doDeletePeers(w, r) == nil {
 		if peers, err := a.doPostPeers(w, r); err == nil {
@@ -539,7 +539,7 @@ func (a *RestServer) putApiPeersHandler(w http.ResponseWriter, r *http.Request) 
 // @Produce		json
 // @Success		204		{string}	string		"No content"
 // @Failure		403		{error}		error		"Bad request"
-// @Router		/sse [get]
+// @Router		/peers [delete]
 func (a *RestServer) deleteApiPeersHandler(w http.ResponseWriter, r *http.Request) {
 	if a.doDeletePeers(w, r) == nil {
 		a.savePeers(nil, r)
