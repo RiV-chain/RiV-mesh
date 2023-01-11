@@ -35,10 +35,10 @@
       <div id="notification_windowx" style="z-index: 9;" class="notification is-primary">
         <button class="delete" id="info_win_close"></button>
         <p style="padding:3px;" id="info_window">
-          <div style="overflow-y: auto; overflow-x:hidden; max-height: 450px;">
-            <table id="peer_list">
-            </table>
-          </div>
+        <div style="overflow-y: auto; overflow-x:hidden; max-height: 450px;">
+          <table id="peer_list">
+          </table>
+        </div>
         </p>
         <div style="padding-left:100px; padding-top:15px;" class="field is-grouped">
           <p class="control">
@@ -73,7 +73,7 @@
                 preserveAspectRatio="xMidYMid meet" viewBox="0 0 42 42">
                 <path
                   d="M18.5 35.5l-8 2c-.48.04-1 .52-1 1v1c0 .5.47 1 1 1h20c.43 0 1-.41 1-1v-1c-.02-.52-.55-.98-1-1l-8-2h-4zm19-1c2.59 0 3-.529 3-3v-26c0-2.391-.55-3-3-3h-34c-2.43 0-3 .54-3 3v26c0 2.51.529 3 3 3h34zm-2-27v22h-30v-22h30z"
-                  fill="white" ></path>
+                  fill="white"></path>
               </svg>
             </span>
             <span>My Node</span>
@@ -87,31 +87,32 @@
                 style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);"
                 preserveAspectRatio="xMidYMid meet" viewBox="0 0 32 32">
                 <g fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
-                  <path d="M5 15v15h22V15zm4 0C9 9 9 5 16 5s7 4 7 10m-7 5v3" ></path>
-                  <circle cx="16" cy="24" r="1" ></circle>
+                  <path d="M5 15v15h22V15zm4 0C9 9 9 5 16 5s7 4 7 10m-7 5v3"></path>
+                  <circle cx="16" cy="24" r="1"></circle>
                 </g>
               </svg>
             </span>
             <span>Keys</span>
           </a>
         </li>
-        <!--li class="tab">
+        <li class="tab">
           <a onclick="openTab(this, 'about');">
             <span class="icon">
               <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true"
                 focusable="false" width="1em" height="1em"
                 style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);"
                 preserveAspectRatio="xMidYMid meet" viewBox="0 0 48 48">
-                <path fill="#2196F3" d="M37 40H11l-6 6V12c0-3.3 2.7-6 6-6h26c3.3 0 6 2.7 6 6v22c0 3.3-2.7 6-6 6z" ></path>
+                <path fill="#2196F3" d="M37 40H11l-6 6V12c0-3.3 2.7-6 6-6h26c3.3 0 6 2.7 6 6v22c0 3.3-2.7 6-6 6z">
+                </path>
                 <g fill="#fff">
-                  <path d="M22 20h4v11h-4z" ></path>
-                  <circle cx="24" cy="15" r="2" ></circle>
+                  <path d="M22 20h4v11h-4z"></path>
+                  <circle cx="24" cy="15" r="2"></circle>
                 </g>
               </svg>
             </span>
             <span>About</span>
           </a>
-        </li-->
+        </li>
       </ul>
     </div>
 
@@ -181,6 +182,48 @@
 
       </div>
     </div>
+    <div class="tab here is-hidden" id="about" style="text-align: left;">
+      <article class="media">
+        <div class="media-content">
+          <div class="content">
+            <p> <strong><a href="https://github.com/RiV-chain/RiV-mesh" target="_blank" class="button is-text">Introduction</a></strong>
+              <br>
+            <div class="" style="margin-left: 20px; margin-right: 10px;">RiV-mesh is an implementation of a fully
+              end-to-end encrypted IPv6 network.</div>
+            </p>
+          </div>
+        </div>
+      </article>
+
+      <article class="media">
+        <div class="media-content">
+          <div class="content">
+            <p> <strong><a href="doc" target="_blank" class="button is-text">API documentation</a></strong>
+              <br>
+            <div class="" style="margin-left: 20px; margin-right: 10px;">Admin interface documentation describes an
+              interaction with mesh nodes using REST methods.</div>
+            </p>
+          </div>
+        </div>
+      </article>
+
+      <article class="media">
+
+        <div class="media-content">
+          <div class="content">
+            <p> <strong><a href="https://github.com/RiV-chain/RiV-mesh/releases" target="_blank"
+                  class="button is-text">Releases</a></strong>
+              <br>
+            </p>
+            <div class="" style="margin-left: 20px; margin-right: 10px;">RiV-mesh is in beta stage. Check the official
+              GitHub repository to retrieve latest updates.</div>
+            <p></p>
+          </div>
+
+        </div>
+      </article>
+
+    </div>
 
 
     <div style="margin-left: 100px; margin-right: 100px;">
@@ -191,20 +234,22 @@
     </div>
 
   </div>
-    <footer>
-      <hr style="margin: 0px;background-color: #5d656d;">
-      <table class="content"><tr id="footer-row">
-          <td id="version">v123456</td>
-          <td style="width: 100%;"></td>
-          <td>↓&nbsp;<span id="dn_speed">? Bps</span></td>
-          <td>↑&nbsp;<span id="up_speed">? Bps</span></td>
-          <td id="status">
-            <i id="st-connecting" class="status fas fa-solid fa-spinner fa-spin"></i>
-            <i id="st-connected" class="status fas fa-solid fa-circle-nodes is-hidden"></i>
-            <i id="st-multicast" class="status fas fa-solid fa-circle-check is-hidden"></i>
-            <i id="st-error" class="status fas fa-solid fa-circle-exclamation is-hidden"></i>
-          </td>
-      </tr></table>
-    </footer>
-                      
+  <footer>
+    <hr style="margin: 0px;background-color: #5d656d;">
+    <table class="content">
+      <tr id="footer-row">
+        <td id="version">v123456</td>
+        <td style="width: 100%;"></td>
+        <td>↓&nbsp;<span id="dn_speed">? Bps</span></td>
+        <td>↑&nbsp;<span id="up_speed">? Bps</span></td>
+        <td id="status">
+          <i id="st-connecting" class="status fas fa-solid fa-spinner fa-spin"></i>
+          <i id="st-connected" class="status fas fa-solid fa-circle-nodes is-hidden"></i>
+          <i id="st-multicast" class="status fas fa-solid fa-circle-check is-hidden"></i>
+          <i id="st-error" class="status fas fa-solid fa-circle-exclamation is-hidden"></i>
+        </td>
+      </tr>
+    </table>
+  </footer>
+
 </html>

@@ -29,6 +29,7 @@ function setHealth(d) {
   var chk = document.createElement('input');
   chk.setAttribute('type', 'checkbox');
   chk.checked = ui.connectedPeersAddress.indexOf(d.peer) >= 0;
+  chk.setAttribute('id', "peer-" + d.peer);  
   peerSelect.appendChild(chk);
   row.appendChild(imgElement);
   row.appendChild(peerAddress);
