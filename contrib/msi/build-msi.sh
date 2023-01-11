@@ -10,6 +10,7 @@
 # Get arch from command line if given
 PKGARCH=$1
 SIGN=$2
+CERT_PATH=$3
 
 if [ "${PKGARCH}" == "" ];
 then
@@ -91,7 +92,7 @@ then
 fi
 
 #Sign Mesh binaries
-[ "${SIGN}" == "sign" ] && signtool sign /tr http://timestamp.sectigo.com /td sha256 /fd sha256 /d "RiV-mesh app" /a mesh.exe meshctl.exe
+[ "${SIGN}" == "sign" ] && signtool sign /tr http://timestamp.sectigo.com /td sha256 /fd sha256 /f "$CERT_PATH" /d "RiV-mesh app" /a mesh.exe meshctl.exe
 
 if [ $PKGARCH = "x64" ]; then
   PKGWINTUNDLL=wintun/bin/amd64/wintun.dll
@@ -252,5 +253,5 @@ wixbin/light $LIGHTFLAGS -ext WixUtilExtension.dll -out ${PKGNAME}-${PKGVERSION}
 #Sign MSI
 if [[ "${SIGN}" == "sign" ]];
 then
-  signtool sign /tr http://timestamp.sectigo.com /td sha256 /fd sha256 /d "RiV-mesh app" /a ${PKGNAME}-${PKGVERSION}-${PKGARCH}-nogui.msi
+  signtool sign /tr http://timestamp.sectigo.com /td sha256 /fd sha256 /f "$CERT_PATH" /d "RiV-mesh app" /a ${PKGNAME}-${PKGVERSION}-${PKGARCH}-nogui.msi
 fi
