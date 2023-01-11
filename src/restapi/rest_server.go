@@ -505,6 +505,11 @@ func (a *RestServer) prepareGetPeers() []Peer {
 	return response
 }
 
+// @Summary		Get current peers list.
+// @Produce		json
+// @Success		200		{string}	string		"ok"
+// @Failure		403		{error}		error		"Bad request"
+// @Router		/peers [get]
 func (a *RestServer) getApiPeersHandler(w http.ResponseWriter, r *http.Request) {
 	writeJson(w, r, a.prepareGetPeers())
 }
