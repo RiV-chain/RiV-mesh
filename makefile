@@ -29,7 +29,10 @@ $(foreach platf, $(ALL_PLATFORMS), $(addprefix $(platf)-,$(ALL_EXE))):
 
 lint:
 		golangci-lint run
-		
+
+gen-swagger:
+	swag init -g src/restapi/rest_server.go --ot yaml -o contrib/ui/mesh-ui/ui/doc
+
 clean:
 
 help:
