@@ -100,7 +100,7 @@ go-winres simply --file-version $PKGVERSION --file-description "RiV-mesh (c) CLI
 cp *.syso cmd/meshctl
 
 #Sign Mesh binaries
-[ "${SIGN}" == "sign" ] &&  cmd \''/c signtool sign /tr http://timestamp.sectigo.com /td sha256 /fd sha256 /a mesh.exe meshctl.exe'\'
+[ "${SIGN}" == "sign" ] &&  cmd \'"/c signtool sign /tr http://timestamp.sectigo.com /td sha256 /fd sha256 /a mesh.exe meshctl.exe"\'
 
 if [ $PKGARCH = "x64" ]; then
   PKGWINTUNDLL=wintun/bin/amd64/wintun.dll
@@ -347,5 +347,5 @@ wixbin/light $LIGHTFLAGS -ext WixUIExtension -ext WixUtilExtension.dll -out ${PK
 
 if [[ "${SIGN}" == "sign" ]];
 then
-  cmd \''/c signtool sign /tr http://timestamp.sectigo.com /td sha256 /fd sha256 /a ${PKGNAME}-${PKGVERSION}-${PKGARCH}-win7-ie.msi'\'
+  cmd \'"/c signtool sign /tr http://timestamp.sectigo.com /td sha256 /fd sha256 /a ${PKGNAME}-${PKGVERSION}-${PKGARCH}-win7-ie.msi"\'
 fi
