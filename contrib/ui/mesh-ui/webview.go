@@ -19,7 +19,7 @@ Usage:
   mesh-ui -v | --version
 
 Options:
-  <index>       Index file name [default: http://localhost:19019].
+  <index>       Web interface address [default: http://localhost:19019].
   -c --console  Show debug console window.
   -h --help     Show this screen.
   -v --version  Show version.`
