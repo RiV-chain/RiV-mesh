@@ -1,0 +1,11 @@
+{
+  "presets": [
+    [
+      "/home/sl/.nvm/versions/node/v17.9.0/lib/node_modules/@babel/preset-env",
+      {
+        "useBuiltIns": "entry",
+        "corejs": "3"
+      }
+    ]
+  ]
+}

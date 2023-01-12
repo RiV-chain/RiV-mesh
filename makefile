@@ -33,6 +33,10 @@ lint:
 gen-swagger:
 	swag init -g src/restapi/rest_server.go --ot yaml -o contrib/ui/mesh-ui/ui/doc
 
+gen-ie11:export BROWSERSLIST=ie 11
+gen-ie11:
+	npx babel --config-file ./babel.config.json contrib/ui/mesh-ui/ui/assets/mesh-ui.js --out-file contrib/ui/mesh-ui/ui/assets/mesh-ui-es5.js
+
 clean:
 
 help:

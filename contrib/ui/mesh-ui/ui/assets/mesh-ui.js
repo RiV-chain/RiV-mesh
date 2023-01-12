@@ -1,3 +1,6 @@
+"use strict";
+console.log("IE load fix");
+
 var $ = id => document.getElementById(id)
 var $$ = clazz => document.getElementsByClassName(clazz)
 var ui = ui || {};
