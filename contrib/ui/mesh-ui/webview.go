@@ -8,6 +8,7 @@ import (
 	"github.com/RiV-chain/RiV-mesh/src/defaults"
 
 	"github.com/docopt/docopt-go"
+	"github.com/pkg/browser"
 )
 
 var usage = `Graphical interface for RiV mesh.
@@ -41,7 +42,8 @@ func main() {
 	defer w.Destroy()
 	w.SetTitle("RiV-mesh")
 	w.SetSize(690, 920, HintFixed)
-
+	w.Bind("openBrowser", browser.OpenURL)
+	w.Init("window.open = openBrowser;")
 	if confui.IndexHtml == "" {
 		confui.IndexHtml = defaults.GetHttpEndpoint("http://localhost:19019")
 	}

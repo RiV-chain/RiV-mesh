@@ -327,6 +327,12 @@ function main() {
 
   window.addEventListener("load", () => {
     $("showAllPeersBtn").addEventListener("click", ui.showAllPeers);
+    Array.from($$("target_new_window")).forEach(a => {
+      a.addEventListener("click", (event)=>{
+        event.preventDefault();
+        window.open(new URL(new URL(a.href).hash.substring(1), location.origin).href);
+      });
+    });
 
     ui.updateConnectedPeers();
 
