@@ -74,7 +74,7 @@ cp *.syso cmd/meshctl
 [ "${PKGARCH}" == "arm" ] && GOOS=windows GOARCH=arm CGO_ENABLED=0 ./build
 
 #Sign Mesh binaries
-[ "${SIGN}" == "sign" ] && signtool sign /tr http://timestamp.sectigo.com /td sha256 /fd sha256 /d "RiV-mesh app" /a mesh.exe meshctl.exe mesh-ui.exe
+[ "${SIGN}" == "sign" ] && cmd \""/c signtool sign /v /tr http://timestamp.sectigo.com /td sha256 /fd sha256 /a mesh.exe meshctl.exe mesh-ui.exe"\"
 
 # Create the postinstall script
 cat > updateconfig.bat << EOF
@@ -316,5 +316,5 @@ wixbin/light $LIGHTFLAGS -ext WixUIExtension -ext WixUtilExtension -out ${PKGNAM
 #Sign MSI
 if [[ "${SIGN}" == "sign" ]];
 then
-  signtool sign /tr http://timestamp.sectigo.com /td sha256 /fd sha256 /d "RiV-mesh app" /a ${PKGNAME}-${PKGVERSION}-${PKGARCH}.msi
+   cmd \""/c signtool sign /v /tr http://timestamp.sectigo.com /td sha256 /fd sha256 /a ${PKGNAME}-${PKGVERSION}-${PKGARCH}.msi"\"
 fi
