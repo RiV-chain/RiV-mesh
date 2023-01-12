@@ -61,6 +61,29 @@
         </div>
       </div>
     </div>
+    <div id="Dis" class="modal">
+
+      <div class="modal-card">
+        <header class="modal-card-head">
+          <p class="modal-card-title">Terms and Conditions</p>
+          <button id="close" class="delete" aria-label="close" onclick="Dis.classList.toggle('is-active')"> </button>
+        </header>
+        <section class="modal-card-body has-text-justified">
+          <br> THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
+          WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+          PARTICULAR PURPOSE ARE
+          DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+          INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+          SUBSTITUTE GOODS OR SERVICES;
+          LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+          WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
+          THE USE OF THIS SOFTWARE,
+          EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+          <p></p>
+        </section>
+
+      </div>
+    </div>
     <!-- Tabs -->
     <div class="tabs is-centered is-medium is-toggle">
       <ul>
@@ -183,7 +206,7 @@
       </div>
     </div>
     <div class="tab here is-hidden" id="about" style="text-align: left;">
-      <article class="media">
+      <article>
         <div class="media-content">
           <div class="content">
             <strong><a style="margin-left: 5px;" href="#https://github.com/RiV-chain/RiV-mesh"
@@ -195,7 +218,7 @@
         </div>
       </article>
 
-      <article class="media">
+      <article>
         <div class="media-content">
           <div class="content">
             <strong><a style="margin-left: 5px;" href="#doc" class="target_new_window button is-text">API
@@ -206,7 +229,7 @@
         </div>
       </article>
 
-      <article class="media">
+      <article>
         <div class="media-content">
           <div class="content">
             <strong><a style="margin-left: 5px;" href="#https://github.com/RiV-chain/RiV-mesh/releases"
@@ -220,14 +243,12 @@
       <article class="media">
         <div class="media-content">
           <div class="content">
-            <strong><a style="margin-left: 5px;" href="#https://rivchain.org/"
-                class="target_new_window button is-text">Terms and Conditions</a></strong>
+            <strong><a style="margin-left: 5px;" onclick="document.getElementById('Dis').classList.add('is-active')"
+                class="button is-text">Terms and Conditions</a></strong>
             <br>
             <div style="margin-left: 20px; margin-right: 10px;">Copyright © <a class="target_new_window"
                 href="https://rivchain.org/">RiV Chain </a>Ltd. and
-              individual contributors. All rights reserved. Neither the name of RiV Chain nor the
-              names of its contributors may be used to endorse or promote products derived from this software without
-              specific prior written permission.</div>
+              individual contributors. All rights reserved.</div>
           </div>
         </div>
       </article>
