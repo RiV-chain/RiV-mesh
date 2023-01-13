@@ -26,6 +26,25 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - in case of vulnerabilities.
 -->
 
+## [0.4.7.2] - 2023-01-12
+
+### Added
+
+- UI for Windows, Linux (Debian), MacOS desktop OS
+- Built-in documentation can be opened in a browser: http://localhost:19019/doc/
+- Multipath, SCTP transports support (beta)
+- ReadyNAS OS6 models support for x86_64 and arm platforms.
+
+### Changed
+
+- Admin interface is fully redesigned and migrated to REST
+- United codebase for all interfaces, as result, any device can be configured from web UI
+
+### Fixed
+
+- Fixed graceful shutdown for Windows service
+- Fixed issue with tun driver initialization for Windows OS
+
 ## [0.4.7] - 2022-11-20
 
 ### Added
