@@ -246,7 +246,7 @@ func (a *RestServer) AddHandler(handler ApiHandler) error {
 						if err := cmd.Wait(); err != nil {
 							if exiterr, ok := err.(*exec.ExitError); ok {
 								exitCode := exiterr.ExitCode()
-								a.Log.Infoln("Auth failed. Exit code: %d", exitCode)
+								a.Log.Debugln("Auth failed. Exit code: ", exitCode)
 								http.Error(w, "Authentication failed", http.StatusUnauthorized)
 								return
 							} else {
@@ -254,7 +254,7 @@ func (a *RestServer) AddHandler(handler ApiHandler) error {
 								return
 							}
 						} else {
-							a.Log.Infoln("Auth success")
+							a.Log.Debugln("Auth success")
 						}
 					} else {
 						a.Log.Infoln("Auth module not found")
