@@ -227,7 +227,7 @@ func (a *RestServer) AddHandler(handler ApiHandler) error {
 					//webauth module here
 					for k, v := range r.Header {
 						os.Setenv("HTTP_"+strings.ReplaceAll(strings.ToUpper(k), "-", "_"), strings.Join(v, ""))
-						a.Log.Infoln("HTTP_" + strings.ReplaceAll(strings.ToUpper(k), "-", "_") + ":" + strings.Join(v, ""))
+						a.Log.Debugln("HTTP_" + strings.ReplaceAll(strings.ToUpper(k), "-", "_") + ":" + strings.Join(v, ""))
 					}
 					os.Setenv("REQUEST_METHOD", r.Method)
 					os.Setenv("REQUEST_PATH", r.URL.Path)
@@ -245,25 +245,19 @@ func (a *RestServer) AddHandler(handler ApiHandler) error {
 						}
 						if err := cmd.Wait(); err != nil {
 							if exiterr, ok := err.(*exec.ExitError); ok {
-								if exiterr.ExitCode() == 0 {
-									a.Log.Infoln("Auth success")
-								} else {
-									a.Log.Infoln("Auth failed")
-									http.Error(w, "Authentication failed", http.StatusUnauthorized)
-									return
-								}
+								exitCode := exiterr.ExitCode()
+								a.Log.Infoln("Auth failed. Exit code: %d", exitCode)
+								http.Error(w, "Authentication failed", http.StatusUnauthorized)
+								return
 							} else {
 								http.Error(w, err.Error(), http.StatusInternalServerError)
 								return
 							}
+						} else {
+							a.Log.Infoln("Auth success")
 						}
 					} else {
 						a.Log.Infoln("Auth module not found")
-						out, err := exec.Command("pwd").Output()
-						if err != nil {
-							a.Log.Errorln(err)
-						}
-						a.Log.Printf("Current dir is %s\n", out)
 					}
 
 					addNoCacheHeaders(w)
