@@ -245,11 +245,10 @@ func (a *RestServer) AddHandler(handler ApiHandler) error {
 						}
 						if err := cmd.Wait(); err != nil {
 							if exiterr, ok := err.(*exec.ExitError); ok {
-								exitCode := exiterr.ExitCode()
-								if exitCode == 0 {
+								if exiterr.ExitCode() == 0 {
 									a.Log.Infoln("Auth success")
 								} else {
-									a.Log.Infoln("Auth failed. Exit code:", exitCode)
+									a.Log.Infoln("Auth failed")
 									http.Error(w, "Authentication failed", http.StatusUnauthorized)
 									return
 								}
