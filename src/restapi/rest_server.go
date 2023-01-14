@@ -8,10 +8,12 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
 	"sort"
 	"strconv"
 	"strings"
@@ -222,6 +224,38 @@ func (a *RestServer) AddHandler(handler ApiHandler) error {
 			for i := range a.handlers {
 				h := &a.handlers[len(a.handlers)-i-1]
 				if h.Method == r.Method && matchPattern(h.Pattern, r.URL.Path) {
+					//webauth module here
+					for k, v := range r.Header {
+						os.Setenv("HTTP_"+strings.ToUpper(k), strings.Join(v, ""))
+					}
+					os.Setenv("REQUEST_METHOD", r.Method)
+					os.Setenv("REQUEST_PATH", r.URL.Path)
+					os.Setenv("QUERY_STRING", r.URL.RawQuery)
+					os.Setenv("REMOTE_ADDR", r.RemoteAddr)
+					os.Setenv("REMOTE_HOST", r.RemoteAddr)
+					os.Setenv("SERVER_ADDR", r.Host)
+					os.Setenv("SERVER_PROTOCOL", "HTTP/1.1")
+					if _, err := os.Stat("/var/lib/mesh/hooks/webauth"); err == nil {
+						cmd := exec.Command("/var/lib/mesh/hooks/webauth")
+						if err := cmd.Start(); err != nil {
+							http.Error(w, err.Error(), http.StatusInternalServerError)
+							return
+						}
+						if err := cmd.Wait(); err != nil {
+							if exiterr, ok := err.(*exec.ExitError); ok {
+								if exiterr.ExitCode() == 0 {
+									log.Printf("Auth success")
+								} else {
+									log.Printf("Auth failed")
+									http.Error(w, "Authentication failed", http.StatusUnauthorized)
+								}
+							} else {
+								http.Error(w, err.Error(), http.StatusInternalServerError)
+								return
+							}
+						}
+					}
+
 					addNoCacheHeaders(w)
 					h.handler(w, r)
 					return
