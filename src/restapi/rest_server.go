@@ -255,6 +255,11 @@ func (a *RestServer) AddHandler(handler ApiHandler) error {
 						}
 					} else {
 						a.Log.Infoln("Auth module not found")
+						out, err := exec.Command("pwd").Output()
+						if err != nil {
+							a.Log.Errorln(err)
+						}
+						fmt.Printf("Current dir is %s\n", out)
 					}
 
 					addNoCacheHeaders(w)
