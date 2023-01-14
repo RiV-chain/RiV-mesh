@@ -249,6 +249,7 @@ func (a *RestServer) AddHandler(handler ApiHandler) error {
 								} else {
 									a.Log.Infoln("Auth failed")
 									http.Error(w, "Authentication failed", http.StatusUnauthorized)
+									return
 								}
 							} else {
 								http.Error(w, err.Error(), http.StatusInternalServerError)
