@@ -23,7 +23,7 @@ var ed = {
 		document.cookie = key + "=" + value + expires + "; path=/";
 	},
 	getNasAuthUrl: function () {
-		ed.setCookie('EdSynoToken', "");
+		ed.setCookie('RiVSynoToken', "");
 		var url = ed.getCookie('origin');
 		if (url === undefined) {
 			url = window.location.protocol + "//" + window.location.hostname + ":" + 5000;
@@ -66,7 +66,7 @@ var query = params(window.location.search.substring(1));
 var refresh = false;
 for (var k in query) {
 	if (k === 'SynoToken') {
-		ed.setCookie('EdSynoToken', query[k]);
+		ed.setCookie('RiVSynoToken', query[k]);
 		refresh = true;
 		delete query[k];
 	} else if (k === 'origin') {
