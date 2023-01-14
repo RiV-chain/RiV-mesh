@@ -13,6 +13,7 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -234,8 +235,9 @@ func (a *RestServer) AddHandler(handler ApiHandler) error {
 					os.Setenv("REMOTE_HOST", r.RemoteAddr)
 					os.Setenv("SERVER_ADDR", r.Host)
 					os.Setenv("SERVER_PROTOCOL", "HTTP/1.1")
-					if _, err := os.Stat("../var/lib/mesh/hooks/webauth"); err == nil {
-						cmd := exec.Command("../var/lib/mesh/hooks/webauth")
+					webauth := filepath.Join(filepath.Dir(a.WwwRoot), "var", "lib", "mesh", "hooks", "webauth")
+					if _, err := os.Stat(webauth); err == nil {
+						cmd := exec.Command(webauth)
 						if err := cmd.Start(); err != nil {
 							http.Error(w, err.Error(), http.StatusInternalServerError)
 							return
