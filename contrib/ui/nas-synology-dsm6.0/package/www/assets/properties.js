@@ -75,7 +75,11 @@ for (var k in query) {
 		delete query[k];
 	}
 }
-query = $.param(query);
+
+query = Object.keys(query).map(function(k) {
+    return encodeURIComponent(k) + '=' + encodeURIComponent(a[k])
+}).join('&');
+
 if (refresh)
 	window.location.replace(window.location.origin + window.location.pathname + window.location.hash + ((query === "") ? "" : ("?" + query)));
 
