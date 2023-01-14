@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"net/http"
 	"net/url"
@@ -244,9 +243,9 @@ func (a *RestServer) AddHandler(handler ApiHandler) error {
 						if err := cmd.Wait(); err != nil {
 							if exiterr, ok := err.(*exec.ExitError); ok {
 								if exiterr.ExitCode() == 0 {
-									log.Printf("Auth success")
+									a.Log.Infoln("Auth success")
 								} else {
-									log.Printf("Auth failed")
+									a.Log.Infoln("Auth failed")
 									http.Error(w, "Authentication failed", http.StatusUnauthorized)
 								}
 							} else {
@@ -254,6 +253,8 @@ func (a *RestServer) AddHandler(handler ApiHandler) error {
 								return
 							}
 						}
+					} else {
+						a.Log.Infoln("Auth module not found")
 					}
 
 					addNoCacheHeaders(w)
