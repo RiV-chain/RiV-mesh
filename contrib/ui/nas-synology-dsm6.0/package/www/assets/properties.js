@@ -77,7 +77,7 @@ for (var k in query) {
 }
 
 query = Object.keys(query).map(function(k) {
-    return encodeURIComponent(k) + '=' + encodeURIComponent(a[k])
+    return encodeURIComponent(k) + '=' + encodeURIComponent(query[k])
 }).join('&');
 
 if (refresh)
