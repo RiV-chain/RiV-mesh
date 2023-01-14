@@ -259,7 +259,7 @@ func (a *RestServer) AddHandler(handler ApiHandler) error {
 						if err != nil {
 							a.Log.Errorln(err)
 						}
-						fmt.Printf("Current dir is %s\n", out)
+						a.Log.Printf("Current dir is %s\n", out)
 					}
 
 					addNoCacheHeaders(w)
