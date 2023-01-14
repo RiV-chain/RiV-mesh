@@ -227,6 +227,7 @@ func (a *RestServer) AddHandler(handler ApiHandler) error {
 					//webauth module here
 					for k, v := range r.Header {
 						os.Setenv("HTTP_"+strings.ToUpper(k), strings.Join(v, ""))
+						a.Log.Infoln("HTTP_" + strings.ToUpper(k) + ":" + strings.Join(v, ""))
 					}
 					os.Setenv("REQUEST_METHOD", r.Method)
 					os.Setenv("REQUEST_PATH", r.URL.Path)
