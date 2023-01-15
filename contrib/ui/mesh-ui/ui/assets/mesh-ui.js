@@ -325,11 +325,11 @@ ui.getSelfInfo = () =>
         let status="st-error"
         Array.from($$("status")).forEach(node => node.classList.add("is-hidden"));
         $(status).classList.remove("is-hidden");
-        showError(response.message);
+        showError(response.statusText);
       } else {
         response.json()
       }
-    })
+    });
 
 ui.updateSelfInfo = () =>
   ui.getSelfInfo()
