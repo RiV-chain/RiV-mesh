@@ -1,4 +1,4 @@
-# RiV-mesh
+# RiV-mesh first self arranging mesh network with link aggregation.
 
 [![CircleCI](https://circleci.com/gh/RiV-chain/RiV-mesh.svg?style=shield&circle-token=:circle-token
 )](https://circleci.com/gh/RiV-chain/RiV-mesh)
@@ -31,7 +31,7 @@ or tools in the `contrib` folder.
 If you want to build from source, as opposed to installing one of the pre-built
 packages:
 
-1. Install [Go](https://golang.org) (requires Go 1.16 or later)
+1. Install [Go](https://golang.org) (requires Go 1.17 or later)
 2. Clone this repository
 2. Run `./build`
 
@@ -63,6 +63,7 @@ other configuration such as listen addresses or multicast addresses, etc.
 ### Run RiV-mesh
 
 To run with the generated static configuration:
+
 ```
 ./mesh -useconffile /path/to/mesh.conf
 ```
@@ -91,6 +92,40 @@ Documentation is available [on our website](https://riv-chain.github.io/RiV-mesh
 
 Feel free to join us on our [Telegram
 channel](https://t.me/rivchain).
+
+## Public peers
+If you are operating RiV-mesh peer and may create your pool request with your new per or use existing one https://github.com/RiV-chain/public-peers
+
+## Known issues
+
+### 1. Log message:
+```
+An error occurred starting multicast: listen udp6 [::]:9001: socket: address family not supported by protocol
+```
+and
+```
+An error occurred starting TUN/TAP: operation not supported
+```
+
+### Caused by:
+The device has no IPv6 support
+
+
+### 2. Log message:
+```
+An error occurred starting TUN/TAP: permission denied
+```
+
+### Caused by:
+IPv6 support is not enabled. See the solution: https://github.com/yggdrasil-network/yggdrasil-go/issues/479#issuecomment-519512395
+
+### 3. Mesh infinite output in log:
+ Connected SCTP ...
+ 
+ Disconnected SCTP ...
+
+### Caused by:
+Docker interface docker0 is conflicting with SCTP bind process. The issue can be resolved by removing docker.
 
 ## License
 

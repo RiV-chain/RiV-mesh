@@ -1,158 +1,43 @@
 package main
 
 import (
-	"bytes"
-	"context"
 	"crypto/ed25519"
 	"encoding/hex"
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"net"
 	"os"
 	"os/signal"
+	"regexp"
 	"strings"
+	"sync"
 	"syscall"
-
-	"golang.org/x/text/encoding/unicode"
+	"time"
 
 	"github.com/gologme/log"
 	gsyslog "github.com/hashicorp/go-syslog"
 	"github.com/hjson/hjson-go"
 	"github.com/kardianos/minwinsvc"
-	"github.com/mitchellh/mapstructure"
 
-	"github.com/RiV-chain/RiV-mesh/src/address"
-	"github.com/RiV-chain/RiV-mesh/src/admin"
+	//"github.com/RiV-chain/RiV-mesh/src/address"
+
 	"github.com/RiV-chain/RiV-mesh/src/config"
 	"github.com/RiV-chain/RiV-mesh/src/defaults"
 
 	"github.com/RiV-chain/RiV-mesh/src/core"
+	//"github.com/RiV-chain/RiV-mesh/src/ipv6rwc"
 	"github.com/RiV-chain/RiV-mesh/src/multicast"
-	"github.com/RiV-chain/RiV-mesh/src/tuntap"
+	"github.com/RiV-chain/RiV-mesh/src/restapi"
+	"github.com/RiV-chain/RiV-mesh/src/tun"
 	"github.com/RiV-chain/RiV-mesh/src/version"
 )
 
 type node struct {
-	core      core.Core
-	config    *config.NodeConfig
-	tuntap    *tuntap.TunAdapter
-	multicast *multicast.Multicast
-	admin     *admin.AdminSocket
-}
-
-func readConfig(log *log.Logger, useconf bool, useconffile string, normaliseconf bool) *config.NodeConfig {
-	// Use a configuration file. If -useconf, the configuration will be read
-	// from stdin. If -useconffile, the configuration will be read from the
-	// filesystem.
-	var conf []byte
-	var err error
-	if useconffile != "" {
-		// Read the file from the filesystem
-		conf, err = ioutil.ReadFile(useconffile)
-	} else {
-		// Read the file from stdin.
-		conf, err = ioutil.ReadAll(os.Stdin)
-	}
-	if err != nil {
-		panic(err)
-	}
-	// If there's a byte order mark - which Windows 10 is now incredibly fond of
-	// throwing everywhere when it's converting things into UTF-16 for the hell
-	// of it - remove it and decode back down into UTF-8. This is necessary
-	// because hjson doesn't know what to do with UTF-16 and will panic
-	if bytes.Equal(conf[0:2], []byte{0xFF, 0xFE}) ||
-		bytes.Equal(conf[0:2], []byte{0xFE, 0xFF}) {
-		utf := unicode.UTF16(unicode.BigEndian, unicode.UseBOM)
-		decoder := utf.NewDecoder()
-		conf, err = decoder.Bytes(conf)
-		if err != nil {
-			panic(err)
-		}
-	}
-	// Generate a new configuration - this gives us a set of sane defaults -
-	// then parse the configuration we loaded above on top of it. The effect
-	// of this is that any configuration item that is missing from the provided
-	// configuration will use a sane default.
-	cfg := defaults.GenerateConfig()
-	var dat map[string]interface{}
-	if err := hjson.Unmarshal(conf, &dat); err != nil {
-		panic(err)
-	}
-	// Check if we have old field names
-	if _, ok := dat["TunnelRouting"]; ok {
-		log.Warnln("WARNING: Tunnel routing is no longer supported")
-	}
-	if old, ok := dat["SigningPrivateKey"]; ok {
-		log.Warnln("WARNING: The \"SigningPrivateKey\" configuration option has been renamed to \"PrivateKey\"")
-		if _, ok := dat["PrivateKey"]; !ok {
-			if privstr, err := hex.DecodeString(old.(string)); err == nil {
-				priv := ed25519.PrivateKey(privstr)
-				pub := priv.Public().(ed25519.PublicKey)
-				dat["PrivateKey"] = hex.EncodeToString(priv[:])
-				dat["PublicKey"] = hex.EncodeToString(pub[:])
-			} else {
-				log.Warnln("WARNING: The \"SigningPrivateKey\" configuration option contains an invalid value and will be ignored")
-			}
-		}
-	}
-	if oldmc, ok := dat["MulticastInterfaces"]; ok {
-		if oldmcvals, ok := oldmc.([]interface{}); ok {
-			var newmc []config.MulticastInterfaceConfig
-			for _, oldmcval := range oldmcvals {
-				if str, ok := oldmcval.(string); ok {
-					newmc = append(newmc, config.MulticastInterfaceConfig{
-						Regex:  str,
-						Beacon: true,
-						Listen: true,
-					})
-				}
-			}
-			if newmc != nil {
-				if oldport, ok := dat["LinkLocalTCPPort"]; ok {
-					// numbers parse to float64 by default
-					if port, ok := oldport.(float64); ok {
-						for idx := range newmc {
-							newmc[idx].Port = uint16(port)
-						}
-					}
-				}
-				dat["MulticastInterfaces"] = newmc
-			}
-		}
-	}
-	// Sanitise the config
-	confJson, err := json.Marshal(dat)
-	if err != nil {
-		panic(err)
-	}
-	if err := json.Unmarshal(confJson, &cfg); err != nil {
-		panic(err)
-	}
-	// Overlay our newly mapped configuration onto the autoconf node config that
-	// we generated above.
-	if err = mapstructure.Decode(dat, &cfg); err != nil {
-		panic(err)
-	}
-	return cfg
-}
-
-// Generates a new configuration and returns it in HJSON format. This is used
-// with -genconf.
-func doGenconf(isjson bool) string {
-	cfg := defaults.GenerateConfig()
-	var bs []byte
-	var err error
-	if isjson {
-		bs, err = json.MarshalIndent(cfg, "", "  ")
-	} else {
-		bs, err = hjson.Marshal(cfg)
-	}
-	if err != nil {
-		panic(err)
-	}
-	return string(bs)
+	core        *core.Core
+	tun         *tun.TunAdapter
+	multicast   *multicast.Multicast
+	rest_server *restapi.RestServer
 }
 
 func setLogLevel(loglevel string, logger *log.Logger) {
@@ -181,21 +66,23 @@ func setLogLevel(loglevel string, logger *log.Logger) {
 	}
 }
 
-type yggArgs struct {
+type rivArgs struct {
 	genconf       bool
 	useconf       bool
-	useconffile   string
 	normaliseconf bool
 	confjson      bool
 	autoconf      bool
 	ver           bool
-	logto         string
 	getaddr       bool
 	getsnet       bool
+	useconffile   string
+	logto         string
 	loglevel      string
+	httpaddress   string
+	wwwroot       string
 }
 
-func getArgs() yggArgs {
+func getArgs() rivArgs {
 	genconf := flag.Bool("genconf", false, "print a new config to stdout")
 	useconf := flag.Bool("useconf", false, "read HJSON/JSON config from stdin")
 	useconffile := flag.String("useconffile", "", "read HJSON/JSON config from specified file path")
@@ -207,8 +94,11 @@ func getArgs() yggArgs {
 	getaddr := flag.Bool("address", false, "returns the IPv6 address as derived from the supplied configuration")
 	getsnet := flag.Bool("subnet", false, "returns the IPv6 subnet as derived from the supplied configuration")
 	loglevel := flag.String("loglevel", "info", "loglevel to enable")
+	httpaddress := flag.String("httpaddress", "", "httpaddress to enable")
+	wwwroot := flag.String("wwwroot", "", "wwwroot to enable")
+
 	flag.Parse()
-	return yggArgs{
+	return rivArgs{
 		genconf:       *genconf,
 		useconf:       *useconf,
 		useconffile:   *useconffile,
@@ -220,12 +110,12 @@ func getArgs() yggArgs {
 		getaddr:       *getaddr,
 		getsnet:       *getsnet,
 		loglevel:      *loglevel,
+		httpaddress:   *httpaddress,
+		wwwroot:       *wwwroot,
 	}
 }
 
-// The main function is responsible for configuring and starting RiV-mesh.
-func run(args yggArgs, ctx context.Context, done chan struct{}) {
-	defer close(done)
+func run(args rivArgs, sigCh chan os.Signal) {
 	// Create a new logger that logs output to stdout.
 	var logger *log.Logger
 	switch args.logto {
@@ -238,6 +128,14 @@ func run(args yggArgs, ctx context.Context, done chan struct{}) {
 	default:
 		if logfd, err := os.OpenFile(args.logto, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644); err == nil {
 			logger = log.New(logfd, "", log.Flags())
+			defer func() int {
+				if r := recover(); r != nil {
+					logger.Println("Fatal error:", r)
+					fmt.Print(logfd)
+					return 1
+				}
+				return 0
+			}()
 		}
 	}
 	if logger == nil {
@@ -260,11 +158,14 @@ func run(args yggArgs, ctx context.Context, done chan struct{}) {
 		return
 	case args.autoconf:
 		// Use an autoconf-generated config, this will give us random keys and
-		// port numbers, and will use an automatically selected TUN/TAP interface.
+		// port numbers, and will use an automatically selected TUN interface.
 		cfg = defaults.GenerateConfig()
 	case args.useconffile != "" || args.useconf:
 		// Read the configuration from either stdin or from the filesystem
-		cfg = readConfig(logger, args.useconf, args.useconffile, args.normaliseconf)
+		cfg, err = defaults.ReadConfig(args.useconffile)
+		if err != nil {
+			panic("Configuration file load error: " + err.Error())
+		}
 		// If the -normaliseconf option was specified then remarshal the above
 		// configuration and print it back to stdout. This lets the user update
 		// their configuration file with newly mapped names (like above) or to
@@ -284,18 +185,23 @@ func run(args yggArgs, ctx context.Context, done chan struct{}) {
 		}
 	case args.genconf:
 		// Generate a new configuration and print it to stdout.
-		fmt.Println(doGenconf(args.confjson))
+		fmt.Println(defaults.Genconf(args.confjson))
 		return
 	default:
 		// No flags were provided, therefore print the list of flags to stdout.
+		fmt.Println("Usage:")
 		flag.PrintDefaults()
+
+		if args.getaddr || args.getsnet {
+			fmt.Println("\nError: You need to specify some config data using -useconf or -useconffile.")
+		}
 	}
 	// Have we got a working configuration? If we don't then it probably means
-	// that neither -autoconf, -useconf or -useconffile were set above. Stop
-	// if we don't.
+	// that neither -autoconf, -useconf or -useconffile were set above.
 	if cfg == nil {
 		return
 	}
+	n := &node{}
 	// Have we been asked for the node address yet? If so, print it and then stop.
 	getNodeKey := func() ed25519.PublicKey {
 		if pubkey, err := hex.DecodeString(cfg.PrivateKey); err == nil {
@@ -306,14 +212,14 @@ func run(args yggArgs, ctx context.Context, done chan struct{}) {
 	switch {
 	case args.getaddr:
 		if key := getNodeKey(); key != nil {
-			addr := address.AddrForKey(key)
+			addr := n.core.AddrForKey(key)
 			ip := net.IP(addr[:])
 			fmt.Println(ip.String())
 		}
 		return
 	case args.getsnet:
 		if key := getNodeKey(); key != nil {
-			snet := address.SubnetForKey(key)
+			snet := n.core.SubnetForKey(key)
 			ipnet := net.IPNet{
 				IP:   append(snet[:], 0, 0, 0, 0, 0, 0, 0, 0),
 				Mask: net.CIDRMask(len(snet)*8, 128),
@@ -321,44 +227,98 @@ func run(args yggArgs, ctx context.Context, done chan struct{}) {
 			fmt.Println(ipnet.String())
 		}
 		return
-	default:
 	}
 
-	// Setup the RiV-mesh node itself. The node{} type includes a Core, so we
-	// don't need to create this manually.
-	n := node{config: cfg}
-	// Now start RiV-mesh - this starts the DHT, router, switch and other core
-	// components needed for RiV-mesh to operate
-	if err = n.core.Start(cfg, logger); err != nil {
-		logger.Errorln("An error occurred during startup")
-		panic(err)
+	// Setup the RiV-mesh node itself.
+	{
+		sk, err := hex.DecodeString(cfg.PrivateKey)
+		if err != nil {
+			panic(err)
+		}
+		options := []core.SetupOption{
+			core.NodeInfo(cfg.NodeInfo),
+			core.NodeInfoPrivacy(cfg.NodeInfoPrivacy),
+			core.NetworkDomain(cfg.NetworkDomain),
+		}
+		for _, addr := range cfg.Listen {
+			options = append(options, core.ListenAddress(addr))
+		}
+		for _, peer := range cfg.Peers {
+			options = append(options, core.Peer{URI: peer})
+		}
+		for intf, peers := range cfg.InterfacePeers {
+			for _, peer := range peers {
+				options = append(options, core.Peer{URI: peer, SourceInterface: intf})
+			}
+		}
+		for _, allowed := range cfg.AllowedPublicKeys {
+			k, err := hex.DecodeString(allowed)
+			if err != nil {
+				panic(err)
+			}
+			options = append(options, core.AllowedPublicKey(k[:]))
+		}
+		if n.core, err = core.New(sk[:], logger, options...); err != nil {
+			panic(err)
+		}
 	}
-	// Register the session firewall gatekeeper function
-	// Allocate our modules
-	n.admin = &admin.AdminSocket{}
-	n.multicast = &multicast.Multicast{}
-	n.tuntap = &tuntap.TunAdapter{}
-	// Start the admin socket
-	if err := n.admin.Init(&n.core, cfg, logger, nil); err != nil {
-		logger.Errorln("An error occurred initialising admin socket:", err)
-	} else if err := n.admin.Start(); err != nil {
-		logger.Errorln("An error occurred starting admin socket:", err)
+
+	// Setup the multicast module.
+	{
+		options := []multicast.SetupOption{}
+		for _, intf := range cfg.MulticastInterfaces {
+			options = append(options, multicast.MulticastInterface{
+				Regex:    regexp.MustCompile(intf.Regex),
+				Beacon:   intf.Beacon,
+				Listen:   intf.Listen,
+				Port:     intf.Port,
+				Priority: uint8(intf.Priority),
+			})
+		}
+		if n.multicast, err = multicast.New(n.core, logger, options...); err != nil {
+			panic(err)
+		}
 	}
-	n.admin.SetupAdminHandlers(n.admin)
-	// Start the multicast interface
-	if err := n.multicast.Init(&n.core, cfg, logger, nil); err != nil {
-		logger.Errorln("An error occurred initialising multicast:", err)
-	} else if err := n.multicast.Start(); err != nil {
-		logger.Errorln("An error occurred starting multicast:", err)
+
+	// Setup the REST socket.
+	{
+		//override httpaddress and wwwroot parameters in cfg
+		if len(cfg.HttpAddress) == 0 {
+			cfg.HttpAddress = args.httpaddress
+		}
+		if len(cfg.WwwRoot) == 0 {
+			cfg.WwwRoot = args.wwwroot
+		}
+
+		if n.rest_server, err = restapi.NewRestServer(restapi.RestServerCfg{
+			Core:          n.core,
+			Tun:           n.tun,
+			Multicast:     n.multicast,
+			Log:           logger,
+			ListenAddress: cfg.HttpAddress,
+			WwwRoot:       cfg.WwwRoot,
+			ConfigFn:      args.useconffile,
+		}); err != nil {
+			logger.Errorln(err)
+		} else {
+			err = n.rest_server.Serve()
+			if err != nil {
+				logger.Errorln(err)
+			}
+		}
 	}
-	n.multicast.SetupAdminHandlers(n.admin)
-	// Start the TUN/TAP interface
-	if err := n.tuntap.Init(&n.core, cfg, logger, nil); err != nil {
-		logger.Errorln("An error occurred initialising TUN/TAP:", err)
-	} else if err := n.tuntap.Start(); err != nil {
-		logger.Errorln("An error occurred starting TUN/TAP:", err)
+
+	// Setup the TUN module.
+	{
+		options := []tun.SetupOption{
+			tun.InterfaceName(cfg.IfName),
+			tun.InterfaceMTU(cfg.IfMTU),
+		}
+		if n.tun, err = tun.New(n.core, logger, options...); err != nil {
+			panic(err)
+		}
 	}
-	n.tuntap.SetupAdminHandlers(n.admin)
+
 	// Make some nice output that tells us what our IPv6 address and subnet are.
 	// This is just logged to stdout for the user.
 	address := n.core.Address()
@@ -367,40 +327,33 @@ func run(args yggArgs, ctx context.Context, done chan struct{}) {
 	logger.Infof("Your public key is %s", hex.EncodeToString(public[:]))
 	logger.Infof("Your IPv6 address is %s", address.String())
 	logger.Infof("Your IPv6 subnet is %s", subnet.String())
-	// Catch interrupts from the operating system to exit gracefully.
-	<-ctx.Done()
-	// Capture the service being stopped on Windows.
-	minwinsvc.SetOnExit(n.shutdown)
-	n.shutdown()
-}
 
-func (n *node) shutdown() {
-	_ = n.admin.Stop()
+	//Windows service shutdown service
+	minwinsvc.SetOnExit(func() {
+		logger.Infof("Shutting down service ...")
+		sigCh <- os.Interrupt
+		//there is a pause in handler. If the handler is finished other routines are not running.
+		//Slee code gives a chance to run Stop methods.
+		time.Sleep(10 * time.Second)
+	})
+	// Block until we are told to shut down.
+	<-sigCh
 	_ = n.multicast.Stop()
-	_ = n.tuntap.Stop()
+	_ = n.tun.Stop()
 	n.core.Stop()
 }
 
 func main() {
 	args := getArgs()
-	hup := make(chan os.Signal, 1)
-	//signal.Notify(hup, os.Interrupt, syscall.SIGHUP)
-	term := make(chan os.Signal, 1)
-	signal.Notify(term, os.Interrupt, syscall.SIGTERM)
-	for {
-		done := make(chan struct{})
-		ctx, cancel := context.WithCancel(context.Background())
-		go run(args, ctx, done)
-		select {
-		case <-hup:
-			cancel()
-			<-done
-		case <-term:
-			cancel()
-			<-done
-			return
-		case <-done:
-			return
-		}
-	}
+
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		run(args, sigCh)
+	}()
+	wg.Wait()
 }

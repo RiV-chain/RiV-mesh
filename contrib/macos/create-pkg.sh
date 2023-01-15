@@ -32,10 +32,11 @@ mkdir -p pkgbuild/scripts
 mkdir -p pkgbuild/flat/base.pkg
 mkdir -p pkgbuild/flat/Resources/en.lproj
 mkdir -p pkgbuild/root/usr/local/bin
+mkdir -p pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS
 mkdir -p pkgbuild/root/Library/LaunchDaemons
 
 # Copy package contents into the pkgbuild root
-cp mesh pkgbuild/root/usr/local/bin
+cp mesh pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS
 cp meshctl pkgbuild/root/usr/local/bin
 cp contrib/macos/mesh.plist pkgbuild/root/Library/LaunchDaemons
 
@@ -50,10 +51,12 @@ then
   echo "Backing up configuration file to /Library/Preferences/RiV-mesh/mesh.conf.`date +%Y%m%d`"
   cp /etc/mesh.conf /Library/Preferences/RiV-mesh/mesh.conf.`date +%Y%m%d`
   echo "Normalising /etc/mesh.conf"
-  /usr/local/bin/mesh -useconffile /Library/Preferences/RiV-mesh/mesh.conf.`date +%Y%m%d` -normaliseconf > /etc/mesh.conf
+  /Applications/RiV-mesh.app/Contents/MacOS/mesh -useconffile /Library/Preferences/RiV-mesh/mesh.conf.`date +%Y%m%d` -normaliseconf > /etc/mesh.conf
 else
-  /usr/local/bin/mesh -genconf > /etc/mesh.conf
+  /Applications/RiV-mesh.app/Contents/MacOS/mesh -genconf > /etc/mesh.conf
 fi
+
+chmod 755 /etc/mesh.conf
 
 # Unload existing RiV-mesh launchd service, if possible
 test -f /Library/LaunchDaemons/mesh.plist && (launchctl unload /Library/LaunchDaemons/mesh.plist || true)
@@ -63,9 +66,9 @@ launchctl load /Library/LaunchDaemons/mesh.plist
 EOF
 
 # Set execution permissions
-chmod +x pkgbuild/scripts/postinstall
-chmod +x pkgbuild/root/usr/local/bin/mesh
-chmod +x pkgbuild/root/usr/local/bin/meshctl
+chmod 755 pkgbuild/scripts/postinstall
+chmod 755 pkgbuild/root/Applications/RiV-mesh.app/Contents/MacOS/mesh
+chmod 755 pkgbuild/root/usr/local/bin/meshctl
 
 # Pack payload and scripts
 ( cd pkgbuild/scripts && find . | cpio -o --format odc --owner 0:80 | gzip -c ) > pkgbuild/flat/base.pkg/Scripts
@@ -113,11 +116,11 @@ cat > pkgbuild/flat/Distribution << EOF
         <line choice="choice1"/>
     </choices-outline>
     <choice id="choice1" title="base">
-        <pkg-ref id="io.github.RiV-chain.pkg"/>
+        <pkg-ref id="io.github.RiV-mesh.pkg"/>
     </choice>
-    <pkg-ref id="io.github.RiV-chain.pkg" installKBytes="${PAYLOADSIZE}" version="${VERSION}" auth="Root">#base.pkg</pkg-ref>
+    <pkg-ref id="io.github.RiV-mesh.pkg" installKBytes="${PAYLOADSIZE}" version="${VERSION}" auth="Root">#base.pkg</pkg-ref>
 </installer-script>
 EOF
 
 # Finally pack the .pkg
-( cd pkgbuild/flat && xar --compression none -cf "../../${PKGNAME}-${PKGVERSION}-macos-${PKGARCH}.pkg" * )
+( cd pkgbuild/flat && xar --compression none -cf "../../${PKGNAME}-${PKGVERSION}-macos-${PKGARCH}-nogui.pkg" * )

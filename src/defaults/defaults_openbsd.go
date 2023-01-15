@@ -1,13 +1,12 @@
+//go:build openbsd
 // +build openbsd
 
 package defaults
 
 // Sane defaults for the BSD platforms. The "default" options may be
 // may be replaced by the running configuration.
-func GetDefaults() platformDefaultParameters {
+func getDefaults() platformDefaultParameters {
 	return platformDefaultParameters{
-		// Admin
-		DefaultAdminListen: "unix:///var/run/mesh.sock",
 
 		// Configuration (used for meshctl)
 		DefaultConfigFile: "/etc/mesh.conf",
@@ -17,7 +16,7 @@ func GetDefaults() platformDefaultParameters {
 			{Regex: ".*", Beacon: true, Listen: true},
 		},
 
-		// TUN/TAP
+		// TUN
 		MaximumIfMTU:  16384,
 		DefaultIfMTU:  16384,
 		DefaultIfName: "tun0",

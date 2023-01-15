@@ -1,23 +1,22 @@
+//go:build windows
 // +build windows
 
 package defaults
 
 // Sane defaults for the Windows platform. The "default" options may be
 // may be replaced by the running configuration.
-func GetDefaults() platformDefaultParameters {
+func getDefaults() platformDefaultParameters {
 	return platformDefaultParameters{
-		// Admin
-		DefaultAdminListen: "tcp://localhost:9001",
 
 		// Configuration (used for meshctl)
-		DefaultConfigFile: "C:\\Program Files\\RiV-mesh\\mesh.conf",
+		DefaultConfigFile: "C:\\ProgramData\\RiV-mesh\\mesh.conf",
 
 		// Multicast interfaces
 		DefaultMulticastInterfaces: []MulticastInterfaceConfig{
 			{Regex: ".*", Beacon: true, Listen: true},
 		},
 
-		// TUN/TAP
+		// TUN
 		MaximumIfMTU:  65535,
 		DefaultIfMTU:  65535,
 		DefaultIfName: "RiV-mesh",

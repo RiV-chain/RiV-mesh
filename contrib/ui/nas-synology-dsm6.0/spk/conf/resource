@@ -1,0 +1,9 @@
+{
+	"port-config": {
+		"protocol-file": "mesh.sc"
+	},
+
+	"usr-local-linker": {
+        "bin": ["mesh", "meshctl"]
+    }
+}
