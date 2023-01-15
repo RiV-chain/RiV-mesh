@@ -5,8 +5,8 @@ cat << EOF >> "$SYNOPKG_TEMP_LOGFILE"
 <br>
 <ol style="list-style-type:decimal; margin-left: 0; padding-left: 40px;">
 	<li>Go to the SSH prompt as <strong>root</strong></li>
-	<li>Run the following command to start the package <strong>/var/packages/mesh/scripts/start</strong></li>
-	</li>
+	<li>Run the following command to start the package: <strong>/var/packages/mesh/scripts/start</strong></li>
+	<li>As result of success run you have to see the following output: <strong>RiV-mesh has been successfully started</strong></li>
 </ol>
 <br>
 For a detailed step-by-step guide, join our official channel in <a href="https://t.me/rivchain" target="_blank">Telegram</a>.
