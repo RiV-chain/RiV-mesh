@@ -21,6 +21,7 @@ func main() {
 func run() int {
 	logbuffer := &bytes.Buffer{}
 	logger := log.New(logbuffer, "", log.Flags())
+
 	defer func() int {
 		if r := recover(); r != nil {
 			logger.Println("Fatal error:", r)

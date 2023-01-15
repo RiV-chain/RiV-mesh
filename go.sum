@@ -4,10 +4,6 @@ github.com/Arceliar/ironwood v0.0.0-20221115123222-ec61cea2f439 h1:eOW6/XIs06TnU
 github.com/Arceliar/ironwood v0.0.0-20221115123222-ec61cea2f439/go.mod h1:RP72rucOFm5udrnEzTmIWLRVGQiV/fSUAQXJ0RST/nk=
 github.com/Arceliar/phony v0.0.0-20210209235338-dde1a8dca979 h1:WndgpSW13S32VLQ3ugUxx2EnnWmgba1kCqPkd4Gk1yQ=
 github.com/Arceliar/phony v0.0.0-20210209235338-dde1a8dca979/go.mod h1:6Lkn+/zJilRMsKmbmG1RPoamiArC6HS73xbwRyp3UyI=
-github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
-github.com/RiV-chain/RiV-mesh v0.4.1-0.20210906152728-6bfbc3d4ffac/go.mod h1:klZKFy5qaCiE6iHgrmCA7/GTsSFOhweOWMI+0KOpgcQ=
-github.com/RiV-chain/RiV-mesh-extras v0.0.0-20210908113704-d30dca38b092 h1:hVt4m8FuGRbdO/ps7HaSKN4O86OuhWBJBOtFnlE0OhA=
-github.com/RiV-chain/RiV-mesh-extras v0.0.0-20210908113704-d30dca38b092/go.mod h1:yqOe40VN9flBYgiQGeEl4NemhNNbgIeP1qB/IFwFUTY=
 github.com/VividCortex/ewma v1.1.1/go.mod h1:2Tkkvm3sRDVXaiyucHiACn4cqf7DpdyLvmxzcbUokwA=
 github.com/VividCortex/ewma v1.2.0 h1:f58SaIzcDXrSy3kWaHNvuJgJ3Nmz59Zji6XoJR/q1ow=
 github.com/VividCortex/ewma v1.2.0/go.mod h1:nz4BbCtbLyFDeC9SUHbtcT5644juEuWfUAUnGx7j5l4=

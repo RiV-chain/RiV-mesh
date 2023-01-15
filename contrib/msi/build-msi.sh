@@ -153,7 +153,7 @@ cat > wix.xml << EOF
       <Directory Id="${PKGINSTFOLDER}" Name="PFiles">
         <Directory Id="MeshInstallFolder" Name="RiV-mesh">
 
-          <Component Id="MainExecutable" Guid="ca425a1c-407b-4d37-a629-6d004922e5e6">
+          <Component Id="MainExecutable" Guid="c2119231-2aa3-4962-867a-9759c87beb24">
             <File
               Id="Mesh"
               Name="mesh.exe"
@@ -188,7 +188,7 @@ cat > wix.xml << EOF
               Remove="uninstall" />
           </Component>
 
-          <Component Id="CtrlExecutable" Guid="7c13026e-8654-4ccb-8ac3-7cc11f284e52">
+          <Component Id="CtrlExecutable" Guid="a916b730-974d-42a1-b687-d9d504cbb86a">
             <File
               Id="Meshctl"
               Name="meshctl.exe"
@@ -205,7 +205,7 @@ cat > wix.xml << EOF
               System="yes"/>
           </Component>
 
-          <Component Id="ConfigScript" Guid="b9e3d00c-25f5-413c-b152-f8def1cf5025">
+          <Component Id="ConfigScript" Guid="64a3733b-c98a-4732-85f3-20cd7da1a785">
             <File
               Id="Configbat"
               Name="updateconfig.bat"
