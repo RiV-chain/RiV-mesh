@@ -1,0 +1,18 @@
+#!/bin/sh
+
+if [ "$EUID" -ne 0 ]; then
+    echo "This script must be run as root"
+    exit 1
+fi
+
+dir=`dirname $0`
+sed -i 's/package/root/' "$dir/../conf/privilege"
+
+synopkg start mesh > /dev/null
+if [ "$?" -eq 0 ]; then
+    echo "RiV-mesh has been successfully started"
+    exit 0
+else
+    echo "An error occurred during RiV-mesh startup" 1>&2
+    exit 1
+fi
