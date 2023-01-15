@@ -325,7 +325,7 @@ ui.getSelfInfo = () =>
         let status="st-error"
         Array.from($$("status")).forEach(node => node.classList.add("is-hidden"));
         $(status).classList.remove("is-hidden");
-        showError(response.statusText);
+        response.json().then(response => {showError(response.error.message)});
       } else {
         response.json()
       }
