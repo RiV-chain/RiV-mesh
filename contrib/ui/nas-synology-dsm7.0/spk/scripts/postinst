@@ -1,0 +1,15 @@
+cat << EOF >> "$SYNOPKG_TEMP_LOGFILE"
+<big><strong style='color:blue'>RiV-mesh</strong></big><br>
+<br>
+<span>Please ensure that the RiV-mesh app is granted with root priviledges when it starts:<br>
+<br>
+<ol style="list-style-type:decimal; margin-left: 0; padding-left: 40px;">
+	<li>Go to the SSH prompt as <strong>root</strong></li>
+	<li>Run the following command to start the package <strong>/var/packages/mesh/scripts/start</strong></li>
+	</li>
+</ol>
+<br>
+For a detailed step-by-step guide, join our official channel in <a href="https://t.me/rivchain" target="_blank">Telegram</a>.
+EOF
+
+exit 0
