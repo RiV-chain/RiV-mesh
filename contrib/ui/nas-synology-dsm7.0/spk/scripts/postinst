@@ -1,3 +1,5 @@
+#!/bin/bash
+
 cat << EOF >> "$SYNOPKG_TEMP_LOGFILE"
 <big><strong style='color:blue'>RiV-mesh</strong></big><br>
 <br>
