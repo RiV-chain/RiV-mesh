@@ -327,7 +327,7 @@ ui.getSelfInfo = () =>
         $(status).classList.remove("is-hidden");
         response.text().then(text => {showError(text)});
       } else {
-        response.json()
+        return response.json()
       }
     });
 
