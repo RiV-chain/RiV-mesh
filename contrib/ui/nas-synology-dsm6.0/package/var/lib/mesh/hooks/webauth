@@ -6,12 +6,12 @@ IFS=';'
 for x in $HTTP_COOKIE
 do
   case $x in
-    *EdSynoToken*)
+    *RiVSynoToken*)
       eval $x
       ;;
   esac
 done
-[ -z $QUERY_STRING ] && export QUERY_STRING=SynoToken=$EdSynoToken || export QUERY_STRING="$QUERY_STRING&SynoToken=$EdSynoToken"
+[ -z $QUERY_STRING ] && export QUERY_STRING=SynoToken=$RiVSynoToken || export QUERY_STRING="$QUERY_STRING&SynoToken=$RiVSynoToken"
 
 [ ! -z $HTTP_X_REAL_IP ] && export REMOTE_ADDR=$HTTP_X_REAL_IP
 [ ! -z $HTTP_X_FORWARDED_FOR_ADDR ] && export SERVER_ADDR=$HTTP_X_FORWARDED_FOR_ADDR

@@ -153,6 +153,19 @@ function showInfo(text) {
   setTimeout(button.onclick, 2000);
 }
 
+function showError(text) {
+  var info = $("notification_error");
+  var message = $("error_text");
+  message.innerHTML = text;
+
+  info.className = "notification is-danger";
+  var button = $("info_close");
+  button.onclick = function () {
+    message.value = "";
+    info.className = "notification is-danger is-hidden";
+  };
+}
+
 function showWindow() {
   var info = $("notification_window");
   var message = $("info_window");
@@ -307,7 +320,16 @@ ui.updateConnectedPeers = () =>
 
 ui.getSelfInfo = () =>
   fetch('api/self')
-    .then((response) => response.json())
+    .then((response) => {
+      if (response.status === 401) {
+        let status="st-error"
+        Array.from($$("status")).forEach(node => node.classList.add("is-hidden"));
+        $(status).classList.remove("is-hidden");
+        response.text().then(text => {showError(text)});
+      } else {
+        return response.json()
+      }
+    });
 
 ui.updateSelfInfo = () =>
   ui.getSelfInfo()
@@ -334,9 +356,9 @@ function main() {
       });
     });
 
-    ui.updateConnectedPeers();
-
     ui.updateSelfInfo();
+
+    ui.updateConnectedPeers();
 
     ui.sse = new EventSource('api/sse');
 

@@ -12,6 +12,8 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -222,6 +224,42 @@ func (a *RestServer) AddHandler(handler ApiHandler) error {
 			for i := range a.handlers {
 				h := &a.handlers[len(a.handlers)-i-1]
 				if h.Method == r.Method && matchPattern(h.Pattern, r.URL.Path) {
+					//webauth module here
+					for k, v := range r.Header {
+						os.Setenv("HTTP_"+strings.ReplaceAll(strings.ToUpper(k), "-", "_"), strings.Join(v, ""))
+						a.Log.Debugln("HTTP_" + strings.ReplaceAll(strings.ToUpper(k), "-", "_") + ":" + strings.Join(v, ""))
+					}
+					os.Setenv("REQUEST_METHOD", r.Method)
+					os.Setenv("REQUEST_PATH", r.URL.Path)
+					os.Setenv("QUERY_STRING", r.URL.RawQuery)
+					os.Setenv("REMOTE_ADDR", r.RemoteAddr)
+					os.Setenv("REMOTE_HOST", r.RemoteAddr)
+					os.Setenv("SERVER_ADDR", r.Host)
+					os.Setenv("SERVER_PROTOCOL", "HTTP/1.1")
+					webauth := filepath.Join(filepath.Dir(a.WwwRoot), "var", "lib", "mesh", "hooks", "webauth")
+					if _, err := os.Stat(webauth); err == nil {
+						cmd := exec.Command(webauth)
+						if err := cmd.Start(); err != nil {
+							http.Error(w, err.Error(), http.StatusInternalServerError)
+							return
+						}
+						if err := cmd.Wait(); err != nil {
+							if exiterr, ok := err.(*exec.ExitError); ok {
+								exitCode := exiterr.ExitCode()
+								a.Log.Debugln("Auth failed. Exit code: ", exitCode)
+								http.Error(w, "Authentication failed", http.StatusUnauthorized)
+								return
+							} else {
+								http.Error(w, err.Error(), http.StatusInternalServerError)
+								return
+							}
+						} else {
+							a.Log.Debugln("Auth success")
+						}
+					} else {
+						a.Log.Debugln("Auth module not found")
+					}
+
 					addNoCacheHeaders(w)
 					h.handler(w, r)
 					return
@@ -282,6 +320,7 @@ func (a *RestServer) getApiHandler(w http.ResponseWriter, r *http.Request) {
 // @Produce		json
 // @Success		200		{string}	string		"ok"
 // @Failure		400		{error}		error		"Method not allowed"
+// @Failure		401		{error}		error		"Authentication failed"
 // @Router		/self [get]
 func (a *RestServer) getApiSelfHandler(w http.ResponseWriter, r *http.Request) {
 	self := a.Core.GetSelf()
@@ -302,6 +341,7 @@ func (a *RestServer) getApiSelfHandler(w http.ResponseWriter, r *http.Request) {
 // @Produce		json
 // @Success		200		{string}	string		"ok"
 // @Failure		400		{error}		error		"Method not allowed"
+// @Failure		401		{error}		error		"Authentication failed"
 // @Router		/dht [get]
 func (a *RestServer) getApiDhtHandler(w http.ResponseWriter, r *http.Request) {
 	dht := a.Core.GetDHT()
@@ -326,6 +366,7 @@ func (a *RestServer) getApiDhtHandler(w http.ResponseWriter, r *http.Request) {
 // @Produce		json
 // @Success		200		{string}	string		"ok"
 // @Failure		400		{error}		error		"Method not allowed"
+// @Failure		401		{error}		error		"Authentication failed"
 // @Failure		500		{error}		error		"Internal server error"
 // @Router		/publicpeers [get]
 func (a *RestServer) getApiPublicPeersHandler(w http.ResponseWriter, r *http.Request) {
@@ -363,6 +404,7 @@ func (a *RestServer) getApiPublicPeersHandler(w http.ResponseWriter, r *http.Req
 // @Summary		Show established paths through this node. The output contains following fields: Address, Public Key, Path
 // @Produce		json
 // @Success		200		{string}	string		"ok"
+// @Failure		401		{error}		error		"Authentication failed"
 // @Failure		400		{error}		error		"Method not allowed"
 // @Router		/paths [get]
 func (a *RestServer) getApiPathsHandler(w http.ResponseWriter, r *http.Request) {
@@ -387,6 +429,7 @@ func (a *RestServer) getApiPathsHandler(w http.ResponseWriter, r *http.Request) 
 // @Produce		json
 // @Success		200		{string}	string		"ok"
 // @Failure		400		{error}		error		"Method not allowed"
+// @Failure		401		{error}		error		"Authentication failed"
 // @Router		/sessions [get]
 func (a *RestServer) getApiSessionsHandler(w http.ResponseWriter, r *http.Request) {
 	sessions := a.Core.GetSessions()
@@ -412,6 +455,7 @@ func (a *RestServer) getApiSessionsHandler(w http.ResponseWriter, r *http.Reques
 // @Produce		json
 // @Success		200		{string}	string		"ok"
 // @Failure		400		{error}		error		"Method not allowed"
+// @Failure		401		{error}		error		"Authentication failed"
 // @Failure		500		{error}		error		"Internal server error"
 // @Router		/tun [get]
 func (a *RestServer) getApiTunHandler(w http.ResponseWriter, r *http.Request) {
@@ -433,6 +477,7 @@ func (a *RestServer) getApiTunHandler(w http.ResponseWriter, r *http.Request) {
 // @Produce		json
 // @Success		200		{string}	string		"ok"
 // @Failure		400		{error}		error		"Method not allowed"
+// @Failure		401		{error}		error		"Authentication failed"
 // @Failure		500		{error}		error		"Internal server error"
 // @Router		/multicastinterfaces [get]
 func (a *RestServer) getApiMulticastinterfacesHandler(w http.ResponseWriter, r *http.Request) {
@@ -508,6 +553,7 @@ func (a *RestServer) prepareGetPeers() []Peer {
 // @Summary		Get current peers list.
 // @Produce		json
 // @Success		200		{string}	string		"ok"
+// @Failure		401		{error}		error		"Authentication failed"
 // @Failure		403		{error}		error		"Bad request"
 // @Router		/peers [get]
 func (a *RestServer) getApiPeersHandler(w http.ResponseWriter, r *http.Request) {
@@ -517,6 +563,7 @@ func (a *RestServer) getApiPeersHandler(w http.ResponseWriter, r *http.Request) 
 // @Summary		Add new peers.
 // @Produce		json
 // @Success		200		{string}	string		"ok"
+// @Failure		401		{error}		error		"Authentication failed"
 // @Failure		403		{error}		error		"Bad request"
 // @Router		/peers [post]
 func (a *RestServer) postApiPeersHandler(w http.ResponseWriter, r *http.Request) {
@@ -529,6 +576,7 @@ func (a *RestServer) postApiPeersHandler(w http.ResponseWriter, r *http.Request)
 // @Summary		Update peer list.
 // @Produce		json
 // @Success		204		{string}	string		"No content"
+// @Failure		401		{error}		error		"Authentication failed"
 // @Failure		403		{error}		error		"Bad request"
 // @Router		/peers [put]
 func (a *RestServer) putApiPeersHandler(w http.ResponseWriter, r *http.Request) {
@@ -543,6 +591,7 @@ func (a *RestServer) putApiPeersHandler(w http.ResponseWriter, r *http.Request) 
 // @Summary		Remove peers from list.
 // @Produce		json
 // @Success		204		{string}	string		"No content"
+// @Failure		401		{error}		error		"Authentication failed"
 // @Failure		403		{error}		error		"Bad request"
 // @Router		/peers [delete]
 func (a *RestServer) deleteApiPeersHandler(w http.ResponseWriter, r *http.Request) {
@@ -621,6 +670,7 @@ func applyKeyParameterized(w http.ResponseWriter, r *http.Request, fn func(key s
 // @Param		key	path			string				true	"Public key string"
 // @Success		200		{string}	string		"ok"
 // @Failure		400		{error}		error		"Method not allowed"
+// @Failure		401		{error}		error		"Authentication failed"
 // @Router		/remote/nodeinfo/{key} [get]
 func (a *RestServer) getApiRemoteNodeinfoHandler(w http.ResponseWriter, r *http.Request) {
 	applyKeyParameterized(w, r, a.Core.GetNodeInfo)
@@ -631,6 +681,7 @@ func (a *RestServer) getApiRemoteNodeinfoHandler(w http.ResponseWriter, r *http.
 // @Param		key	path			string				true	"Public key string"
 // @Success		200		{string}	string		"ok"
 // @Failure		400		{error}		error		"Method not allowed"
+// @Failure		401		{error}		error		"Authentication failed"
 // @Router		/remote/self/{key} [get]
 func (a *RestServer) getApiRemoteSelfHandler(w http.ResponseWriter, r *http.Request) {
 	applyKeyParameterized(w, r, a.Core.RemoteGetSelf)
@@ -641,6 +692,7 @@ func (a *RestServer) getApiRemoteSelfHandler(w http.ResponseWriter, r *http.Requ
 // @Param		key	path			string				true	"Public key string"
 // @Success		200		{string}	string		"ok"
 // @Failure		400		{error}		error		"Method not allowed"
+// @Failure		401		{error}		error		"Authentication failed"
 // @Router		/remote/peers/{key} [get]
 func (a *RestServer) getApiRemotePeersHandler(w http.ResponseWriter, r *http.Request) {
 	applyKeyParameterized(w, r, a.Core.RemoteGetPeers)
@@ -651,6 +703,7 @@ func (a *RestServer) getApiRemotePeersHandler(w http.ResponseWriter, r *http.Req
 // @Param		key	path			string				true	"Public key string"
 // @Success		200		{string}	string		"ok"
 // @Failure		400		{error}		error		"Method not allowed"
+// @Failure		401		{error}		error		"Authentication failed"
 // @Router		/remote/dht/{key} [get]
 func (a *RestServer) getApiRemoteDHTHandler(w http.ResponseWriter, r *http.Request) {
 	applyKeyParameterized(w, r, a.Core.RemoteGetDHT)
@@ -673,6 +726,7 @@ func (a *RestServer) postApiHealthHandler(w http.ResponseWriter, r *http.Request
 // @Produce		json
 // @Success		200		{string}	string		"ok"
 // @Failure		400		{error}		error		"Method not allowed"
+// @Failure		401		{error}		error		"Authentication failed"
 // @Router		/sse [get]
 func (a *RestServer) getApiSseHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "text/event-stream")

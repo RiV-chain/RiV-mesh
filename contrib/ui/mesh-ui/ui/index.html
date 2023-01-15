@@ -11,7 +11,8 @@
   <link rel="stylesheet" href="assets/bulmaswatch.min.css" type="text/css">
   <link rel="stylesheet" href="assets/flag-icons.css" type="text/css">
   <link rel="stylesheet" href="assets/mesh-ui.css" type="text/css">
-  <!--script type="application/javascript" src="assets/mesh-ui.js"></script-->
+  <script type="module" type="application/javascript" src="assets/properties.js"></script>
+
   <script>
     var script = document.createElement('script');
     //load polyfills + EC5 for IE or usual for rest
@@ -247,7 +248,7 @@
                 class="button is-text">Terms and Conditions</a></strong>
             <br>
             <div style="margin-left: 20px; margin-right: 10px;">Copyright © <a class="target_new_window"
-                href="https://rivchain.org/">RiV Chain </a>Ltd. and
+                href="#https://rivchain.org/">RiV Chain </a>Ltd. and
               individual contributors. All rights reserved.</div>
           </div>
         </div>
@@ -273,6 +274,12 @@
       <div class="notification is-primary is-hidden" id="notification_info">
         <button class="delete" id="info_close"></button>
         <p id="info_text"></p>
+      </div>
+    </div>
+    <div style="margin-left: 100px; margin-right: 100px;">
+      <div class="notification is-danger is-hidden" id="notification_error">
+        <button class="delete" id="info_close"></button>
+        <p id="error_text"></p>
       </div>
     </div>
 

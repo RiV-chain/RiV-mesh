@@ -23,7 +23,7 @@ var ed = {
 		document.cookie = key + "=" + value + expires + "; path=/";
 	},
 	getNasAuthUrl: function () {
-		ed.setCookie('EdSynoToken', "");
+		ed.setCookie('RiVSynoToken', "");
 		var url = ed.getCookie('origin');
 		if (url === undefined) {
 			url = window.location.protocol + "//" + window.location.hostname + ":" + 5000;
@@ -31,51 +31,55 @@ var ed = {
 		return url;
 	}
 };
-$(function () {
-	function params(obj) {
-		if (typeof obj === 'string') {
-			if (obj[0] === '?') {
-				obj = obj.substring(1);
+
+function params(obj) {
+	if (typeof obj === 'string') {
+		if (obj[0] === '?') {
+			obj = obj.substring(1);
+		}
+		var result = {};
+		obj = obj.split("&");
+		obj.forEach(function (pair) {
+			pair = pair.split("=");
+			var key = decodeURIComponent(pair[0]);
+			var value = decodeURIComponent(pair[1]);
+			// If first entry with this name
+			if (typeof result[key] === "undefined") {
+				result[key] = value;
+				// If second entry with this name
+			} else if (typeof result[key] === "string") {
+				result[key] = [result[key], value];
+				// If third or later entry with this name
+			} else {
+				result[key].push(value);
 			}
-			var result = {};
-			obj = obj.split("&");
-			obj.forEach(function (pair) {
-				pair = pair.split("=");
-				var key = decodeURIComponent(pair[0]);
-				var value = decodeURIComponent(pair[1]);
-				// If first entry with this name
-				if (typeof result[key] === "undefined") {
-					result[key] = value;
-					// If second entry with this name
-				} else if (typeof result[key] === "string") {
-					result[key] = [result[key], value];
-					// If third or later entry with this name
-				} else {
-					result[key].push(value);
-				}
-			});
-			return result;
-		} else {
-			return Object.keys(obj).map(function (key) {
-				return encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]);
-			}).join('&');
-		}
-	};
-	//Hide URL parameters
-	var query = params(window.location.search.substring(1));
-	var refresh = false;
-	for (var k in query) {
-		if (k === 'SynoToken') {
-			ed.setCookie('EdSynoToken', query[k]);
-			refresh = true;
-			delete query[k];
-		} else if (k === 'origin') {
-			ed.setCookie('origin', query[k]);
-			refresh = true;
-			delete query[k];
-		}
+		});
+		return result;
+	} else {
+		return Object.keys(obj).map(function (key) {
+			return encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]);
+		}).join('&');
 	}
-	query = $.param(query);
-	if (refresh)
-		window.location.replace(window.location.origin + window.location.pathname + window.location.hash + ((query === "") ? "" : ("?" + query)));
-});
+};
+//Hide URL parameters
+var query = params(window.location.search.substring(1));
+var refresh = false;
+for (var k in query) {
+	if (k === 'SynoToken') {
+		ed.setCookie('RiVSynoToken', query[k]);
+		refresh = true;
+		delete query[k];
+	} else if (k === 'origin') {
+		ed.setCookie('origin', query[k]);
+		refresh = true;
+		delete query[k];
+	}
+}
+
+query = Object.keys(query).map(function(k) {
+    return encodeURIComponent(k) + '=' + encodeURIComponent(query[k])
+}).join('&');
+
+if (refresh)
+	window.location.replace(window.location.origin + window.location.pathname + window.location.hash + ((query === "") ? "" : ("?" + query)));
+
