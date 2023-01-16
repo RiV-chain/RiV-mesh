@@ -1,4 +1,4 @@
-var ed = {
+var riv = {
   partnerId: 1422,
   applicationName: 'RiV Mesh Asustor ADM App',
   nasOSName: 'Asustor ADM',
@@ -16,7 +16,7 @@ var ed = {
 		$.ajax({url: "api/self"}).done(function () {
 			window.location.reload();
 		}).fail(function () {
-			ed.nasLogoutCall();
+			riv.nasLogoutCall();
 			nasLoginFailure();
 		});
 	},
