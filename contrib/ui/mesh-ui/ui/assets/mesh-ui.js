@@ -376,7 +376,7 @@ var nasLoginFailure = function (message) {
 };
 
 ui.handleLogin = () =>
-$("loginButton").click(function (e) {
+$("loginButton").addEventListener("click", function (e) {
   e.preventDefault();
   $('username').val($('username').val().trim());
   if ($('username').val().length === 0 || $('password').val().trim().length === 0) {
