@@ -15,11 +15,14 @@ var riv = {
 		var d = new Date();
 		d.setTime(d.getTime() + (10 * 60 * 1000));
 		document.cookie = "access_key=" + btoa( "user=" + encodeURIComponent($('username').value) + ";pwd=" + encodeURIComponent($('password').value))+ "; expires=" + d.toUTCString() + "; path=/";
-		$.ajax({url: "api/self"}).done(function () {
+		fetch('api/self')
+		.then((response) => {
+		  if (response.status === 200) {
 			window.location.reload();
-		}).fail(function () {
+		  } else {
 			riv.nasLogoutCall();
 			nasLoginFailure();
+		  }
 		});
 	},
 	nasLogoutCall: function () {
