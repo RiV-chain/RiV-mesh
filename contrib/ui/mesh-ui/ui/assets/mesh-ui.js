@@ -325,7 +325,14 @@ ui.getSelfInfo = () =>
         let status="st-error"
         Array.from($$("status")).forEach(node => node.classList.add("is-hidden"));
         $(status).classList.remove("is-hidden");
-        response.text().then(text => {showError(text)});
+        response.text().then(text => {
+          if (ed.useAuthNASRichScreen) {
+            $("#login").toggleClass('is-active');
+            $("username").text(ed.getNasUser());
+          } else {
+            showError(text);
+          }
+        });
       } else {
         return response.json()
       }
@@ -344,6 +351,34 @@ ui.updateSelfInfo = () =>
     }).catch((error) => {
       $("ipv6").innerText = error.message;
     });
+
+var nasLoginSuccess = function () {
+  $("#login").toggleClass('is-hidden');
+  $('#progress').toggleClass('is-hidden');
+};
+
+var nasLoginFailure = function (message) {
+  //Show notification: Username/password is wrong
+  if (typeof message !== 'undefined') {
+    showError(message);
+  } else {
+    showError("Incorrect username or password");
+  }
+  $('#password').val('');
+  $("#login").toggleClass('is-active');
+  $('#progress').toggleClass('is-hidden');
+};
+
+$('#loginButton').click(function (e) {
+  e.preventDefault();
+  $('#username').val($('#username').val().trim());
+  if ($('#username').val().length === 0 || $('#password').val().trim().length === 0) {
+    return;
+  }
+  $("#login").toggleClass('is-hidden');
+  $("#progress").toggleClass('is-active');
+  ed.nasLoginCall(nasLoginSuccess, nasLoginFailure);
+});
 
 function main() {
 
