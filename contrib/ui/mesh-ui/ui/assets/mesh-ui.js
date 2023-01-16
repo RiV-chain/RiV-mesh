@@ -369,7 +369,7 @@ var nasLoginFailure = function (message) {
   $('#progress').toggleClass('is-hidden');
 };
 
-$('#loginButton').click(function (e) {
+document.getElementById("loginButton").click(function (e) {
   e.preventDefault();
   $('#username').val($('#username').val().trim());
   if ($('#username').val().length === 0 || $('#password').val().trim().length === 0) {
