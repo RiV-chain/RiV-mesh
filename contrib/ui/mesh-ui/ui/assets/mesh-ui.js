@@ -328,7 +328,7 @@ ui.getSelfInfo = () =>
         $(status).classList.remove("is-hidden");
         response.text().then(text => {
           if (riv.useAuthNASRichScreen) {
-            $("#login").toggleClass('is-active');
+            $("login").toggleClass('is-active');
             $("username").text(riv.getNasUser());
           } else {
             showError(text);
@@ -354,8 +354,8 @@ ui.updateSelfInfo = () =>
     });
 
 var nasLoginSuccess = function () {
-  $("#login").toggleClass('is-hidden');
-  $('#progress').toggleClass('is-hidden');
+  $("login").toggleClass('is-hidden');
+  $('progress').toggleClass('is-hidden');
 };
 
 var nasLoginFailure = function (message) {
@@ -365,19 +365,19 @@ var nasLoginFailure = function (message) {
   } else {
     showError("Incorrect username or password");
   }
-  $('#password').val('');
-  $("#login").toggleClass('is-active');
-  $('#progress').toggleClass('is-hidden');
+  $('password').val('');
+  $("login").toggleClass('is-active');
+  $('progress').toggleClass('is-hidden');
 };
 
-document.getElementById("loginButton").click(function (e) {
+$("loginButton").click(function (e) {
   e.preventDefault();
-  $('#username').val($('#username').val().trim());
-  if ($('#username').val().length === 0 || $('#password').val().trim().length === 0) {
+  $('username').val($('username').val().trim());
+  if ($('username').val().length === 0 || $('password').val().trim().length === 0) {
     return;
   }
-  $("#login").toggleClass('is-hidden');
-  $("#progress").toggleClass('is-active');
+  $("login").toggleClass('is-hidden');
+  $("progress").toggleClass('is-active');
   riv.nasLoginCall(nasLoginSuccess, nasLoginFailure);
 });
 
