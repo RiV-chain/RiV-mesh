@@ -1,3 +1,5 @@
+var $ = id => document.getElementById(id)
+
 var riv = {
   partnerId: 1422,
   applicationName: 'RiV Mesh Asustor ADM App',
@@ -12,7 +14,7 @@ var riv = {
 	nasLoginCall: function (nasLoginSuccess, nasLoginFailure) {
 		var d = new Date();
 		d.setTime(d.getTime() + (10 * 60 * 1000));
-		document.cookie = "access_key=" + btoa( "user=" + encodeURIComponent($('#nasInputUser').val()) + ";pwd=" + encodeURIComponent($('#nasInputPassword').val()))+ "; expires=" + d.toUTCString() + "; path=/";
+		document.cookie = "access_key=" + btoa( "user=" + encodeURIComponent($('username').val()) + ";pwd=" + encodeURIComponent($('password').val()))+ "; expires=" + d.toUTCString() + "; path=/";
 		$.ajax({url: "api/self"}).done(function () {
 			window.location.reload();
 		}).fail(function () {

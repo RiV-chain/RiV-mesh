@@ -375,6 +375,7 @@ var nasLoginFailure = function (message) {
   $("progress").classList.add('is-hidden');
 };
 
+ui.handleLogin = () =>
 $("loginButton").click(function (e) {
   e.preventDefault();
   $('username').val($('username').val().trim());
@@ -398,6 +399,8 @@ function main() {
         window.open(new URL(new URL(a.href).hash.substring(1), location.origin).href);
       });
     });
+
+    ui.handleLogin();
 
     ui.updateSelfInfo();
 
