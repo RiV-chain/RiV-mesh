@@ -14,7 +14,7 @@ var riv = {
 	nasLoginCall: function (nasLoginSuccess, nasLoginFailure) {
 		var d = new Date();
 		d.setTime(d.getTime() + (10 * 60 * 1000));
-		document.cookie = "access_key=" + btoa( "user=" + encodeURIComponent($('username').val()) + ";pwd=" + encodeURIComponent($('password').val()))+ "; expires=" + d.toUTCString() + "; path=/";
+		document.cookie = "access_key=" + btoa( "user=" + encodeURIComponent($('username').value) + ";pwd=" + encodeURIComponent($('password').value))+ "; expires=" + d.toUTCString() + "; path=/";
 		$.ajax({url: "api/self"}).done(function () {
 			window.location.reload();
 		}).fail(function () {
