@@ -378,8 +378,8 @@ var nasLoginFailure = function (message) {
 ui.handleLogin = () =>
 $("loginButton").addEventListener("click", function (e) {
   e.preventDefault();
-  $('username').val($('username').val().trim());
-  if ($('username').val().length === 0 || $('password').val().trim().length === 0) {
+  $('username').value = $('username').value.trim();
+  if ($('username').value.length === 0 || $('password').value.trim().length === 0) {
     return;
   }
   $("login").classList.add('is-hidden');
