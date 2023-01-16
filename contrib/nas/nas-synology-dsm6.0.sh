@@ -24,8 +24,9 @@ fi
 
 if [ $PKGARCH = "x86_64" ]; then GOOS=linux GOARCH=amd64 ./build
 elif [ $PKGARCH = "armv7" ]; then GOOS=linux GOARCH=arm GOARM=7 ./build
+elif [ $PKGARCH = "arm64" ]; then GOOS=linux GOARCH=arm64 ./build
 else
-  echo "Specify PKGARCH=x86_64"
+  echo "Specify PKGARCH=x86_64, armv7 or arm64"
   exit 1
 fi
 
