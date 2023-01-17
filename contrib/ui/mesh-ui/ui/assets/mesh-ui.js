@@ -331,6 +331,7 @@ ui.getSelfInfo = () =>
             $("login").classList.remove('is-hidden');
             $("login").classList.add('is-active');
             $("username").text(riv.getNasUser());
+            $("logoutArea").classList.add('is-active');
           } else {
             showError(text);
           }
@@ -389,6 +390,12 @@ $("loginButton").addEventListener("click", function (e) {
   riv.nasLoginCall(nasLoginSuccess, nasLoginFailure);
 });
 
+ui.handleLogout = () =>
+$("logout").addEventListener("click", function (e) {
+  riv.nasLogoutCall();
+  window.location.reload();
+});
+
 function main() {
 
   window.addEventListener("load", () => {
@@ -401,6 +408,8 @@ function main() {
     });
 
     ui.handleLogin();
+
+    ui.handleLogout();
 
     ui.updateSelfInfo();
 
