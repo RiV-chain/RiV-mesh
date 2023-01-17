@@ -326,8 +326,6 @@ ui.getSelfInfo = () =>
         let status="st-error"
         Array.from($$("status")).forEach(node => node.classList.add("is-hidden"));
         $(status).classList.remove("is-hidden");
-        $("logoutButton").classList.add('is-active');
-        $("logoutButton").classList.remove('is-hidden');
         response.text().then(text => {
           if (riv.useAuthNASRichScreen) {
             $("login").classList.remove('is-hidden');
@@ -338,11 +336,11 @@ ui.getSelfInfo = () =>
           }
         });
       } else {
+        if (riv.useAuthNASRichScreen){
+          $("logoutButton").classList.remove('is-hidden');
+          $("logoutButton").classList.add('is-active');
+        }
         return response.json()
-      }
-      if (riv.useAuthNASRichScreen){
-        $("logoutButton").classList.remove('is-hidden');
-        $("logoutButton").classList.add('is-active');
       }
     });
 
