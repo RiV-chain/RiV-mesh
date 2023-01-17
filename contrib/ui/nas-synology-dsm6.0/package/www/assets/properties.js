@@ -13,7 +13,7 @@ var riv = {
 		return matches ? decodeURIComponent(matches[1]) : undefined;
 	},
 	setCookie: function (key, value, expires) {
-		if(expires) {
+		if (expires) {
 			var d = new Date();
 			d.setTime(d.getTime() + (30 * 60 * 1000));
 			expires = "; expires=" + d.toUTCString();
@@ -32,56 +32,58 @@ var riv = {
 	}
 };
 
-$(document).ready(function params(obj) {
-	if (typeof obj === 'string') {
-		if (obj[0] === '?') {
-			obj = obj.substring(1);
-		}
-		var result = {};
-		obj = obj.split("&");
-		obj.forEach(function (pair) {
-			pair = pair.split("=");
-			var key = decodeURIComponent(pair[0]);
-			var value = decodeURIComponent(pair[1]);
-			// If first entry with this name
-			if (typeof result[key] === "undefined") {
-				result[key] = value;
-				// If second entry with this name
-			} else if (typeof result[key] === "string") {
-				result[key] = [result[key], value];
-				// If third or later entry with this name
-			} else {
-				result[key].push(value);
+$(document).ready(function () {
+
+	function params(obj) {
+		if (typeof obj === 'string') {
+			if (obj[0] === '?') {
+				obj = obj.substring(1);
 			}
-		});
-		return result;
-	} else {
-		return Object.keys(obj).map(function (key) {
-			return encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]);
-		}).join('&');
+			var result = {};
+			obj = obj.split("&");
+			obj.forEach(function (pair) {
+				pair = pair.split("=");
+				var key = decodeURIComponent(pair[0]);
+				var value = decodeURIComponent(pair[1]);
+				// If first entry with this name
+				if (typeof result[key] === "undefined") {
+					result[key] = value;
+					// If second entry with this name
+				} else if (typeof result[key] === "string") {
+					result[key] = [result[key], value];
+					// If third or later entry with this name
+				} else {
+					result[key].push(value);
+				}
+			});
+			return result;
+		} else {
+			return Object.keys(obj).map(function (key) {
+				return encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]);
+			}).join('&');
+		}
+	};
+	//Hide URL parameters
+	var query = params(window.location.search.substring(1));
+	var refresh = false;
+	for (var k in query) {
+		if (k === 'SynoToken') {
+			riv.setCookie('RiVSynoToken', query[k]);
+			refresh = true;
+			delete query[k];
+		} else if (k === 'origin') {
+			riv.setCookie('origin', query[k]);
+			refresh = true;
+			delete query[k];
+		}
 	}
 
-//Hide URL parameters
-var query = params(window.location.search.substring(1));
-var refresh = false;
-for (var k in query) {
-	if (k === 'SynoToken') {
-		riv.setCookie('RiVSynoToken', query[k]);
-		refresh = true;
-		delete query[k];
-	} else if (k === 'origin') {
-		riv.setCookie('origin', query[k]);
-		refresh = true;
-		delete query[k];
-	}
-}
+	query = Object.keys(query).map(function (k) {
+		return encodeURIComponent(k) + '=' + encodeURIComponent(query[k])
+	}).join('&');
 
-query = Object.keys(query).map(function(k) {
-    return encodeURIComponent(k) + '=' + encodeURIComponent(query[k])
-}).join('&');
-
-if (refresh)
-	window.location.replace(window.location.origin + window.location.pathname + window.location.hash + ((query === "") ? "" : ("?" + query)));
+	if (refresh)
+		window.location.replace(window.location.origin + window.location.pathname + window.location.hash + ((query === "") ? "" : ("?" + query)));
 
 
 });
