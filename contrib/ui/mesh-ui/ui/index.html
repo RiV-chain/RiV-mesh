@@ -31,8 +31,9 @@
 </head>
 
 <body class="hero is-fullheight">
-  
-  <div>
+
+  <div style="position:relative;">
+
     <div class="box is-hidden" id="notification_window">
       <div id="notification_windowx" style="z-index: 9;" class="notification is-primary">
         <button class="delete" id="info_win_close"></button>
@@ -87,12 +88,11 @@
     </div>
 
     <!-- Logout -->
-    <div id="logoutButton" class="control has-icons-right">
-      <span id="logout" style="color:aliceblue; margin: 12px;" class="icon is-small is-right">
+    <div id="logoutButton" style="width: 100%; position:absolute; display: flex; justify-content: flex-end;" class="has-icons-right is-hidden">
+      <span id="logout" style="color:aliceblue; margin: 20px; margin-right: 30px;" class="icon is-small is-right">
         <i class="fa fa-sign-out"></i>
       </span>
     </div>
-
     <!-- Tabs -->
     <div class="tabs is-centered is-medium is-toggle">
       <ul>

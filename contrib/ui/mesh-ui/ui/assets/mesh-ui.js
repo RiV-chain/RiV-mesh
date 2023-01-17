@@ -333,6 +333,8 @@ ui.getSelfInfo = () =>
             $("login").classList.remove('is-hidden');
             $("login").classList.add('is-active');
             $("username").text(riv.getNasUser());
+            $("logoutButton").classList.remove('is-hidden');
+            $("logoutButton").classList.add('is-active');
           } else {
             showError(text);
           }
