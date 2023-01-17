@@ -347,13 +347,15 @@ ui.getSelfInfo = () =>
 ui.updateSelfInfo = () =>
   ui.getSelfInfo()
     .then((info) => {
-      $("ipv6").innerText = info.address;
-      $("subnet").innerText = info.subnet;
-      $("coordinates").innerText = ''.concat('[',info.coords.join(' '),']');
-      $("pub_key").innerText = info.key;
-      $("priv_key").innerText = info.private_key;
-      $("ipv6").innerText = info.address;
-      $("version").innerText = info.build_version;
+      if (typeof info !== 'undefined') {
+        $("ipv6").innerText = info.address;
+        $("subnet").innerText = info.subnet;
+        $("coordinates").innerText = ''.concat('[',info.coords.join(' '),']');
+        $("pub_key").innerText = info.key;
+        $("priv_key").innerText = info.private_key;
+        $("ipv6").innerText = info.address;
+        $("version").innerText = info.build_version;
+      }
     }).catch((error) => {
       showError(error.message);
     });
