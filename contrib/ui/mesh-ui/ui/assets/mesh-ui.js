@@ -355,7 +355,7 @@ ui.updateSelfInfo = () =>
       $("ipv6").innerText = info.address;
       $("version").innerText = info.build_version;
     }).catch((error) => {
-      $("ipv6").innerText = error.message;
+      showError(error.message);
     });
 
 var nasLoginSuccess = function () {
