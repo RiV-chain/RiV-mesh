@@ -326,13 +326,13 @@ ui.getSelfInfo = () =>
         let status="st-error"
         Array.from($$("status")).forEach(node => node.classList.add("is-hidden"));
         $(status).classList.remove("is-hidden");
+        $("logoutButton").classList.add('is-active');
+        $("logoutButton").classList.remove('is-hidden');
         response.text().then(text => {
           if (riv.useAuthNASRichScreen) {
             $("login").classList.remove('is-hidden');
             $("login").classList.add('is-active');
             $("username").text(riv.getNasUser());
-            $("logoutArea").classList.add('is-active');
-            $("logoutArea").classList.remove('is-hidden');
           } else {
             showError(text);
           }
