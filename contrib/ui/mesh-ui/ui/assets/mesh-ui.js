@@ -335,8 +335,6 @@ ui.getSelfInfo = () =>
             $("username").text(riv.getNasUser());
           } else {
             showError(text);
-            $("progress").classList.remove('is-active');
-            $("progress").classList.add('is-hidden');
           }
         });
       } else {
@@ -376,7 +374,7 @@ var nasLoginFailure = function (message) {
   } else {
     showError("Incorrect username or password");
   }
-  $('password').val('');
+  $('password').value = "";
   $("login").classList.add('is-active');
   $("login").classList.remove('is-hidden');
   $("progress").classList.remove('is-active');
