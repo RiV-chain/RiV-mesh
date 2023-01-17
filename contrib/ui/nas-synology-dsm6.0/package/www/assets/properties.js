@@ -60,7 +60,7 @@ $(document).ready(function params(obj) {
 			return encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]);
 		}).join('&');
 	}
-});
+
 //Hide URL parameters
 var query = params(window.location.search.substring(1));
 var refresh = false;
@@ -84,3 +84,4 @@ if (refresh)
 	window.location.replace(window.location.origin + window.location.pathname + window.location.hash + ((query === "") ? "" : ("?" + query)));
 
 
+});
