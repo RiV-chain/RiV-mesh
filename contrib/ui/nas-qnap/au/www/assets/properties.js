@@ -1,4 +1,6 @@
-var ed = {
+var $ = id => document.getElementById(id)
+
+var riv = {
 	partnerId: 1222,
 	brand: 'RiV Mesh',
 	applicationName: "RiV Mesh QNAP NAS OS App",
@@ -12,9 +14,9 @@ var ed = {
 	}
 };
 
-$(function () {
+function handleToken() {
 
-	ed.nasLoginCall = function (nasLoginSuccess, nasLoginFailure) {
+	riv.nasLoginCall = function (nasLoginSuccess, nasLoginFailure) {
 		/* encode function start */
 		var ezEncodeChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
@@ -78,17 +80,19 @@ $(function () {
 
 		var d = new Date();
 		d.setTime(d.getTime() + (30 * 60 * 1000));
-		document.cookie = "qnapuser=" + encodeURIComponent($('#nasInputUser').val()) + "; expires=" + d.toUTCString() + "; path=/";
-		document.cookie = "qnappwd=" + encodeURIComponent(ezEncode(utf16to8($('#nasInputPassword').val()))) + "; expires=" + d.toUTCString() + "; path=/";
-		$.ajax({url: "rest/info"}).done(function (response) {
-			window.location.reload();
-			checkError(response);
-		}).fail(function () {
-			ed.nasLogoutCall();
-			nasLoginFailure();
+		document.cookie = "qnapuser=" + encodeURIComponent($('username').value) + "; expires=" + d.toUTCString() + "; path=/";
+		document.cookie = "qnappwd=" + encodeURIComponent(ezEncode(utf16to8($('password').value))) + "; expires=" + d.toUTCString() + "; path=/";
+		fetch('api/self').then(function (response) {
+			if (response.status === 200) {
+				window.location.reload();
+				checkError(response);
+			} else {
+				riv.nasLogoutCall();
+				nasLoginFailure();
+			}
 		});
 	};
-	ed.nasLogoutCall = function() {
+	riv.nasLogoutCall = function() {
 		document.cookie = "qnapuser=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
 		document.cookie = "qnappwd=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
 	};
@@ -98,7 +102,9 @@ $(function () {
 		));
 		return matches ? decodeURIComponent(matches[1]) : undefined;
 	}
-	ed.getNasUser = function() {
+	riv.getNasUser = function() {
 		return getCookie('qnapuser');
 	};
-});
+};
+
+window.onload = handleToken;
