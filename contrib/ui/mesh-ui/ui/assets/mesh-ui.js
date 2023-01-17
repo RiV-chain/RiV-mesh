@@ -391,13 +391,6 @@ $("loginButton").addEventListener("click", function (e) {
   riv.nasLoginCall(nasLoginSuccess, nasLoginFailure);
 });
 
-ui.handleLogout = () =>
-$("logout").addEventListener("click", function (e) {
-  e.preventDefault();
-  riv.nasLogoutCall();
-  window.location.reload();
-});
-
 function main() {
 
   window.addEventListener("load", () => {
@@ -409,9 +402,13 @@ function main() {
       });
     });
 
-    ui.handleLogin();
+    $("logout").addEventListener("click", (event)=> {
+      event.preventDefault();
+      riv.nasLogoutCall();
+      window.location.reload();
+    });
 
-    ui.handleLogout();
+    ui.handleLogin();
 
     ui.updateSelfInfo();
 
