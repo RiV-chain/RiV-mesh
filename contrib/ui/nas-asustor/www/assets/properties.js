@@ -1,4 +1,6 @@
-var ed = {
+var $ = id => document.getElementById(id)
+
+var riv = {
   partnerId: 1422,
   applicationName: 'RiV Mesh Asustor ADM App',
   nasOSName: 'Asustor ADM',
@@ -12,12 +14,15 @@ var ed = {
 	nasLoginCall: function (nasLoginSuccess, nasLoginFailure) {
 		var d = new Date();
 		d.setTime(d.getTime() + (10 * 60 * 1000));
-		document.cookie = "access_key=" + btoa( "user=" + encodeURIComponent($('#nasInputUser').val()) + ";pwd=" + encodeURIComponent($('#nasInputPassword').val()))+ "; expires=" + d.toUTCString() + "; path=/";
-		$.ajax({url: "api/self"}).done(function () {
+		document.cookie = "access_key=" + btoa( "user=" + encodeURIComponent($('username').value) + ";pwd=" + encodeURIComponent($('password').value))+ "; expires=" + d.toUTCString() + "; path=/";
+		fetch('api/self')
+		.then((response) => {
+		  if (response.status === 200) {
 			window.location.reload();
-		}).fail(function () {
-			ed.nasLogoutCall();
+		  } else {
+			riv.nasLogoutCall();
 			nasLoginFailure();
+		  }
 		});
 	},
 	nasLogoutCall: function () {
