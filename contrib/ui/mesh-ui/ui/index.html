@@ -88,9 +88,9 @@
     </div>
 
     <!-- Logout -->
-    <div id="logoutButton" style="width: 100%; position:absolute; display: flex; justify-content: flex-end;" class="has-icons-right is-hidden">
+    <div id="logoutButton" style="width: 100%; position:absolute; display: flex; justify-content: flex-end;" class="has-icons-right">
       <span id="logout" style="color:aliceblue; margin: 20px; margin-right: 30px;" class="icon is-small is-right">
-        <i class="fa fa-sign-out"></i>
+        <i style="padding: 10px;" class="fa fa-sign-out"></i>
       </span>
     </div>
     <!-- Tabs -->
@@ -283,9 +283,9 @@
         <p id="info_text"></p>
       </div>
     </div>
-    <div style="margin-left: 100px; margin-right: 100px;">
+    <div style="margin-left: 100px; margin-right: 100px; z-index: 9;">
       <div class="notification is-danger is-hidden" id="notification_error">
-        <button class="delete" id="info_close"></button>
+        <button class="delete" id="error_close"></button>
         <p id="error_text"></p>
       </div>
     </div>
@@ -295,7 +295,6 @@
       <div class="modal-card">
         <header class="modal-card-head">
           <p class="modal-card-title">Login</p>
-          <button class="delete"></button>
         </header>
         <section class="modal-card-body">
           <div class="field">

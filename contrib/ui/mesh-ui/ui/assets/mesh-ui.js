@@ -160,7 +160,7 @@ function showError(text) {
   message.innerHTML = text;
 
   info.className = "notification is-danger";
-  var button = $("info_close");
+  var button = $("error_close");
   button.onclick = function () {
     message.value = "";
     info.className = "notification is-danger is-hidden";
