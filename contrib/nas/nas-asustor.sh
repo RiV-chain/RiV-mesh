@@ -23,11 +23,11 @@ if [ $PKGBRANCH = "master" ]; then
 fi
 
 if [ $PKGARCH = "x86-64" ]; then GOOS=linux GOARCH=amd64 ./build
-elif [ $PKGARCH = "armv7" ]; then GOOS=linux GOARCH=arm GOARM=7 ./build
+elif [ $PKGARCH = "arm" ]; then GOOS=linux GOARCH=arm GOARM=7 ./build
 elif [ $PKGARCH = "arm64" ]; then GOOS=linux GOARCH=arm64 ./build
-elif [ $PKGARCH = "x86" ]; then GOOS=linux GOARCH=386 ./build
+elif [ $PKGARCH = "i386" ]; then GOOS=linux GOARCH=386 ./build
 else
-  echo "Specify PKGARCH=x86-64, armv7, arm64 or x86"
+  echo "Specify PKGARCH=x86-64, arm, arm64 or i386"
   exit 1
 fi
 
