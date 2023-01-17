@@ -32,7 +32,7 @@ var riv = {
 	}
 };
 
-function params(obj) {
+$(document).ready(function params(obj) {
 	if (typeof obj === 'string') {
 		if (obj[0] === '?') {
 			obj = obj.substring(1);
@@ -60,7 +60,7 @@ function params(obj) {
 			return encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]);
 		}).join('&');
 	}
-};
+});
 //Hide URL parameters
 var query = params(window.location.search.substring(1));
 var refresh = false;
@@ -82,4 +82,5 @@ query = Object.keys(query).map(function(k) {
 
 if (refresh)
 	window.location.replace(window.location.origin + window.location.pathname + window.location.hash + ((query === "") ? "" : ("?" + query)));
+
 
