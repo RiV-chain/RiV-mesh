@@ -276,7 +276,7 @@ func run(args rivArgs, sigCh chan os.Signal) {
 			})
 		}
 		if n.multicast, err = multicast.New(n.core, logger, options...); err != nil {
-			panic(err)
+			fmt.Println("Multicast module fail:", err)
 		}
 	}
 

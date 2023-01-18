@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="assets/bulmaswatch.min.css" type="text/css">
   <link rel="stylesheet" href="assets/flag-icons.css" type="text/css">
   <link rel="stylesheet" href="assets/mesh-ui.css" type="text/css">
-  <script type="module" type="application/javascript" src="assets/properties.js"></script>
+  <script type="application/javascript" src="assets/properties.js"></script>
 
   <script>
     var script = document.createElement('script');
@@ -31,7 +31,9 @@
 </head>
 
 <body class="hero is-fullheight">
-  <div>
+
+  <div style="position:relative;">
+
     <div class="box is-hidden" id="notification_window">
       <div id="notification_windowx" style="z-index: 9;" class="notification is-primary">
         <button class="delete" id="info_win_close"></button>
@@ -62,8 +64,8 @@
         </div>
       </div>
     </div>
-    <div id="Dis" class="modal">
 
+    <div id="Dis" class="modal">
       <div class="modal-card">
         <header class="modal-card-head">
           <p class="modal-card-title">Terms and Conditions</p>
@@ -82,8 +84,14 @@
           EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           <p></p>
         </section>
-
       </div>
+    </div>
+
+    <!-- Logout -->
+    <div id="logoutButton" style="width: 100%; position:absolute; display: flex; justify-content: flex-end;" class="has-icons-right is-hidden">
+      <span id="logout" style="color:aliceblue; margin: 20px; margin-right: 30px;" class="icon is-small is-right">
+        <i style="padding: 10px; cursor: pointer;" class="fa fa-sign-out"></i>
+      </span>
     </div>
     <!-- Tabs -->
     <div class="tabs is-centered is-medium is-toggle">
@@ -269,7 +277,6 @@
       </article>
     </div>
 
-
     <div style="margin-left: 100px; margin-right: 100px;">
       <div class="notification is-primary is-hidden" id="notification_info">
         <button class="delete" id="info_close"></button>
@@ -277,11 +284,52 @@
       </div>
     </div>
     <div style="margin-left: 100px; margin-right: 100px;">
-      <div class="notification is-danger is-hidden" id="notification_error">
-        <button class="delete" id="info_close"></button>
+      <div style="z-index: 99;" class="notification is-danger is-hidden" id="notification_error">
+        <button class="delete" id="error_close"></button>
         <p id="error_text"></p>
       </div>
     </div>
+
+    <div id="login" class="modal is-hidden">
+      <div class="modal-background"></div>
+      <div class="modal-card">
+        <header class="modal-card-head">
+          <p class="modal-card-title">Login</p>
+        </header>
+        <section class="modal-card-body">
+          <div class="field">
+            <p class="control has-icons-left">
+              <input id="username" class="input" type="text" placeholder="Username">
+              <span class="icon is-small is-left">
+                <i class="fa fa-user"></i>
+              </span>
+            </p>
+          </div>
+          <div class="field">
+            <p class="control has-icons-left">
+              <input id="password" class="input" type="password" placeholder="Password">
+              <span class="icon is-small is-left">
+                <i class="fa fa-lock"></i>
+              </span>
+            </p>
+          </div>
+        </section>
+        <footer class="modal-card-foot">
+          <p class="control">
+            <button id="loginButton" class="button is-success">
+              Login
+            </button>
+          </p>
+        </footer>
+      </div>
+    </div>
+
+    <div id="progress" class="modal is-hidden">
+      <div class="modal-background"></div>
+      <div class="modal-card">
+        <progress class="progress is-small is-primary" max="100">15%</progress>
+      </div>
+    </div>    
 
   </div>
   <footer>

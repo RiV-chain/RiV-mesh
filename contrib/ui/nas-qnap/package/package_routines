@@ -5,9 +5,14 @@ QPKG_NAME="mesh"
 CONF=/etc/config/mesh.conf
 
 PKG_PRE_REMOVE="{
+  grep -v 'apache-mesh.conf' /etc/app_proxy.conf > /tmp/app_proxy.conf
+  mv -f /tmp/app_proxy.conf /etc/app_proxy.conf
+  /usr/local/apache/bin/apache_proxy -k graceful -f /etc/apache-sys-proxy.conf
+  /usr/local/apache/bin/apache_proxy -k graceful -f /etc/apache-sys-proxy-ssl.conf
+
   killall -q mesh
   rm -rf /share/Web/$QPKG_NAME
-  [ -L /var/log/mesh.log ] && rm -f /var/log/mesh.log
+  [ -L $SYS_QPKG_DIR/var/log/mesh.log ] && rm -f $SYS_QPKG_DIR/var/log/mesh.log
 }"
 
 PKG_MAIN_REMOVE="{

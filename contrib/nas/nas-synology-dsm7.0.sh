@@ -24,8 +24,9 @@ fi
 
 if [ $PKGARCH = "x86_64" ]; then GOOS=linux GOARCH=amd64 ./build
 elif [ $PKGARCH = "armv7" ]; then GOOS=linux GOARCH=arm GOARM=7 ./build
+elif [ $PKGARCH = "arm64" ]; then GOOS=linux GOARCH=arm64 ./build
 else
-  echo "Specify PKGARCH=x86_64 or armv7"
+  echo "Specify PKGARCH=x86_64, armv7 or arm64"
   exit 1
 fi
 
@@ -46,7 +47,7 @@ cp contrib/ui/nas-synology-dsm6.0/package/* /tmp/$PKGFOLDER/ -r
 cp contrib/ui/nas-synology-dsm6.0/spk/* /tmp/$PKGNAME/ -r
 cp contrib/ui/nas-synology-dsm7.0/package/* /tmp/$PKGFOLDER/ -r
 cp contrib/ui/nas-synology-dsm7.0/spk/* /tmp/$PKGNAME/ -r
-cp -r contrib/ui/mesh-ui/ui/* /tmp/$PKGFOLDER/www/
+cp -r -n contrib/ui/mesh-ui/ui/* /tmp/$PKGFOLDER/www/
 
 for res in 16 24 32 48 64 72 256; do
   resolution="${res}x${res}"

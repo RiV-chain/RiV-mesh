@@ -159,7 +159,7 @@ function showError(text) {
   message.innerHTML = text;
 
   info.className = "notification is-danger";
-  var button = $("info_close");
+  var button = $("error_close");
   button.onclick = function () {
     message.value = "";
     info.className = "notification is-danger is-hidden";
@@ -325,8 +325,20 @@ ui.getSelfInfo = () =>
         let status="st-error"
         Array.from($$("status")).forEach(node => node.classList.add("is-hidden"));
         $(status).classList.remove("is-hidden");
-        response.text().then(text => {showError(text)});
+        response.text().then(text => {
+          if (riv.useAuthNASRichScreen) {
+            $("login").classList.remove('is-hidden');
+            $("login").classList.add('is-active');
+            $("username").text(riv.getNasUser());
+          } else {
+            showError(text);
+          }
+        });
       } else {
+        if (riv.useAuthNASRichScreen){
+          $("logoutButton").classList.remove('is-hidden');
+          $("logoutButton").classList.add('is-active');
+        }
         return response.json()
       }
     });
@@ -334,16 +346,53 @@ ui.getSelfInfo = () =>
 ui.updateSelfInfo = () =>
   ui.getSelfInfo()
     .then((info) => {
-      $("ipv6").innerText = info.address;
-      $("subnet").innerText = info.subnet;
-      $("coordinates").innerText = ''.concat('[',info.coords.join(' '),']');
-      $("pub_key").innerText = info.key;
-      $("priv_key").innerText = info.private_key;
-      $("ipv6").innerText = info.address;
-      $("version").innerText = info.build_version;
+      if (typeof info !== 'undefined') {
+        $("ipv6").innerText = info.address;
+        $("subnet").innerText = info.subnet;
+        $("coordinates").innerText = ''.concat('[',info.coords.join(' '),']');
+        $("pub_key").innerText = info.key;
+        $("priv_key").innerText = info.private_key;
+        $("ipv6").innerText = info.address;
+        $("version").innerText = info.build_version;
+      }
     }).catch((error) => {
-      $("ipv6").innerText = error.message;
+      showError(error.message);
     });
+
+var nasLoginSuccess = function () {
+  $("login").classList.remove('is-active');
+  $("login").classList.add('is-hidden');
+  $("progress").classList.remove('is-active');
+  $("progress").classList.add('is-hidden');
+};
+
+var nasLoginFailure = function (message) {
+  //Show notification: Username/password is wrong
+  if (typeof message !== 'undefined') {
+    showError(message);
+  } else {
+    showError("Incorrect username or password");
+  }
+  $('password').value = "";
+  $("login").classList.add('is-active');
+  $("login").classList.remove('is-hidden');
+  $("progress").classList.remove('is-active');
+  $("progress").classList.add('is-hidden');
+};
+
+ui.handleLogin = () =>
+$("loginButton").addEventListener("click", function (e) {
+  e.preventDefault();
+  $('username').value = $('username').value.trim();
+  if ($('username').value.length === 0 || $('password').value.trim().length === 0) {
+    return;
+  }
+  $("login").classList.add('is-hidden');
+  $("login").classList.remove('is-active');
+  $("progress").classList.remove('is-hidden');
+  $("progress").classList.add('is-active');
+  riv.nasLoginCall(nasLoginSuccess, nasLoginFailure);
+});
 
 function main() {
 
@@ -355,6 +404,14 @@ function main() {
         window.open(new URL(new URL(a.href).hash.substring(1), location.origin).href);
       });
     });
+
+    $("logout").addEventListener("click", (event)=> {
+      event.preventDefault();
+      riv.nasLogoutCall();
+      window.location.reload();
+    });
+
+    ui.handleLogin();
 
     ui.updateSelfInfo();
 

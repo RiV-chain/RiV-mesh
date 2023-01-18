@@ -23,9 +23,11 @@ if [ $PKGBRANCH = "master" ]; then
 fi
 
 if [ $PKGARCH = "x86-64" ]; then GOOS=linux GOARCH=amd64 ./build
-elif [ $PKGARCH = "armv7" ]; then GOOS=linux GOARCH=arm GOARM=7 ./build
+elif [ $PKGARCH = "arm" ]; then GOOS=linux GOARCH=arm GOARM=7 ./build
+elif [ $PKGARCH = "arm64" ]; then GOOS=linux GOARCH=arm64 ./build
+elif [ $PKGARCH = "i386" ]; then GOOS=linux GOARCH=386 ./build
 else
-  echo "Specify PKGARCH=x86-64 or armv7"
+  echo "Specify PKGARCH=x86-64, arm, arm64 or i386"
   exit 1
 fi
 
@@ -39,7 +41,7 @@ chmod 0775 /tmp/$PKGFOLDER/ -R
 
 echo "coping ui package..."
 cp contrib/ui/nas-asustor/* /tmp/$PKGFOLDER/ -r
-cp -r contrib/ui/mesh-ui/ui/* /tmp/$PKGFOLDER/www/
+cp -r -n contrib/ui/mesh-ui/ui/* /tmp/$PKGFOLDER/www/
 
 echo "Converting icon for: 90x90"
 convert -colorspace sRGB ./riv.png -resize 90x90 PNG32:/tmp/$PKGFOLDER/CONTROL/icon.png

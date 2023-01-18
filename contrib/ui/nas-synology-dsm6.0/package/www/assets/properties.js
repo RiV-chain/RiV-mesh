@@ -1,4 +1,4 @@
-var ed = {
+var riv = {
 	partnerId: 1126,
 	brand: 'RiV Mesh',
 	applicationName: 'RiV Mesh Synology DSM App',
@@ -23,8 +23,8 @@ var ed = {
 		document.cookie = key + "=" + value + expires + "; path=/";
 	},
 	getNasAuthUrl: function () {
-		ed.setCookie('RiVSynoToken', "");
-		var url = ed.getCookie('origin');
+		riv.setCookie('RiVSynoToken', "");
+		var url = riv.getCookie('origin');
 		if (url === undefined) {
 			url = window.location.protocol + "//" + window.location.hostname + ":" + 5000;
 		}
@@ -61,25 +61,30 @@ function params(obj) {
 		}).join('&');
 	}
 };
-//Hide URL parameters
-var query = params(window.location.search.substring(1));
-var refresh = false;
-for (var k in query) {
-	if (k === 'SynoToken') {
-		ed.setCookie('RiVSynoToken', query[k]);
-		refresh = true;
-		delete query[k];
-	} else if (k === 'origin') {
-		ed.setCookie('origin', query[k]);
-		refresh = true;
-		delete query[k];
+
+function handleToken(){
+	//Hide URL parameters
+	var query = params(window.location.search.substring(1));
+	var refresh = false;
+	for (var k in query) {
+		if (k === 'SynoToken') {
+			riv.setCookie('RiVSynoToken', query[k]);
+			refresh = true;
+			delete query[k];
+		} else if (k === 'origin') {
+			riv.setCookie('origin', query[k]);
+			refresh = true;
+			delete query[k];
+		}
 	}
-}
 
-query = Object.keys(query).map(function(k) {
-    return encodeURIComponent(k) + '=' + encodeURIComponent(query[k])
-}).join('&');
+	query = Object.keys(query).map(function(k) {
+		return encodeURIComponent(k) + '=' + encodeURIComponent(query[k])
+	}).join('&');
 
-if (refresh)
-	window.location.replace(window.location.origin + window.location.pathname + window.location.hash + ((query === "") ? "" : ("?" + query)));
+	if (refresh)
+		window.location.replace(window.location.origin + window.location.pathname + window.location.hash + ((query === "") ? "" : ("?" + query)));
 
+};
+
+window.onload = handleToken;

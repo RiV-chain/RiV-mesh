@@ -257,7 +257,7 @@ func (a *RestServer) AddHandler(handler ApiHandler) error {
 							a.Log.Debugln("Auth success")
 						}
 					} else {
-						a.Log.Debugln("Auth module not found")
+						a.Log.Debugln("Auth module not found: ", webauth)
 					}
 
 					addNoCacheHeaders(w)

@@ -1,4 +1,4 @@
-var ed = {
+var riv = {
 	partnerId: 252,
 	applicationName: 'RiV-Mesh App',
 	nasOSName: 'Ready NAS OS 6',
