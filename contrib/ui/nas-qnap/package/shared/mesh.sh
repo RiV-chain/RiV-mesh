@@ -62,19 +62,14 @@ start_service ()
 
     #. /etc/init.d/vpn_common.sh && load_kernel_modules
 
-    if [ ! -f '/etc/config/apache/extra/apache-mesh.conf' ] ; then
-      ln -sf $QPKG_DIR/apache-mesh.conf /etc/config/apache/extra/
-      apache_reload=1
-    fi    
-    
-    if ! grep '/etc/config/apache/extra/apache-mesh.conf' /etc/config/apache/apache.conf ; then
-      echo 'Include /etc/config/apache/extra/apache-mesh.conf' >> /etc/config/apache/apache.conf
-      apache_reload=1
+    if ! grep 'apache-mesh.conf' /etc/app_proxy.conf ; then
+      echo "Include ${QPKG_DIR}/apache-mesh.conf" >> /etc/app_proxy.conf
     fi
 
-    if [ -n "$apache_reload" ] ; then
-      /usr/local/apache/bin/apachectl -k graceful
-    fi
+
+    /usr/local/apache/bin/apache_proxy -k graceful -f /etc/apache-sys-proxy.conf
+    /usr/local/apache/bin/apache_proxy -k graceful -f /etc/apache-sys-proxy-ssl.conf
+
     
     # Launch the mesh in the background.
     ${QPKG_DIR}/bin/mesh -useconffile "$CONF" \
