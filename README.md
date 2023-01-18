@@ -31,7 +31,7 @@ or tools in the `contrib` folder.
 If you want to build from source, as opposed to installing one of the pre-built
 packages:
 
-1. Install [Go](https://golang.org) (requires Go 1.17 or later)
+1. Install [Go](https://golang.org) (requires Go 1.18 or later)
 2. Clone this repository
 2. Run `./build`
 
