@@ -61,10 +61,11 @@ QPKG_AUTHOR="Riv Chain ltd"
 QPKG_SUMMARY="RiV-mesh is an implementation of a fully end-to-end encrypted IPv6 network."
 QPKG_RC_NUM="198"
 QPKG_SERVICE_PROGRAM="mesh.sh"
-QPKG_WEBUI="/mesh"
-QPKG_WEB_PORT=
+QPKG_WEBUI="/mesh/"
 QPKG_LICENSE="LGPLv3"
 QDK_BUILD_ARCH="$PKGARCH"
+QPKG_DESKTOP_APP="1"
+QPKG_WEB_PORT=-1
 EOF
 
 touch /tmp/$PKGFOLDER/mesh/qdk.conf
