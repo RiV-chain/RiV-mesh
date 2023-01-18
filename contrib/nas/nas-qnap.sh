@@ -22,10 +22,15 @@ if [ $PKGBRANCH = "master" ]; then
   PKGREPLACES=mesh-develop
 fi
 
-if [ $PKGARCH = "x86-64" ]; then GOOS=linux GOARCH=amd64 ./build
+if [ $PKGARCH = "x86_64" ]; then GOOS=linux GOARCH=amd64 ./build
 elif [ $PKGARCH = "arm-x31" ]; then GOOS=linux GOARCH=arm GOARM=7 ./build
+elif [ $PKGARCH = "arm-x41" ]; then GOOS=linux GOARCH=arm GOARM=7 ./build
+elif [ $PKGARCH = "x86" ]; then GOOS=linux GOARCH=386 ./build
+elif [ $PKGARCH = "arm_64" ]; then GOOS=linux GOARCH=arm64 ./build
+elif [ $PKGARCH = "arm-x09" ]; then GOOS=linux GOARCH=arm GOARM=5 ./build
+elif [ $PKGARCH = "arm-x19" ]; then GOOS=linux GOARCH=arm GOARM=5 ./build
 else
-  echo "Specify PKGARCH=x86-64 or arm-x31"
+  echo "Specify PKGARCH=x86_64, x86, arm-64, arm-x09, arm-x19, arm-x31 or arm-x41"
   exit 1
 fi
 
@@ -61,10 +66,11 @@ QPKG_AUTHOR="Riv Chain ltd"
 QPKG_SUMMARY="RiV-mesh is an implementation of a fully end-to-end encrypted IPv6 network."
 QPKG_RC_NUM="198"
 QPKG_SERVICE_PROGRAM="mesh.sh"
-QPKG_WEBUI="/mesh"
-QPKG_WEB_PORT=
+QPKG_WEBUI="/mesh/"
 QPKG_LICENSE="LGPLv3"
 QDK_BUILD_ARCH="$PKGARCH"
+QPKG_DESKTOP_APP="1"
+QPKG_WEB_PORT=-1
 EOF
 
 touch /tmp/$PKGFOLDER/mesh/qdk.conf

@@ -34,6 +34,7 @@ rm -rf /tmp/$PKGFOLDER
 mkdir -p /tmp/$PKGFOLDER/bin/
 mkdir -p /tmp/$PKGFOLDER/tmp/
 mkdir -p /tmp/$PKGFOLDER/lib/
+mkdir -p /tmp/$PKGFOLDER/ui/
 mkdir -p /tmp/$PKGFOLDER/var/log/
 mkdir -p /tmp/$PKGFOLDER/var/lib/mesh
 
@@ -45,7 +46,7 @@ cp -r -n contrib/ui/mesh-ui/ui/* /tmp/$PKGFOLDER/www/
 
 for resolution in 256x256; do
   echo "Converting icon for: $resolution"
-  convert -colorspace sRGB ./riv.png -resize $resolution PNG32:/tmp/$PKGFOLDER/www/mesh.png  && \
+  convert -colorspace sRGB ./riv.png -resize $resolution PNG32:/tmp/$PKGFOLDER/ui/mesh.png  && \
   chmod 644 /tmp/$PKGFOLDER/www/mesh.png
 done
 
@@ -83,9 +84,11 @@ chmod +x /tmp/$PKGFOLDER/*.sh
 curent_dir=$(pwd)
 echo "current folder=$curent_dir"
 
-cd /tmp/$PKGFOLDER/ && MyCloudOS5_mksapkg -E -s -m WDMyCloudEX4100
+cd /tmp/$PKGFOLDER/ && MyCloudOS5_mksapkg -E -s -m WDMyCloudEX4100 && MyCloudOS5_mksapkg -E -s -m WDMyCloudMirror
 
 cp /tmp/WDMyCloudEX4100_mesh_$PKGVERSION.bin* "$curent_dir"
+
+cp /tmp/WDMyCloudMirror_mesh_$PKGVERSION.bin* "$curent_dir"
 
 rm -rf /tmp/$PKGFOLDER
 
