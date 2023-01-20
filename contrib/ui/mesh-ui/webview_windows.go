@@ -50,7 +50,7 @@ func New(debug bool) WebView {
 	return webview2.NewWithOptions(webview2.WebViewOptions{
 		Debug: debug,
 		WindowOptions: webview2.WindowOptions{
-			IconId: 101,
+			IconId: 1,
 			Title:  "RiV-mesh",
 			Width:  706,
 			Height: 960,
