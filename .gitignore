@@ -1,3 +1,4 @@
 .history
 built
 contrib/ui/mesh-ui/ui/doc/swagger.yaml
+*.syso

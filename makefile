@@ -6,6 +6,7 @@ ALL_EXE=mesh meshctl mesh_ui
 OUT_DIR=built
 
 PATH:=/devroot/toolchain/x86_64-w64-mingw32-seh-cpp20/bin:$(PATH)
+PKGVERSION:=$(shell contrib/msi/msversion.sh --bare)
 
 take=$(word $1,$(subst -, ,$2))
 
@@ -36,6 +37,15 @@ gen-swagger:
 gen-ie11:export BROWSERSLIST=ie 11
 gen-ie11:
 	npx babel --config-file ./babel.config.json contrib/ui/mesh-ui/ui/assets/mesh-ui.js --out-file contrib/ui/mesh-ui/ui/assets/mesh-ui-es5.js
+
+ICO:=$(shell realpath riv.ico)
+GO_WINRES=go-winres simply --icon $(ICO) --file-version $(PKGVERSION) --file-description "RiV-mesh (c) service, 2023 RIV CHAIN" \
+	--product-version $(PKGVERSION) --product-name "RiV-mesh" --copyright "Copyright (c) 2023, RIV CHAIN"
+
+gen-winres:
+	cd cmd/mesh && $(GO_WINRES)
+	cd cmd/meshctl && $(GO_WINRES) --manifest cli
+	cd contrib/ui/mesh-ui && $(GO_WINRES) --manifest gui
 
 clean:
 
