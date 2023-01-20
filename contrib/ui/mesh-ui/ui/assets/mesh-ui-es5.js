@@ -557,7 +557,7 @@ ui.updateStatus = function (peers) {
       var isNonMulticastExists = peers.filter(function (peer) {
         return !peer.multicast;
       }).length;
-      status = isNonMulticastExists ? "st-multicast" : "st-connected";
+      status = !isNonMulticastExists ? "st-multicast" : "st-connected";
     } else {
       status = "st-connecting";
     }

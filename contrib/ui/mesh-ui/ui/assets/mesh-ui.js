@@ -284,7 +284,7 @@ ui.updateStatus = peers => {
   if(peers) {
     if(peers.length) {
       const isNonMulticastExists = peers.filter(peer => !peer.multicast).length;
-      status = isNonMulticastExists ? "st-multicast" : "st-connected";
+      status = !isNonMulticastExists ? "st-multicast" : "st-connected";
     } else {
       status = "st-connecting"
     }
