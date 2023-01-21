@@ -24,6 +24,7 @@ import (
 	"gerace.dev/zipfs"
 	"golang.org/x/exp/slices"
 
+	"github.com/RiV-chain/RiV-mesh/src/config"
 	"github.com/RiV-chain/RiV-mesh/src/core"
 	"github.com/RiV-chain/RiV-mesh/src/defaults"
 	"github.com/RiV-chain/RiV-mesh/src/multicast"
@@ -132,6 +133,8 @@ func NewRestServer(cfg RestServerCfg) (*RestServer, error) {
 
 	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api", Desc: "API documentation", handler: a.getApiHandler})
 	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/self", Desc: "Show details about this node", handler: a.getApiSelfHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/nodeinfo", Desc: "Request nodeinfo of this node", handler: a.getApiNodeinfoHandler})
+	a.AddHandler(ApiHandler{Method: "PUT", Pattern: "/api/nodeinfo", Desc: "Update nodeinfo of this node", handler: a.putApiNodeinfoHandler})
 	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/peers", Desc: `Show directly connected peers`, handler: a.getApiPeersHandler})
 	a.AddHandler(ApiHandler{Method: "POST", Pattern: "/api/peers", Desc: `Append peers to the peers list. 
 Request body [{ "uri":"tcp://xxx.xxx.xxx.xxx:yyyy", "interface":"eth0" }, ...], interface is optional
@@ -335,6 +338,37 @@ func (a *RestServer) getApiSelfHandler(w http.ResponseWriter, r *http.Request) {
 		"coords":        self.Coords,
 	}
 	writeJson(w, r, result)
+}
+
+// @Summary		Show node info of this node.
+// @Produce		json
+// @Success		200		{string}	string		"ok"
+// @Failure		401		{error}		error		"Authentication failed"
+// @Router		/nodeinfo [get]
+func (a *RestServer) getApiNodeinfoHandler(w http.ResponseWriter, r *http.Request) {
+	writeJson(w, r, a.Core.GetThisNodeInfo())
+}
+
+// @Summary		Replace node info of this node.
+// @Produce		json
+// @Success		200		{string}	string		"ok"
+// @Failure		400		{error}		error		"Bad request"
+// @Failure		401		{error}		error		"Authentication failed"
+// @Failure		500		{error}		error		"Internal error"
+// @Router		/nodeinfo [put]
+func (a *RestServer) putApiNodeinfoHandler(w http.ResponseWriter, r *http.Request) {
+	var info core.NodeInfo
+	err := json.NewDecoder(r.Body).Decode(&info)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	a.Core.SetThisNodeInfo(info)
+	w.WriteHeader(http.StatusNoContent)
+	a.saveConfig(func(cfg *config.NodeConfig) {
+		cfg.NodeInfo = info
+	}, r)
 }
 
 // @Summary		Show known DHT entries. The output contains following fields: Address, Public Key, Port, Rest
@@ -627,19 +661,27 @@ func (a *RestServer) doPostPeers(w http.ResponseWriter, r *http.Request) (peers 
 }
 
 func (a *RestServer) savePeers(peers []map[string]string, r *http.Request) {
+	a.saveConfig(func(cfg *config.NodeConfig) {
+		cfg.Peers = []string{}
+		cfg.InterfacePeers = map[string][]string{}
+		for _, peer := range peers {
+			if peer["interface"] == "" {
+				cfg.Peers = append(cfg.Peers, peer["url"])
+			} else {
+				cfg.InterfacePeers[peer["interface"]] = append(cfg.InterfacePeers[peer["interface"]], peer["url"])
+			}
+		}
+	}, r)
+}
+
+func (a *RestServer) saveConfig(setConfigFields func(*config.NodeConfig), r *http.Request) {
 	if len(a.ConfigFn) > 0 {
 		saveHeaders := r.Header["Riv-Save-Config"]
 		if len(saveHeaders) > 0 && saveHeaders[0] == "true" {
 			cfg, err := defaults.ReadConfig(a.ConfigFn)
 			if err == nil {
-				cfg.Peers = []string{}
-				cfg.InterfacePeers = map[string][]string{}
-				for _, peer := range peers {
-					if peer["interface"] == "" {
-						cfg.Peers = append(cfg.Peers, peer["url"])
-					} else {
-						cfg.InterfacePeers[peer["interface"]] = append(cfg.InterfacePeers[peer["interface"]], peer["url"])
-					}
+				if setConfigFields != nil {
+					setConfigFields(cfg)
 				}
 				err := defaults.WriteConfig(a.ConfigFn, cfg)
 				if err != nil {
