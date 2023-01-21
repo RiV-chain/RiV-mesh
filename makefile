@@ -6,7 +6,7 @@ ALL_EXE=mesh meshctl mesh_ui
 OUT_DIR=built
 
 PATH:=/devroot/toolchain/x86_64-w64-mingw32-seh-cpp20/bin:$(PATH)
-PKGVERSION:=$(shell contrib/msi/msversion.sh --bare)
+PKGVERSION:=$(shell sh contrib/msi/msversion.sh --bare)
 
 take=$(word $1,$(subst -, ,$2))
 
