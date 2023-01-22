@@ -4,7 +4,7 @@
 )](https://circleci.com/gh/RiV-chain/RiV-mesh)
 
 ## Why fork?
-RiV-mesh is fork of Yggdrasil which is great project. Starting from Yggdrasil 0.4 dev team removed CKR feature which is a core for secure tunneling like VPN does. RiV-mesh gets back CKR feature. Second reason: Yggdrasil uses deprecated 200::/7 IPv6 address pool which can be assigned for some network in future, unlike this fc00::/7 is safe and has been taken for RiV-mesh. So far RiV-mesh can be easy switched to Yggdrasil network address space with NetworkDomain.Prefix 2 in mesh.conf configuration file.
+RiV-mesh is fork of Yggdrasil which is great project. Yggdrasil uses a custom admin TCP protocol istead of REST. Second reason: Yggdrasil uses deprecated 200::/7 IPv6 address pool which can be assigned for some network in future, unlike this fc00::/7 is safe and has been taken for RiV-mesh. So far RiV-mesh can be easy switched to Yggdrasil network address space with NetworkDomain.Prefix 2 in mesh.conf configuration file.
 
 ## Introduction
 
