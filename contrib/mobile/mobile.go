@@ -24,6 +24,7 @@ import (
 // (non-native) types. Therefore for iOS we will expose some nice simple
 // functions. Note that in the case of iOS we handle reading/writing to/from TUN
 // in Swift therefore we use the "dummy" TUN interface instead.
+
 type Mesh struct {
 	core        *core.Core
 	iprwc       *ipv6rwc.ReadWriteCloser
@@ -104,7 +105,6 @@ func (m *Mesh) StartJSON(configjson []byte) error {
 		var err error
 		if m.rest_server, err = restapi.NewRestServer(restapi.RestServerCfg{
 			Core:          m.core,
-			Tun:           nil,
 			Multicast:     m.multicast,
 			Log:           logger,
 			ListenAddress: m.config.HttpAddress,
