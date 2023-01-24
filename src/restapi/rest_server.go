@@ -109,6 +109,7 @@ func NewRestServer(cfg RestServerCfg) (*RestServer, error) {
 
 	pakReader, err := zip.OpenReader(cfg.WwwRoot)
 
+	//unregister http Handlers here
 	http.DefaultServeMux = new(http.ServeMux)
 	if err == nil {
 		defer pakReader.Close()
