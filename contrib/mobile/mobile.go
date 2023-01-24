@@ -181,6 +181,7 @@ func (m *Mesh) Stop() error {
 	}
 	m.core.Stop()
 	m.rest_server.Shutdown()
+	m.rest_server = nil
 	return nil
 }
 

@@ -92,6 +92,7 @@ type RestServer struct {
 
 func NewRestServer(cfg RestServerCfg) (*RestServer, error) {
 	a := &RestServer{
+		server:            http.Server{},
 		RestServerCfg:     cfg,
 		serverEvents:      make(chan ServerEvent, 10),
 		serverEventNextId: 0,
@@ -191,14 +192,13 @@ func (a *RestServer) Serve() error {
 		return strings.Compare(a.handlers[i].Pattern, a.handlers[j].Pattern) < 0
 	})
 	l, e := net.Listen("tcp4", a.listenUrl.Host)
-	srv := &http.Server{}
 	if e != nil {
 		return fmt.Errorf("http server start error: %w", e)
 	} else {
 		a.Log.Infof("Started http server listening on %s. Document root %s %s\n", a.ListenAddress, a.WwwRoot, a.docFsType)
 	}
 	go func() {
-		err := srv.Serve(l)
+		err := a.server.Serve(l)
 		if err != nil {
 			a.Log.Errorln(err)
 		}
@@ -208,7 +208,9 @@ func (a *RestServer) Serve() error {
 
 // Shutdown http server
 func (a *RestServer) Shutdown() error {
-	return a.server.Shutdown(context.Background())
+	err := a.server.Shutdown(context.Background())
+	a.Log.Infof("Stop REST service")
+	return err
 }
 
 // AddHandler is called for each admin function to add the handler and help documentation to the API.
