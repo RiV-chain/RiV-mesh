@@ -2,6 +2,7 @@ package restapi
 
 import (
 	"bytes"
+	"context"
 	"embed"
 	"encoding/hex"
 	"encoding/json"
@@ -79,6 +80,7 @@ type RestServerCfg struct {
 }
 
 type RestServer struct {
+	server http.Server
 	RestServerCfg
 	listenUrl         *url.URL
 	serverEvents      chan ServerEvent
@@ -189,13 +191,14 @@ func (a *RestServer) Serve() error {
 		return strings.Compare(a.handlers[i].Pattern, a.handlers[j].Pattern) < 0
 	})
 	l, e := net.Listen("tcp4", a.listenUrl.Host)
+	srv := &http.Server{}
 	if e != nil {
 		return fmt.Errorf("http server start error: %w", e)
 	} else {
 		a.Log.Infof("Started http server listening on %s. Document root %s %s\n", a.ListenAddress, a.WwwRoot, a.docFsType)
 	}
 	go func() {
-		err := http.Serve(l, nil)
+		err := srv.Serve(l)
 		if err != nil {
 			a.Log.Errorln(err)
 		}
@@ -203,9 +206,9 @@ func (a *RestServer) Serve() error {
 	return nil
 }
 
-// Stop http server
-func (a *RestServer) Stop() error {
-	return a.
+// Shutdown http server
+func (a *RestServer) Shutdown() error {
+	return a.server.Shutdown(context.Background())
 }
 
 // AddHandler is called for each admin function to add the handler and help documentation to the API.

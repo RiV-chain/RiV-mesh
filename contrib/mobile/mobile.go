@@ -180,6 +180,7 @@ func (m *Mesh) Stop() error {
 		return err
 	}
 	m.core.Stop()
+	m.rest_server.Shutdown()
 	return nil
 }
 

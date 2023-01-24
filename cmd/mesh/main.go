@@ -292,7 +292,6 @@ func run(args rivArgs, sigCh chan os.Signal) {
 
 		if n.rest_server, err = restapi.NewRestServer(restapi.RestServerCfg{
 			Core:          n.core,
-			Tun:           n.tun,
 			Multicast:     n.multicast,
 			Log:           logger,
 			ListenAddress: cfg.HttpAddress,
@@ -341,6 +340,7 @@ func run(args rivArgs, sigCh chan os.Signal) {
 	_ = n.multicast.Stop()
 	_ = n.tun.Stop()
 	n.core.Stop()
+	n.rest_server.Shutdown()
 }
 
 func main() {
