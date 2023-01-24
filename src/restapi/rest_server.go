@@ -2,6 +2,7 @@ package restapi
 
 import (
 	"bytes"
+	"context"
 	"embed"
 	"encoding/hex"
 	"encoding/json"
@@ -28,7 +29,6 @@ import (
 	"github.com/RiV-chain/RiV-mesh/src/core"
 	"github.com/RiV-chain/RiV-mesh/src/defaults"
 	"github.com/RiV-chain/RiV-mesh/src/multicast"
-	"github.com/RiV-chain/RiV-mesh/src/tun"
 	"github.com/RiV-chain/RiV-mesh/src/version"
 	"github.com/ip2location/ip2location-go/v9"
 	"github.com/slonm/tableprinter"
@@ -71,7 +71,6 @@ type ApiHandler struct {
 
 type RestServerCfg struct {
 	Core          *core.Core
-	Tun           *tun.TunAdapter
 	Multicast     *multicast.Multicast
 	Log           core.Logger
 	ListenAddress string
@@ -81,6 +80,7 @@ type RestServerCfg struct {
 }
 
 type RestServer struct {
+	server http.Server
 	RestServerCfg
 	listenUrl         *url.URL
 	serverEvents      chan ServerEvent
@@ -92,6 +92,7 @@ type RestServer struct {
 
 func NewRestServer(cfg RestServerCfg) (*RestServer, error) {
 	a := &RestServer{
+		server:            http.Server{},
 		RestServerCfg:     cfg,
 		serverEvents:      make(chan ServerEvent, 10),
 		serverEventNextId: 0,
@@ -107,6 +108,9 @@ func NewRestServer(cfg RestServerCfg) (*RestServer, error) {
 	}
 
 	pakReader, err := zip.OpenReader(cfg.WwwRoot)
+
+	//unregister http Handlers here
+	http.DefaultServeMux = new(http.ServeMux)
 	if err == nil {
 		defer pakReader.Close()
 		fs, err := zipfs.NewZipFileSystem(&pakReader.Reader, zipfs.ServeIndexForMissing())
@@ -150,7 +154,6 @@ Request header "Riv-Save-Config: true" persists changes`, handler: a.deleteApiPe
 	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/sse", Desc: "Return server side events", handler: a.getApiSseHandler})
 	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/dht", Desc: "Show known DHT entries", handler: a.getApiDhtHandler})
 	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/sessions", Desc: "Show established traffic sessions with remote nodes", handler: a.getApiSessionsHandler})
-	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/tun", Desc: "Show information about the node's TUN interface", handler: a.getApiTunHandler})
 	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/multicastinterfaces", Desc: "Show which interfaces multicast is enabled on", handler: a.getApiMulticastinterfacesHandler})
 	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/remote/nodeinfo/{key}", Desc: "Request nodeinfo from a remote node by its public key", handler: a.getApiRemoteNodeinfoHandler})
 	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/remote/self/{key}", Desc: "Request self from a remote node by its public key", handler: a.getApiRemoteSelfHandler})
@@ -198,12 +201,19 @@ func (a *RestServer) Serve() error {
 		a.Log.Infof("Started http server listening on %s. Document root %s %s\n", a.ListenAddress, a.WwwRoot, a.docFsType)
 	}
 	go func() {
-		err := http.Serve(l, nil)
+		err := a.server.Serve(l)
 		if err != nil {
 			a.Log.Errorln(err)
 		}
 	}()
 	return nil
+}
+
+// Shutdown http server
+func (a *RestServer) Shutdown() error {
+	err := a.server.Shutdown(context.Background())
+	a.Log.Infof("Stop REST service")
+	return err
 }
 
 // AddHandler is called for each admin function to add the handler and help documentation to the API.
@@ -483,28 +493,6 @@ func (a *RestServer) getApiSessionsHandler(w http.ResponseWriter, r *http.Reques
 		return strings.Compare(result[i]["key"].(string), result[j]["key"].(string)) < 0
 	})
 	writeJson(w, r, result)
-}
-
-// @Summary		Show information about the node's TUN interface. The output contains following fields: name, MTU.
-// @Produce		json
-// @Success		200		{string}	string		"ok"
-// @Failure		400		{error}		error		"Method not allowed"
-// @Failure		401		{error}		error		"Authentication failed"
-// @Failure		500		{error}		error		"Internal server error"
-// @Router		/tun [get]
-func (a *RestServer) getApiTunHandler(w http.ResponseWriter, r *http.Request) {
-	if a.Tun == nil {
-		writeError(w, http.StatusInternalServerError)
-		return
-	}
-	isStarted := a.Tun.IsStarted()
-	res := map[string]any{"enabled": isStarted}
-	if isStarted {
-		res["name"] = a.Tun.Name()
-		res["MTU"] = a.Tun.MTU()
-	}
-
-	writeJson(w, r, res)
 }
 
 // @Summary		Show which interfaces multicast is enabled on.

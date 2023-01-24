@@ -15,6 +15,7 @@ import (
 	"github.com/RiV-chain/RiV-mesh/src/defaults"
 	"github.com/RiV-chain/RiV-mesh/src/ipv6rwc"
 	"github.com/RiV-chain/RiV-mesh/src/multicast"
+	"github.com/RiV-chain/RiV-mesh/src/restapi"
 	"github.com/RiV-chain/RiV-mesh/src/version"
 )
 
@@ -23,12 +24,14 @@ import (
 // (non-native) types. Therefore for iOS we will expose some nice simple
 // functions. Note that in the case of iOS we handle reading/writing to/from TUN
 // in Swift therefore we use the "dummy" TUN interface instead.
+
 type Mesh struct {
-	core      *core.Core
-	iprwc     *ipv6rwc.ReadWriteCloser
-	config    *config.NodeConfig
-	multicast *multicast.Multicast
-	log       MobileLogger
+	core        *core.Core
+	iprwc       *ipv6rwc.ReadWriteCloser
+	config      *config.NodeConfig
+	multicast   *multicast.Multicast
+	rest_server *restapi.RestServer
+	log         MobileLogger
 }
 
 // StartAutoconfigure starts a node with a randomly generated config
@@ -92,9 +95,28 @@ func (m *Mesh) StartJSON(configjson []byte) error {
 				Priority: uint8(intf.Priority),
 			})
 		}
-		m.multicast, err = multicast.New(m.core, logger, options...)
-		if err != nil {
-			logger.Errorln("An error occurred starting multicast:", err)
+		if m.multicast, err = multicast.New(m.core, logger, options...); err != nil {
+			fmt.Println("Multicast module fail:", err)
+		}
+	}
+
+	// Setup the REST socket.
+	{
+		var err error
+		if m.rest_server, err = restapi.NewRestServer(restapi.RestServerCfg{
+			Core:          m.core,
+			Multicast:     m.multicast,
+			Log:           logger,
+			ListenAddress: m.config.HttpAddress,
+			WwwRoot:       m.config.WwwRoot,
+			ConfigFn:      "",
+		}); err != nil {
+			logger.Errorln(err)
+		} else {
+			err = m.rest_server.Serve()
+			if err != nil {
+				logger.Errorln(err)
+			}
 		}
 	}
 
@@ -158,6 +180,8 @@ func (m *Mesh) Stop() error {
 		return err
 	}
 	m.core.Stop()
+	m.rest_server.Shutdown()
+	m.rest_server = nil
 	return nil
 }
 
