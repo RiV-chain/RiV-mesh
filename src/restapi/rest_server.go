@@ -347,7 +347,7 @@ func (a *RestServer) getApiSelfHandler(w http.ResponseWriter, r *http.Request) {
 		"address":       a.Core.Address().String(),
 		"subnet":        snet.String(),
 		"coords":        self.Coords,
-		"features":      a.features,
+		"features":      a.Features,
 	}
 	writeJson(w, r, result)
 }
