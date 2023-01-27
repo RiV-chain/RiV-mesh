@@ -59,10 +59,6 @@ build_meshctl() {
   LDFLAGS2="${STATIC}" buildbin ./cmd/meshctl
 }
 
-build_mesh_ui() {
-  buildbin ./contrib/ui/mesh-ui
-}
-
 case $TARGET in 
   "mesh")
     build_mesh
@@ -70,12 +66,8 @@ case $TARGET in
   "meshctl")
     build_meshctl
     ;;
-  "mesh_ui")
-    build_mesh_ui
-    ;;
   *)
     build_mesh
     build_meshctl
-    build_mesh_ui
     ;;
 esac
