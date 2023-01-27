@@ -297,6 +297,7 @@ func run(args rivArgs, sigCh chan os.Signal) {
 			ListenAddress: cfg.HttpAddress,
 			WwwRoot:       cfg.WwwRoot,
 			ConfigFn:      args.useconffile,
+			Features:      []string{},
 		}); err != nil {
 			logger.Errorln(err)
 		} else {

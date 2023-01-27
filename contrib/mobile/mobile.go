@@ -110,6 +110,7 @@ func (m *Mesh) StartJSON(configjson []byte) error {
 			ListenAddress: m.config.HttpAddress,
 			WwwRoot:       m.config.WwwRoot,
 			ConfigFn:      "",
+			Features:      []string{},
 		}); err != nil {
 			logger.Errorln(err)
 		} else {

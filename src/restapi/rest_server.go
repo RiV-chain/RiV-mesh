@@ -77,6 +77,7 @@ type RestServerCfg struct {
 	WwwRoot       string
 	ConfigFn      string
 	handlers      []ApiHandler
+	Features      []string
 }
 
 type RestServer struct {
@@ -329,7 +330,7 @@ func (a *RestServer) getApiHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// @Summary		Show details about this node. The output contains following fields: Address, Public Key, Port, Priority, Coordinates, Remote URL, Remote IP, Bytes received, Bytes sent, Uptime, Multicast flag, Country code, Country
+// @Summary		Show details about this node. The output contains following fields: build name, build version, public key, private key, address, subnet, coords, features.
 // @Produce		json
 // @Success		200		{string}	string		"ok"
 // @Failure		400		{error}		error		"Method not allowed"
@@ -346,6 +347,7 @@ func (a *RestServer) getApiSelfHandler(w http.ResponseWriter, r *http.Request) {
 		"address":       a.Core.Address().String(),
 		"subnet":        snet.String(),
 		"coords":        self.Coords,
+		"features":      a.features,
 	}
 	writeJson(w, r, result)
 }
@@ -572,7 +574,7 @@ func (a *RestServer) prepareGetPeers() []Peer {
 	return response
 }
 
-// @Summary		Get current peers list.
+// @Summary		Get current peers list. The output contains following fields: address, public key, port, priority, coordinates, remote URL, remote IP, bytes received, bytes sent, uptime, multicast flag, country code, country.
 // @Produce		json
 // @Success		200		{string}	string		"ok"
 // @Failure		401		{error}		error		"Authentication failed"
