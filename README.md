@@ -39,6 +39,8 @@ Note that you can cross-compile for other platforms and architectures by
 specifying the `GOOS` and `GOARCH` environment variables, e.g. `GOOS=windows
 ./build` or `GOOS=linux GOARCH=mipsle ./build`.
 
+Other OS packages can be built in this repo: https://github.com/RiV-chain/RiV-mesh-builds.
+
 ## Running
 
 ### Generate configuration
