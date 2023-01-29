@@ -279,7 +279,7 @@ func (a *RestServer) AddHandler(handler ApiHandler) error {
 					return
 				}
 			}
-			writeError(w, http.StatusMethodNotAllowed)
+			WriteError(w, http.StatusMethodNotAllowed)
 		})
 	}
 	return nil
@@ -297,7 +297,7 @@ func (a *RestServer) getApiHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Query().Has("fmt") && r.URL.Query()["fmt"][0] == "table" {
 		w.Header().Add("Content-Type", "text/plain; charset=utf-8")
 		fmt.Fprintf(w, "Common query params: fmt=table|json - Response format\n\n")
-		writeJson(w, r, a.handlers)
+		WriteJson(w, r, a.handlers)
 		// for _, h := range a.handlers {
 		// 	fmt.Fprintf(w, "%s %s\t\t%s\n\n", h.method, h.pattern, h.desc)
 		// }
@@ -349,7 +349,7 @@ func (a *RestServer) getApiSelfHandler(w http.ResponseWriter, r *http.Request) {
 		"coords":        self.Coords,
 		"features":      a.Features,
 	}
-	writeJson(w, r, result)
+	WriteJson(w, r, result)
 }
 
 // @Summary		Show node info of this node.
@@ -358,7 +358,7 @@ func (a *RestServer) getApiSelfHandler(w http.ResponseWriter, r *http.Request) {
 // @Failure		401		{error}		error		"Authentication failed"
 // @Router		/nodeinfo [get]
 func (a *RestServer) getApiNodeinfoHandler(w http.ResponseWriter, r *http.Request) {
-	writeJson(w, r, a.Core.GetThisNodeInfo())
+	WriteJson(w, r, a.Core.GetThisNodeInfo())
 }
 
 // @Summary		Replace node info of this node.
@@ -405,7 +405,7 @@ func (a *RestServer) getApiDhtHandler(w http.ResponseWriter, r *http.Request) {
 	sort.SliceStable(result, func(i, j int) bool {
 		return strings.Compare(result[i]["key"].(string), result[j]["key"].(string)) < 0
 	})
-	writeJson(w, r, result)
+	WriteJson(w, r, result)
 }
 
 // @Summary		Show public peers which is result of output PublicPeersURL in mesh.conf.
@@ -429,7 +429,7 @@ func (a *RestServer) getApiPublicPeersHandler(w http.ResponseWriter, r *http.Req
 		}
 		if response.StatusCode > 200 {
 			a.Log.Errorln("Error read public peers url. Response code: ", response.StatusCode, ", Error message: ", response.Status)
-			writeError(w, response.StatusCode)
+			WriteError(w, response.StatusCode)
 			return
 		}
 		result, err = io.ReadAll(response.Body)
@@ -468,7 +468,7 @@ func (a *RestServer) getApiPathsHandler(w http.ResponseWriter, r *http.Request) 
 	sort.SliceStable(result, func(i, j int) bool {
 		return strings.Compare(result[i]["key"].(string), result[j]["key"].(string)) < 0
 	})
-	writeJson(w, r, result)
+	WriteJson(w, r, result)
 }
 
 // @Summary		Show established traffic sessions with remote nodes. The output contains following fields: Address, Byte received, Byte sent, Public Key, Uptime
@@ -494,7 +494,7 @@ func (a *RestServer) getApiSessionsHandler(w http.ResponseWriter, r *http.Reques
 	sort.SliceStable(result, func(i, j int) bool {
 		return strings.Compare(result[i]["key"].(string), result[j]["key"].(string)) < 0
 	})
-	writeJson(w, r, result)
+	WriteJson(w, r, result)
 }
 
 // @Summary		Show which interfaces multicast is enabled on.
@@ -513,7 +513,7 @@ func (a *RestServer) getApiMulticastinterfacesHandler(w http.ResponseWriter, r *
 	for _, v := range a.Multicast.Interfaces() {
 		res = append(res, v.Name)
 	}
-	writeJson(w, r, res)
+	WriteJson(w, r, res)
 }
 
 type Peer struct {
@@ -581,7 +581,7 @@ func (a *RestServer) prepareGetPeers() []Peer {
 // @Failure		403		{error}		error		"Bad request"
 // @Router		/peers [get]
 func (a *RestServer) getApiPeersHandler(w http.ResponseWriter, r *http.Request) {
-	writeJson(w, r, a.prepareGetPeers())
+	WriteJson(w, r, a.prepareGetPeers())
 }
 
 // @Summary		Add new peers.
@@ -691,7 +691,7 @@ func applyKeyParameterized(w http.ResponseWriter, r *http.Request, fn func(key s
 		return
 	}
 	if result, err := fn(cnt[4]); err == nil {
-		writeJson(w, r, result)
+		WriteJson(w, r, result)
 	} else {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
@@ -873,11 +873,11 @@ func (a *RestServer) getCountry(ipaddr string) (country_short string, country_lo
 	return
 }
 
-func writeError(w http.ResponseWriter, status int) {
+func WriteError(w http.ResponseWriter, status int) {
 	http.Error(w, http.StatusText(status), status)
 }
 
-func writeJson(w http.ResponseWriter, r *http.Request, data any) {
+func WriteJson(w http.ResponseWriter, r *http.Request, data any) {
 	if r.URL.Query().Has("fmt") && r.URL.Query()["fmt"][0] == "table" {
 		w.Header().Add("Content-Type", "text/plain; charset=utf-8")
 		printer := tableprinter.New(w)
