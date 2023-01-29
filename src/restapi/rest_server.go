@@ -66,7 +66,7 @@ type ApiHandler struct {
 	Pattern string `json:"pattern"` // Context path pattern
 	Desc    string `json:"desc"`    // What does the endpoint do?
 	//	args    []string            // List of human-readable argument names
-	handler func(w http.ResponseWriter, r *http.Request) // First is input map, second is output
+	Handler func(w http.ResponseWriter, r *http.Request) // First is input map, second is output
 }
 
 type RestServerCfg struct {
@@ -136,30 +136,30 @@ func NewRestServer(cfg RestServerCfg) (*RestServer, error) {
 		}
 	}
 
-	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api", Desc: "API documentation", handler: a.getApiHandler})
-	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/self", Desc: "Show details about this node", handler: a.getApiSelfHandler})
-	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/nodeinfo", Desc: "Request nodeinfo of this node", handler: a.getApiNodeinfoHandler})
-	a.AddHandler(ApiHandler{Method: "PUT", Pattern: "/api/nodeinfo", Desc: "Update nodeinfo of this node", handler: a.putApiNodeinfoHandler})
-	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/peers", Desc: `Show directly connected peers`, handler: a.getApiPeersHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api", Desc: "API documentation", Handler: a.getApiHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/self", Desc: "Show details about this node", Handler: a.getApiSelfHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/nodeinfo", Desc: "Request nodeinfo of this node", Handler: a.getApiNodeinfoHandler})
+	a.AddHandler(ApiHandler{Method: "PUT", Pattern: "/api/nodeinfo", Desc: "Update nodeinfo of this node", Handler: a.putApiNodeinfoHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/peers", Desc: `Show directly connected peers`, Handler: a.getApiPeersHandler})
 	a.AddHandler(ApiHandler{Method: "POST", Pattern: "/api/peers", Desc: `Append peers to the peers list. 
 Request body [{ "uri":"tcp://xxx.xxx.xxx.xxx:yyyy", "interface":"eth0" }, ...], interface is optional
-Request header "Riv-Save-Config: true" persists changes`, handler: a.postApiPeersHandler})
+Request header "Riv-Save-Config: true" persists changes`, Handler: a.postApiPeersHandler})
 	a.AddHandler(ApiHandler{Method: "PUT", Pattern: "/api/peers", Desc: `Set peers list. 
 Request body [{ "uri":"tcp://xxx.xxx.xxx.xxx:yyyy", "interface":"eth0" }, ...], interface is optional.
-Request header "Riv-Save-Config: true" persists changes`, handler: a.putApiPeersHandler})
+Request header "Riv-Save-Config: true" persists changes`, Handler: a.putApiPeersHandler})
 	a.AddHandler(ApiHandler{Method: "DELETE", Pattern: "/api/peers", Desc: `Remove all peers from this node
-Request header "Riv-Save-Config: true" persists changes`, handler: a.deleteApiPeersHandler})
-	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/publicpeers", Desc: "Show public peers loaded from URL which configured in mesh.conf file", handler: a.getApiPublicPeersHandler})
-	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/paths", Desc: "Show established paths through this node", handler: a.getApiPathsHandler})
-	a.AddHandler(ApiHandler{Method: "POST", Pattern: "/api/health", Desc: "Run peers health check task", handler: a.postApiHealthHandler})
-	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/sse", Desc: "Return server side events", handler: a.getApiSseHandler})
-	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/dht", Desc: "Show known DHT entries", handler: a.getApiDhtHandler})
-	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/sessions", Desc: "Show established traffic sessions with remote nodes", handler: a.getApiSessionsHandler})
-	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/multicastinterfaces", Desc: "Show which interfaces multicast is enabled on", handler: a.getApiMulticastinterfacesHandler})
-	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/remote/nodeinfo/{key}", Desc: "Request nodeinfo from a remote node by its public key", handler: a.getApiRemoteNodeinfoHandler})
-	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/remote/self/{key}", Desc: "Request self from a remote node by its public key", handler: a.getApiRemoteSelfHandler})
-	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/remote/peers/{key}", Desc: "Request peers from a remote node by its public key", handler: a.getApiRemotePeersHandler})
-	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/remote/dht/{key}", Desc: "Request dht from a remote node by its public key", handler: a.getApiRemoteDHTHandler})
+Request header "Riv-Save-Config: true" persists changes`, Handler: a.deleteApiPeersHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/publicpeers", Desc: "Show public peers loaded from URL which configured in mesh.conf file", Handler: a.getApiPublicPeersHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/paths", Desc: "Show established paths through this node", Handler: a.getApiPathsHandler})
+	a.AddHandler(ApiHandler{Method: "POST", Pattern: "/api/health", Desc: "Run peers health check task", Handler: a.postApiHealthHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/sse", Desc: "Return server side events", Handler: a.getApiSseHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/dht", Desc: "Show known DHT entries", Handler: a.getApiDhtHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/sessions", Desc: "Show established traffic sessions with remote nodes", Handler: a.getApiSessionsHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/multicastinterfaces", Desc: "Show which interfaces multicast is enabled on", Handler: a.getApiMulticastinterfacesHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/remote/nodeinfo/{key}", Desc: "Request nodeinfo from a remote node by its public key", Handler: a.getApiRemoteNodeinfoHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/remote/self/{key}", Desc: "Request self from a remote node by its public key", Handler: a.getApiRemoteSelfHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/remote/peers/{key}", Desc: "Request peers from a remote node by its public key", Handler: a.getApiRemotePeersHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/remote/dht/{key}", Desc: "Request dht from a remote node by its public key", Handler: a.getApiRemoteDHTHandler})
 
 	var _ = a.Core.PeersChangedSignal.Connect(func(data any) {
 		b, err := json.Marshal(a.prepareGetPeers())
@@ -275,7 +275,7 @@ func (a *RestServer) AddHandler(handler ApiHandler) error {
 					}
 
 					addNoCacheHeaders(w)
-					h.handler(w, r)
+					h.Handler(w, r)
 					return
 				}
 			}
