@@ -70,25 +70,30 @@ type ApiHandler struct {
 }
 
 type RestServerCfg struct {
-	Core          *core.Core
-	Multicast     *multicast.Multicast
-	Log           core.Logger
-	ListenAddress string
-	WwwRoot       string
-	ConfigFn      string
-	handlers      []ApiHandler
-	Features      []string
+	Core             *core.Core
+	Multicast        *multicast.Multicast
+	Log              core.Logger
+	ListenAddress    string
+	ListenSecAddress string
+	CertFile         string
+	KeyFile          string
+	WwwRoot          string
+	ConfigFn         string
+	handlers         []ApiHandler
+	Features         []string
 }
 
 type RestServer struct {
 	server http.Server
 	RestServerCfg
 	listenUrl         *url.URL
+	listenSecUrl      *url.URL
 	serverEvents      chan ServerEvent
 	serverEventNextId int
 	updateTimer       *time.Timer
 	docFsType         string
 	ip2locatinoDb     *ip2location.DB
+	serverHttps       *http.Server
 }
 
 func NewRestServer(cfg RestServerCfg) (*RestServer, error) {
@@ -106,6 +111,34 @@ func NewRestServer(cfg RestServerCfg) (*RestServer, error) {
 	a.listenUrl, err = url.Parse(cfg.ListenAddress)
 	if err != nil {
 		return nil, fmt.Errorf("an error occurred parsing http address: %w", err)
+	}
+
+	if cfg.ListenSecAddress != "none" && cfg.ListenSecAddress != "" {
+		a.listenSecUrl, err = url.Parse(cfg.ListenSecAddress)
+		if err != nil {
+			a.Log.Errorf("an error occurred parsing https address: %w\n", err)
+		} else {
+
+			var cfgRelToAbs = func(path string) (res string) {
+
+				if filepath.IsAbs(path) {
+					res = filepath.Clean(path)
+					return
+				}
+				wd := filepath.Dir(cfg.ConfigFn)
+				res = filepath.Join(wd, path)
+				if _, err := os.Stat(res); err != nil {
+					res = ""
+				}
+				return
+			}
+			a.CertFile = cfgRelToAbs(cfg.CertFile)
+			a.KeyFile = cfgRelToAbs(cfg.KeyFile)
+			if a.CertFile == "" || a.KeyFile == "" {
+				a.Log.Errorf("TLS certificates not found: %w\n", err)
+				a.listenSecUrl = nil
+			}
+		}
 	}
 
 	pakReader, err := zip.OpenReader(cfg.WwwRoot)
@@ -207,12 +240,27 @@ func (a *RestServer) Serve() error {
 			a.Log.Errorln(err)
 		}
 	}()
+
+	if a.listenSecUrl != nil {
+		a.serverHttps = &http.Server{Addr: a.listenSecUrl.Host}
+		go func() {
+			err := a.serverHttps.ListenAndServeTLS(a.CertFile, a.KeyFile)
+			if err != nil {
+				a.Log.Errorln(err)
+			}
+		}()
+		a.Log.Infof("Started https server listening on %s. Document root %s %s\n", a.ListenSecAddress, a.WwwRoot, a.docFsType)
+	}
 	return nil
 }
 
 // Shutdown http server
 func (a *RestServer) Shutdown() error {
 	err := a.server.Shutdown(context.Background())
+	if a.serverHttps != nil {
+		err1 := a.serverHttps.Shutdown(context.Background())
+		a.Log.Errorf("stop REST TLS service listening error %w\n", err1)
+	}
 	a.Log.Infof("Stop REST service")
 	return err
 }

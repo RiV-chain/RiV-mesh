@@ -291,13 +291,16 @@ func run(args rivArgs, sigCh chan os.Signal) {
 		}
 
 		if n.rest_server, err = restapi.NewRestServer(restapi.RestServerCfg{
-			Core:          n.core,
-			Multicast:     n.multicast,
-			Log:           logger,
-			ListenAddress: cfg.HttpAddress,
-			WwwRoot:       cfg.WwwRoot,
-			ConfigFn:      args.useconffile,
-			Features:      []string{},
+			Core:             n.core,
+			Multicast:        n.multicast,
+			Log:              logger,
+			ListenAddress:    cfg.HttpAddress,
+			ListenSecAddress: cfg.HttpsAddress,
+			CertFile:         cfg.CertFile,
+			KeyFile:          cfg.KeyFile,
+			WwwRoot:          cfg.WwwRoot,
+			ConfigFn:         args.useconffile,
+			Features:         []string{},
 		}); err != nil {
 			logger.Errorln(err)
 		} else {

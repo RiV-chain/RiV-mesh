@@ -21,6 +21,15 @@ type defaultParameters struct {
 	//Default Http address
 	DefaultHttpAddress string
 
+	//Default Https address
+	DefaultHttpsAddress string
+
+	//Default TLS certificates file name
+	CertFile string
+
+	//Default TLS key file name
+	KeyFile string
+
 	//Public peers URL
 	DefaultPublicPeersUrl string
 
@@ -50,6 +59,12 @@ func Define() defaultParameters {
 	return defaultParameters{
 
 		DefaultHttpAddress: "http://localhost:19019",
+
+		DefaultHttpsAddress: "https://localhost:19319",
+
+		CertFile: "cert.pem",
+
+		KeyFile: "key.pem",
 
 		DefaultPublicPeersUrl: "https://map.rivchain.org/rest/peers.json",
 
@@ -86,6 +101,9 @@ func GenerateConfig() *config.NodeConfig {
 	cfg.IfMTU = defaults.DefaultIfMTU
 	cfg.NodeInfoPrivacy = false
 	cfg.HttpAddress = Define().DefaultHttpAddress
+	cfg.HttpsAddress = Define().DefaultHttpsAddress
+	cfg.CertFile = Define().CertFile
+	cfg.KeyFile = Define().KeyFile
 	cfg.NetworkDomain = Define().DefaultNetworkDomain
 	cfg.PublicPeersUrl = Define().DefaultPublicPeersUrl
 
