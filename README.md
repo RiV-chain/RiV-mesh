@@ -22,7 +22,7 @@ RiV-mesh does not require you to have IPv6 Internet connectivity - it also works
 RiV-mesh works on a number of platforms, including Linux, macOS, Ubiquiti
 EdgeRouter, VyOS, Windows, FreeBSD, OpenBSD and OpenWrt.
 
-Please see our [Installation](https://RiV-chain.github.io/installation.html) 
+Please see our [Installation](https://github.com/RiV-chain/RiV-mesh-builds#riv-mesh-build) 
 page for more information. You may also find other platform-specific wrappers, scripts
 or tools in the `contrib` folder.
 
