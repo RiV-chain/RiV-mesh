@@ -378,7 +378,7 @@ func (a *RestServer) putApiNodeinfoHandler(w http.ResponseWriter, r *http.Reques
 
 	a.Core.SetThisNodeInfo(info)
 	w.WriteHeader(http.StatusNoContent)
-	a.saveConfig(func(cfg *config.NodeConfig) {
+	a.SaveConfig(func(cfg *config.NodeConfig) {
 		cfg.NodeInfo = info
 	}, r)
 }
@@ -651,7 +651,7 @@ func (a *RestServer) doPostPeers(w http.ResponseWriter, r *http.Request) (peers 
 }
 
 func (a *RestServer) savePeers(peers []map[string]string, r *http.Request) {
-	a.saveConfig(func(cfg *config.NodeConfig) {
+	a.SaveConfig(func(cfg *config.NodeConfig) {
 		cfg.Peers = []string{}
 		cfg.InterfacePeers = map[string][]string{}
 		for _, peer := range peers {
@@ -664,7 +664,7 @@ func (a *RestServer) savePeers(peers []map[string]string, r *http.Request) {
 	}, r)
 }
 
-func (a *RestServer) saveConfig(setConfigFields func(*config.NodeConfig), r *http.Request) {
+func (a *RestServer) SaveConfig(setConfigFields func(*config.NodeConfig), r *http.Request) {
 	if len(a.ConfigFn) > 0 {
 		saveHeaders := r.Header["Riv-Save-Config"]
 		if len(saveHeaders) > 0 && saveHeaders[0] == "true" {
