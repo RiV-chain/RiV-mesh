@@ -41,6 +41,7 @@ type NodeConfig struct {
 	NodeInfo            map[string]interface{}     `comment:"Optional node info. This must be a { \"key\": \"value\", ... } map\nor set as null. This is entirely optional but, if set, is visible\nto the whole network on request."`
 	NetworkDomain       NetworkDomainConfig        `comment:"Address prefix used by mesh.\nThe current implementation requires this to be a multiple of 8 bits + 7 bits.4\nNodes that configure this differently will be unable to communicate with each other using IP packets."`
 	PublicPeersUrl      string                     `comment:"Public peers URL which contains all peers in JSON format grouped by a country."`
+	FeaturesConfig      map[string]interface{}     `comment:"Optional features config. This must be a { \"key\": \"value\", ... } map\not set as null. This is mandatory for extended featured builds containing features specific settings."`
 }
 
 type MulticastInterfaceConfig struct {
