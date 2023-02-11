@@ -195,14 +195,10 @@ func (a *RestServer) Serve() error {
 		}
 		return strings.Compare(a.handlers[i].Pattern, a.handlers[j].Pattern) < 0
 	})
-	l, e := net.Listen("tcp4", a.listenUrl.Host)
-	if e != nil {
-		return fmt.Errorf("http server start error: %w", e)
-	} else {
-		a.Log.Infof("Started http server listening on %s. Document root %s %s\n", a.ListenAddress, a.WwwRoot, a.docFsType)
-	}
 	go func() {
-		err := a.server.Serve(l)
+		a.Log.Infof("Starting http server listening on %s. Document root %s %s\n", a.ListenAddress, a.WwwRoot, a.docFsType)
+		a.server.Addr = a.listenUrl.Host
+		err := a.server.ListenAndServe()
 		if err != nil {
 			a.Log.Errorln(err)
 		}
@@ -235,6 +231,22 @@ func (a *RestServer) AddHandler(handler ApiHandler) error {
 
 	if notRegistered {
 		http.HandleFunc(strings.Split(handler.Pattern, "{")[0], func(w http.ResponseWriter, r *http.Request) {
+			{
+				ip, _, err := net.SplitHostPort(r.RemoteAddr)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusForbidden)
+					return
+				}
+				netIP := net.ParseIP(ip)
+				if netIP == nil {
+					http.Error(w, "Forbidden", http.StatusForbidden)
+					return
+				}
+				if bytes.Compare(netIP, a.Core.Address()) != 0 {
+					http.Error(w, "Forbidden", http.StatusForbidden)
+					return
+				}
+			}
 			for i := range a.handlers {
 				h := &a.handlers[len(a.handlers)-i-1]
 				if h.Method == r.Method && matchPattern(h.Pattern, r.URL.Path) {

@@ -280,6 +280,17 @@ func run(args rivArgs, sigCh chan os.Signal) {
 		}
 	}
 
+	// Setup the TUN module.
+	{
+		options := []tun.SetupOption{
+			tun.InterfaceName(cfg.IfName),
+			tun.InterfaceMTU(cfg.IfMTU),
+		}
+		if n.tun, err = tun.New(n.core, logger, options...); err != nil {
+			panic(err)
+		}
+	}
+
 	// Setup the REST socket.
 	{
 		//override httpaddress and wwwroot parameters in cfg
@@ -289,6 +300,7 @@ func run(args rivArgs, sigCh chan os.Signal) {
 		if len(cfg.WwwRoot) == 0 {
 			cfg.WwwRoot = args.wwwroot
 		}
+		cfg.HttpAddress = strings.Replace(cfg.HttpAddress, "<tun>", "["+n.core.Address().String()+"]", 1)
 
 		if n.rest_server, err = restapi.NewRestServer(restapi.RestServerCfg{
 			Core:          n.core,
@@ -305,17 +317,6 @@ func run(args rivArgs, sigCh chan os.Signal) {
 			if err != nil {
 				logger.Errorln(err)
 			}
-		}
-	}
-
-	// Setup the TUN module.
-	{
-		options := []tun.SetupOption{
-			tun.InterfaceName(cfg.IfName),
-			tun.InterfaceMTU(cfg.IfMTU),
-		}
-		if n.tun, err = tun.New(n.core, logger, options...); err != nil {
-			panic(err)
 		}
 	}
 
