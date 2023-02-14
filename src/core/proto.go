@@ -4,7 +4,6 @@ import (
 	"crypto/ed25519"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net"
 	"time"
@@ -259,7 +258,7 @@ func (p *protoHandler) getSelfHandler(in json.RawMessage) (interface{}, error) {
 	defer timer.Stop()
 	select {
 	case <-timer.C:
-		return nil, errors.New("timeout")
+		return nil, ErrTimeout
 	case info := <-ch:
 		var msg json.RawMessage
 		if err := msg.UnmarshalJSON(info); err != nil {
@@ -299,7 +298,7 @@ func (p *protoHandler) getPeersHandler(in json.RawMessage) (interface{}, error) 
 	defer timer.Stop()
 	select {
 	case <-timer.C:
-		return nil, errors.New("timeout")
+		return nil, ErrTimeout
 	case info := <-ch:
 		ks := make(map[string][]string)
 		bs := info
@@ -349,7 +348,7 @@ func (p *protoHandler) getDHTHandler(in json.RawMessage) (interface{}, error) {
 	defer timer.Stop()
 	select {
 	case <-timer.C:
-		return nil, errors.New("timeout")
+		return nil, ErrTimeout
 	case info := <-ch:
 		ks := make(map[string][]string)
 		bs := info

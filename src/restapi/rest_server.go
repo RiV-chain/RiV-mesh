@@ -702,8 +702,11 @@ func applyKeyParameterized(w http.ResponseWriter, r *http.Request, fn func(key s
 		http.Error(w, "No remote public key supplied", http.StatusBadRequest)
 		return
 	}
-	if result, err := fn(cnt[4]); err == nil {
+	result, err := fn(cnt[4])
+	if err == nil {
 		WriteJson(w, r, result)
+	} else if errors.As(err, &core.ErrTimeout) {
+		http.Error(w, "Node inaccessible", http.StatusBadGateway)
 	} else {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
@@ -715,6 +718,7 @@ func applyKeyParameterized(w http.ResponseWriter, r *http.Request, fn func(key s
 // @Success		200		{string}	string		"ok"
 // @Failure		400		{error}		error		"Method not allowed"
 // @Failure		401		{error}		error		"Authentication failed"
+// @Failure		404		{error}		error		"Not found"
 // @Router		/remote/nodeinfo/{key} [get]
 func (a *RestServer) getApiRemoteNodeinfoHandler(w http.ResponseWriter, r *http.Request) {
 	applyKeyParameterized(w, r, a.Core.GetNodeInfo)
@@ -726,6 +730,7 @@ func (a *RestServer) getApiRemoteNodeinfoHandler(w http.ResponseWriter, r *http.
 // @Success		200		{string}	string		"ok"
 // @Failure		400		{error}		error		"Method not allowed"
 // @Failure		401		{error}		error		"Authentication failed"
+// @Failure		404		{error}		error		"Not found"
 // @Router		/remote/self/{key} [get]
 func (a *RestServer) getApiRemoteSelfHandler(w http.ResponseWriter, r *http.Request) {
 	applyKeyParameterized(w, r, a.Core.RemoteGetSelf)
@@ -737,6 +742,7 @@ func (a *RestServer) getApiRemoteSelfHandler(w http.ResponseWriter, r *http.Requ
 // @Success		200		{string}	string		"ok"
 // @Failure		400		{error}		error		"Method not allowed"
 // @Failure		401		{error}		error		"Authentication failed"
+// @Failure		404		{error}		error		"Not found"
 // @Router		/remote/peers/{key} [get]
 func (a *RestServer) getApiRemotePeersHandler(w http.ResponseWriter, r *http.Request) {
 	applyKeyParameterized(w, r, a.Core.RemoteGetPeers)
@@ -748,6 +754,7 @@ func (a *RestServer) getApiRemotePeersHandler(w http.ResponseWriter, r *http.Req
 // @Success		200		{string}	string		"ok"
 // @Failure		400		{error}		error		"Method not allowed"
 // @Failure		401		{error}		error		"Authentication failed"
+// @Failure		404		{error}		error		"Not found"
 // @Router		/remote/dht/{key} [get]
 func (a *RestServer) getApiRemoteDHTHandler(w http.ResponseWriter, r *http.Request) {
 	applyKeyParameterized(w, r, a.Core.RemoteGetDHT)
