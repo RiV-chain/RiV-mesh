@@ -195,14 +195,10 @@ func (a *RestServer) Serve() error {
 		}
 		return strings.Compare(a.handlers[i].Pattern, a.handlers[j].Pattern) < 0
 	})
-	l, e := net.Listen("tcp4", a.listenUrl.Host)
-	if e != nil {
-		return fmt.Errorf("http server start error: %w", e)
-	} else {
-		a.Log.Infof("Started http server listening on %s. Document root %s %s\n", a.ListenAddress, a.WwwRoot, a.docFsType)
-	}
 	go func() {
-		err := a.server.Serve(l)
+		a.Log.Infof("Starting http server listening on %s. Document root %s %s\n", a.ListenAddress, a.WwwRoot, a.docFsType)
+		a.server.Addr = a.listenUrl.Host
+		err := a.server.ListenAndServe()
 		if err != nil {
 			a.Log.Errorln(err)
 		}
@@ -235,6 +231,22 @@ func (a *RestServer) AddHandler(handler ApiHandler) error {
 
 	if notRegistered {
 		http.HandleFunc(strings.Split(handler.Pattern, "{")[0], func(w http.ResponseWriter, r *http.Request) {
+			{
+				ip, _, err := net.SplitHostPort(r.RemoteAddr)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusForbidden)
+					return
+				}
+				netIP := net.ParseIP(ip)
+				if netIP == nil {
+					http.Error(w, "Forbidden", http.StatusForbidden)
+					return
+				}
+				if bytes.Compare(netIP, a.Core.Address()) != 0 {
+					http.Error(w, "Forbidden", http.StatusForbidden)
+					return
+				}
+			}
 			for i := range a.handlers {
 				h := &a.handlers[len(a.handlers)-i-1]
 				if h.Method == r.Method && matchPattern(h.Pattern, r.URL.Path) {
@@ -690,8 +702,11 @@ func applyKeyParameterized(w http.ResponseWriter, r *http.Request, fn func(key s
 		http.Error(w, "No remote public key supplied", http.StatusBadRequest)
 		return
 	}
-	if result, err := fn(cnt[4]); err == nil {
+	result, err := fn(cnt[4])
+	if err == nil {
 		WriteJson(w, r, result)
+	} else if errors.As(err, &core.ErrTimeout) {
+		http.Error(w, "Node inaccessible", http.StatusBadGateway)
 	} else {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
@@ -703,6 +718,7 @@ func applyKeyParameterized(w http.ResponseWriter, r *http.Request, fn func(key s
 // @Success		200		{string}	string		"ok"
 // @Failure		400		{error}		error		"Method not allowed"
 // @Failure		401		{error}		error		"Authentication failed"
+// @Failure		404		{error}		error		"Not found"
 // @Router		/remote/nodeinfo/{key} [get]
 func (a *RestServer) getApiRemoteNodeinfoHandler(w http.ResponseWriter, r *http.Request) {
 	applyKeyParameterized(w, r, a.Core.GetNodeInfo)
@@ -714,6 +730,7 @@ func (a *RestServer) getApiRemoteNodeinfoHandler(w http.ResponseWriter, r *http.
 // @Success		200		{string}	string		"ok"
 // @Failure		400		{error}		error		"Method not allowed"
 // @Failure		401		{error}		error		"Authentication failed"
+// @Failure		404		{error}		error		"Not found"
 // @Router		/remote/self/{key} [get]
 func (a *RestServer) getApiRemoteSelfHandler(w http.ResponseWriter, r *http.Request) {
 	applyKeyParameterized(w, r, a.Core.RemoteGetSelf)
@@ -725,6 +742,7 @@ func (a *RestServer) getApiRemoteSelfHandler(w http.ResponseWriter, r *http.Requ
 // @Success		200		{string}	string		"ok"
 // @Failure		400		{error}		error		"Method not allowed"
 // @Failure		401		{error}		error		"Authentication failed"
+// @Failure		404		{error}		error		"Not found"
 // @Router		/remote/peers/{key} [get]
 func (a *RestServer) getApiRemotePeersHandler(w http.ResponseWriter, r *http.Request) {
 	applyKeyParameterized(w, r, a.Core.RemoteGetPeers)
@@ -736,6 +754,7 @@ func (a *RestServer) getApiRemotePeersHandler(w http.ResponseWriter, r *http.Req
 // @Success		200		{string}	string		"ok"
 // @Failure		400		{error}		error		"Method not allowed"
 // @Failure		401		{error}		error		"Authentication failed"
+// @Failure		404		{error}		error		"Not found"
 // @Router		/remote/dht/{key} [get]
 func (a *RestServer) getApiRemoteDHTHandler(w http.ResponseWriter, r *http.Request) {
 	applyKeyParameterized(w, r, a.Core.RemoteGetDHT)

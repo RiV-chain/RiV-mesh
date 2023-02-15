@@ -1,5 +1,7 @@
 package core
 
+import "errors"
+
 // In-band packet types
 const (
 	typeSessionDummy = iota // nolint:deadcode,varcheck
@@ -14,3 +16,5 @@ const (
 	typeProtoNodeInfoResponse
 	typeProtoDebug = 255
 )
+
+var ErrTimeout = errors.New("Operation timeout")

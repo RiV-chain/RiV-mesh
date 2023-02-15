@@ -4,13 +4,16 @@
 package tun
 
 import (
+	"crypto/sha1"
+	"encoding/binary"
 	"errors"
 
-	"golang.org/x/sys/windows"
 	"log"
 	"net/netip"
 	"time"
 	_ "unsafe"
+
+	"golang.org/x/sys/windows"
 
 	"golang.zx2c4.com/wintun"
 	wgtun "golang.zx2c4.com/wireguard/tun"
@@ -29,9 +32,11 @@ func (tun *TunAdapter) setup(ifname string, addr string, mtu uint64) error {
 		var err error
 		var iface wgtun.Device
 		var guid windows.GUID
-		if guid, err = windows.GUIDFromString("{f1369c05-0344-40ed-a772-bfb4770abdd0}"); err != nil {
-			return err
-		}
+		hash := sha1.Sum([]byte(ifname))
+		guid.Data1 = binary.LittleEndian.Uint32(hash[0:4])
+		guid.Data2 = binary.LittleEndian.Uint16(hash[4:6])
+		guid.Data3 = binary.LittleEndian.Uint16(hash[6:8])
+		copy(guid.Data4[:], hash[8:16])
 
 		iface, err = wgtun.CreateTUNWithRequestedGUID(ifname, &guid, int(mtu))
 		if err != nil {
