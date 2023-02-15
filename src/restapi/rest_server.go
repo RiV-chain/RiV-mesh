@@ -77,6 +77,7 @@ type RestServerCfg struct {
 	WwwRoot       string
 	ConfigFn      string
 	handlers      []ApiHandler
+	Domain        string
 	Features      []string
 }
 
@@ -232,17 +233,17 @@ func (a *RestServer) AddHandler(handler ApiHandler) error {
 	if notRegistered {
 		http.HandleFunc(strings.Split(handler.Pattern, "{")[0], func(w http.ResponseWriter, r *http.Request) {
 			{
-				ip, _, err := net.SplitHostPort(r.RemoteAddr)
+				clientIp, _, err := net.SplitHostPort(r.RemoteAddr)
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusForbidden)
 					return
 				}
-				netIP := net.ParseIP(ip)
-				if netIP == nil {
-					http.Error(w, "Forbidden", http.StatusForbidden)
+				svrIp, _, err := net.SplitHostPort(a.server.Addr)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusForbidden)
 					return
 				}
-				if bytes.Compare(netIP, a.Core.Address()) != 0 {
+				if clientIp != svrIp {
 					http.Error(w, "Forbidden", http.StatusForbidden)
 					return
 				}
