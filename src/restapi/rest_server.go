@@ -198,8 +198,14 @@ func (a *RestServer) Serve() error {
 	})
 	go func() {
 		a.Log.Infof("Starting http server listening on %s. Document root %s %s\n", a.ListenAddress, a.WwwRoot, a.docFsType)
-		a.server.Addr = a.listenUrl.Host
-		err := a.server.ListenAndServe()
+		localIp, err := net.LookupIP(a.listenUrl.Hostname())
+		if err != nil {
+			a.Log.Errorln(err)
+			return
+		}
+
+		a.server.Addr = net.JoinHostPort(localIp[0].String(), a.listenUrl.Port())
+		err = a.server.ListenAndServe()
 		if err != nil {
 			a.Log.Errorln(err)
 		}
@@ -244,7 +250,7 @@ func (a *RestServer) AddHandler(handler ApiHandler) error {
 					return
 				}
 				if clientIp != svrIp {
-					http.Error(w, "Forbidden", http.StatusForbidden)
+					http.Error(w, fmt.Sprintf("Forbidden access to '%s' from '%s'", svrIp, clientIp), http.StatusForbidden)
 					return
 				}
 			}
