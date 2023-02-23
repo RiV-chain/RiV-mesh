@@ -55,6 +55,7 @@ var _ embed.FS
 var IP2LOCATION []byte
 
 const ip2loc_not_supported string = "This parameter is unavailable for selected data file. Please upgrade the data file."
+const ip2loc_invalid_ip_address string = "Invalid IP address."
 
 type ServerEvent struct {
 	Event string
@@ -542,7 +543,7 @@ type Peer struct {
 	Priority      uint64   `json:"priority"`
 	Coords        []uint64 `json:"coords"`
 	Remote        string   `json:"remote"`
-	Rremote_ip    string   `json:"remote_ip"`
+	Remote_ip     string   `json:"remote_ip"`
 	Bytes_recvd   uint64   `json:"bytes_recvd"`
 	Bytes_sent    uint64   `json:"bytes_sent"`
 	Uptime        float64  `json:"uptime"`
@@ -887,11 +888,11 @@ func (a *RestServer) getCountry(ipaddr string) (country_short string, country_lo
 	if a.ip2locatinoDb != nil {
 		ipLoc, err := a.ip2locatinoDb.Get_all(ipaddr)
 		if err == nil {
-			if ipLoc.Country_short != ip2loc_not_supported {
+			if ipLoc.Country_short != ip2loc_not_supported && ipLoc.Country_short != ip2loc_invalid_ip_address {
 				country_short = ipLoc.Country_short
 			}
 
-			if ipLoc.Country_long != ip2loc_not_supported {
+			if ipLoc.Country_long != ip2loc_not_supported && ipLoc.Country_long != ip2loc_invalid_ip_address {
 				country_long = ipLoc.Country_long
 			}
 		}
