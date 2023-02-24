@@ -187,13 +187,13 @@ func (l *linkTCP) dialerFor(dst *net.TCPAddr, sintf string) (*net.Dialer, error)
 }
 
 func tcpIDFor(local net.Addr, remoteAddr *net.TCPAddr) string {
-	if localAddr, ok := local.(*net.TCPAddr); ok && localAddr.IP.Equal(remoteAddr.IP) {
-		// Nodes running on the same host — include both the IP and port.
-		return remoteAddr.String()
-	}
 	if remoteAddr.IP.IsLinkLocalUnicast() {
 		// Nodes discovered via multicast — include the IP only.
 		return remoteAddr.IP.String()
+	}
+	if localAddr, ok := local.(*net.TCPAddr); ok && localAddr.IP.Equal(remoteAddr.IP) {
+		// Nodes running on the same host — include both the IP and port.
+		return remoteAddr.String()
 	}
 	// Nodes connected remotely — include both the IP and port.
 	return remoteAddr.String()
