@@ -24,6 +24,7 @@ type links struct {
 	unix   *linkUNIX          // UNIX interface support
 	socks  *linkSOCKS         // SOCKS interface support
 	mpath  *linkMPATH         // Multipath interface support
+	quic   *linkQUIC          // QUIC interface support
 	_links map[linkInfo]*link // *link is nil if connection in progress
 	// TODO timeout (to remove from switch), read from config.ReadTimeout
 }
@@ -35,6 +36,7 @@ func (l *links) init(c *Core) error {
 	l.unix = l.newLinkUNIX()
 	l.socks = l.newLinkSOCKS()
 	l.mpath = l.newLinkMPATH()
+	l.quic = l.newLinkQUIC()
 	l._links = make(map[linkInfo]*link)
 
 	var listeners []ListenAddress
@@ -164,6 +166,19 @@ func (l *links) call(u *url.URL, sintf string, errch chan<- error) (info linkInf
 			}
 		}()
 
+	case "quic":
+		go func() {
+			if errch != nil {
+				defer close(errch)
+			}
+			if err := l.quic.dial(u, options, sintf); err != nil && err != io.EOF {
+				l.core.log.Warnf("Failed to dial QUIC %s: %s\n", u.Host, err)
+				if errch != nil {
+					errch <- err
+				}
+			}
+		}()
+
 	default:
 		if errch != nil {
 			close(errch)
@@ -185,6 +200,8 @@ func (l *links) listen(u *url.URL, sintf string) (*Listener, error) {
 		listener, err = l.unix.listen(u, sintf)
 	case "mpath":
 		listener, err = l.mpath.listen(u, sintf)
+	case "quic":
+		listener, err = l.quic.listen(u, sintf)
 	default:
 		return nil, fmt.Errorf("unrecognised scheme %q", u.Scheme)
 	}

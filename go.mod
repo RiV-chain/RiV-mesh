@@ -41,19 +41,29 @@ require (
 	github.com/getlantern/hidden v0.0.0-20190325191715-f02dbb02be55 // indirect
 	github.com/getlantern/ops v0.0.0-20190325191751-d70cb0d6f85f // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
+	github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0 // indirect
+	github.com/golang/mock v1.6.0 // indirect
+	github.com/google/pprof v0.0.0-20210407192527-94a9f03dee38 // indirect
 	github.com/google/uuid v1.1.2 // indirect
 	github.com/libp2p/go-buffer-pool v0.0.2 // indirect
+	github.com/onsi/ginkgo/v2 v2.2.0 // indirect
 	github.com/oxtoacart/bpool v0.0.0-20190530202638-03653db5a59c // indirect
+	github.com/quic-go/qtls-go1-19 v0.2.1 // indirect
+	github.com/quic-go/qtls-go1-20 v0.1.1 // indirect
+	github.com/quic-go/quic-go v0.33.0 // indirect
 	github.com/rivo/uniseg v0.3.4 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.19.1 // indirect
 	golang.org/x/crypto v0.4.0 // indirect
+	golang.org/x/mod v0.6.0 // indirect
+	golang.org/x/tools v0.2.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
 require (
 	github.com/ip2location/ip2location-go/v9 v9.5.0
 	github.com/mattn/go-runewidth v0.0.13 // indirect
+	github.com/vikulin/quic-conn v0.0.0-20230226122402-c0f509802080
 	github.com/vishvananda/netns v0.0.0-20210104183010-2eb08e3e575f // indirect
 )
