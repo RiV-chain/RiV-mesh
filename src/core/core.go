@@ -225,4 +225,5 @@ type Logger interface {
 	Errorln(...interface{})
 	Debugf(string, ...interface{})
 	Debugln(...interface{})
+	Traceln(...interface{})
 }
