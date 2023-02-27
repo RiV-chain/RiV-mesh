@@ -37,7 +37,19 @@ packages:
 
 Note that you can cross-compile for other platforms and architectures by
 specifying the `GOOS` and `GOARCH` environment variables, e.g. `GOOS=windows
-./build` or `GOOS=linux GOARCH=mipsle ./build`.
+./build` or `GOOS=linux GOARCH=mipsle ./build`
+
+... or generate an iOS framework with:
+
+```
+./contrib/mobile/build -i
+```
+
+... or generate an Android AAR bundle with:
+
+```
+./contrib/mobile/build -a
+```
 
 Other OS packages can be built in this repo: https://github.com/RiV-chain/RiV-mesh-builds.
 
