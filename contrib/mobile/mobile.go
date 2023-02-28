@@ -97,6 +97,8 @@ func (m *Mesh) StartJSON(configjson []byte) error {
 		}
 		if m.multicast, err = multicast.New(m.core, logger, options...); err != nil {
 			fmt.Println("Multicast module fail:", err)
+		} else {
+			logger.Infof("Multicast started")
 		}
 	}
 
