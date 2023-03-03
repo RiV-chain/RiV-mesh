@@ -15,6 +15,7 @@ import (
 	"github.com/RiV-chain/RiV-mesh/src/defaults"
 	"github.com/RiV-chain/RiV-mesh/src/ipv6rwc"
 	"github.com/RiV-chain/RiV-mesh/src/multicast"
+	"github.com/RiV-chain/RiV-mesh/src/restapi"
 	"github.com/RiV-chain/RiV-mesh/src/version"
 )
 
@@ -23,12 +24,14 @@ import (
 // (non-native) types. Therefore for iOS we will expose some nice simple
 // functions. Note that in the case of iOS we handle reading/writing to/from TUN
 // in Swift therefore we use the "dummy" TUN interface instead.
+
 type Mesh struct {
-	core      *core.Core
-	iprwc     *ipv6rwc.ReadWriteCloser
-	config    *config.NodeConfig
-	multicast *multicast.Multicast
-	log       MobileLogger
+	core        *core.Core
+	iprwc       *ipv6rwc.ReadWriteCloser
+	config      *config.NodeConfig
+	multicast   *multicast.Multicast
+	rest_server *restapi.RestServer
+	log         MobileLogger
 }
 
 // StartAutoconfigure starts a node with a randomly generated config
@@ -92,9 +95,30 @@ func (m *Mesh) StartJSON(configjson []byte) error {
 				Priority: uint8(intf.Priority),
 			})
 		}
-		m.multicast, err = multicast.New(m.core, logger, options...)
-		if err != nil {
-			logger.Errorln("An error occurred starting multicast:", err)
+		if m.multicast, err = multicast.New(m.core, logger, options...); err != nil {
+			fmt.Println("Multicast module fail:", err)
+		} else {
+			logger.Infof("Multicast module started")
+		}
+	}
+
+	// Setup the REST socket.
+	{
+		var err error
+		if m.rest_server, err = restapi.NewRestServer(restapi.RestServerCfg{
+			Core:          m.core,
+			Multicast:     m.multicast,
+			Log:           logger,
+			ListenAddress: m.config.HttpAddress,
+			WwwRoot:       m.config.WwwRoot,
+			ConfigFn:      "",
+		}); err != nil {
+			logger.Errorln(err)
+		} else {
+			err = m.rest_server.Serve()
+			if err != nil {
+				logger.Errorln(err)
+			}
 		}
 	}
 
@@ -107,7 +131,7 @@ func (m *Mesh) StartJSON(configjson []byte) error {
 	return nil
 }
 
-// Send sends a packet to Mesh. It should be a fully formed
+// Send sends a packet to RiV-mesh. It should be a fully formed
 // IPv6 packet
 func (m *Mesh) Send(p []byte) error {
 	if m.iprwc == nil {
@@ -117,7 +141,7 @@ func (m *Mesh) Send(p []byte) error {
 	return nil
 }
 
-// Send sends a packet from given buffer to Yggdrasil. From first byte up to length.
+// Send sends a packet from given buffer to RiV-mesh. From first byte up to length.
 func (m *Mesh) SendBuffer(p []byte, length int) error {
 	if m.iprwc == nil {
 		return nil
@@ -129,7 +153,7 @@ func (m *Mesh) SendBuffer(p []byte, length int) error {
 	return nil
 }
 
-// Recv waits for and reads a packet coming from Yggdrasil. It
+// Recv waits for and reads a packet coming from RiV-mesh. It
 // will be a fully formed IPv6 packet
 func (m *Mesh) Recv() ([]byte, error) {
 	if m.iprwc == nil {
@@ -140,7 +164,7 @@ func (m *Mesh) Recv() ([]byte, error) {
 	return buf[:n], nil
 }
 
-// Recv waits for and reads a packet coming from Yggdrasil to given buffer, returning size of packet
+// Recv waits for and reads a packet coming from RiV-mesh to given buffer, returning size of packet
 func (m *Mesh) RecvBuffer(buf []byte) (int, error) {
 	if m.iprwc == nil {
 		return 0, nil
@@ -158,6 +182,8 @@ func (m *Mesh) Stop() error {
 		return err
 	}
 	m.core.Stop()
+	m.rest_server.Shutdown()
+	m.rest_server = nil
 	return nil
 }
 

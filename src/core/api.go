@@ -93,12 +93,10 @@ func (c *Core) GetPeers() []PeerInfo {
 		if name := names[p.Conn]; name != "" {
 			info.Remote = name
 		}
-		info.RemoteIp = ips[p.Conn]
 		if info.RemoteIp = ips[p.Conn]; info.RemoteIp != "" {
 			//Cut port
-			host, err := url.Parse(fmt.Sprintf("http://%s", info.RemoteIp))
-			if err == nil {
-				info.RemoteIp = host.Hostname()
+			if host, _, err := net.SplitHostPort(info.RemoteIp); err == nil {
+				info.RemoteIp = host
 			}
 		}
 		if linkconn, ok := p.Conn.(*linkConn); ok {

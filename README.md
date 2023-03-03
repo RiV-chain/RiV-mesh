@@ -4,7 +4,7 @@
 )](https://circleci.com/gh/RiV-chain/RiV-mesh)
 
 ## Why fork?
-RiV-mesh is fork of Yggdrasil which is great project. Starting from Yggdrasil 0.4 dev team removed CKR feature which is a core for secure tunneling like VPN does. RiV-mesh gets back CKR feature. Second reason: Yggdrasil uses deprecated 200::/7 IPv6 address pool which can be assigned for some network in future, unlike this fc00::/7 is safe and has been taken for RiV-mesh. So far RiV-mesh can be easy switched to Yggdrasil network address space with NetworkDomain.Prefix 2 in mesh.conf configuration file.
+RiV-mesh is fork of Yggdrasil which is great project. Yggdrasil uses a custom admin TCP protocol istead of REST. Second reason: Yggdrasil uses deprecated 200::/7 IPv6 address pool which can be assigned for some network in future, unlike this fc00::/7 is safe and has been taken for RiV-mesh. So far RiV-mesh can be easy switched to Yggdrasil network address space with NetworkDomain.Prefix 2 in mesh.conf configuration file.
 
 ## Introduction
 
@@ -22,7 +22,7 @@ RiV-mesh does not require you to have IPv6 Internet connectivity - it also works
 RiV-mesh works on a number of platforms, including Linux, macOS, Ubiquiti
 EdgeRouter, VyOS, Windows, FreeBSD, OpenBSD and OpenWrt.
 
-Please see our [Installation](https://RiV-chain.github.io/installation.html) 
+Please see our [Installation](https://github.com/RiV-chain/RiV-mesh-builds#riv-mesh-build) 
 page for more information. You may also find other platform-specific wrappers, scripts
 or tools in the `contrib` folder.
 
@@ -37,7 +37,21 @@ packages:
 
 Note that you can cross-compile for other platforms and architectures by
 specifying the `GOOS` and `GOARCH` environment variables, e.g. `GOOS=windows
-./build` or `GOOS=linux GOARCH=mipsle ./build`.
+./build` or `GOOS=linux GOARCH=mipsle ./build`
+
+... or generate an iOS framework with:
+
+```
+./contrib/mobile/build -i
+```
+
+... or generate an Android AAR bundle with:
+
+```
+./contrib/mobile/build -a
+```
+
+Other OS packages can be built in this repo: https://github.com/RiV-chain/RiV-mesh-builds.
 
 ## Running
 

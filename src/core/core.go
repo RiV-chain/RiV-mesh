@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"crypto/ed25519"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net"
@@ -38,7 +39,7 @@ type Core struct {
 	config             struct {
 		_peers             map[Peer]*linkInfo         // configurable after startup
 		_listeners         map[ListenAddress]struct{} // configurable after startup
-		nodeinfo           NodeInfo                   // immutable after startup
+		nodeinfo           NodeInfo                   // configurable after startup
 		nodeinfoPrivacy    NodeInfoPrivacy            // immutable after startup
 		_allowedPublicKeys map[[32]byte]struct{}      // configurable after startup
 		networkdomain      NetworkDomain              // immutable after startup
@@ -95,6 +96,17 @@ func New(secret ed25519.PrivateKey, logger Logger, opts ...SetupOption) (*Core, 
 	}
 	c.Act(nil, c._addPeerLoop)
 	return c, nil
+}
+
+func (c *Core) SetThisNodeInfo(nodeinfo NodeInfo) error {
+	if err := c.proto.nodeinfo.setNodeInfo(nodeinfo, bool(c.config.nodeinfoPrivacy)); err != nil {
+		return fmt.Errorf("error setting node info: %w", err)
+	}
+	return nil
+}
+
+func (c *Core) GetThisNodeInfo() json.RawMessage {
+	return c.proto.nodeinfo._getNodeInfo()
 }
 
 // If any static peers were provided in the configuration above then we should
@@ -213,4 +225,5 @@ type Logger interface {
 	Errorln(...interface{})
 	Debugf(string, ...interface{})
 	Debugln(...interface{})
+	Traceln(...interface{})
 }

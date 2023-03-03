@@ -3,7 +3,6 @@ package core
 import (
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"runtime"
 	"time"
@@ -163,7 +162,7 @@ func (m *nodeinfo) nodeInfoAdminHandler(in json.RawMessage) (interface{}, error)
 	defer timer.Stop()
 	select {
 	case <-timer.C:
-		return nil, errors.New("Timed out waiting for response")
+		return nil, ErrTimeout
 	case info := <-ch:
 		var msg json.RawMessage
 		if err := msg.UnmarshalJSON(info); err != nil {

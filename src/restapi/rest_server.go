@@ -2,6 +2,7 @@ package restapi
 
 import (
 	"bytes"
+	"context"
 	"embed"
 	"encoding/hex"
 	"encoding/json"
@@ -24,10 +25,10 @@ import (
 	"gerace.dev/zipfs"
 	"golang.org/x/exp/slices"
 
+	"github.com/RiV-chain/RiV-mesh/src/config"
 	"github.com/RiV-chain/RiV-mesh/src/core"
 	"github.com/RiV-chain/RiV-mesh/src/defaults"
 	"github.com/RiV-chain/RiV-mesh/src/multicast"
-	"github.com/RiV-chain/RiV-mesh/src/tun"
 	"github.com/RiV-chain/RiV-mesh/src/version"
 	"github.com/ip2location/ip2location-go/v9"
 	"github.com/slonm/tableprinter"
@@ -54,6 +55,7 @@ var _ embed.FS
 var IP2LOCATION []byte
 
 const ip2loc_not_supported string = "This parameter is unavailable for selected data file. Please upgrade the data file."
+const ip2loc_invalid_ip_address string = "Invalid IP address."
 
 type ServerEvent struct {
 	Event string
@@ -65,21 +67,23 @@ type ApiHandler struct {
 	Pattern string `json:"pattern"` // Context path pattern
 	Desc    string `json:"desc"`    // What does the endpoint do?
 	//	args    []string            // List of human-readable argument names
-	handler func(w http.ResponseWriter, r *http.Request) // First is input map, second is output
+	Handler func(w http.ResponseWriter, r *http.Request) // First is input map, second is output
 }
 
 type RestServerCfg struct {
 	Core          *core.Core
-	Tun           *tun.TunAdapter
 	Multicast     *multicast.Multicast
 	Log           core.Logger
 	ListenAddress string
 	WwwRoot       string
 	ConfigFn      string
 	handlers      []ApiHandler
+	Domain        string
+	Features      []string
 }
 
 type RestServer struct {
+	server http.Server
 	RestServerCfg
 	listenUrl         *url.URL
 	serverEvents      chan ServerEvent
@@ -91,6 +95,7 @@ type RestServer struct {
 
 func NewRestServer(cfg RestServerCfg) (*RestServer, error) {
 	a := &RestServer{
+		server:            http.Server{},
 		RestServerCfg:     cfg,
 		serverEvents:      make(chan ServerEvent, 10),
 		serverEventNextId: 0,
@@ -106,6 +111,9 @@ func NewRestServer(cfg RestServerCfg) (*RestServer, error) {
 	}
 
 	pakReader, err := zip.OpenReader(cfg.WwwRoot)
+
+	//unregister http Handlers here
+	http.DefaultServeMux = new(http.ServeMux)
 	if err == nil {
 		defer pakReader.Close()
 		fs, err := zipfs.NewZipFileSystem(&pakReader.Reader, zipfs.ServeIndexForMissing())
@@ -130,29 +138,30 @@ func NewRestServer(cfg RestServerCfg) (*RestServer, error) {
 		}
 	}
 
-	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api", Desc: "API documentation", handler: a.getApiHandler})
-	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/self", Desc: "Show details about this node", handler: a.getApiSelfHandler})
-	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/peers", Desc: `Show directly connected peers`, handler: a.getApiPeersHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api", Desc: "API documentation", Handler: a.getApiHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/self", Desc: "Show details about this node", Handler: a.getApiSelfHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/nodeinfo", Desc: "Request nodeinfo of this node", Handler: a.getApiNodeinfoHandler})
+	a.AddHandler(ApiHandler{Method: "PUT", Pattern: "/api/nodeinfo", Desc: "Update nodeinfo of this node", Handler: a.putApiNodeinfoHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/peers", Desc: `Show directly connected peers`, Handler: a.getApiPeersHandler})
 	a.AddHandler(ApiHandler{Method: "POST", Pattern: "/api/peers", Desc: `Append peers to the peers list. 
 Request body [{ "uri":"tcp://xxx.xxx.xxx.xxx:yyyy", "interface":"eth0" }, ...], interface is optional
-Request header "Riv-Save-Config: true" persists changes`, handler: a.postApiPeersHandler})
+Request header "Riv-Save-Config: true" persists changes`, Handler: a.postApiPeersHandler})
 	a.AddHandler(ApiHandler{Method: "PUT", Pattern: "/api/peers", Desc: `Set peers list. 
 Request body [{ "uri":"tcp://xxx.xxx.xxx.xxx:yyyy", "interface":"eth0" }, ...], interface is optional.
-Request header "Riv-Save-Config: true" persists changes`, handler: a.putApiPeersHandler})
+Request header "Riv-Save-Config: true" persists changes`, Handler: a.putApiPeersHandler})
 	a.AddHandler(ApiHandler{Method: "DELETE", Pattern: "/api/peers", Desc: `Remove all peers from this node
-Request header "Riv-Save-Config: true" persists changes`, handler: a.deleteApiPeersHandler})
-	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/publicpeers", Desc: "Show public peers loaded from URL which configured in mesh.conf file", handler: a.getApiPublicPeersHandler})
-	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/paths", Desc: "Show established paths through this node", handler: a.getApiPathsHandler})
-	a.AddHandler(ApiHandler{Method: "POST", Pattern: "/api/health", Desc: "Run peers health check task", handler: a.postApiHealthHandler})
-	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/sse", Desc: "Return server side events", handler: a.getApiSseHandler})
-	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/dht", Desc: "Show known DHT entries", handler: a.getApiDhtHandler})
-	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/sessions", Desc: "Show established traffic sessions with remote nodes", handler: a.getApiSessionsHandler})
-	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/tun", Desc: "Show information about the node's TUN interface", handler: a.getApiTunHandler})
-	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/multicastinterfaces", Desc: "Show which interfaces multicast is enabled on", handler: a.getApiMulticastinterfacesHandler})
-	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/remote/nodeinfo/{key}", Desc: "Request nodeinfo from a remote node by its public key", handler: a.getApiRemoteNodeinfoHandler})
-	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/remote/self/{key}", Desc: "Request self from a remote node by its public key", handler: a.getApiRemoteSelfHandler})
-	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/remote/peers/{key}", Desc: "Request peers from a remote node by its public key", handler: a.getApiRemotePeersHandler})
-	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/remote/dht/{key}", Desc: "Request dht from a remote node by its public key", handler: a.getApiRemoteDHTHandler})
+Request header "Riv-Save-Config: true" persists changes`, Handler: a.deleteApiPeersHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/publicpeers", Desc: "Show public peers loaded from URL which configured in mesh.conf file", Handler: a.getApiPublicPeersHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/paths", Desc: "Show established paths through this node", Handler: a.getApiPathsHandler})
+	a.AddHandler(ApiHandler{Method: "POST", Pattern: "/api/health", Desc: "Run peers health check task", Handler: a.postApiHealthHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/sse", Desc: "Return server side events", Handler: a.getApiSseHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/dht", Desc: "Show known DHT entries", Handler: a.getApiDhtHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/sessions", Desc: "Show established traffic sessions with remote nodes", Handler: a.getApiSessionsHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/multicastinterfaces", Desc: "Show which interfaces multicast is enabled on", Handler: a.getApiMulticastinterfacesHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/remote/nodeinfo/{key}", Desc: "Request nodeinfo from a remote node by its public key", Handler: a.getApiRemoteNodeinfoHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/remote/self/{key}", Desc: "Request self from a remote node by its public key", Handler: a.getApiRemoteSelfHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/remote/peers/{key}", Desc: "Request peers from a remote node by its public key", Handler: a.getApiRemotePeersHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/remote/dht/{key}", Desc: "Request dht from a remote node by its public key", Handler: a.getApiRemoteDHTHandler})
 
 	var _ = a.Core.PeersChangedSignal.Connect(func(data any) {
 		b, err := json.Marshal(a.prepareGetPeers())
@@ -188,19 +197,28 @@ func (a *RestServer) Serve() error {
 		}
 		return strings.Compare(a.handlers[i].Pattern, a.handlers[j].Pattern) < 0
 	})
-	l, e := net.Listen("tcp4", a.listenUrl.Host)
-	if e != nil {
-		return fmt.Errorf("http server start error: %w", e)
-	} else {
-		a.Log.Infof("Started http server listening on %s. Document root %s %s\n", a.ListenAddress, a.WwwRoot, a.docFsType)
-	}
 	go func() {
-		err := http.Serve(l, nil)
+		a.Log.Infof("Starting http server listening on %s. Document root %s %s\n", a.ListenAddress, a.WwwRoot, a.docFsType)
+		localIp, err := net.LookupIP(a.listenUrl.Hostname())
+		if err != nil {
+			a.Log.Errorln(err)
+			return
+		}
+
+		a.server.Addr = net.JoinHostPort(localIp[0].String(), a.listenUrl.Port())
+		err = a.server.ListenAndServe()
 		if err != nil {
 			a.Log.Errorln(err)
 		}
 	}()
 	return nil
+}
+
+// Shutdown http server
+func (a *RestServer) Shutdown() error {
+	err := a.server.Shutdown(context.Background())
+	a.Log.Infof("Stop REST service")
+	return err
 }
 
 // AddHandler is called for each admin function to add the handler and help documentation to the API.
@@ -221,6 +239,22 @@ func (a *RestServer) AddHandler(handler ApiHandler) error {
 
 	if notRegistered {
 		http.HandleFunc(strings.Split(handler.Pattern, "{")[0], func(w http.ResponseWriter, r *http.Request) {
+			{
+				clientIp, _, err := net.SplitHostPort(r.RemoteAddr)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusForbidden)
+					return
+				}
+				svrIp, _, err := net.SplitHostPort(a.server.Addr)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusForbidden)
+					return
+				}
+				if clientIp != svrIp {
+					http.Error(w, fmt.Sprintf("Forbidden access to '%s' from '%s'", svrIp, clientIp), http.StatusForbidden)
+					return
+				}
+			}
 			for i := range a.handlers {
 				h := &a.handlers[len(a.handlers)-i-1]
 				if h.Method == r.Method && matchPattern(h.Pattern, r.URL.Path) {
@@ -261,11 +295,11 @@ func (a *RestServer) AddHandler(handler ApiHandler) error {
 					}
 
 					addNoCacheHeaders(w)
-					h.handler(w, r)
+					h.Handler(w, r)
 					return
 				}
 			}
-			writeError(w, http.StatusMethodNotAllowed)
+			WriteError(w, http.StatusMethodNotAllowed)
 		})
 	}
 	return nil
@@ -283,7 +317,7 @@ func (a *RestServer) getApiHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Query().Has("fmt") && r.URL.Query()["fmt"][0] == "table" {
 		w.Header().Add("Content-Type", "text/plain; charset=utf-8")
 		fmt.Fprintf(w, "Common query params: fmt=table|json - Response format\n\n")
-		writeJson(w, r, a.handlers)
+		WriteJson(w, r, a.handlers)
 		// for _, h := range a.handlers {
 		// 	fmt.Fprintf(w, "%s %s\t\t%s\n\n", h.method, h.pattern, h.desc)
 		// }
@@ -316,7 +350,7 @@ func (a *RestServer) getApiHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// @Summary		Show details about this node. The output contains following fields: Address, Public Key, Port, Priority, Coordinates, Remote URL, Remote IP, Bytes received, Bytes sent, Uptime, Multicast flag, Country code, Country
+// @Summary		Show details about this node. The output contains following fields: build name, build version, public key, private key, address, subnet, coords, features.
 // @Produce		json
 // @Success		200		{string}	string		"ok"
 // @Failure		400		{error}		error		"Method not allowed"
@@ -333,8 +367,40 @@ func (a *RestServer) getApiSelfHandler(w http.ResponseWriter, r *http.Request) {
 		"address":       a.Core.Address().String(),
 		"subnet":        snet.String(),
 		"coords":        self.Coords,
+		"features":      a.Features,
 	}
-	writeJson(w, r, result)
+	WriteJson(w, r, result)
+}
+
+// @Summary		Show node info of this node.
+// @Produce		json
+// @Success		200		{string}	string		"ok"
+// @Failure		401		{error}		error		"Authentication failed"
+// @Router		/nodeinfo [get]
+func (a *RestServer) getApiNodeinfoHandler(w http.ResponseWriter, r *http.Request) {
+	WriteJson(w, r, a.Core.GetThisNodeInfo())
+}
+
+// @Summary		Replace node info of this node.
+// @Produce		json
+// @Success		204		{string}	string		"No content"
+// @Failure		400		{error}		error		"Bad request"
+// @Failure		401		{error}		error		"Authentication failed"
+// @Failure		500		{error}		error		"Internal error"
+// @Router		/nodeinfo [put]
+func (a *RestServer) putApiNodeinfoHandler(w http.ResponseWriter, r *http.Request) {
+	var info core.NodeInfo
+	err := json.NewDecoder(r.Body).Decode(&info)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	a.Core.SetThisNodeInfo(info)
+	w.WriteHeader(http.StatusNoContent)
+	a.saveConfig(func(cfg *config.NodeConfig) {
+		cfg.NodeInfo = info
+	}, r)
 }
 
 // @Summary		Show known DHT entries. The output contains following fields: Address, Public Key, Port, Rest
@@ -359,7 +425,7 @@ func (a *RestServer) getApiDhtHandler(w http.ResponseWriter, r *http.Request) {
 	sort.SliceStable(result, func(i, j int) bool {
 		return strings.Compare(result[i]["key"].(string), result[j]["key"].(string)) < 0
 	})
-	writeJson(w, r, result)
+	WriteJson(w, r, result)
 }
 
 // @Summary		Show public peers which is result of output PublicPeersURL in mesh.conf.
@@ -383,7 +449,7 @@ func (a *RestServer) getApiPublicPeersHandler(w http.ResponseWriter, r *http.Req
 		}
 		if response.StatusCode > 200 {
 			a.Log.Errorln("Error read public peers url. Response code: ", response.StatusCode, ", Error message: ", response.Status)
-			writeError(w, response.StatusCode)
+			WriteError(w, response.StatusCode)
 			return
 		}
 		result, err = io.ReadAll(response.Body)
@@ -422,7 +488,7 @@ func (a *RestServer) getApiPathsHandler(w http.ResponseWriter, r *http.Request) 
 	sort.SliceStable(result, func(i, j int) bool {
 		return strings.Compare(result[i]["key"].(string), result[j]["key"].(string)) < 0
 	})
-	writeJson(w, r, result)
+	WriteJson(w, r, result)
 }
 
 // @Summary		Show established traffic sessions with remote nodes. The output contains following fields: Address, Byte received, Byte sent, Public Key, Uptime
@@ -448,29 +514,7 @@ func (a *RestServer) getApiSessionsHandler(w http.ResponseWriter, r *http.Reques
 	sort.SliceStable(result, func(i, j int) bool {
 		return strings.Compare(result[i]["key"].(string), result[j]["key"].(string)) < 0
 	})
-	writeJson(w, r, result)
-}
-
-// @Summary		Show information about the node's TUN interface. The output contains following fields: name, MTU.
-// @Produce		json
-// @Success		200		{string}	string		"ok"
-// @Failure		400		{error}		error		"Method not allowed"
-// @Failure		401		{error}		error		"Authentication failed"
-// @Failure		500		{error}		error		"Internal server error"
-// @Router		/tun [get]
-func (a *RestServer) getApiTunHandler(w http.ResponseWriter, r *http.Request) {
-	if a.Tun == nil {
-		writeError(w, http.StatusInternalServerError)
-		return
-	}
-	isStarted := a.Tun.IsStarted()
-	res := map[string]any{"enabled": isStarted}
-	if isStarted {
-		res["name"] = a.Tun.Name()
-		res["MTU"] = a.Tun.MTU()
-	}
-
-	writeJson(w, r, res)
+	WriteJson(w, r, result)
 }
 
 // @Summary		Show which interfaces multicast is enabled on.
@@ -489,7 +533,7 @@ func (a *RestServer) getApiMulticastinterfacesHandler(w http.ResponseWriter, r *
 	for _, v := range a.Multicast.Interfaces() {
 		res = append(res, v.Name)
 	}
-	writeJson(w, r, res)
+	WriteJson(w, r, res)
 }
 
 type Peer struct {
@@ -499,7 +543,7 @@ type Peer struct {
 	Priority      uint64   `json:"priority"`
 	Coords        []uint64 `json:"coords"`
 	Remote        string   `json:"remote"`
-	Rremote_ip    string   `json:"remote_ip"`
+	Remote_ip     string   `json:"remote_ip"`
 	Bytes_recvd   uint64   `json:"bytes_recvd"`
 	Bytes_sent    uint64   `json:"bytes_sent"`
 	Uptime        float64  `json:"uptime"`
@@ -550,14 +594,14 @@ func (a *RestServer) prepareGetPeers() []Peer {
 	return response
 }
 
-// @Summary		Get current peers list.
+// @Summary		Get current peers list. The output contains following fields: address, public key, port, priority, coordinates, remote URL, remote IP, bytes received, bytes sent, uptime, multicast flag, country code, country.
 // @Produce		json
 // @Success		200		{string}	string		"ok"
 // @Failure		401		{error}		error		"Authentication failed"
 // @Failure		403		{error}		error		"Bad request"
 // @Router		/peers [get]
 func (a *RestServer) getApiPeersHandler(w http.ResponseWriter, r *http.Request) {
-	writeJson(w, r, a.prepareGetPeers())
+	WriteJson(w, r, a.prepareGetPeers())
 }
 
 // @Summary		Add new peers.
@@ -627,19 +671,27 @@ func (a *RestServer) doPostPeers(w http.ResponseWriter, r *http.Request) (peers 
 }
 
 func (a *RestServer) savePeers(peers []map[string]string, r *http.Request) {
+	a.saveConfig(func(cfg *config.NodeConfig) {
+		cfg.Peers = []string{}
+		cfg.InterfacePeers = map[string][]string{}
+		for _, peer := range peers {
+			if peer["interface"] == "" {
+				cfg.Peers = append(cfg.Peers, peer["url"])
+			} else {
+				cfg.InterfacePeers[peer["interface"]] = append(cfg.InterfacePeers[peer["interface"]], peer["url"])
+			}
+		}
+	}, r)
+}
+
+func (a *RestServer) saveConfig(setConfigFields func(*config.NodeConfig), r *http.Request) {
 	if len(a.ConfigFn) > 0 {
 		saveHeaders := r.Header["Riv-Save-Config"]
 		if len(saveHeaders) > 0 && saveHeaders[0] == "true" {
 			cfg, err := defaults.ReadConfig(a.ConfigFn)
 			if err == nil {
-				cfg.Peers = []string{}
-				cfg.InterfacePeers = map[string][]string{}
-				for _, peer := range peers {
-					if peer["interface"] == "" {
-						cfg.Peers = append(cfg.Peers, peer["url"])
-					} else {
-						cfg.InterfacePeers[peer["interface"]] = append(cfg.InterfacePeers[peer["interface"]], peer["url"])
-					}
+				if setConfigFields != nil {
+					setConfigFields(cfg)
 				}
 				err := defaults.WriteConfig(a.ConfigFn, cfg)
 				if err != nil {
@@ -658,8 +710,11 @@ func applyKeyParameterized(w http.ResponseWriter, r *http.Request, fn func(key s
 		http.Error(w, "No remote public key supplied", http.StatusBadRequest)
 		return
 	}
-	if result, err := fn(cnt[4]); err == nil {
-		writeJson(w, r, result)
+	result, err := fn(cnt[4])
+	if err == nil {
+		WriteJson(w, r, result)
+	} else if errors.As(err, &core.ErrTimeout) {
+		http.Error(w, "Node inaccessible", http.StatusBadGateway)
 	} else {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
@@ -671,6 +726,7 @@ func applyKeyParameterized(w http.ResponseWriter, r *http.Request, fn func(key s
 // @Success		200		{string}	string		"ok"
 // @Failure		400		{error}		error		"Method not allowed"
 // @Failure		401		{error}		error		"Authentication failed"
+// @Failure		404		{error}		error		"Not found"
 // @Router		/remote/nodeinfo/{key} [get]
 func (a *RestServer) getApiRemoteNodeinfoHandler(w http.ResponseWriter, r *http.Request) {
 	applyKeyParameterized(w, r, a.Core.GetNodeInfo)
@@ -682,6 +738,7 @@ func (a *RestServer) getApiRemoteNodeinfoHandler(w http.ResponseWriter, r *http.
 // @Success		200		{string}	string		"ok"
 // @Failure		400		{error}		error		"Method not allowed"
 // @Failure		401		{error}		error		"Authentication failed"
+// @Failure		404		{error}		error		"Not found"
 // @Router		/remote/self/{key} [get]
 func (a *RestServer) getApiRemoteSelfHandler(w http.ResponseWriter, r *http.Request) {
 	applyKeyParameterized(w, r, a.Core.RemoteGetSelf)
@@ -693,6 +750,7 @@ func (a *RestServer) getApiRemoteSelfHandler(w http.ResponseWriter, r *http.Requ
 // @Success		200		{string}	string		"ok"
 // @Failure		400		{error}		error		"Method not allowed"
 // @Failure		401		{error}		error		"Authentication failed"
+// @Failure		404		{error}		error		"Not found"
 // @Router		/remote/peers/{key} [get]
 func (a *RestServer) getApiRemotePeersHandler(w http.ResponseWriter, r *http.Request) {
 	applyKeyParameterized(w, r, a.Core.RemoteGetPeers)
@@ -704,6 +762,7 @@ func (a *RestServer) getApiRemotePeersHandler(w http.ResponseWriter, r *http.Req
 // @Success		200		{string}	string		"ok"
 // @Failure		400		{error}		error		"Method not allowed"
 // @Failure		401		{error}		error		"Authentication failed"
+// @Failure		404		{error}		error		"Not found"
 // @Router		/remote/dht/{key} [get]
 func (a *RestServer) getApiRemoteDHTHandler(w http.ResponseWriter, r *http.Request) {
 	applyKeyParameterized(w, r, a.Core.RemoteGetDHT)
@@ -829,11 +888,11 @@ func (a *RestServer) getCountry(ipaddr string) (country_short string, country_lo
 	if a.ip2locatinoDb != nil {
 		ipLoc, err := a.ip2locatinoDb.Get_all(ipaddr)
 		if err == nil {
-			if ipLoc.Country_short != ip2loc_not_supported {
+			if ipLoc.Country_short != ip2loc_not_supported && ipLoc.Country_short != ip2loc_invalid_ip_address {
 				country_short = ipLoc.Country_short
 			}
 
-			if ipLoc.Country_long != ip2loc_not_supported {
+			if ipLoc.Country_long != ip2loc_not_supported && ipLoc.Country_long != ip2loc_invalid_ip_address {
 				country_long = ipLoc.Country_long
 			}
 		}
@@ -841,11 +900,11 @@ func (a *RestServer) getCountry(ipaddr string) (country_short string, country_lo
 	return
 }
 
-func writeError(w http.ResponseWriter, status int) {
+func WriteError(w http.ResponseWriter, status int) {
 	http.Error(w, http.StatusText(status), status)
 }
 
-func writeJson(w http.ResponseWriter, r *http.Request, data any) {
+func WriteJson(w http.ResponseWriter, r *http.Request, data any) {
 	if r.URL.Query().Has("fmt") && r.URL.Query()["fmt"][0] == "table" {
 		w.Header().Add("Content-Type", "text/plain; charset=utf-8")
 		printer := tableprinter.New(w)
