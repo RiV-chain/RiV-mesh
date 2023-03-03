@@ -242,7 +242,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - By encryption public key: `tcp://host:port?curve25519=key`
   - By both: `tcp://host:port?ed25519=key&curve25519=key`
   - By multiple, in case of DNS round-robin or similar: `tcp://host:port?curve25519=key&curve25519=key&ed25519=key&ed25519=key`
-- Some checks to prevent Yggdrasil-over-Yggdrasil peerings have been added
+- Some checks to prevent RiV-mesh-over-RiV-mesh peerings have been added
 - Added support for SOCKS proxy authentication, e.g. `socks://user@password:host/...`
 
 ### Fixed
@@ -256,7 +256,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - `DisconnectPeer` and `RemovePeer` have been separated and implemented properly now
 - Less nodes are stored in the DHT now, reducing ambient network traffic and possible instability
-- Default config file for FreeBSD is now at `/usr/local/etc/yggdrasil.conf` instead of `/etc/yggdrasil.conf`
+- Default config file for FreeBSD is now at `/usr/local/etc/mesh.conf` instead of `/etc/mesh.conf`
 
 ## [0.3.14] - 2020-03-28
 
@@ -276,7 +276,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Windows `.msi` installer files are now supported (bundling the Wireguard TUN driver)
 - NodeInfo code is now actorised, should be more reliable
 - The DHT now tries to store the two closest nodes in either direction instead of one, such that if a node goes offline, the replacement is already known
-- The Yggdrasil API now supports dialing a remote node using the public key instead of the Node ID
+- The RiV-mesh API now supports dialing a remote node using the public key instead of the Node ID
 
 ### Changed
 
@@ -284,7 +284,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - DHT search code has been significantly simplified and processes rumoured nodes in parallel, speeding up search time
 - DHT search results are now sorted
 - The systemd service now handles configuration generation in a different unit
-- The Yggdrasil API now returns public keys instead of node IDs when querying for local and remote addresses
+- The RiV-mesh API now returns public keys instead of node IDs when querying for local and remote addresses
 
 ### Fixed
 
@@ -304,7 +304,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - New API functions `SetMaximumSessionMTU` and `GetMaximumSessionMTU`
 - New command line parameters `-address` and `-subnet` for getting the address/subnet from the config file, for use with `-useconffile` or `-useconf`
-- A warning is now produced in the Yggdrasil output at startup when the MTU in the config is invalid or has been adjusted for some reason
+- A warning is now produced in the RiV-mesh output at startup when the MTU in the config is invalid or has been adjusted for some reason
 
 ### Changed
 
@@ -330,9 +330,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Go 1.13 or later is now required for building Yggdrasil
 - Some exported API functions have been updated to work with standard Go interfaces:
-  - `net.Conn` instead of `yggdrasil.Conn`
-  - `net.Dialer` (the interface it would satisfy if it wasn't a concrete type) instead of `yggdrasil.Dialer`
-  - `net.Listener` instead of `yggdrasil.Listener`
+  - `net.Conn` instead of `mesh.Conn`
+  - `net.Dialer` (the interface it would satisfy if it wasn't a concrete type) instead of `mesh.Dialer`
+  - `net.Listener` instead of `mesh.Listener`
 - Session metadata is now updated correctly when a search completes for a node to which we already have an open session
 - Multicast module reloading behaviour has been improved
 
@@ -362,7 +362,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Yggdrasil will now complain more verbosely when a peer URI is incorrectly formatted
 - Soft-shutdown methods have been added, allowing a node to shut down gracefully when terminated
-- New multicast interval logic which sends multicast beacons more often when Yggdrasil is first started to increase the chance of finding nearby nodes quickly after startup
+- New multicast interval logic which sends multicast beacons more often when RiV-mesh is first started to increase the chance of finding nearby nodes quickly after startup
 
 ### Changed
 
@@ -382,7 +382,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - A race condition when dialing a remote node by both the node address and routed prefix simultaneously has been fixed
 - A race condition between the router and the dial code resulting in a panic has been fixed
 - A panic which could occur when the TUN/TAP interface disappears (e.g. during soft-shutdown) has been fixed
-- A bug in the semantic versioning script which accompanies Yggdrasil for builds has been fixed
+- A bug in the semantic versioning script which accompanies RiV-mesh for builds has been fixed
 - A panic which could occur when the TUN/TAP interface reads an undersized/corrupted packet has been fixed
 
 ### Removed
@@ -426,7 +426,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - A number of significant performance regressions introduced in version 0.3.6 have been fixed, resulting in better performance
 - Flow labels are now used to prioritise traffic flows again correctly
-- In low-traffic scenarios where there are multiple peerings between a pair of nodes, Yggdrasil now prefers the most active peering instead of the least active, helping to reduce packet reordering
+- In low-traffic scenarios where there are multiple peerings between a pair of nodes, RiV-mesh now prefers the most active peering instead of the least active, helping to reduce packet reordering
 - The `Listen` statement, when configured as a string rather than an array, will now be parsed correctly
 - The admin socket now returns `coords` as a correct array of unsigned 64-bit integers, rather than the internal representation
 - The admin socket now returns `box_pub_key` in string format again
@@ -452,7 +452,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - This allows Yggdrasil to be integrated directly into other applications and used as a transport
   - IP-specific code has now been moved out of the core `yggdrasil` package, making Yggdrasil effectively protocol-agnostic
 - Multicast peer discovery functionality is now in the `multicast` package
-- Admin socket functionality is now in the `admin` package and uses the Yggdrasil public API
+- Admin socket functionality is now in the `admin` package and uses the RiV-mesh public API
 - TUN/TAP, ICMPv6 and all IP-specific functionality is now in the `tuntap` package
 - `PPROF` debug output is now sent to `stderr` instead of `stdout`
 - Node IPv6 addresses on macOS are now configured as `secured`
@@ -461,7 +461,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 
 - Multicast discovery is no longer disabled if the nominated interfaces aren't available on the system yet, e.g. during boot
-- Multicast interfaces are now re-evaluated more frequently so that Yggdrasil doesn't need to be restarted to use interfaces that have become available since startup
+- Multicast interfaces are now re-evaluated more frequently so that RiV-mesh doesn't need to be restarted to use interfaces that have become available since startup
 - Admin socket error cases are now handled better
 - Various fixes in the TUN/TAP module, particularly surrounding Windows platform support
 - Invalid keys will now cause the node to fail to start, rather than starting but silently not working as before
@@ -488,9 +488,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - New multicast behaviour where each multicast interface is given its own link-local listener and does not depend on the `Listen` configuration
 - Blocking detection in the switch to avoid parenting a blocked peer
 - Support for adding and removing listeners and multicast interfaces when reloading configuration during runtime
-- Yggdrasil will now attempt to clean up UNIX admin sockets on startup if left behind by a previous crash
+- RiV-mesh will now attempt to clean up UNIX admin sockets on startup if left behind by a previous crash
 - Admin socket `getTunnelRouting` and `setTunnelRouting` calls for enabling and disabling crypto-key routing during runtime
-- On macOS, Yggdrasil will now try to wake up AWDL on start-up when `awdl0` is a configured multicast interface, to keep it awake after system sleep, and to stop waking it when no longer needed
+- On macOS, RiV-mesh will now try to wake up AWDL on start-up when `awdl0` is a configured multicast interface, to keep it awake after system sleep, and to stop waking it when no longer needed
 - Added `LinkLocalTCPPort` option for controlling the port number that link-local TCP listeners will listen on by default when setting up `MulticastInterfaces` (a node restart is currently required for changes to `LinkLocalTCPPort` to take effect - it cannot be updated by reloading config during runtime)
 
 ### Changed
@@ -505,19 +505,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 
 - Admin socket `getTunTap` call now returns properly instead of claiming no interface is enabled in all cases
-- Handling of `getRoutes` etc in `yggdrasilctl` is now working
+- Handling of `getRoutes` etc in `meshctl` is now working
 - Local interface names are no longer leaked in multicast packets
 - Link-local TCP connections, particularly those initiated because of multicast beacons, are now always correctly scoped for the target interface
-- Yggdrasil now correctly responds to multicast interfaces going up and down during runtime
+- RiV-mesh now correctly responds to multicast interfaces going up and down during runtime
 
 ## [0.3.3] - 2019-02-18
 
 ### Added
 
 - Dynamic reconfiguration, which allows reloading the configuration file to make changes during runtime by sending a `SIGHUP` signal (note: this only works with `-useconffile` and not `-useconf` and currently reconfiguring TUN/TAP is not supported)
-- Support for building Yggdrasil as an iOS or Android framework if the appropriate tools (e.g. `gomobile`/`gobind` + SDKs) are available
+- Support for building RiV-mesh as an iOS or Android framework if the appropriate tools (e.g. `gomobile`/`gobind` + SDKs) are available
 - Connection contexts used for TCP connections which allow more exotic socket options to be set, e.g.
-  - Reusing the multicast socket to allow multiple running Yggdrasil instances without having to disable multicast
+  - Reusing the multicast socket to allow multiple running RiV-mesh instances without having to disable multicast
   - Allowing supported Macs to peer with other nearby Macs that aren't even on the same Wi-Fi network using AWDL
 - Flexible logging support, which allows for logging at different levels of verbosity
 
@@ -571,13 +571,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Default `AdminListen` in newly generated config is now `unix:///var/run/yggdrasil.sock`
 - Formatting of `getRoutes` in the admin socket has been improved
-- Debian package now adds `yggdrasil` group to assist with `AF_UNIX` admin socket permissions
+- Debian package now adds `mesh` group to assist with `AF_UNIX` admin socket permissions
 - Crypto, address and other utility code refactored into separate Go packages
 
 ### Fixed
 
 - Switch peer convergence is now much faster again (previously it was taking up to a minute once the peering was established)
-- `yggdrasilctl` is now less prone to crashing when parameters are specified incorrectly
+- `meshctl` is now less prone to crashing when parameters are specified incorrectly
 - Panic fixed when `Peers` or `InterfacePeers` was commented out
 
 ## [0.3.0] - 2018-12-12
@@ -590,20 +590,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - New macOS .pkgs built automatically by CircleCI
 - Add Dockerfile to repository for Docker support
 - Add `-json` command line flag for generating and normalising configuration in plain JSON instead of HJSON
-- Build name and version numbers are now imprinted onto the build, accessible through `yggdrasil -version` and `yggdrasilctl getSelf`
+- Build name and version numbers are now imprinted onto the build, accessible through `mesh -version` and `meshctl getSelf`
 - Add ability to disable admin socket by setting `AdminListen` to `"none"`
-- `yggdrasilctl` now tries to look for the default configuration file to find `AdminListen` if `-endpoint` is not specified
-- `yggdrasilctl` now returns more useful logging in the event of a fatal error
+- `meshctl` now tries to look for the default configuration file to find `AdminListen` if `-endpoint` is not specified
+- `meshctl` now returns more useful logging in the event of a fatal error
 
 ### Changed
 
 - Switched to Chord DHT (instead of Kademlia, although still compatible at the protocol level)
-- The `AdminListen` option and `yggdrasilctl` now default to `unix:///var/run/yggdrasil.sock` on BSDs, macOS and Linux
+- The `AdminListen` option and `meshctl` now default to `unix:///var/run/mesh.sock` on BSDs, macOS and Linux
 - Cleaned up some of the parameter naming in the admin socket
 - Latency-based parent selection for the switch instead of uptime-based (should help to avoid high latency links somewhat)
 - Real peering endpoints now shown in the admin socket `getPeers` call to help identify peerings
-- Reuse the multicast port on supported platforms so that multiple Yggdrasil processes can run
-- `yggdrasilctl` now has more useful help text (with `-help` or when no arguments passed)
+- Reuse the multicast port on supported platforms so that multiple RiV-mesh processes can run
+- `meshctl` now has more useful help text (with `-help` or when no arguments passed)
 
 ### Fixed
 
