@@ -1,8 +1,5 @@
 # RiV-mesh first self arranging mesh network with link aggregation.
 
-[![CircleCI](https://circleci.com/gh/RiV-chain/RiV-mesh.svg?style=shield&circle-token=:circle-token
-)](https://circleci.com/gh/RiV-chain/RiV-mesh)
-
 ## Why fork?
 RiV-mesh is fork of Yggdrasil which is great project. Yggdrasil uses a custom admin TCP protocol istead of REST. Second reason: Yggdrasil uses deprecated 200::/7 IPv6 address pool which can be assigned for some network in future, unlike this fc00::/7 is safe and has been taken for RiV-mesh. So far RiV-mesh can be easy switched to Yggdrasil network address space with NetworkDomain.Prefix 2 in mesh.conf configuration file.
 
@@ -101,6 +98,10 @@ Documentation is available [on our website](https://riv-chain.github.io/RiV-mesh
 - [Configuring RiV-mesh](https://riv-chain.github.io/RiV-mesh/)
 - [Frequently asked questions](https://riv-chain.github.io/RiV-mesh/)
 - [Version changelog](CHANGELOG.md)
+
+## Work in progress:
+
+<img width="253" alt="DDNS" src="https://github.com/RiV-chain/RiV-mesh/assets/743622/05757b9f-2053-4503-9037-24e5ff992554">
 
 ## Community
 
