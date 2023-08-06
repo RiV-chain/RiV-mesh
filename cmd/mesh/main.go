@@ -203,12 +203,6 @@ func run(args rivArgs, sigCh chan os.Signal) {
 		return
 	}
 	n := &node{}
-	options := []core.SetupOption{
-		core.Domain(cfg.Domain),
-		core.NodeInfo(cfg.NodeInfo),
-		core.NodeInfoPrivacy(cfg.NodeInfoPrivacy),
-		core.NetworkDomain(cfg.NetworkDomain),
-	}
 	// Have we been asked for the node address yet? If so, print it and then stop.
 	getDomain := func() iwt.Domain {
 		if d, err := hex.DecodeString(cfg.Domain); err == nil {
@@ -216,16 +210,23 @@ func run(args rivArgs, sigCh chan os.Signal) {
 		}
 		return nil
 	}
+	domain := getDomain()
+	options := []core.SetupOption{
+		core.Domain(domain),
+		core.NodeInfo(cfg.NodeInfo),
+		core.NodeInfoPrivacy(cfg.NodeInfoPrivacy),
+		core.NetworkDomain(cfg.NetworkDomain),
+	}
 	switch {
 	case args.getaddr:
-		if domain := getDomain(); domain != nil {
+		if domain != nil {
 			addr := n.core.AddrForDomain(domain)
 			ip := net.IP(addr[:])
 			fmt.Println(ip.String())
 		}
 		return
 	case args.getsnet:
-		if domain := getDomain(); domain != nil {
+		if domain != nil {
 			snet := n.core.SubnetForDomain(domain)
 			ipnet := net.IPNet{
 				IP:   append(snet[:], 0, 0, 0, 0, 0, 0, 0, 0),
@@ -324,7 +325,6 @@ func run(args rivArgs, sigCh chan os.Signal) {
 
 	// Make some nice output that tells us what our IPv6 address and subnet are.
 	// This is just logged to stdout for the user.
-	domain := n.core.Domain()
 	address := n.core.Address()
 	subnet := n.core.Subnet()
 	public := n.core.GetSelf().PublicKey

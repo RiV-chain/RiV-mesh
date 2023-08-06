@@ -2,6 +2,7 @@ package core
 
 import (
 	"crypto/ed25519"
+	"encoding/hex"
 
 	iwt "github.com/Arceliar/ironwood/types"
 )
@@ -9,7 +10,8 @@ import (
 func (c *Core) _applyOption(opt SetupOption) {
 	switch v := opt.(type) {
 	case Domain:
-		c.config.domain = nil
+		d, _ := hex.DecodeString(string(v))
+		c.config.domain = iwt.Domain(d)
 	case Peer:
 		c.config._peers[v] = nil
 	case ListenAddress:
@@ -27,11 +29,11 @@ func (c *Core) _applyOption(opt SetupOption) {
 	}
 }
 
-type Domain iwt.Domain
-
 type SetupOption interface {
 	isSetupOption()
 }
+
+type Domain string
 
 type ListenAddress string
 type Peer struct {
