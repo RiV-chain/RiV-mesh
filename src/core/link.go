@@ -124,7 +124,7 @@ func (intf *link) handler(dial *linkDial) error {
 	})
 
 	meta := version_getBaseMetadata()
-	meta.domain = intf.links.core.domain
+	meta.domain = intf.links.core.config.domain
 	metaBytes := meta.encode()
 	if err := intf.conn.SetDeadline(time.Now().Add(time.Second * 6)); err != nil {
 		return fmt.Errorf("failed to set handshake deadline: %w", err)

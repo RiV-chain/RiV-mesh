@@ -91,7 +91,7 @@ func GenerateConfig() *config.NodeConfig {
 	cfg.PublicPeersUrl = Define().DefaultPublicPeersUrl
 	//TODO this is a random string.
 	//Domain should be registered accordingly to dDNS spec.
-	cfg.Domain = uuid.New().String()[:5]
+	cfg.Domain = uuid.New().String()[:64]
 
 	return cfg
 }

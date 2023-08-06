@@ -2,10 +2,14 @@ package core
 
 import (
 	"crypto/ed25519"
+
+	iwt "github.com/Arceliar/ironwood/types"
 )
 
 func (c *Core) _applyOption(opt SetupOption) {
 	switch v := opt.(type) {
+	case Domain:
+		c.config.domain = nil
 	case Peer:
 		c.config._peers[v] = nil
 	case ListenAddress:
@@ -23,6 +27,8 @@ func (c *Core) _applyOption(opt SetupOption) {
 	}
 }
 
+type Domain iwt.Domain
+
 type SetupOption interface {
 	isSetupOption()
 }
@@ -39,6 +45,7 @@ type NetworkDomain struct {
 }
 type AllowedPublicKey ed25519.PublicKey
 
+func (a Domain) isSetupOption()           {}
 func (a ListenAddress) isSetupOption()    {}
 func (a Peer) isSetupOption()             {}
 func (a NodeInfo) isSetupOption()         {}

@@ -203,6 +203,12 @@ func run(args rivArgs, sigCh chan os.Signal) {
 		return
 	}
 	n := &node{}
+	options := []core.SetupOption{
+		core.Domain(cfg.Domain),
+		core.NodeInfo(cfg.NodeInfo),
+		core.NodeInfoPrivacy(cfg.NodeInfoPrivacy),
+		core.NetworkDomain(cfg.NetworkDomain),
+	}
 	// Have we been asked for the node address yet? If so, print it and then stop.
 	getDomain := func() iwt.Domain {
 		if d, err := hex.DecodeString(cfg.Domain); err == nil {
@@ -235,11 +241,6 @@ func run(args rivArgs, sigCh chan os.Signal) {
 		sk, err := hex.DecodeString(cfg.PrivateKey)
 		if err != nil {
 			panic(err)
-		}
-		options := []core.SetupOption{
-			core.NodeInfo(cfg.NodeInfo),
-			core.NodeInfoPrivacy(cfg.NodeInfoPrivacy),
-			core.NetworkDomain(cfg.NetworkDomain),
 		}
 		for _, addr := range cfg.Listen {
 			options = append(options, core.ListenAddress(addr))
@@ -323,9 +324,11 @@ func run(args rivArgs, sigCh chan os.Signal) {
 
 	// Make some nice output that tells us what our IPv6 address and subnet are.
 	// This is just logged to stdout for the user.
+	domain := n.core.Domain()
 	address := n.core.Address()
 	subnet := n.core.Subnet()
-	public := n.core.GetSelf().Domain
+	public := n.core.GetSelf().PublicKey
+	logger.Infof("Your Domain is %s", hex.EncodeToString(domain[:]))
 	logger.Infof("Your public key is %s", hex.EncodeToString(public[:]))
 	logger.Infof("Your IPv6 address is %s", address.String())
 	logger.Infof("Your IPv6 subnet is %s", subnet.String())

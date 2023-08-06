@@ -24,6 +24,7 @@ import (
 type SelfInfo struct {
 	Domain     iwt.Domain
 	Root       iwt.Domain
+	PublicKey  ed25519.PublicKey
 	PrivateKey ed25519.PrivateKey
 	Coords     []uint64
 }
@@ -62,6 +63,7 @@ type SessionInfo struct {
 func (c *Core) GetSelf() SelfInfo {
 	var self SelfInfo
 	s := c.PacketConn.PacketConn.Debug.GetSelf()
+	self.PublicKey = c.public
 	self.Domain = s.Domain
 	self.PrivateKey = c.secret
 	self.Root = s.Root
@@ -171,7 +173,7 @@ func (c *Core) Listen(u *url.URL, sintf string) (*Listener, error) {
 // that application also implements either VPN functionality or deals with IP
 // packets specifically.
 func (c *Core) Address() net.IP {
-	addr := net.IP(c.AddrForDomain(c.domain)[:])
+	addr := net.IP(c.AddrForDomain(c.config.domain)[:])
 	return addr
 }
 
@@ -181,7 +183,7 @@ func (c *Core) Address() net.IP {
 // that application also implements either VPN functionality or deals with IP
 // packets specifically.
 func (c *Core) Subnet() net.IPNet {
-	subnet := c.SubnetForDomain(c.domain)[:]
+	subnet := c.SubnetForDomain(c.config.domain)[:]
 	subnet = append(subnet, 0, 0, 0, 0, 0, 0, 0, 0)
 	return net.IPNet{IP: subnet, Mask: net.CIDRMask(64, 128)}
 }
@@ -277,7 +279,7 @@ func (c *Core) PublicKey() ed25519.PublicKey {
 }
 
 func (c *Core) Domain() iwt.Domain {
-	return c.domain
+	return c.config.domain
 }
 
 // Hack to get the admin stuff working, TODO something cleaner
