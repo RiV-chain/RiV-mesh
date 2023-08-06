@@ -2,12 +2,13 @@ package defaults
 
 import (
 	"bytes"
+	"crypto/ed25519"
+	"encoding/hex"
 	"encoding/json"
 	"io"
 	"os"
 
 	"github.com/RiV-chain/RiV-mesh/src/config"
-	"github.com/google/uuid"
 	"github.com/hjson/hjson-go"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/text/encoding/unicode"
@@ -91,7 +92,8 @@ func GenerateConfig() *config.NodeConfig {
 	cfg.PublicPeersUrl = Define().DefaultPublicPeersUrl
 	//TODO this is a random string.
 	//Domain should be registered accordingly to dDNS spec.
-	cfg.Domain = uuid.New().String()[:64]
+	pub, _, _ := ed25519.GenerateKey(nil)
+	cfg.Domain = hex.EncodeToString(pub)
 
 	return cfg
 }
