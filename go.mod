@@ -2,7 +2,7 @@ module github.com/RiV-chain/RiV-mesh
 
 go 1.18
 
-replace github.com/Arceliar/ironwood => github.com/RiV-chain/ironwood v0.0.0-20230806163323-6b8ec9684c98
+replace github.com/Arceliar/ironwood => github.com/RiV-chain/ironwood v0.0.0-20230806202556-8e4ddcf4f8a7
 
 require (
 	github.com/Arceliar/ironwood v0.0.0-20230805085300-86206813435f
@@ -43,7 +43,7 @@ require (
 	github.com/getlantern/hidden v0.0.0-20190325191715-f02dbb02be55 // indirect
 	github.com/getlantern/ops v0.0.0-20190325191751-d70cb0d6f85f // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
-	github.com/google/uuid v1.3.0
+	github.com/google/uuid v1.3.0 // indirect
 	github.com/libp2p/go-buffer-pool v0.0.2 // indirect
 	github.com/oxtoacart/bpool v0.0.0-20190530202638-03653db5a59c // indirect
 	github.com/rivo/uniseg v0.3.4 // indirect
