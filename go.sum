@@ -4,6 +4,8 @@ github.com/Arceliar/phony v0.0.0-20210209235338-dde1a8dca979 h1:WndgpSW13S32VLQ3
 github.com/Arceliar/phony v0.0.0-20210209235338-dde1a8dca979/go.mod h1:6Lkn+/zJilRMsKmbmG1RPoamiArC6HS73xbwRyp3UyI=
 github.com/RiV-chain/ironwood v0.0.0-20230806102314-bd0750e3fe00 h1:XeRRkIRhDN0zITv6yx9GkqZ0PQ9WXIfL2dINlhgk+UQ=
 github.com/RiV-chain/ironwood v0.0.0-20230806102314-bd0750e3fe00/go.mod h1:RP72rucOFm5udrnEzTmIWLRVGQiV/fSUAQXJ0RST/nk=
+github.com/RiV-chain/ironwood v0.0.0-20230806163323-6b8ec9684c98 h1:B1Uv6wDmqxpuuxftUDGxsheCZkxEYJRVproVit1rv48=
+github.com/RiV-chain/ironwood v0.0.0-20230806163323-6b8ec9684c98/go.mod h1:RP72rucOFm5udrnEzTmIWLRVGQiV/fSUAQXJ0RST/nk=
 github.com/benbjohnson/clock v1.1.0 h1:Q92kusRqC1XV2MjkWETPvjJVqKetz1OzxZB7mHJLju8=
 github.com/benbjohnson/clock v1.1.0/go.mod h1:J11/hYXuz8f4ySSvYwY0FKfm+ezbsZBKZxNJlLklBHA=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
