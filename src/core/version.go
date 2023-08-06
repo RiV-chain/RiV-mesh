@@ -6,6 +6,7 @@ package core
 
 import (
 	"crypto/ed25519"
+	"fmt"
 
 	iwt "github.com/Arceliar/ironwood/types"
 )
@@ -47,7 +48,7 @@ func (m *version_metadata) encode() []byte {
 	bs = append(bs, m.minorVer)
 	bs = append(bs, m.domain[:]...)
 	if len(bs) != version_getMetaLength() {
-		panic("Inconsistent metadata length")
+		panic(fmt.Sprintf("Inconsistent metadata length. Expected %d, Actual %d", version_getMetaLength(), len(bs)))
 	}
 	return bs
 }
