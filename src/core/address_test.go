@@ -5,6 +5,8 @@ import (
 	"crypto/ed25519"
 	"math/rand"
 	"testing"
+
+	iwt "github.com/Arceliar/ironwood/types"
 )
 
 func (c *Core) TestAddress_Address_IsValid(t *testing.T) {
@@ -54,7 +56,7 @@ func (c *Core) TestAddress_Subnet_IsValid(t *testing.T) {
 }
 
 func (c *Core) TestAddress_AddrForKey(t *testing.T) {
-	publicKey := ed25519.PublicKey{
+	publicKey := iwt.Domain{
 		189, 186, 207, 216, 34, 64, 222, 61, 205, 18, 57, 36, 203, 181, 82, 86,
 		251, 141, 171, 8, 170, 152, 227, 5, 82, 138, 184, 79, 65, 158, 110, 251,
 	}
@@ -63,20 +65,20 @@ func (c *Core) TestAddress_AddrForKey(t *testing.T) {
 		0xfc, 0, 132, 138, 96, 79, 187, 126, 67, 132, 101, 219, 141, 182, 104, 149,
 	}
 
-	if *c.AddrForKey(publicKey) != expectedAddress {
+	if *c.AddrForDomain(publicKey) != expectedAddress {
 		t.Fatal("invalid address returned")
 	}
 }
 
 func (c *Core) TestAddress_SubnetForKey(t *testing.T) {
-	publicKey := ed25519.PublicKey{
+	publicKey := iwt.Domain{
 		189, 186, 207, 216, 34, 64, 222, 61, 205, 18, 57, 36, 203, 181, 82, 86,
 		251, 141, 171, 8, 170, 152, 227, 5, 82, 138, 184, 79, 65, 158, 110, 251,
 	}
 
 	expectedSubnet := Subnet{0xfd, 0, 132, 138, 96, 79, 187, 126}
 
-	if *c.SubnetForKey(publicKey) != expectedSubnet {
+	if *c.SubnetForDomain(publicKey) != expectedSubnet {
 		t.Fatal("invalid subnet returned")
 	}
 }

@@ -16,20 +16,21 @@ import (
 	//"sort"
 	//"time"
 
+	iwt "github.com/Arceliar/ironwood/types"
 	"github.com/Arceliar/phony"
 	//"github.com/RiV-chain/RiV-mesh/src/address"
 )
 
 type SelfInfo struct {
-	Key        ed25519.PublicKey
-	Root       ed25519.PublicKey
+	Domain     iwt.Domain
+	Root       iwt.Domain
 	PrivateKey ed25519.PrivateKey
 	Coords     []uint64
 }
 
 type PeerInfo struct {
-	Key      ed25519.PublicKey
-	Root     ed25519.PublicKey
+	Domain   iwt.Domain
+	Root     iwt.Domain
 	Coords   []uint64
 	Port     uint64
 	Priority uint8
@@ -41,18 +42,18 @@ type PeerInfo struct {
 }
 
 type DHTEntryInfo struct {
-	Key  ed25519.PublicKey
-	Port uint64
-	Rest uint64
+	Domain iwt.Domain
+	Port   uint64
+	Rest   uint64
 }
 
 type PathEntryInfo struct {
-	Key  ed25519.PublicKey
-	Path []uint64
+	Domain iwt.Domain
+	Path   []uint64
 }
 
 type SessionInfo struct {
-	Key     ed25519.PublicKey
+	Domain  iwt.Domain
 	RXBytes uint64
 	TXBytes uint64
 	Uptime  time.Duration
@@ -61,7 +62,7 @@ type SessionInfo struct {
 func (c *Core) GetSelf() SelfInfo {
 	var self SelfInfo
 	s := c.PacketConn.PacketConn.Debug.GetSelf()
-	self.Key = s.Key
+	self.Domain = s.Domain
 	self.PrivateKey = c.secret
 	self.Root = s.Root
 	self.Coords = s.Coords
@@ -84,7 +85,7 @@ func (c *Core) GetPeers() []PeerInfo {
 	ps := c.PacketConn.PacketConn.Debug.GetPeers()
 	for _, p := range ps {
 		var info PeerInfo
-		info.Key = p.Key
+		info.Domain = p.Domain
 		info.Root = p.Root
 		info.Coords = p.Coords
 		info.Port = p.Port
@@ -114,7 +115,7 @@ func (c *Core) GetDHT() []DHTEntryInfo {
 	ds := c.PacketConn.PacketConn.Debug.GetDHT()
 	for _, d := range ds {
 		var info DHTEntryInfo
-		info.Key = d.Key
+		info.Domain = d.Domain
 		info.Port = d.Port
 		info.Rest = d.Rest
 		dhts = append(dhts, info)
@@ -127,7 +128,7 @@ func (c *Core) GetPaths() []PathEntryInfo {
 	ps := c.PacketConn.PacketConn.Debug.GetPaths()
 	for _, p := range ps {
 		var info PathEntryInfo
-		info.Key = p.Key
+		info.Domain = p.Domain
 		info.Path = p.Path
 		paths = append(paths, info)
 	}
@@ -139,7 +140,7 @@ func (c *Core) GetSessions() []SessionInfo {
 	ss := c.PacketConn.Debug.GetSessions()
 	for _, s := range ss {
 		var info SessionInfo
-		info.Key = s.Key
+		info.Domain = s.Domain
 		info.RXBytes = s.RX
 		info.TXBytes = s.TX
 		info.Uptime = s.Uptime
@@ -170,7 +171,7 @@ func (c *Core) Listen(u *url.URL, sintf string) (*Listener, error) {
 // that application also implements either VPN functionality or deals with IP
 // packets specifically.
 func (c *Core) Address() net.IP {
-	addr := net.IP(c.AddrForKey(c.public)[:])
+	addr := net.IP(c.AddrForDomain(c.domain)[:])
 	return addr
 }
 
@@ -180,7 +181,7 @@ func (c *Core) Address() net.IP {
 // that application also implements either VPN functionality or deals with IP
 // packets specifically.
 func (c *Core) Subnet() net.IPNet {
-	subnet := c.SubnetForKey(c.public)[:]
+	subnet := c.SubnetForDomain(c.domain)[:]
 	subnet = append(subnet, 0, 0, 0, 0, 0, 0, 0, 0)
 	return net.IPNet{IP: subnet, Mask: net.CIDRMask(64, 128)}
 }
@@ -273,6 +274,10 @@ func (c *Core) CallPeer(u *url.URL, sintf string) error {
 
 func (c *Core) PublicKey() ed25519.PublicKey {
 	return c.public
+}
+
+func (c *Core) Domain() iwt.Domain {
+	return c.domain
 }
 
 // Hack to get the admin stuff working, TODO something cleaner

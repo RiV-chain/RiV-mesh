@@ -1,7 +1,6 @@
 package main
 
 import (
-	"crypto/ed25519"
 	"encoding/hex"
 	"encoding/json"
 	"flag"
@@ -31,6 +30,8 @@ import (
 	"github.com/RiV-chain/RiV-mesh/src/restapi"
 	"github.com/RiV-chain/RiV-mesh/src/tun"
 	"github.com/RiV-chain/RiV-mesh/src/version"
+
+	iwt "github.com/Arceliar/ironwood/types"
 )
 
 type node struct {
@@ -203,23 +204,23 @@ func run(args rivArgs, sigCh chan os.Signal) {
 	}
 	n := &node{}
 	// Have we been asked for the node address yet? If so, print it and then stop.
-	getNodeKey := func() ed25519.PublicKey {
-		if pubkey, err := hex.DecodeString(cfg.PrivateKey); err == nil {
-			return ed25519.PrivateKey(pubkey).Public().(ed25519.PublicKey)
+	getDomain := func() iwt.Domain {
+		if d, err := hex.DecodeString(cfg.Domain); err == nil {
+			return d
 		}
 		return nil
 	}
 	switch {
 	case args.getaddr:
-		if key := getNodeKey(); key != nil {
-			addr := n.core.AddrForKey(key)
+		if domain := getDomain(); domain != nil {
+			addr := n.core.AddrForDomain(domain)
 			ip := net.IP(addr[:])
 			fmt.Println(ip.String())
 		}
 		return
 	case args.getsnet:
-		if key := getNodeKey(); key != nil {
-			snet := n.core.SubnetForKey(key)
+		if domain := getDomain(); domain != nil {
+			snet := n.core.SubnetForDomain(domain)
 			ipnet := net.IPNet{
 				IP:   append(snet[:], 0, 0, 0, 0, 0, 0, 0, 0),
 				Mask: net.CIDRMask(len(snet)*8, 128),
@@ -324,7 +325,7 @@ func run(args rivArgs, sigCh chan os.Signal) {
 	// This is just logged to stdout for the user.
 	address := n.core.Address()
 	subnet := n.core.Subnet()
-	public := n.core.GetSelf().Key
+	public := n.core.GetSelf().Domain
 	logger.Infof("Your public key is %s", hex.EncodeToString(public[:]))
 	logger.Infof("Your IPv6 address is %s", address.String())
 	logger.Infof("Your IPv6 subnet is %s", subnet.String())

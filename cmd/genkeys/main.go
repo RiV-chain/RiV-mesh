@@ -1,5 +1,4 @@
 /*
-
 This file generates crypto keys.
 It prints out a new set of keys each time if finds a "better" one.
 By default, "better" means a higher NodeID (-> higher IP address).
@@ -8,7 +7,6 @@ This is because the IP address format can compress leading 1s in the address, to
 If run with the "-sig" flag, it generates signing keys instead.
 A "better" signing key means one with a higher TreeID.
 This only matters if it's high enough to make you the root of the tree.
-
 */
 package main
 
@@ -22,6 +20,7 @@ import (
 
 	"github.com/gologme/log"
 
+	iwt "github.com/Arceliar/ironwood/types"
 	c "github.com/RiV-chain/RiV-mesh/src/core"
 )
 
@@ -46,7 +45,7 @@ func main() {
 			fmt.Println("Pub:", hex.EncodeToString(newKey.pub))
 			logger := log.New(os.Stdout, "", log.Flags())
 			core, _ := c.New(newKey.priv, logger, nil)
-			addr := core.AddrForKey(newKey.pub)
+			addr := core.AddrForDomain(iwt.Domain("example"))
 			fmt.Println("IP:", net.IP(addr[:]).String())
 		}
 	}

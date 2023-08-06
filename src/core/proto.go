@@ -124,7 +124,7 @@ func (p *protoHandler) sendGetSelfRequest(key keyArray, callback func([]byte)) {
 func (p *protoHandler) _handleGetSelfRequest(key keyArray) {
 	self := p.core.GetSelf()
 	res := map[string]string{
-		"key":    hex.EncodeToString(self.Key[:]),
+		"domain": hex.EncodeToString(self.Domain[:]),
 		"coords": fmt.Sprintf("%v", self.Coords),
 	}
 	bs, err := json.Marshal(res) // FIXME this puts keys in base64, not hex
@@ -168,7 +168,7 @@ func (p *protoHandler) _handleGetPeersRequest(key keyArray) {
 	peers := p.core.GetPeers()
 	var bs []byte
 	for _, pinfo := range peers {
-		tmp := append(bs, pinfo.Key[:]...)
+		tmp := append(bs, pinfo.Domain[:]...)
 		const responseOverhead = 2 // 1 debug type, 1 getpeers type
 		if uint64(len(tmp))+responseOverhead > p.core.MTU() {
 			break
@@ -212,7 +212,7 @@ func (p *protoHandler) _handleGetDHTRequest(key keyArray) {
 	dinfos := p.core.GetDHT()
 	var bs []byte
 	for _, dinfo := range dinfos {
-		tmp := append(bs, dinfo.Key[:]...)
+		tmp := append(bs, dinfo.Domain[:]...)
 		const responseOverhead = 2 // 1 debug type, 1 getdht type
 		if uint64(len(tmp))+responseOverhead > p.core.MTU() {
 			break
@@ -264,7 +264,7 @@ func (p *protoHandler) getSelfHandler(in json.RawMessage) (interface{}, error) {
 		if err := msg.UnmarshalJSON(info); err != nil {
 			return nil, err
 		}
-		ip := net.IP(p.core.AddrForKey(kbs)[:])
+		ip := net.IP(p.core.AddrForDomain(kbs)[:])
 		res := DebugGetSelfResponse{ip.String(): msg}
 		return res, nil
 	}
@@ -314,7 +314,7 @@ func (p *protoHandler) getPeersHandler(in json.RawMessage) (interface{}, error) 
 		if err := msg.UnmarshalJSON(js); err != nil {
 			return nil, err
 		}
-		ip := net.IP(p.core.AddrForKey(kbs)[:])
+		ip := net.IP(p.core.AddrForDomain(kbs)[:])
 		res := DebugGetPeersResponse{ip.String(): msg}
 		return res, nil
 	}
@@ -364,7 +364,7 @@ func (p *protoHandler) getDHTHandler(in json.RawMessage) (interface{}, error) {
 		if err := msg.UnmarshalJSON(js); err != nil {
 			return nil, err
 		}
-		ip := net.IP(p.core.AddrForKey(kbs)[:])
+		ip := net.IP(p.core.AddrForDomain(kbs)[:])
 		res := DebugGetDHTResponse{ip.String(): msg}
 		return res, nil
 	}

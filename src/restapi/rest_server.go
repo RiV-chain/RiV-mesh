@@ -362,7 +362,7 @@ func (a *RestServer) getApiSelfHandler(w http.ResponseWriter, r *http.Request) {
 	var result = map[string]any{
 		"build_name":    version.BuildName(),
 		"build_version": version.BuildVersion(),
-		"key":           hex.EncodeToString(self.Key[:]),
+		"domain":        hex.EncodeToString(self.Domain[:]),
 		"private_key":   hex.EncodeToString(self.PrivateKey[:]),
 		"address":       a.Core.Address().String(),
 		"subnet":        snet.String(),
@@ -413,10 +413,10 @@ func (a *RestServer) getApiDhtHandler(w http.ResponseWriter, r *http.Request) {
 	dht := a.Core.GetDHT()
 	result := make([]map[string]any, 0, len(dht))
 	for _, d := range dht {
-		addr := a.Core.AddrForKey(d.Key)
+		addr := a.Core.AddrForDomain(d.Domain)
 		entry := map[string]any{
 			"address": net.IP(addr[:]).String(),
-			"key":     hex.EncodeToString(d.Key),
+			"key":     hex.EncodeToString(d.Domain),
 			"port":    d.Port,
 			"rest":    d.Rest,
 		}
@@ -477,10 +477,10 @@ func (a *RestServer) getApiPathsHandler(w http.ResponseWriter, r *http.Request) 
 	paths := a.Core.GetPaths()
 	result := make([]map[string]any, 0, len(paths))
 	for _, d := range paths {
-		addr := a.Core.AddrForKey(d.Key)
+		addr := a.Core.AddrForDomain(d.Domain)
 		entry := map[string]any{
 			"address": net.IP(addr[:]).String(),
-			"key":     hex.EncodeToString(d.Key),
+			"key":     hex.EncodeToString(d.Domain),
 			"path":    d.Path,
 		}
 		result = append(result, entry)
@@ -501,10 +501,10 @@ func (a *RestServer) getApiSessionsHandler(w http.ResponseWriter, r *http.Reques
 	sessions := a.Core.GetSessions()
 	result := make([]map[string]any, 0, len(sessions))
 	for _, s := range sessions {
-		addr := a.Core.AddrForKey(s.Key)
+		addr := a.Core.AddrForDomain(s.Domain)
 		entry := map[string]any{
 			"address":     net.IP(addr[:]).String(),
-			"key":         hex.EncodeToString(s.Key),
+			"key":         hex.EncodeToString(s.Domain),
 			"bytes_recvd": s.RXBytes,
 			"bytes_sent":  s.TXBytes,
 			"uptime":      s.Uptime.Seconds(),
@@ -556,10 +556,10 @@ func (a *RestServer) prepareGetPeers() []Peer {
 	peers := a.Core.GetPeers()
 	response := make([]Peer, 0, len(peers))
 	for _, p := range peers {
-		addr := a.Core.AddrForKey(p.Key)
+		addr := a.Core.AddrForDomain(p.Domain)
 		entry := Peer{
 			net.IP(addr[:]).String(),
-			hex.EncodeToString(p.Key),
+			hex.EncodeToString(p.Domain),
 			p.Port,
 			uint64(p.Priority), // can't be uint8 thanks to gobind
 			p.Coords,

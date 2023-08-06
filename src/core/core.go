@@ -31,6 +31,7 @@ type Core struct {
 	cancel             context.CancelFunc
 	secret             ed25519.PrivateKey
 	public             ed25519.PublicKey
+	domain             iwt.Domain
 	links              links
 	proto              protoHandler
 	log                Logger

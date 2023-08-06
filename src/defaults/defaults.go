@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/RiV-chain/RiV-mesh/src/config"
+	"github.com/google/uuid"
 	"github.com/hjson/hjson-go"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/text/encoding/unicode"
@@ -88,6 +89,9 @@ func GenerateConfig() *config.NodeConfig {
 	cfg.HttpAddress = Define().DefaultHttpAddress
 	cfg.NetworkDomain = Define().DefaultNetworkDomain
 	cfg.PublicPeersUrl = Define().DefaultPublicPeersUrl
+	//TODO this is a random string.
+	//Domain should be registered accordingly to dDNS spec.
+	cfg.Domain = uuid.New().String()[:5]
 
 	return cfg
 }
