@@ -45,7 +45,8 @@ func main() {
 			fmt.Println("Pub:", hex.EncodeToString(newKey.pub))
 			logger := log.New(os.Stdout, "", log.Flags())
 			core, _ := c.New(newKey.priv, logger, nil)
-			addr := core.AddrForDomain(iwt.Domain("example"))
+			d1, _ := hex.DecodeString("0000000000000000000000000000000000000000000000000000000000000001")
+			addr := core.AddrForDomain(iwt.Domain(d1))
 			fmt.Println("IP:", net.IP(addr[:]).String())
 		}
 	}

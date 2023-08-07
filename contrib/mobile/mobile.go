@@ -216,7 +216,7 @@ func (m *Mesh) GetSubnetString() string {
 
 // GetPublicKeyString gets the node's public key in hex form
 func (m *Mesh) GetPublicKeyString() string {
-	return hex.EncodeToString(m.core.GetSelf().Domain)
+	return hex.EncodeToString(m.core.GetSelf().PublicKey)
 }
 
 // GetCoordsString gets the node's coordinates

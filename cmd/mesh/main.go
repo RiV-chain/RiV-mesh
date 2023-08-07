@@ -206,9 +206,9 @@ func run(args rivArgs, sigCh chan os.Signal) {
 	// Have we been asked for the node address yet? If so, print it and then stop.
 	getDomain := func() iwt.Domain {
 		if d, err := hex.DecodeString(cfg.Domain); err == nil {
-			return d
+			return iwt.Domain(d[:])
 		}
-		return nil
+		return iwt.Domain([32]byte{})
 	}
 	domain := getDomain()
 	options := []core.SetupOption{
@@ -219,21 +219,17 @@ func run(args rivArgs, sigCh chan os.Signal) {
 	}
 	switch {
 	case args.getaddr:
-		if domain != nil {
-			addr := n.core.AddrForDomain(domain)
-			ip := net.IP(addr[:])
-			fmt.Println(ip.String())
-		}
+		addr := n.core.AddrForDomain(domain)
+		ip := net.IP(addr[:])
+		fmt.Println(ip.String())
 		return
 	case args.getsnet:
-		if domain != nil {
-			snet := n.core.SubnetForDomain(domain)
-			ipnet := net.IPNet{
-				IP:   append(snet[:], 0, 0, 0, 0, 0, 0, 0, 0),
-				Mask: net.CIDRMask(len(snet)*8, 128),
-			}
-			fmt.Println(ipnet.String())
+		snet := n.core.SubnetForDomain(domain)
+		ipnet := net.IPNet{
+			IP:   append(snet[:], 0, 0, 0, 0, 0, 0, 0, 0),
+			Mask: net.CIDRMask(len(snet)*8, 128),
 		}
+		fmt.Println(ipnet.String())
 		return
 	}
 

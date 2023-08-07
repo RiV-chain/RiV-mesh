@@ -1,7 +1,6 @@
 package multicast
 
 import (
-	"bytes"
 	"context"
 	"crypto/ed25519"
 	"encoding/binary"
@@ -11,6 +10,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/Arceliar/ironwood/types"
 	"github.com/Arceliar/phony"
 	"github.com/gologme/log"
 
@@ -325,7 +325,11 @@ func (m *Multicast) _announce() {
 			if a, err := net.ResolveTCPAddr("tcp6", lladdr); err == nil {
 				a.Zone = ""
 				destAddr.Zone = iface.Name
-				msg := append([]byte(nil), m.core.GetSelf().Domain...)
+				domainBytes := make([]byte, ed25519.PublicKeySize)
+				for i, v := range m.core.GetSelf().Domain {
+					domainBytes[i] = v
+				}
+				msg := append([]byte(nil), domainBytes...)
 				msg = append(msg, a.IP...)
 				pbs := make([]byte, 2)
 				binary.BigEndian.PutUint16(pbs, uint16(a.Port))
@@ -371,9 +375,8 @@ func (m *Multicast) listen() {
 		if nBytes < ed25519.PublicKeySize {
 			continue
 		}
-		var key ed25519.PublicKey
-		key = append(key, bs[:ed25519.PublicKeySize]...)
-		if bytes.Equal(key, m.core.GetSelf().Domain) {
+		key := types.Domain(bs[:ed25519.PublicKeySize])
+		if key == m.core.GetSelf().Domain {
 			continue // don't bother trying to peer with self
 		}
 		begin := ed25519.PublicKeySize
@@ -398,7 +401,7 @@ func (m *Multicast) listen() {
 		})
 		if info, ok := interfaces[from.Zone]; ok && info.listen {
 			addr.Zone = ""
-			pin := fmt.Sprintf("/?key=%s&priority=%d", hex.EncodeToString(key), info.priority)
+			pin := fmt.Sprintf("/?key=%s&priority=%d", hex.EncodeToString(key[:]), info.priority)
 			u, err := url.Parse("tls://" + addr.String() + pin)
 			if err != nil {
 				m.log.Debugln("Call from multicast failed, parse error:", addr.String(), err)

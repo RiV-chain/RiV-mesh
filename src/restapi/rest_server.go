@@ -416,7 +416,7 @@ func (a *RestServer) getApiDhtHandler(w http.ResponseWriter, r *http.Request) {
 		addr := a.Core.AddrForDomain(d.Domain)
 		entry := map[string]any{
 			"address": net.IP(addr[:]).String(),
-			"key":     hex.EncodeToString(d.Domain),
+			"key":     hex.EncodeToString(d.Domain[:]),
 			"port":    d.Port,
 			"rest":    d.Rest,
 		}
@@ -480,7 +480,7 @@ func (a *RestServer) getApiPathsHandler(w http.ResponseWriter, r *http.Request) 
 		addr := a.Core.AddrForDomain(d.Domain)
 		entry := map[string]any{
 			"address": net.IP(addr[:]).String(),
-			"key":     hex.EncodeToString(d.Domain),
+			"key":     hex.EncodeToString(d.Domain[:]),
 			"path":    d.Path,
 		}
 		result = append(result, entry)
@@ -504,7 +504,7 @@ func (a *RestServer) getApiSessionsHandler(w http.ResponseWriter, r *http.Reques
 		addr := a.Core.AddrForDomain(s.Domain)
 		entry := map[string]any{
 			"address":     net.IP(addr[:]).String(),
-			"key":         hex.EncodeToString(s.Domain),
+			"key":         hex.EncodeToString(s.Domain[:]),
 			"bytes_recvd": s.RXBytes,
 			"bytes_sent":  s.TXBytes,
 			"uptime":      s.Uptime.Seconds(),
@@ -559,7 +559,7 @@ func (a *RestServer) prepareGetPeers() []Peer {
 		addr := a.Core.AddrForDomain(p.Domain)
 		entry := Peer{
 			net.IP(addr[:]).String(),
-			hex.EncodeToString(p.Domain),
+			hex.EncodeToString(p.Domain[:]),
 			p.Port,
 			uint64(p.Priority), // can't be uint8 thanks to gobind
 			p.Coords,

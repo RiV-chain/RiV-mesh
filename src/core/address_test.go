@@ -1,11 +1,10 @@
 package core
 
 import (
-	"bytes"
-	"crypto/ed25519"
 	"math/rand"
 	"testing"
 
+	"github.com/Arceliar/ironwood/types"
 	iwt "github.com/Arceliar/ironwood/types"
 )
 
@@ -88,14 +87,14 @@ func (c *Core) TestAddress_Address_GetKey(t *testing.T) {
 		0xfc, 0, 132, 138, 96, 79, 187, 126, 67, 132, 101, 219, 141, 182, 104, 149,
 	}
 
-	expectedPublicKey := ed25519.PublicKey{
+	expectedPublicKey := types.Domain{
 		189, 186, 207, 216, 34, 64, 222, 61,
 		205, 18, 57, 36, 203, 181, 127, 255,
 		255, 255, 255, 255, 255, 255, 255, 255,
 		255, 255, 255, 255, 255, 255, 255, 255,
 	}
 
-	if !bytes.Equal(c.GetAddressKey(address), expectedPublicKey) {
+	if c.GetAddressKey(address) != expectedPublicKey {
 		t.Fatal("invalid public key returned")
 	}
 }
@@ -103,14 +102,14 @@ func (c *Core) TestAddress_Address_GetKey(t *testing.T) {
 func (c *Core) TestAddress_Subnet_GetKey(t *testing.T) {
 	subnet := Subnet{0xfd, 0, 132, 138, 96, 79, 187, 126}
 
-	expectedPublicKey := ed25519.PublicKey{
+	expectedPublicKey := types.Domain{
 		189, 186, 207, 216, 34, 64, 255, 255,
 		255, 255, 255, 255, 255, 255, 255, 255,
 		255, 255, 255, 255, 255, 255, 255, 255,
 		255, 255, 255, 255, 255, 255, 255, 255,
 	}
 
-	if !bytes.Equal(c.GetSubnetKey(subnet), expectedPublicKey) {
+	if c.GetSubnetKey(subnet) != expectedPublicKey {
 		t.Fatal("invalid public key returned")
 	}
 }

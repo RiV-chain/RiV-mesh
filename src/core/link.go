@@ -166,7 +166,7 @@ func (intf *link) handler(dial *linkDial) error {
 	// check - in future versions we really should check a signature or something like that.
 	if pinned := intf.options.pinnedEd25519Keys; len(pinned) > 0 {
 		var key keyArray
-		copy(key[:], meta.domain)
+		copy(key[:], meta.domain[:])
 		if _, allowed := pinned[key]; !allowed {
 			return fmt.Errorf("node public key that does not match pinned keys")
 		}
@@ -175,14 +175,14 @@ func (intf *link) handler(dial *linkDial) error {
 	allowed := intf.links.core.config._allowedPublicKeys
 	isallowed := len(allowed) == 0
 	for k := range allowed {
-		if bytes.Equal(k[:], meta.domain) {
+		if bytes.Equal(k[:], meta.domain[:]) {
 			isallowed = true
 			break
 		}
 	}
 	if intf.incoming && !intf.force && !isallowed {
 		_ = intf.close()
-		return fmt.Errorf("node public key %q is not in AllowedPublicDomain", hex.EncodeToString(meta.domain))
+		return fmt.Errorf("node public key %q is not in AllowedPublicDomain", hex.EncodeToString(meta.domain[:]))
 	}
 
 	phony.Block(intf.links, func() {

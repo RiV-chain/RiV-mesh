@@ -62,7 +62,7 @@ func (m *version_metadata) decode(bs []byte) bool {
 	offset += copy(m.meta[:], bs[offset:])
 	m.ver, offset = bs[offset], offset+1
 	m.minorVer, offset = bs[offset], offset+1
-	m.domain = append([]byte(nil), bs[offset:]...)
+	m.domain = iwt.Domain(bs[offset:])
 	return true
 }
 

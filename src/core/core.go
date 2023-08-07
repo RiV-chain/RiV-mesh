@@ -186,7 +186,9 @@ func (c *Core) ReadFrom(p []byte) (n int, from net.Addr, err error) {
 			// This is what we want to handle here
 		case typeSessionProto:
 			var key keyArray
-			copy(key[:], from.(iwt.Addr))
+			var bs []byte
+			a := iwt.Domain(from.(iwt.Addr))
+			copy(key[:], a[:])
 			data := append([]byte(nil), bs[1:n]...)
 			c.proto.handleProto(nil, key, data)
 			continue

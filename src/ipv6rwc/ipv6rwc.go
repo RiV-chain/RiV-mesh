@@ -131,7 +131,7 @@ func (k *keyStore) sendToSubnet(subnet core.Subnet, bs []byte) {
 func (k *keyStore) update(key iwt.Domain) *keyInfo {
 	k.mutex.Lock()
 	var kArray keyArray
-	copy(kArray[:], key)
+	copy(kArray[:], key[:])
 	var info *keyInfo
 	var packets [][]byte
 	if info = k.keyToInfo[kArray]; info == nil {

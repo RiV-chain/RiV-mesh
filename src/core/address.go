@@ -68,7 +68,7 @@ func (c *Core) AddrForDomain(domain iwt.Domain) *Address {
 		return nil
 	}
 	var buf [ed25519.PublicKeySize]byte
-	copy(buf[:], domain)
+	copy(buf[:], domain[:])
 	for idx := range buf {
 		buf[idx] = ^buf[idx]
 	}
