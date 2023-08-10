@@ -65,8 +65,9 @@ func (m *version_metadata) decode(bs []byte) bool {
 	offset += copy(m.meta[:], bs[offset:])
 	m.ver, offset = bs[offset], offset+1
 	m.minorVer, offset = bs[offset], offset+1
-	offset += copy(m.domain[:], bs[offset:])
-	copy(m.publicKey[:], bs[offset:])
+	m.domain = append([]byte(nil), bs[offset:offset+ed25519.PublicKeySize]...)
+	offset += ed25519.PublicKeySize
+	m.publicKey = append([]byte(nil), bs[offset:]...)
 	return true
 }
 
