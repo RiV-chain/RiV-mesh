@@ -208,7 +208,7 @@ func run(args rivArgs, sigCh chan os.Signal) {
 		if d, err := hex.DecodeString(cfg.Domain); err == nil {
 			return iwt.Domain(d[:])
 		}
-		return iwt.Domain([32]byte{})
+		return iwt.Domain(nil)
 	}
 	domain := getDomain()
 	options := []core.SetupOption{

@@ -202,7 +202,8 @@ func (intf *link) handler(dial *linkDial) error {
 	time.AfterFunc(time.Millisecond*500, func() {
 		intf.links.core.PeersChangedSignal.Emit(nil)
 	})
-	err = intf.links.core.HandleConn(meta.domain, intf.conn, intf.options.priority)
+
+	err = intf.links.core.HandleConn(meta.domain, intf.links.core.public, intf.conn, intf.options.priority)
 	switch err {
 	case io.EOF, net.ErrClosed, nil:
 		intf.links.core.log.Infof("Disconnected %s %s: %s, source %s",

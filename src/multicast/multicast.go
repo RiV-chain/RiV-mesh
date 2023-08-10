@@ -1,6 +1,7 @@
 package multicast
 
 import (
+	"bytes"
 	"context"
 	"crypto/ed25519"
 	"encoding/binary"
@@ -375,8 +376,9 @@ func (m *Multicast) listen() {
 		if nBytes < ed25519.PublicKeySize {
 			continue
 		}
-		key := types.Domain(bs[:ed25519.PublicKeySize])
-		if key == m.core.GetSelf().Domain {
+
+		key := append(types.Domain(nil), bs[:ed25519.PublicKeySize]...)
+		if bytes.Equal(key, m.core.GetSelf().Domain) {
 			continue // don't bother trying to peer with self
 		}
 		begin := ed25519.PublicKeySize

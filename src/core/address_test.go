@@ -1,6 +1,7 @@
 package core
 
 import (
+	"bytes"
 	"math/rand"
 	"testing"
 
@@ -94,7 +95,7 @@ func (c *Core) TestAddress_Address_GetKey(t *testing.T) {
 		255, 255, 255, 255, 255, 255, 255, 255,
 	}
 
-	if c.GetAddressKey(address) != expectedPublicKey {
+	if !bytes.Equal(c.GetAddressKey(address), expectedPublicKey) {
 		t.Fatal("invalid public key returned")
 	}
 }
@@ -109,7 +110,7 @@ func (c *Core) TestAddress_Subnet_GetKey(t *testing.T) {
 		255, 255, 255, 255, 255, 255, 255, 255,
 	}
 
-	if c.GetSubnetKey(subnet) != expectedPublicKey {
+	if !bytes.Equal(c.GetSubnetKey(subnet), expectedPublicKey) {
 		t.Fatal("invalid public key returned")
 	}
 }
