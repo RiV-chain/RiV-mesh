@@ -125,6 +125,7 @@ func (intf *link) handler(dial *linkDial) error {
 
 	meta := version_getBaseMetadata()
 	meta.domain = intf.links.core.config.domain
+	meta.publicKey = intf.links.core.public
 	metaBytes := meta.encode()
 	if err := intf.conn.SetDeadline(time.Now().Add(time.Second * 6)); err != nil {
 		return fmt.Errorf("failed to set handshake deadline: %w", err)
@@ -203,7 +204,7 @@ func (intf *link) handler(dial *linkDial) error {
 		intf.links.core.PeersChangedSignal.Emit(nil)
 	})
 
-	err = intf.links.core.HandleConn(meta.domain, intf.links.core.public, intf.conn, intf.options.priority)
+	err = intf.links.core.HandleConn(meta.domain, meta.publicKey, intf.conn, intf.options.priority)
 	switch err {
 	case io.EOF, net.ErrClosed, nil:
 		intf.links.core.log.Infof("Disconnected %s %s: %s, source %s",

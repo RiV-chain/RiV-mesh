@@ -2,7 +2,7 @@ module github.com/RiV-chain/RiV-mesh
 
 go 1.20
 
-replace github.com/Arceliar/ironwood => github.com/RiV-chain/ironwood v0.0.0-20230810103004-db418e038b8d
+replace github.com/Arceliar/ironwood => github.com/RiV-chain/ironwood v0.0.0-20230810184651-90ed6bb1633f
 
 require (
 	github.com/Arceliar/ironwood v0.0.0-20230805085300-86206813435f
