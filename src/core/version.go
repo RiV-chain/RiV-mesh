@@ -67,7 +67,7 @@ func (m *version_metadata) decode(bs []byte) bool {
 	m.minorVer, offset = bs[offset], offset+1
 	copy(m.domain[:], bs[offset:offset+32])
 	offset = offset + 32
-	copy(m.domain[:], bs[offset:])
+	copy(m.publicKey[:], bs[offset:])
 	return true
 }
 
