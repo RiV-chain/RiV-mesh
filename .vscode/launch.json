@@ -12,7 +12,7 @@
             "program": "cmd/mesh/main.go",
             "args": [
                 "-useconffile",
-                "C:/ProgramData/RiV-mesh/mesh.conf",
+                "/etc/mesh.conf",
             ],
             "console": "integratedTerminal",
             "asRoot": true,
