@@ -42,7 +42,6 @@ type keyStore struct {
 }
 
 type keyInfo struct {
-	key     keyArray
 	domain  iwt.Domain
 	address core.Address
 	subnet  core.Subnet
@@ -75,7 +74,7 @@ func (k *keyStore) sendToAddress(addr core.Address, bs []byte) {
 	if info := k.addrToInfo[addr]; info != nil {
 		k.resetTimeout(info)
 		k.mutex.Unlock()
-		_, _ = k.core.WriteTo(bs, iwt.Addr(info.key[:]))
+		_, _ = k.core.WriteTo(bs, iwt.Addr(info.domain[:]))
 	} else {
 		var buf *buffer
 		if buf = k.addrBuffer[addr]; buf == nil {
@@ -104,7 +103,7 @@ func (k *keyStore) sendToSubnet(subnet core.Subnet, bs []byte) {
 	if info := k.subnetToInfo[subnet]; info != nil {
 		k.resetTimeout(info)
 		k.mutex.Unlock()
-		_, _ = k.core.WriteTo(bs, iwt.Addr(info.key[:]))
+		_, _ = k.core.WriteTo(bs, iwt.Addr(info.domain[:]))
 	} else {
 		var buf *buffer
 		if buf = k.subnetBuffer[subnet]; buf == nil {
@@ -136,10 +135,10 @@ func (k *keyStore) update(key iwt.Domain) *keyInfo {
 	var packets [][]byte
 	if info = k.keyToInfo[kArray]; info == nil {
 		info = new(keyInfo)
-		info.key = kArray
+		info.domain = iwt.Domain(kArray[:])
 		info.address = *k.core.AddrForDomain(info.domain)
 		info.subnet = *k.core.SubnetForDomain(info.domain)
-		k.keyToInfo[info.key] = info
+		k.keyToInfo[keyArray(info.domain)] = info
 		k.addrToInfo[info.address] = info
 		k.subnetToInfo[info.subnet] = info
 		if buf := k.addrBuffer[info.address]; buf != nil {
@@ -166,8 +165,8 @@ func (k *keyStore) resetTimeout(info *keyInfo) {
 	info.timeout = time.AfterFunc(keyStoreTimeout, func() {
 		k.mutex.Lock()
 		defer k.mutex.Unlock()
-		if nfo := k.keyToInfo[info.key]; nfo == info {
-			delete(k.keyToInfo, info.key)
+		if nfo := k.keyToInfo[keyArray(info.domain)]; nfo == info {
+			delete(k.keyToInfo, keyArray(info.domain))
 		}
 		if nfo := k.addrToInfo[info.address]; nfo == info {
 			delete(k.addrToInfo, info.address)
