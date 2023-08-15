@@ -171,7 +171,7 @@ func (c *Core) Listen(u *url.URL, sintf string) (*Listener, error) {
 // that application also implements either VPN functionality or deals with IP
 // packets specifically.
 func (c *Core) Address() net.IP {
-	addr := net.IP(c.AddrForKey(c.public)[:])
+	addr := net.IP(c.AddrForDomain(c.public)[:])
 	return addr
 }
 
@@ -181,7 +181,7 @@ func (c *Core) Address() net.IP {
 // that application also implements either VPN functionality or deals with IP
 // packets specifically.
 func (c *Core) Subnet() net.IPNet {
-	subnet := c.SubnetForKey(c.public)[:]
+	subnet := c.SubnetForDomain(c.public)[:]
 	subnet = append(subnet, 0, 0, 0, 0, 0, 0, 0, 0)
 	return net.IPNet{IP: subnet, Mask: net.CIDRMask(64, 128)}
 }

@@ -65,7 +65,7 @@ func (c *Core) TestAddress_AddrForKey(t *testing.T) {
 		0xfc, 0, 132, 138, 96, 79, 187, 126, 67, 132, 101, 219, 141, 182, 104, 149,
 	}
 
-	if *c.AddrForKey(types.Domain{Key: publicKey, Name: publicKey}) != expectedAddress {
+	if *c.AddrForDomain(types.Domain{Key: publicKey, Name: publicKey}) != expectedAddress {
 		t.Fatal("invalid address returned")
 	}
 }
@@ -78,7 +78,7 @@ func (c *Core) TestAddress_SubnetForKey(t *testing.T) {
 
 	expectedSubnet := Subnet{0xfd, 0, 132, 138, 96, 79, 187, 126}
 
-	if *c.SubnetForKey(types.Domain{Key: publicKey, Name: publicKey}) != expectedSubnet {
+	if *c.SubnetForDomain(types.Domain{Key: publicKey, Name: publicKey}) != expectedSubnet {
 		t.Fatal("invalid subnet returned")
 	}
 }
@@ -95,7 +95,7 @@ func (c *Core) TestAddress_Address_GetKey(t *testing.T) {
 		255, 255, 255, 255, 255, 255, 255, 255,
 	}
 
-	if !bytes.Equal(c.GetAddressKey(address).Key, expectedPublicKey) {
+	if !bytes.Equal(c.GetAddressDomain(address).Key, expectedPublicKey) {
 		t.Fatal("invalid public key returned")
 	}
 }
@@ -110,7 +110,7 @@ func (c *Core) TestAddress_Subnet_GetKey(t *testing.T) {
 		255, 255, 255, 255, 255, 255, 255, 255,
 	}
 
-	if !bytes.Equal(c.GetSubnetKey(subnet).Key, expectedPublicKey) {
+	if !bytes.Equal(c.GetSubnetDomain(subnet).Key, expectedPublicKey) {
 		t.Fatal("invalid public key returned")
 	}
 }

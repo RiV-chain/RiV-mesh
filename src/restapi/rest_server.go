@@ -414,7 +414,7 @@ func (a *RestServer) getApiDhtHandler(w http.ResponseWriter, r *http.Request) {
 	dht := a.Core.GetDHT()
 	result := make([]map[string]any, 0, len(dht))
 	for _, d := range dht {
-		addr := a.Core.AddrForKey(d.Domain)
+		addr := a.Core.AddrForDomain(d.Domain)
 		entry := map[string]any{
 			"address": net.IP(addr[:]).String(),
 			"key":     hex.EncodeToString(d.Domain.Key),
@@ -555,7 +555,7 @@ func (a *RestServer) prepareGetPeers() []Peer {
 	peers := a.Core.GetPeers()
 	response := make([]Peer, 0, len(peers))
 	for _, p := range peers {
-		addr := a.Core.AddrForKey(p.Domain)
+		addr := a.Core.AddrForDomain(p.Domain)
 		entry := Peer{
 			net.IP(addr[:]).String(),
 			hex.EncodeToString(p.Domain.Key),

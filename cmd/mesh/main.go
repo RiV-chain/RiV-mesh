@@ -215,14 +215,14 @@ func run(args rivArgs, sigCh chan os.Signal) {
 	switch {
 	case args.getaddr:
 		if key := getNodeKey(); !key.Equal(types.Domain{}) {
-			addr := n.core.AddrForKey(key)
+			addr := n.core.AddrForDomain(key)
 			ip := net.IP(addr[:])
 			fmt.Println(ip.String())
 		}
 		return
 	case args.getsnet:
 		if key := getNodeKey(); !key.Equal(types.Domain{}) {
-			snet := n.core.SubnetForKey(key)
+			snet := n.core.SubnetForDomain(key)
 			ipnet := net.IPNet{
 				IP:   append(snet[:], 0, 0, 0, 0, 0, 0, 0, 0),
 				Mask: net.CIDRMask(len(snet)*8, 128),

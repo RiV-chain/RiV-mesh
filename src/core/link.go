@@ -193,7 +193,7 @@ func (intf *link) handler(dial *linkDial) error {
 	if intf.incoming {
 		dir = "inbound"
 	}
-	remoteAddr := net.IP(intf.links.core.AddrForKey(meta.domain)[:]).String()
+	remoteAddr := net.IP(intf.links.core.AddrForDomain(meta.domain)[:]).String()
 	remoteStr := fmt.Sprintf("%s@%s", remoteAddr, intf.info.remote)
 	localStr := intf.conn.LocalAddr()
 	intf.links.core.log.Infof("Connected %s %s: %s, source %s",

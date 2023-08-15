@@ -271,7 +271,7 @@ func (p *protoHandler) getSelfHandler(in json.RawMessage) (interface{}, error) {
 		if err := msg.UnmarshalJSON(info); err != nil {
 			return nil, err
 		}
-		ip := net.IP(p.core.AddrForKey(req.Key)[:])
+		ip := net.IP(p.core.AddrForDomain(req.Key)[:])
 		res := DebugGetSelfResponse{ip.String(): msg}
 		return res, nil
 	}
@@ -317,7 +317,7 @@ func (p *protoHandler) getPeersHandler(in json.RawMessage) (interface{}, error) 
 		if err := msg.UnmarshalJSON(js); err != nil {
 			return nil, err
 		}
-		ip := net.IP(p.core.AddrForKey(req.Key)[:])
+		ip := net.IP(p.core.AddrForDomain(req.Key)[:])
 		res := DebugGetPeersResponse{ip.String(): msg}
 		return res, nil
 	}
@@ -362,7 +362,7 @@ func (p *protoHandler) getDHTHandler(in json.RawMessage) (interface{}, error) {
 		if err := msg.UnmarshalJSON(js); err != nil {
 			return nil, err
 		}
-		ip := net.IP(p.core.AddrForKey(req.Key)[:])
+		ip := net.IP(p.core.AddrForDomain(req.Key)[:])
 		res := DebugGetDHTResponse{ip.String(): msg}
 		return res, nil
 	}

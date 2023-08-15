@@ -52,12 +52,12 @@ func (c *Core) IsValidSubnet(s Subnet) bool {
 	return s[l-1] == prefix[l-1]|0x01
 }
 
-// AddrForKey takes a Domain as an argument and returns an *Address.
+// AddrForDomain takes a Domain as an argument and returns an *Address.
 // This function returns nil if the key length is not ed25519.PublicKeySize.
 // This address begins with the contents of GetPrefix(), with the last bit set to 0 to indicate an address.
 // The following 8 bits are set to the number of leading 1 bits in the bitwise inverse of the public key.
-// The bitwise inverse of the key, excluding the leading 1 bits and the first leading 0 bit, is truncated to the appropriate length and makes up the remainder of the address.
-func (c *Core) AddrForKey(domain iwt.Domain) *Address {
+// The bitwise inverse of the Domain name, excluding the leading 1 bits and the first leading 0 bit, is truncated to the appropriate length and makes up the remainder of the address.
+func (c *Core) AddrForDomain(domain iwt.Domain) *Address {
 	// 128 bit address
 	// Begins with prefix
 	// Next bit is a 0
@@ -102,16 +102,16 @@ func (c *Core) AddrForKey(domain iwt.Domain) *Address {
 	return &addr
 }
 
-// SubnetForKey takes a Domain as an argument and returns a *Subnet.
+// SubnetForDomain takes a Domain as an argument and returns a *Subnet.
 // This function returns nil if the key length is not ed25519.PublicKeySize.
 // The subnet begins with the address prefix, with the last bit set to 1 to indicate a prefix.
 // The following 8 bits are set to the number of leading 1 bits in the bitwise inverse of the key.
-// The bitwise inverse of the key, excluding the leading 1 bits and the first leading 0 bit, is truncated to the appropriate length and makes up the remainder of the subnet.
-func (c *Core) SubnetForKey(domain iwt.Domain) *Subnet {
+// The bitwise inverse of the Domain name bytes, excluding the leading 1 bits and the first leading 0 bit, is truncated to the appropriate length and makes up the remainder of the subnet.
+func (c *Core) SubnetForDomain(domain iwt.Domain) *Subnet {
 	// Exactly as the address version, with two exceptions:
 	//  1) The first bit after the fixed prefix is a 1 instead of a 0
 	//  2) It's truncated to a subnet prefix length instead of 128 bits
-	addr := c.AddrForKey(domain)
+	addr := c.AddrForDomain(domain)
 	if addr == nil {
 		return nil
 	}
@@ -124,7 +124,7 @@ func (c *Core) SubnetForKey(domain iwt.Domain) *Subnet {
 // GetKet returns the partial ed25519.PublicKey for the Address.
 // This is used for key lookup.
 
-func (c *Core) GetAddressKey(a Address) iwt.Domain {
+func (c *Core) GetAddressDomain(a Address) iwt.Domain {
 	var key [ed25519.PublicKeySize]byte
 	prefix := c.GetPrefix() // nolint:staticcheck
 	ones := int(a[len(prefix)])
@@ -152,8 +152,8 @@ func (c *Core) GetAddressKey(a Address) iwt.Domain {
 
 // GetKet returns the partial ed25519.PublicKey for the Subnet.
 // This is used for key lookup.
-func (c *Core) GetSubnetKey(s Subnet) iwt.Domain {
+func (c *Core) GetSubnetDomain(s Subnet) iwt.Domain {
 	var addr Address
 	copy(addr[:], s[:])
-	return c.GetAddressKey(addr)
+	return c.GetAddressDomain(addr)
 }

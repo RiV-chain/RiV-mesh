@@ -56,8 +56,8 @@ type buffer struct {
 
 func (k *keyStore) init(c *core.Core) {
 	k.core = c
-	k.address = *c.AddrForKey(k.core.GetSelf().Domain)
-	k.subnet = *c.SubnetForKey(k.core.GetSelf().Domain)
+	k.address = *c.AddrForDomain(k.core.GetSelf().Domain)
+	k.subnet = *c.SubnetForDomain(k.core.GetSelf().Domain)
 	if err := k.core.SetOutOfBandHandler(k.oobHandler); err != nil {
 		err = fmt.Errorf("tun.core.SetOutOfBandHander: %w", err)
 		panic(err)
@@ -95,7 +95,7 @@ func (k *keyStore) sendToAddress(addr core.Address, bs []byte) {
 			}
 		})
 		k.mutex.Unlock()
-		k.sendKeyLookup(k.core.GetAddressKey(addr))
+		k.sendKeyLookup(k.core.GetAddressDomain(addr))
 	}
 }
 
@@ -124,7 +124,7 @@ func (k *keyStore) sendToSubnet(subnet core.Subnet, bs []byte) {
 			}
 		})
 		k.mutex.Unlock()
-		k.sendKeyLookup(k.core.GetSubnetKey(subnet))
+		k.sendKeyLookup(k.core.GetSubnetDomain(subnet))
 	}
 }
 
@@ -137,8 +137,8 @@ func (k *keyStore) update(key iwt.Domain) *keyInfo {
 	if info = k.keyToInfo[kArray]; info == nil {
 		info = new(keyInfo)
 		info.domain = key
-		info.address = *k.core.AddrForKey(info.domain)
-		info.subnet = *k.core.SubnetForKey(info.domain)
+		info.address = *k.core.AddrForDomain(info.domain)
+		info.subnet = *k.core.SubnetForDomain(info.domain)
 		k.keyToInfo[kArray] = info
 		k.addrToInfo[info.address] = info
 		k.subnetToInfo[info.subnet] = info
@@ -187,7 +187,7 @@ func (k *keyStore) oobHandler(fromKey, toKey types.Domain, data []byte) {
 	sig := data[1:]
 	switch data[0] {
 	case typeKeyLookup:
-		snet := *k.core.SubnetForKey(toKey)
+		snet := *k.core.SubnetForDomain(toKey)
 		if snet == k.subnet && ed25519.Verify(fromKey.Key, toKey.Key, sig) {
 			// This is looking for at least our subnet (possibly our address)
 			// Send a response
