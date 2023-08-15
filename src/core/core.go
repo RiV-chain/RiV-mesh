@@ -66,6 +66,9 @@ func New(secret ed25519.PrivateKey, logger Logger, opts ...SetupOption) (*Core, 
 	c.secret = make(ed25519.PrivateKey, ed25519.PrivateKeySize)
 	copy(c.secret, secret)
 	c.public = iwt.NewDomain(string(c.config.domain), secret.Public().(ed25519.PublicKey))
+	for _, opt := range opts {
+		c._applyOption(opt)
+	}
 	var err error
 	if c.PacketConn, err = iwe.NewPacketConn(c.secret, c.public); err != nil {
 		return nil, fmt.Errorf("error creating encryption: %w", err)
@@ -73,9 +76,6 @@ func New(secret ed25519.PrivateKey, logger Logger, opts ...SetupOption) (*Core, 
 	c.config._peers = map[Peer]*linkInfo{}
 	c.config._listeners = map[ListenAddress]struct{}{}
 	c.config._allowedPublicKeys = map[[32]byte]struct{}{}
-	for _, opt := range opts {
-		c._applyOption(opt)
-	}
 	if c.log == nil {
 		c.log = log.New(io.Discard, "", 0)
 	}
