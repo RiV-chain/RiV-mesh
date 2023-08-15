@@ -328,13 +328,13 @@ func run(args rivArgs, sigCh chan os.Signal) {
 	// Setup the DNS.
 	{
 
-		dns.HandleFunc(".riv", func(w dns.ResponseWriter, r *dns.Msg) {
+		dns.HandleFunc(".", func(w dns.ResponseWriter, r *dns.Msg) {
 			msg := dns.Msg{}
 			msg.SetReply(r)
 			msg.Compress = false
-			domain := string(n.core.GetSelf().Domain.Name)
+			domain := string(removeTrailingZeros(n.core.GetSelf().Domain.Name))
 			for _, q := range r.Question {
-				if q.Qtype == dns.TypeAAAA && q.Name == domain+"." {
+				if q.Qtype == dns.TypeAAAA && q.Name == domain+".riv." {
 					aaaaRecord := &dns.AAAA{
 						Hdr:  dns.RR_Header{Name: q.Name, Rrtype: dns.TypeAAAA, Class: dns.ClassINET, Ttl: 60},
 						AAAA: net.ParseIP(n.core.Address().String()),
@@ -342,16 +342,17 @@ func run(args rivArgs, sigCh chan os.Signal) {
 					msg.Answer = append(msg.Answer, aaaaRecord)
 				}
 			}
-
 			w.WriteMsg(&msg)
 		})
 
-		server := &dns.Server{Addr: ":53", Net: "udp"}
-		fmt.Println("DNS server is listening on :53...")
-		err := server.ListenAndServe()
-		if err != nil {
-			fmt.Println("DNS server error:", err)
-		}
+		server := &dns.Server{Addr: "127.0.0.1:53", Net: "udp"}
+		logger.Infof("DNS server is listening on :53...")
+		go func() {
+			err := server.ListenAndServe()
+			if err != nil {
+				logger.Errorf("DNS server error:", err)
+			}
+		}()
 	}
 
 	// Make some nice output that tells us what our IPv6 address and subnet are.
@@ -378,6 +379,13 @@ func run(args rivArgs, sigCh chan os.Signal) {
 	_ = n.tun.Stop()
 	n.core.Stop()
 	n.rest_server.Shutdown()
+}
+
+func removeTrailingZeros(bytes []byte) []byte {
+	for len(bytes) > 0 && bytes[len(bytes)-1] == 0 {
+		bytes = bytes[:len(bytes)-1]
+	}
+	return bytes
 }
 
 func main() {
