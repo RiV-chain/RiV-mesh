@@ -362,7 +362,8 @@ func (a *RestServer) getApiSelfHandler(w http.ResponseWriter, r *http.Request) {
 	var result = map[string]any{
 		"build_name":    version.BuildName(),
 		"build_version": version.BuildVersion(),
-		"key":           hex.EncodeToString(self.Key[:]),
+		"key":           hex.EncodeToString(self.Domain.Key[:]),
+		"domain":        string(self.Domain.Name[:]),
 		"private_key":   hex.EncodeToString(self.PrivateKey[:]),
 		"address":       a.Core.Address().String(),
 		"subnet":        snet.String(),
@@ -413,10 +414,11 @@ func (a *RestServer) getApiDhtHandler(w http.ResponseWriter, r *http.Request) {
 	dht := a.Core.GetDHT()
 	result := make([]map[string]any, 0, len(dht))
 	for _, d := range dht {
-		addr := a.Core.AddrForKey(d.Key)
+		addr := a.Core.AddrForKey(d.Domain)
 		entry := map[string]any{
 			"address": net.IP(addr[:]).String(),
-			"key":     hex.EncodeToString(d.Key),
+			"key":     hex.EncodeToString(d.Domain.Key),
+			"Domain":  hex.EncodeToString(d.Domain.Name),
 			"port":    d.Port,
 			"rest":    d.Rest,
 		}
@@ -467,7 +469,7 @@ func (a *RestServer) getApiPublicPeersHandler(w http.ResponseWriter, r *http.Req
 	fmt.Fprint(w, string(result))
 }
 
-// @Summary		Show established paths through this node. The output contains following fields: Address, Public Key, Path
+// @Summary		Show established paths through this node. The output contains following fields: Public Key, Path
 // @Produce		json
 // @Success		200		{string}	string		"ok"
 // @Failure		401		{error}		error		"Authentication failed"
@@ -477,11 +479,9 @@ func (a *RestServer) getApiPathsHandler(w http.ResponseWriter, r *http.Request) 
 	paths := a.Core.GetPaths()
 	result := make([]map[string]any, 0, len(paths))
 	for _, d := range paths {
-		addr := a.Core.AddrForKey(d.Key)
 		entry := map[string]any{
-			"address": net.IP(addr[:]).String(),
-			"key":     hex.EncodeToString(d.Key),
-			"path":    d.Path,
+			"key":  hex.EncodeToString(d.Key),
+			"path": d.Path,
 		}
 		result = append(result, entry)
 	}
@@ -501,9 +501,7 @@ func (a *RestServer) getApiSessionsHandler(w http.ResponseWriter, r *http.Reques
 	sessions := a.Core.GetSessions()
 	result := make([]map[string]any, 0, len(sessions))
 	for _, s := range sessions {
-		addr := a.Core.AddrForKey(s.Key)
 		entry := map[string]any{
-			"address":     net.IP(addr[:]).String(),
 			"key":         hex.EncodeToString(s.Key),
 			"bytes_recvd": s.RXBytes,
 			"bytes_sent":  s.TXBytes,
@@ -539,6 +537,7 @@ func (a *RestServer) getApiMulticastinterfacesHandler(w http.ResponseWriter, r *
 type Peer struct {
 	Address       string   `json:"address"`
 	Key           string   `json:"key"`
+	Domain        string   `json:"domain"`
 	Port          uint64   `json:"port"`
 	Priority      uint64   `json:"priority"`
 	Coords        []uint64 `json:"coords"`
@@ -556,10 +555,11 @@ func (a *RestServer) prepareGetPeers() []Peer {
 	peers := a.Core.GetPeers()
 	response := make([]Peer, 0, len(peers))
 	for _, p := range peers {
-		addr := a.Core.AddrForKey(p.Key)
+		addr := a.Core.AddrForKey(p.Domain)
 		entry := Peer{
 			net.IP(addr[:]).String(),
-			hex.EncodeToString(p.Key),
+			hex.EncodeToString(p.Domain.Key),
+			string(p.Domain.Name),
 			p.Port,
 			uint64(p.Priority), // can't be uint8 thanks to gobind
 			p.Coords,

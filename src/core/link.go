@@ -124,7 +124,7 @@ func (intf *link) handler(dial *linkDial) error {
 	})
 
 	meta := version_getBaseMetadata()
-	meta.key = intf.links.core.public
+	meta.domain = intf.links.core.public
 	metaBytes := meta.encode()
 	if err := intf.conn.SetDeadline(time.Now().Add(time.Second * 6)); err != nil {
 		return fmt.Errorf("failed to set handshake deadline: %w", err)
@@ -166,7 +166,7 @@ func (intf *link) handler(dial *linkDial) error {
 	// check - in future versions we really should check a signature or something like that.
 	if pinned := intf.options.pinnedEd25519Keys; len(pinned) > 0 {
 		var key keyArray
-		copy(key[:], meta.key)
+		copy(key[:], meta.domain.Key)
 		if _, allowed := pinned[key]; !allowed {
 			return fmt.Errorf("node public key that does not match pinned keys")
 		}
@@ -175,14 +175,14 @@ func (intf *link) handler(dial *linkDial) error {
 	allowed := intf.links.core.config._allowedPublicKeys
 	isallowed := len(allowed) == 0
 	for k := range allowed {
-		if bytes.Equal(k[:], meta.key) {
+		if bytes.Equal(k[:], meta.domain.Key) {
 			isallowed = true
 			break
 		}
 	}
 	if intf.incoming && !intf.force && !isallowed {
 		_ = intf.close()
-		return fmt.Errorf("node public key %q is not in AllowedPublicKeys", hex.EncodeToString(meta.key))
+		return fmt.Errorf("node public key %q is not in AllowedPublicKeys", hex.EncodeToString(meta.domain.Key))
 	}
 
 	phony.Block(intf.links, func() {
@@ -193,7 +193,7 @@ func (intf *link) handler(dial *linkDial) error {
 	if intf.incoming {
 		dir = "inbound"
 	}
-	remoteAddr := net.IP(intf.links.core.AddrForKey(meta.key)[:]).String()
+	remoteAddr := net.IP(intf.links.core.AddrForKey(meta.domain)[:]).String()
 	remoteStr := fmt.Sprintf("%s@%s", remoteAddr, intf.info.remote)
 	localStr := intf.conn.LocalAddr()
 	intf.links.core.log.Infof("Connected %s %s: %s, source %s",
@@ -202,7 +202,7 @@ func (intf *link) handler(dial *linkDial) error {
 	time.AfterFunc(time.Millisecond*500, func() {
 		intf.links.core.PeersChangedSignal.Emit(nil)
 	})
-	err = intf.links.core.HandleConn(meta.key, intf.conn, intf.options.priority)
+	err = intf.links.core.HandleConn(meta.domain, intf.conn, intf.options.priority)
 	switch err {
 	case io.EOF, net.ErrClosed, nil:
 		intf.links.core.log.Infof("Disconnected %s %s: %s, source %s",

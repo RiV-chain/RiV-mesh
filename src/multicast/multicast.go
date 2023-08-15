@@ -325,7 +325,7 @@ func (m *Multicast) _announce() {
 			if a, err := net.ResolveTCPAddr("tcp6", lladdr); err == nil {
 				a.Zone = ""
 				destAddr.Zone = iface.Name
-				msg := append([]byte(nil), m.core.GetSelf().Key...)
+				msg := append([]byte(nil), m.core.GetSelf().Domain.Key...)
 				msg = append(msg, a.IP...)
 				pbs := make([]byte, 2)
 				binary.BigEndian.PutUint16(pbs, uint16(a.Port))
@@ -373,7 +373,7 @@ func (m *Multicast) listen() {
 		}
 		var key ed25519.PublicKey
 		key = append(key, bs[:ed25519.PublicKeySize]...)
-		if bytes.Equal(key, m.core.GetSelf().Key) {
+		if bytes.Equal(key, m.core.GetSelf().Domain.Key) {
 			continue // don't bother trying to peer with self
 		}
 		begin := ed25519.PublicKeySize

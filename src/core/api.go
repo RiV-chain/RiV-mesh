@@ -16,20 +16,21 @@ import (
 	//"sort"
 	//"time"
 
+	"github.com/Arceliar/ironwood/types"
 	"github.com/Arceliar/phony"
 	//"github.com/RiV-chain/RiV-mesh/src/address"
 )
 
 type SelfInfo struct {
-	Key        ed25519.PublicKey
-	Root       ed25519.PublicKey
+	Domain     types.Domain
+	Root       types.Domain
 	PrivateKey ed25519.PrivateKey
 	Coords     []uint64
 }
 
 type PeerInfo struct {
-	Key      ed25519.PublicKey
-	Root     ed25519.PublicKey
+	Domain   types.Domain
+	Root     types.Domain
 	Coords   []uint64
 	Port     uint64
 	Priority uint8
@@ -41,9 +42,9 @@ type PeerInfo struct {
 }
 
 type DHTEntryInfo struct {
-	Key  ed25519.PublicKey
-	Port uint64
-	Rest uint64
+	Domain types.Domain
+	Port   uint64
+	Rest   uint64
 }
 
 type PathEntryInfo struct {
@@ -61,7 +62,7 @@ type SessionInfo struct {
 func (c *Core) GetSelf() SelfInfo {
 	var self SelfInfo
 	s := c.PacketConn.PacketConn.Debug.GetSelf()
-	self.Key = s.Key
+	self.Domain = s.Domain
 	self.PrivateKey = c.secret
 	self.Root = s.Root
 	self.Coords = s.Coords
@@ -84,7 +85,7 @@ func (c *Core) GetPeers() []PeerInfo {
 	ps := c.PacketConn.PacketConn.Debug.GetPeers()
 	for _, p := range ps {
 		var info PeerInfo
-		info.Key = p.Key
+		info.Domain = p.Domain
 		info.Root = p.Root
 		info.Coords = p.Coords
 		info.Port = p.Port
@@ -114,7 +115,7 @@ func (c *Core) GetDHT() []DHTEntryInfo {
 	ds := c.PacketConn.PacketConn.Debug.GetDHT()
 	for _, d := range ds {
 		var info DHTEntryInfo
-		info.Key = d.Key
+		info.Domain = d.Domain
 		info.Port = d.Port
 		info.Rest = d.Rest
 		dhts = append(dhts, info)
@@ -272,7 +273,7 @@ func (c *Core) CallPeer(u *url.URL, sintf string) error {
 }
 
 func (c *Core) PublicKey() ed25519.PublicKey {
-	return c.public
+	return c.public.Key
 }
 
 // Hack to get the admin stuff working, TODO something cleaner

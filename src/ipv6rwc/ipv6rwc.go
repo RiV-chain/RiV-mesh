@@ -11,6 +11,7 @@ import (
 	"golang.org/x/net/icmp"
 	"golang.org/x/net/ipv6"
 
+	"github.com/Arceliar/ironwood/types"
 	iwt "github.com/Arceliar/ironwood/types"
 
 	//"github.com/RiV-chain/RiV-mesh/src/address"
@@ -42,7 +43,7 @@ type keyStore struct {
 }
 
 type keyInfo struct {
-	key     keyArray
+	domain  types.Domain
 	address core.Address
 	subnet  core.Subnet
 	timeout *time.Timer // From calling a time.AfterFunc to do cleanup
@@ -55,8 +56,8 @@ type buffer struct {
 
 func (k *keyStore) init(c *core.Core) {
 	k.core = c
-	k.address = *c.AddrForKey(k.core.PublicKey())
-	k.subnet = *c.SubnetForKey(k.core.PublicKey())
+	k.address = *c.AddrForKey(k.core.GetSelf().Domain)
+	k.subnet = *c.SubnetForKey(k.core.GetSelf().Domain)
 	if err := k.core.SetOutOfBandHandler(k.oobHandler); err != nil {
 		err = fmt.Errorf("tun.core.SetOutOfBandHander: %w", err)
 		panic(err)
@@ -74,7 +75,7 @@ func (k *keyStore) sendToAddress(addr core.Address, bs []byte) {
 	if info := k.addrToInfo[addr]; info != nil {
 		k.resetTimeout(info)
 		k.mutex.Unlock()
-		_, _ = k.core.WriteTo(bs, iwt.Addr(info.key[:]))
+		_, _ = k.core.WriteTo(bs, iwt.Addr(info.domain))
 	} else {
 		var buf *buffer
 		if buf = k.addrBuffer[addr]; buf == nil {
@@ -103,7 +104,7 @@ func (k *keyStore) sendToSubnet(subnet core.Subnet, bs []byte) {
 	if info := k.subnetToInfo[subnet]; info != nil {
 		k.resetTimeout(info)
 		k.mutex.Unlock()
-		_, _ = k.core.WriteTo(bs, iwt.Addr(info.key[:]))
+		_, _ = k.core.WriteTo(bs, iwt.Addr(info.domain))
 	} else {
 		var buf *buffer
 		if buf = k.subnetBuffer[subnet]; buf == nil {
@@ -127,18 +128,18 @@ func (k *keyStore) sendToSubnet(subnet core.Subnet, bs []byte) {
 	}
 }
 
-func (k *keyStore) update(key ed25519.PublicKey) *keyInfo {
+func (k *keyStore) update(key iwt.Domain) *keyInfo {
 	k.mutex.Lock()
 	var kArray keyArray
-	copy(kArray[:], key)
+	copy(kArray[:], key.Key)
 	var info *keyInfo
 	var packets [][]byte
 	if info = k.keyToInfo[kArray]; info == nil {
 		info = new(keyInfo)
-		info.key = kArray
-		info.address = *k.core.AddrForKey(ed25519.PublicKey(info.key[:]))
-		info.subnet = *k.core.SubnetForKey(ed25519.PublicKey(info.key[:]))
-		k.keyToInfo[info.key] = info
+		info.domain = key
+		info.address = *k.core.AddrForKey(info.domain)
+		info.subnet = *k.core.SubnetForKey(info.domain)
+		k.keyToInfo[kArray] = info
 		k.addrToInfo[info.address] = info
 		k.subnetToInfo[info.subnet] = info
 		if buf := k.addrBuffer[info.address]; buf != nil {
@@ -153,7 +154,7 @@ func (k *keyStore) update(key ed25519.PublicKey) *keyInfo {
 	k.resetTimeout(info)
 	k.mutex.Unlock()
 	for _, packet := range packets {
-		_, _ = k.core.WriteTo(packet, iwt.Addr(info.key[:]))
+		_, _ = k.core.WriteTo(packet, iwt.Addr(info.domain))
 	}
 	return info
 }
@@ -165,8 +166,10 @@ func (k *keyStore) resetTimeout(info *keyInfo) {
 	info.timeout = time.AfterFunc(keyStoreTimeout, func() {
 		k.mutex.Lock()
 		defer k.mutex.Unlock()
-		if nfo := k.keyToInfo[info.key]; nfo == info {
-			delete(k.keyToInfo, info.key)
+		var kArray keyArray
+		copy(kArray[:], info.domain.Key)
+		if nfo := k.keyToInfo[kArray]; nfo == info {
+			delete(k.keyToInfo, kArray)
 		}
 		if nfo := k.addrToInfo[info.address]; nfo == info {
 			delete(k.addrToInfo, info.address)
@@ -177,7 +180,7 @@ func (k *keyStore) resetTimeout(info *keyInfo) {
 	})
 }
 
-func (k *keyStore) oobHandler(fromKey, toKey ed25519.PublicKey, data []byte) {
+func (k *keyStore) oobHandler(fromKey, toKey types.Domain, data []byte) {
 	if len(data) != 1+ed25519.SignatureSize {
 		return
 	}
@@ -185,7 +188,7 @@ func (k *keyStore) oobHandler(fromKey, toKey ed25519.PublicKey, data []byte) {
 	switch data[0] {
 	case typeKeyLookup:
 		snet := *k.core.SubnetForKey(toKey)
-		if snet == k.subnet && ed25519.Verify(fromKey, toKey[:], sig) {
+		if snet == k.subnet && ed25519.Verify(fromKey.Key, toKey.Key, sig) {
 			// This is looking for at least our subnet (possibly our address)
 			// Send a response
 			k.sendKeyResponse(fromKey)
@@ -193,20 +196,20 @@ func (k *keyStore) oobHandler(fromKey, toKey ed25519.PublicKey, data []byte) {
 	case typeKeyResponse:
 		// TODO keep a list of something to match against...
 		// Ignore the response if it doesn't match anything of interest...
-		if ed25519.Verify(fromKey, toKey[:], sig) {
+		if ed25519.Verify(fromKey.Key, toKey.Key, sig) {
 			k.update(fromKey)
 		}
 	}
 }
 
-func (k *keyStore) sendKeyLookup(partial ed25519.PublicKey) {
-	sig := ed25519.Sign(k.core.PrivateKey(), partial[:])
+func (k *keyStore) sendKeyLookup(domain iwt.Domain) {
+	sig := ed25519.Sign(k.core.PrivateKey(), domain.Key)
 	bs := append([]byte{typeKeyLookup}, sig...)
-	_ = k.core.SendOutOfBand(partial, bs)
+	_ = k.core.SendOutOfBand(domain, bs)
 }
 
-func (k *keyStore) sendKeyResponse(dest ed25519.PublicKey) {
-	sig := ed25519.Sign(k.core.PrivateKey(), dest[:])
+func (k *keyStore) sendKeyResponse(dest types.Domain) {
+	sig := ed25519.Sign(k.core.PrivateKey(), dest.Key[:])
 	bs := append([]byte{typeKeyResponse}, sig...)
 	_ = k.core.SendOutOfBand(dest, bs)
 }
@@ -257,7 +260,7 @@ func (k *keyStore) readPC(p []byte) (int, error) {
 		if dstAddr != k.address && dstSubnet != k.subnet {
 			continue // bad local address/subnet
 		}
-		info := k.update(ed25519.PublicKey(from.(iwt.Addr)))
+		info := k.update(iwt.Domain(from.(iwt.Addr)))
 		if srcAddr != info.address && srcSubnet != info.subnet {
 			continue // bad remote address/subnet
 		}

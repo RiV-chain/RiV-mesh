@@ -102,40 +102,44 @@ func (m *nodeinfo) _setNodeInfo(given map[string]interface{}, privacy bool) erro
 	}
 }
 
-func (m *nodeinfo) sendReq(from phony.Actor, key keyArray, callback func(nodeinfo json.RawMessage)) {
+func (m *nodeinfo) sendReq(from phony.Actor, key iwt.Domain, callback func(nodeinfo json.RawMessage)) {
 	m.Act(from, func() {
 		m._sendReq(key, callback)
 	})
 }
 
-func (m *nodeinfo) _sendReq(key keyArray, callback func(nodeinfo json.RawMessage)) {
+func (m *nodeinfo) _sendReq(domain iwt.Domain, callback func(nodeinfo json.RawMessage)) {
 	if callback != nil {
+		var key keyArray
+		copy(key[:], domain.Key)
 		m._addCallback(key, callback)
 	}
-	_, _ = m.proto.core.PacketConn.WriteTo([]byte{typeSessionProto, typeProtoNodeInfoRequest}, iwt.Addr(key[:]))
+	_, _ = m.proto.core.PacketConn.WriteTo([]byte{typeSessionProto, typeProtoNodeInfoRequest}, iwt.Addr(domain))
 }
 
-func (m *nodeinfo) handleReq(from phony.Actor, key keyArray) {
+func (m *nodeinfo) handleReq(from phony.Actor, key iwt.Domain) {
 	m.Act(from, func() {
 		m._sendRes(key)
 	})
 }
 
-func (m *nodeinfo) handleRes(from phony.Actor, key keyArray, info json.RawMessage) {
+func (m *nodeinfo) handleRes(from phony.Actor, domain iwt.Domain, info json.RawMessage) {
 	m.Act(from, func() {
+		var key keyArray
+		copy(key[:], domain.Key)
 		m._callback(key, info)
 	})
 }
 
-func (m *nodeinfo) _sendRes(key keyArray) {
+func (m *nodeinfo) _sendRes(key iwt.Domain) {
 	bs := append([]byte{typeSessionProto, typeProtoNodeInfoResponse}, m._getNodeInfo()...)
-	_, _ = m.proto.core.PacketConn.WriteTo(bs, iwt.Addr(key[:]))
+	_, _ = m.proto.core.PacketConn.WriteTo(bs, iwt.Addr(key))
 }
 
 // Admin socket stuff
 
 type GetNodeInfoRequest struct {
-	Key string `json:"key"`
+	Key iwt.Domain `json:"key"`
 }
 type GetNodeInfoResponse map[string]json.RawMessage
 
@@ -144,18 +148,11 @@ func (m *nodeinfo) nodeInfoAdminHandler(in json.RawMessage) (interface{}, error)
 	if err := json.Unmarshal(in, &req); err != nil {
 		return nil, err
 	}
-	if req.Key == "" {
-		return nil, fmt.Errorf("No remote public key supplied")
+	if req.Key.Key.Equal([]byte("")) {
+		return nil, fmt.Errorf("no remote public key supplied")
 	}
-	var key keyArray
-	var kbs []byte
-	var err error
-	if kbs, err = hex.DecodeString(req.Key); err != nil {
-		return nil, fmt.Errorf("Failed to decode public key: %w", err)
-	}
-	copy(key[:], kbs)
 	ch := make(chan []byte, 1)
-	m.sendReq(nil, key, func(info json.RawMessage) {
+	m.sendReq(nil, req.Key, func(info json.RawMessage) {
 		ch <- info
 	})
 	timer := time.NewTimer(6 * time.Second)
@@ -168,7 +165,7 @@ func (m *nodeinfo) nodeInfoAdminHandler(in json.RawMessage) (interface{}, error)
 		if err := msg.UnmarshalJSON(info); err != nil {
 			return nil, err
 		}
-		key := hex.EncodeToString(kbs[:])
+		key := hex.EncodeToString(req.Key.Key)
 		res := GetNodeInfoResponse{key: msg}
 		return res, nil
 	}

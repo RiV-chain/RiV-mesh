@@ -5,6 +5,8 @@ import (
 	"crypto/ed25519"
 	"math/rand"
 	"testing"
+
+	"github.com/Arceliar/ironwood/types"
 )
 
 func (c *Core) TestAddress_Address_IsValid(t *testing.T) {
@@ -63,7 +65,7 @@ func (c *Core) TestAddress_AddrForKey(t *testing.T) {
 		0xfc, 0, 132, 138, 96, 79, 187, 126, 67, 132, 101, 219, 141, 182, 104, 149,
 	}
 
-	if *c.AddrForKey(publicKey) != expectedAddress {
+	if *c.AddrForKey(types.Domain{Key: publicKey, Name: publicKey}) != expectedAddress {
 		t.Fatal("invalid address returned")
 	}
 }
@@ -76,7 +78,7 @@ func (c *Core) TestAddress_SubnetForKey(t *testing.T) {
 
 	expectedSubnet := Subnet{0xfd, 0, 132, 138, 96, 79, 187, 126}
 
-	if *c.SubnetForKey(publicKey) != expectedSubnet {
+	if *c.SubnetForKey(types.Domain{Key: publicKey, Name: publicKey}) != expectedSubnet {
 		t.Fatal("invalid subnet returned")
 	}
 }
@@ -93,7 +95,7 @@ func (c *Core) TestAddress_Address_GetKey(t *testing.T) {
 		255, 255, 255, 255, 255, 255, 255, 255,
 	}
 
-	if !bytes.Equal(c.GetAddressKey(address), expectedPublicKey) {
+	if !bytes.Equal(c.GetAddressKey(address).Key, expectedPublicKey) {
 		t.Fatal("invalid public key returned")
 	}
 }
@@ -108,7 +110,7 @@ func (c *Core) TestAddress_Subnet_GetKey(t *testing.T) {
 		255, 255, 255, 255, 255, 255, 255, 255,
 	}
 
-	if !bytes.Equal(c.GetSubnetKey(subnet), expectedPublicKey) {
+	if !bytes.Equal(c.GetSubnetKey(subnet).Key, expectedPublicKey) {
 		t.Fatal("invalid public key returned")
 	}
 }

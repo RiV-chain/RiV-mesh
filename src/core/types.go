@@ -17,4 +17,4 @@ const (
 	typeProtoDebug = 255
 )
 
-var ErrTimeout = errors.New("Operation timeout")
+var ErrTimeout = errors.New("operation timeout")

@@ -15,6 +15,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Arceliar/ironwood/types"
 	"github.com/gologme/log"
 	gsyslog "github.com/hashicorp/go-syslog"
 	"github.com/hjson/hjson-go"
@@ -203,22 +204,24 @@ func run(args rivArgs, sigCh chan os.Signal) {
 	}
 	n := &node{}
 	// Have we been asked for the node address yet? If so, print it and then stop.
-	getNodeKey := func() ed25519.PublicKey {
+	getNodeKey := func() types.Domain {
 		if pubkey, err := hex.DecodeString(cfg.PrivateKey); err == nil {
-			return ed25519.PrivateKey(pubkey).Public().(ed25519.PublicKey)
+			pub := ed25519.PrivateKey(pubkey).Public().(ed25519.PublicKey)
+			name := cfg.Domain
+			return types.Domain{Key: pub, Name: []byte(name)}
 		}
-		return nil
+		return types.Domain{}
 	}
 	switch {
 	case args.getaddr:
-		if key := getNodeKey(); key != nil {
+		if key := getNodeKey(); !key.Equal(types.Domain{}) {
 			addr := n.core.AddrForKey(key)
 			ip := net.IP(addr[:])
 			fmt.Println(ip.String())
 		}
 		return
 	case args.getsnet:
-		if key := getNodeKey(); key != nil {
+		if key := getNodeKey(); !key.Equal(types.Domain{}) {
 			snet := n.core.SubnetForKey(key)
 			ipnet := net.IPNet{
 				IP:   append(snet[:], 0, 0, 0, 0, 0, 0, 0, 0),
@@ -324,8 +327,9 @@ func run(args rivArgs, sigCh chan os.Signal) {
 	// This is just logged to stdout for the user.
 	address := n.core.Address()
 	subnet := n.core.Subnet()
-	public := n.core.GetSelf().Key
-	logger.Infof("Your public key is %s", hex.EncodeToString(public[:]))
+	public := n.core.GetSelf().Domain
+	logger.Infof("Your Domain is %s", hex.EncodeToString(public.Name[:]))
+	logger.Infof("Your public key is %s", hex.EncodeToString(public.Key[:]))
 	logger.Infof("Your IPv6 address is %s", address.String())
 	logger.Infof("Your IPv6 subnet is %s", subnet.String())
 

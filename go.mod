@@ -2,9 +2,11 @@ module github.com/RiV-chain/RiV-mesh
 
 go 1.18
 
+replace github.com/Arceliar/ironwood => github.com/RiV-chain/ironwood v0.0.0-20230814215450-60a14e8000c7
+
 require (
-	github.com/Arceliar/ironwood v0.0.0-20221115123222-ec61cea2f439
-	github.com/Arceliar/phony v0.0.0-20210209235338-dde1a8dca979
+	github.com/Arceliar/ironwood v0.0.0-20230805085300-86206813435f
+	github.com/Arceliar/phony v0.0.0-20220903101357-530938a4b13d
 	github.com/getlantern/multipath v0.0.0-20220920195041-55195f38df73
 	github.com/gologme/log v1.2.0
 	github.com/hashicorp/go-syslog v1.0.0
@@ -13,9 +15,9 @@ require (
 	github.com/mitchellh/mapstructure v1.4.1
 	github.com/vikulin/sctp v0.0.0-20221009200520-ae0f2830e422
 	github.com/vishvananda/netlink v1.1.0
-	golang.org/x/net v0.7.0
-	golang.org/x/sys v0.5.0
-	golang.org/x/text v0.7.0
+	golang.org/x/net v0.10.0
+	golang.org/x/sys v0.11.0
+	golang.org/x/text v0.12.0
 	golang.zx2c4.com/wireguard v0.0.0-20211017052713-f87e87af0d9a
 	golang.zx2c4.com/wireguard/windows v0.5.3
 )
@@ -48,7 +50,7 @@ require (
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.19.1 // indirect
-	golang.org/x/crypto v0.1.0 // indirect
+	golang.org/x/crypto v0.12.0 // indirect
 )
 
 require (

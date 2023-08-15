@@ -5,6 +5,8 @@ package core
 import (
 	"crypto/ed25519"
 	"encoding/hex"
+
+	iwt "github.com/Arceliar/ironwood/types"
 )
 
 // Address represents an IPv6 address in the mesh address range.
@@ -50,23 +52,23 @@ func (c *Core) IsValidSubnet(s Subnet) bool {
 	return s[l-1] == prefix[l-1]|0x01
 }
 
-// AddrForKey takes an ed25519.PublicKey as an argument and returns an *Address.
+// AddrForKey takes a Domain as an argument and returns an *Address.
 // This function returns nil if the key length is not ed25519.PublicKeySize.
 // This address begins with the contents of GetPrefix(), with the last bit set to 0 to indicate an address.
 // The following 8 bits are set to the number of leading 1 bits in the bitwise inverse of the public key.
 // The bitwise inverse of the key, excluding the leading 1 bits and the first leading 0 bit, is truncated to the appropriate length and makes up the remainder of the address.
-func (c *Core) AddrForKey(publicKey ed25519.PublicKey) *Address {
+func (c *Core) AddrForKey(domain iwt.Domain) *Address {
 	// 128 bit address
 	// Begins with prefix
 	// Next bit is a 0
 	// Next 7 bits, interpreted as a uint, are # of leading 1s in the NodeID
 	// Leading 1s and first leading 0 of the NodeID are truncated off
 	// The rest is appended to the IPv6 address (truncated to 128 bits total)
-	if len(publicKey) != ed25519.PublicKeySize {
+	if len(domain.Key) != ed25519.PublicKeySize {
 		return nil
 	}
 	var buf [ed25519.PublicKeySize]byte
-	copy(buf[:], publicKey)
+	copy(buf[:], domain.Name)
 	for idx := range buf {
 		buf[idx] = ^buf[idx]
 	}
@@ -100,29 +102,29 @@ func (c *Core) AddrForKey(publicKey ed25519.PublicKey) *Address {
 	return &addr
 }
 
-// SubnetForKey takes an ed25519.PublicKey as an argument and returns a *Subnet.
+// SubnetForKey takes a Domain as an argument and returns a *Subnet.
 // This function returns nil if the key length is not ed25519.PublicKeySize.
 // The subnet begins with the address prefix, with the last bit set to 1 to indicate a prefix.
 // The following 8 bits are set to the number of leading 1 bits in the bitwise inverse of the key.
 // The bitwise inverse of the key, excluding the leading 1 bits and the first leading 0 bit, is truncated to the appropriate length and makes up the remainder of the subnet.
-func (c *Core) SubnetForKey(publicKey ed25519.PublicKey) *Subnet {
+func (c *Core) SubnetForKey(domain iwt.Domain) *Subnet {
 	// Exactly as the address version, with two exceptions:
 	//  1) The first bit after the fixed prefix is a 1 instead of a 0
 	//  2) It's truncated to a subnet prefix length instead of 128 bits
-	addr := c.AddrForKey(publicKey)
+	addr := c.AddrForKey(domain)
 	if addr == nil {
 		return nil
 	}
 	var snet Subnet
 	copy(snet[:], addr[:])
-	prefix := c.GetPrefix() // nolint:staticcheck
-	snet[len(prefix)-1] |= 0x01
+	snet[len(c.GetPrefix())-1] |= 0x01
 	return &snet
 }
 
 // GetKet returns the partial ed25519.PublicKey for the Address.
 // This is used for key lookup.
-func (c *Core) GetAddressKey(a Address) ed25519.PublicKey {
+
+func (c *Core) GetAddressKey(a Address) iwt.Domain {
 	var key [ed25519.PublicKeySize]byte
 	prefix := c.GetPrefix() // nolint:staticcheck
 	ones := int(a[len(prefix)])
@@ -145,12 +147,12 @@ func (c *Core) GetAddressKey(a Address) ed25519.PublicKey {
 	for idx := range key {
 		key[idx] = ^key[idx]
 	}
-	return ed25519.PublicKey(key[:])
+	return iwt.NewDomain("", ed25519.PublicKey(key[:]))
 }
 
 // GetKet returns the partial ed25519.PublicKey for the Subnet.
 // This is used for key lookup.
-func (c *Core) GetSubnetKey(s Subnet) ed25519.PublicKey {
+func (c *Core) GetSubnetKey(s Subnet) iwt.Domain {
 	var addr Address
 	copy(addr[:], s[:])
 	return c.GetAddressKey(addr)

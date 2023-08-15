@@ -132,7 +132,7 @@ func (l *linkTLS) generateConfig() (*tls.Config, error) {
 	cert := x509.Certificate{
 		SerialNumber: big.NewInt(1),
 		Subject: pkix.Name{
-			CommonName: hex.EncodeToString(l.links.core.public[:]),
+			CommonName: hex.EncodeToString(l.links.core.public.Key[:]),
 		},
 		NotBefore:             time.Now(),
 		NotAfter:              notAfterNeverExpires,
@@ -141,7 +141,7 @@ func (l *linkTLS) generateConfig() (*tls.Config, error) {
 		BasicConstraintsValid: true,
 	}
 
-	certbytes, err := x509.CreateCertificate(rand.Reader, &cert, &cert, l.links.core.public, l.links.core.secret)
+	certbytes, err := x509.CreateCertificate(rand.Reader, &cert, &cert, l.links.core.public.Key, l.links.core.secret)
 	if err != nil {
 		return nil, err
 	}

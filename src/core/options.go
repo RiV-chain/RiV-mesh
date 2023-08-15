@@ -6,6 +6,8 @@ import (
 
 func (c *Core) _applyOption(opt SetupOption) {
 	switch v := opt.(type) {
+	case Domain:
+		c.config.domain = v
 	case Peer:
 		c.config._peers[v] = nil
 	case ListenAddress:
@@ -27,6 +29,8 @@ type SetupOption interface {
 	isSetupOption()
 }
 
+type Domain string
+
 type ListenAddress string
 type Peer struct {
 	URI             string
@@ -39,6 +43,7 @@ type NetworkDomain struct {
 }
 type AllowedPublicKey ed25519.PublicKey
 
+func (a Domain) isSetupOption()           {}
 func (a ListenAddress) isSetupOption()    {}
 func (a Peer) isSetupOption()             {}
 func (a NodeInfo) isSetupOption()         {}

@@ -216,7 +216,7 @@ func (m *Mesh) GetSubnetString() string {
 
 // GetPublicKeyString gets the node's public key in hex form
 func (m *Mesh) GetPublicKeyString() string {
-	return hex.EncodeToString(m.core.GetSelf().Key)
+	return hex.EncodeToString(m.core.GetSelf().Domain.Key)
 }
 
 // GetCoordsString gets the node's coordinates
@@ -230,7 +230,7 @@ func (m *Mesh) GetPeersJSON() (result string) {
 		IP string
 	}{}
 	for _, v := range m.core.GetPeers() {
-		a := m.core.AddrForKey(v.Key)
+		a := m.core.AddrForKey(v.Domain)
 		ip := net.IP(a[:]).String()
 		peers = append(peers, struct {
 			core.PeerInfo

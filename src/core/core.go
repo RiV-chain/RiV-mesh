@@ -12,6 +12,7 @@ import (
 
 	iwe "github.com/Arceliar/ironwood/encrypted"
 	iwt "github.com/Arceliar/ironwood/types"
+
 	"github.com/Arceliar/phony"
 	"github.com/gologme/log"
 	signals "github.com/vorot93/golang-signals"
@@ -30,13 +31,14 @@ type Core struct {
 	ctx                context.Context
 	cancel             context.CancelFunc
 	secret             ed25519.PrivateKey
-	public             ed25519.PublicKey
+	public             iwt.Domain
 	links              links
 	proto              protoHandler
 	log                Logger
 	addPeerTimer       *time.Timer
 	PeersChangedSignal signals.Signal
 	config             struct {
+		domain             Domain
 		_peers             map[Peer]*linkInfo         // configurable after startup
 		_listeners         map[ListenAddress]struct{} // configurable after startup
 		nodeinfo           NodeInfo                   // configurable after startup
@@ -63,9 +65,9 @@ func New(secret ed25519.PrivateKey, logger Logger, opts ...SetupOption) (*Core, 
 	}
 	c.secret = make(ed25519.PrivateKey, ed25519.PrivateKeySize)
 	copy(c.secret, secret)
-	c.public = secret.Public().(ed25519.PublicKey)
+	c.public = iwt.NewDomain(string(c.config.domain), secret.Public().(ed25519.PublicKey))
 	var err error
-	if c.PacketConn, err = iwe.NewPacketConn(c.secret); err != nil {
+	if c.PacketConn, err = iwe.NewPacketConn(c.secret, c.public); err != nil {
 		return nil, fmt.Errorf("error creating encryption: %w", err)
 	}
 	c.config._peers = map[Peer]*linkInfo{}
@@ -184,8 +186,7 @@ func (c *Core) ReadFrom(p []byte) (n int, from net.Addr, err error) {
 		case typeSessionTraffic:
 			// This is what we want to handle here
 		case typeSessionProto:
-			var key keyArray
-			copy(key[:], from.(iwt.Addr))
+			key := iwt.Domain(from.(iwt.Addr))
 			data := append([]byte(nil), bs[1:n]...)
 			c.proto.handleProto(nil, key, data)
 			continue

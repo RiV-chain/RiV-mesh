@@ -4,7 +4,11 @@ package core
 // Used in the initial connection setup and key exchange
 // Some of this could arguably go in wire.go instead
 
-import "crypto/ed25519"
+import (
+	"crypto/ed25519"
+
+	"github.com/Arceliar/ironwood/types"
+)
 
 // This is the version-specific metadata exchanged at the start of a connection.
 // It must always begin with the 4 bytes "meta" and a wire formatted uint64 major version number.
@@ -14,15 +18,15 @@ type version_metadata struct {
 	ver  uint8 // 1 byte in this version
 	// Everything after this point potentially depends on the version number, and is subject to change in future versions
 	minorVer uint8 // 1 byte in this version
-	key      ed25519.PublicKey
+	domain   types.Domain
 }
 
 // Gets a base metadata with no keys set, but with the correct version numbers.
 func version_getBaseMetadata() version_metadata {
 	return version_metadata{
-		meta:     [4]byte{'m', 'e', 't', 'a'},
+		meta:     [4]byte{'d', 'e', 't', 'a'},
 		ver:      0,
-		minorVer: 4,
+		minorVer: 6,
 	}
 }
 
@@ -31,7 +35,8 @@ func version_getMetaLength() (mlen int) {
 	mlen += 4                     // meta
 	mlen++                        // ver, as long as it's < 127, which it is in this version
 	mlen++                        // minorVer, as long as it's < 127, which it is in this version
-	mlen += ed25519.PublicKeySize // key
+	mlen += ed25519.PublicKeySize // Domain Key
+	mlen += ed25519.PublicKeySize // Domain Name
 	return
 }
 
@@ -41,7 +46,8 @@ func (m *version_metadata) encode() []byte {
 	bs = append(bs, m.meta[:]...)
 	bs = append(bs, m.ver)
 	bs = append(bs, m.minorVer)
-	bs = append(bs, m.key[:]...)
+	bs = append(bs, m.domain.Key[:]...)
+	bs = append(bs, m.domain.Name[:]...)
 	if len(bs) != version_getMetaLength() {
 		panic("Inconsistent metadata length")
 	}
@@ -57,7 +63,11 @@ func (m *version_metadata) decode(bs []byte) bool {
 	offset += copy(m.meta[:], bs[offset:])
 	m.ver, offset = bs[offset], offset+1
 	m.minorVer, offset = bs[offset], offset+1
-	m.key = append([]byte(nil), bs[offset:]...)
+	var key keyArray
+	var name keyArray
+	offset += copy(key[:], bs[offset:])
+	offset += copy(name[:], bs[offset:])
+	m.domain = types.NewDomain(string(name[:]), key[:])
 	return true
 }
 
