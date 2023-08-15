@@ -66,7 +66,7 @@ func (m *version_metadata) decode(bs []byte) bool {
 	var key keyArray
 	var name keyArray
 	offset += copy(key[:], bs[offset:])
-	offset += copy(name[:], bs[offset:])
+	copy(name[:], bs[offset:])
 	m.domain = types.NewDomain(string(name[:]), key[:])
 	return true
 }

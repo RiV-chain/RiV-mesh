@@ -11,6 +11,7 @@ type TUNEntry struct {
 	MTU uint64 `json:"mtu"`
 }
 
+//lint:ignore U1000 Ignore unused function
 func (t *TunAdapter) getTUNHandler(req *GetTUNRequest, res *GetTUNResponse) error {
 	res.Enabled = t.isEnabled
 	if !t.isEnabled {

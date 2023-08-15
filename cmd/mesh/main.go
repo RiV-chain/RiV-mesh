@@ -20,6 +20,7 @@ import (
 	gsyslog "github.com/hashicorp/go-syslog"
 	"github.com/hjson/hjson-go"
 	"github.com/kardianos/minwinsvc"
+	"github.com/miekg/dns"
 
 	//"github.com/RiV-chain/RiV-mesh/src/address"
 
@@ -324,6 +325,37 @@ func run(args rivArgs, sigCh chan os.Signal) {
 		}
 	}
 
+	// Setup the DNS.
+	{
+		dns.HandleFunc(".", func(w dns.ResponseWriter, r *dns.Msg) {
+			tld := ".riv."
+			msg := dns.Msg{}
+			msg.SetReply(r)
+			msg.Compress = false
+			for _, q := range r.Question {
+				if q.Qtype == dns.TypeAAAA && strings.HasSuffix(q.Name, tld) {
+					name := strings.TrimSuffix(q.Name, tld)
+					aaaaRecord := &dns.AAAA{
+						Hdr:  dns.RR_Header{Name: q.Name, Rrtype: dns.TypeAAAA, Class: dns.ClassINET, Ttl: 60},
+						AAAA: net.ParseIP(net.IP(n.core.AddrForDomain(types.NewDomain(name, n.core.PublicKey()))[:]).String()),
+					}
+					msg.Answer = append(msg.Answer, aaaaRecord)
+				}
+			}
+			err = w.WriteMsg(&msg)
+			logger.Errorln(err)
+		})
+
+		server := &dns.Server{Addr: "[::]:53", Net: "udp"}
+		logger.Infof("DNS server is listening on :53...")
+		go func() {
+			err := server.ListenAndServe()
+			if err != nil {
+				logger.Errorf("DNS server error: %v", err)
+			}
+		}()
+	}
+
 	// Make some nice output that tells us what our IPv6 address and subnet are.
 	// This is just logged to stdout for the user.
 	address := n.core.Address()
@@ -347,7 +379,10 @@ func run(args rivArgs, sigCh chan os.Signal) {
 	_ = n.multicast.Stop()
 	_ = n.tun.Stop()
 	n.core.Stop()
-	n.rest_server.Shutdown()
+	err = n.rest_server.Shutdown()
+	if err != nil {
+		logger.Errorf("REST server shutdown error: %v", err)
+	}
 }
 
 func main() {
