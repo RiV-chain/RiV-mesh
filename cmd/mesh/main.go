@@ -20,6 +20,7 @@ import (
 	gsyslog "github.com/hashicorp/go-syslog"
 	"github.com/hjson/hjson-go"
 	"github.com/kardianos/minwinsvc"
+	"github.com/miekg/dns"
 
 	//"github.com/RiV-chain/RiV-mesh/src/address"
 
@@ -321,6 +322,35 @@ func run(args rivArgs, sigCh chan os.Signal) {
 			if err != nil {
 				logger.Errorln(err)
 			}
+		}
+	}
+
+	// Setup the DNS.
+	{
+
+		dns.HandleFunc(".riv", func(w dns.ResponseWriter, r *dns.Msg) {
+			msg := dns.Msg{}
+			msg.SetReply(r)
+			msg.Compress = false
+			domain := string(n.core.GetSelf().Domain.Name)
+			for _, q := range r.Question {
+				if q.Qtype == dns.TypeAAAA && q.Name == domain+"." {
+					aaaaRecord := &dns.AAAA{
+						Hdr:  dns.RR_Header{Name: q.Name, Rrtype: dns.TypeAAAA, Class: dns.ClassINET, Ttl: 60},
+						AAAA: net.ParseIP(n.core.Address().String()),
+					}
+					msg.Answer = append(msg.Answer, aaaaRecord)
+				}
+			}
+
+			w.WriteMsg(&msg)
+		})
+
+		server := &dns.Server{Addr: ":53", Net: "udp"}
+		fmt.Println("DNS server is listening on :53...")
+		err := server.ListenAndServe()
+		if err != nil {
+			fmt.Println("DNS server error:", err)
 		}
 	}
 
