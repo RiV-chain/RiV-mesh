@@ -239,6 +239,7 @@ func run(args rivArgs, sigCh chan os.Signal) {
 			panic(err)
 		}
 		options := []core.SetupOption{
+			core.Domain(cfg.Domain),
 			core.NodeInfo(cfg.NodeInfo),
 			core.NodeInfoPrivacy(cfg.NodeInfoPrivacy),
 			core.NetworkDomain(cfg.NetworkDomain),
