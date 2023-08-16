@@ -1,8 +1,10 @@
 module github.com/RiV-chain/RiV-mesh
 
-go 1.18
+go 1.20
 
 replace github.com/Arceliar/ironwood => github.com/RiV-chain/ironwood v0.0.0-20230814215450-60a14e8000c7
+
+replace github.com/mikispag/dns-over-tls-forwarder => github.com/RiV-chain/dns-over-tls-forwarder v0.0.0-20230816185706-1ea30b0a84fe
 
 require (
 	github.com/Arceliar/ironwood v0.0.0-20230805085300-86206813435f
@@ -25,6 +27,8 @@ require (
 require gerace.dev/zipfs v0.2.0
 
 require (
+	github.com/miekg/dns v1.1.55
+	github.com/mikispag/dns-over-tls-forwarder v0.0.0-20230401080233-dae75d4680fd
 	github.com/slonm/tableprinter v0.0.0-20230107100804-643098716018
 	github.com/vorot93/golang-signals v0.0.0-20170221070717-d9e83421ce45
 	golang.org/x/exp v0.0.0-20221217163422-3c43f8badb15
@@ -45,14 +49,15 @@ require (
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/google/uuid v1.1.2 // indirect
 	github.com/libp2p/go-buffer-pool v0.0.2 // indirect
-	github.com/miekg/dns v1.1.55 // indirect
 	github.com/oxtoacart/bpool v0.0.0-20190530202638-03653db5a59c // indirect
 	github.com/rivo/uniseg v0.3.4 // indirect
+	github.com/sirupsen/logrus v1.9.0 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.19.1 // indirect
 	golang.org/x/crypto v0.12.0 // indirect
 	golang.org/x/mod v0.8.0 // indirect
+	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/tools v0.6.0 // indirect
 )
 

@@ -14,6 +14,7 @@ import (
 
 type MulticastInterfaceConfig = config.MulticastInterfaceConfig
 type NetworkDomainConfig = config.NetworkDomainConfig
+type DnsServerConfig = config.DnsServerConfig
 
 var defaultConfig = "" // LDFLAGS='-X github.com/yggdrasil-network/yggdrasil-go/src/defaults.defaultConfig=/path/to/config
 
@@ -26,6 +27,9 @@ type defaultParameters struct {
 
 	//Network domain
 	DefaultNetworkDomain NetworkDomainConfig
+
+	//dDNS server
+	DefaultDnsServerConfig DnsServerConfig
 }
 
 // Defines which parameters are expected by default for configuration on a
@@ -56,6 +60,12 @@ func Define() defaultParameters {
 		// Network domain
 		DefaultNetworkDomain: NetworkDomainConfig{
 			Prefix: "fc",
+		},
+
+		DefaultDnsServerConfig: DnsServerConfig{
+			Tld:             ".riv.",
+			ListenAddress:   "[::]:53",
+			UpstreamServers: []string{"one.one.one.one:853@1.1.1.1", "dns.google:853@8.8.8.8"},
 		},
 	}
 }
@@ -88,6 +98,7 @@ func GenerateConfig() *config.NodeConfig {
 	cfg.HttpAddress = Define().DefaultHttpAddress
 	cfg.NetworkDomain = Define().DefaultNetworkDomain
 	cfg.PublicPeersUrl = Define().DefaultPublicPeersUrl
+	cfg.DDnsServer = Define().DefaultDnsServerConfig
 
 	return cfg
 }
