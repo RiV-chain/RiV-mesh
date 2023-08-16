@@ -22,7 +22,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
-          args: --issues-exit-code=1 --output=colored-line-number
+          args: --issues-exit-code=1 --out-format=colored-line-number
 
   codeql:
     name: Analyse
