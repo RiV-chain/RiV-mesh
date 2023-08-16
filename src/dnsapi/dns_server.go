@@ -5,10 +5,10 @@ import (
 	"net"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/Arceliar/ironwood/types"
 	"github.com/RiV-chain/RiV-mesh/src/core"
-	"github.com/gologme/log"
 	"github.com/miekg/dns"
 	"github.com/mikispag/dns-over-tls-forwarder/proxy"
 )
@@ -37,7 +37,7 @@ func NewDnsServer(cfg DnsServerCfg) (*DnsServer, error) {
 
 func (s *DnsServer) Run() {
 	sigs := make(chan os.Signal, 1)
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 	go func() {
 		<-sigs
@@ -49,11 +49,11 @@ func (s *DnsServer) Run() {
 }
 
 func (s *DnsServer) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
-	msg := dns.Msg{}
+	msg := &dns.Msg{}
 	msg.SetReply(r)
 	msg.Compress = false
 	for _, q := range r.Question {
-		if q.Qtype == dns.TypeAAAA && strings.HasSuffix(q.Name, s.Tld) {
+		if strings.HasSuffix(q.Name, s.Tld) {
 			name := strings.TrimSuffix(q.Name, s.Tld)
 			aaaaRecord := &dns.AAAA{
 				Hdr:  dns.RR_Header{Name: q.Name, Rrtype: dns.TypeAAAA, Class: dns.ClassINET, Ttl: 60},
@@ -63,8 +63,9 @@ func (s *DnsServer) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 		}
 	}
 	if len(msg.Answer) > 0 {
-		err := w.WriteMsg(&msg)
-		s.Log.Errorln(err)
+		if err := w.WriteMsg(msg); err != nil {
+			s.Log.Warnf("Write message failed, message: %v, error: %v", msg, err)
+		}
 	} else {
 		inboundIP, _, _ := net.SplitHostPort(w.RemoteAddr().String())
 		s.Log.Debugf("Question from %s: %q", inboundIP, r.Question[0])
@@ -74,7 +75,7 @@ func (s *DnsServer) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 			return
 		}
 		if err := w.WriteMsg(m); err != nil {
-			log.Warnf("Write message failed, message: %v, error: %v", m, err)
+			s.Log.Warnf("Write message failed, message: %v, error: %v", m, err)
 		}
 	}
 }
