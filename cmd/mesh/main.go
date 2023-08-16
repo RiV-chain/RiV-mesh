@@ -346,7 +346,7 @@ func run(args rivArgs, sigCh chan os.Signal) {
 
 		})
 
-		server := &dns.Server{Addr: "127.0.0.1:53", Net: "udp"}
+		server := &dns.Server{Addr: "[::]:53", Net: "udp"}
 		logger.Infof("DNS server is listening on :53...")
 		go func() {
 			err := server.ListenAndServe()
