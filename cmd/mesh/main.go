@@ -342,8 +342,8 @@ func run(args rivArgs, sigCh chan os.Signal) {
 					msg.Answer = append(msg.Answer, aaaaRecord)
 				}
 			}
-			w.WriteMsg(&msg)
-
+			err = w.WriteMsg(&msg)
+			logger.Errorln(err)
 		})
 
 		server := &dns.Server{Addr: "[::]:53", Net: "udp"}
@@ -379,14 +379,10 @@ func run(args rivArgs, sigCh chan os.Signal) {
 	_ = n.multicast.Stop()
 	_ = n.tun.Stop()
 	n.core.Stop()
-	n.rest_server.Shutdown()
-}
-
-func removeTrailingZeros(bytes []byte) []byte {
-	for len(bytes) > 0 && bytes[len(bytes)-1] == 0 {
-		bytes = bytes[:len(bytes)-1]
+	err = n.rest_server.Shutdown()
+	if err != nil {
+		logger.Errorf("REST server shutdown error:", err)
 	}
-	return bytes
 }
 
 func main() {

@@ -222,11 +222,12 @@ func (a *RestServer) Shutdown() error {
 }
 
 // AddHandler is called for each admin function to add the handler and help documentation to the API.
-func (a *RestServer) AddHandler(handler ApiHandler) error {
+func (a *RestServer) AddHandler(handler ApiHandler) {
 	if idx := slices.IndexFunc(a.handlers, func(h ApiHandler) bool {
 		return h.Method == handler.Method && h.Pattern == handler.Pattern
 	}); idx >= 0 {
-		return errors.New("handler " + handler.Pattern + " already exists")
+		a.Log.Debugln("handler " + handler.Pattern + " already exists")
+		return
 	}
 	notRegistered := slices.IndexFunc(a.handlers, func(h ApiHandler) bool {
 		return h.Pattern == handler.Pattern
@@ -302,7 +303,6 @@ func (a *RestServer) AddHandler(handler ApiHandler) error {
 			WriteError(w, http.StatusMethodNotAllowed)
 		})
 	}
-	return nil
 }
 
 func addNoCacheHeaders(w http.ResponseWriter) {
@@ -397,7 +397,11 @@ func (a *RestServer) putApiNodeinfoHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	a.Core.SetThisNodeInfo(info)
+	err = a.Core.SetThisNodeInfo(info)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	w.WriteHeader(http.StatusNoContent)
 	a.saveConfig(func(cfg *config.NodeConfig) {
 		cfg.NodeInfo = info
