@@ -351,7 +351,7 @@ func run(args rivArgs, sigCh chan os.Signal) {
 		go func() {
 			err := server.ListenAndServe()
 			if err != nil {
-				logger.Errorf("DNS server error:", err)
+				logger.Errorf("DNS server error: %w", err)
 			}
 		}()
 	}
@@ -381,7 +381,7 @@ func run(args rivArgs, sigCh chan os.Signal) {
 	n.core.Stop()
 	err = n.rest_server.Shutdown()
 	if err != nil {
-		logger.Errorf("REST server shutdown error:", err)
+		logger.Errorf("REST server shutdown error: %w", err)
 	}
 }
 
