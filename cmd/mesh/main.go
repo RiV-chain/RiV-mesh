@@ -327,22 +327,23 @@ func run(args rivArgs, sigCh chan os.Signal) {
 
 	// Setup the DNS.
 	{
-
 		dns.HandleFunc(".", func(w dns.ResponseWriter, r *dns.Msg) {
+			tld := ".riv."
 			msg := dns.Msg{}
 			msg.SetReply(r)
 			msg.Compress = false
-			domain := string(removeTrailingZeros(n.core.GetSelf().Domain.Name))
 			for _, q := range r.Question {
-				if q.Qtype == dns.TypeAAAA && q.Name == domain+".riv." {
+				if q.Qtype == dns.TypeAAAA && strings.HasSuffix(q.Name, tld) {
+					name := strings.TrimSuffix(q.Name, tld)
 					aaaaRecord := &dns.AAAA{
 						Hdr:  dns.RR_Header{Name: q.Name, Rrtype: dns.TypeAAAA, Class: dns.ClassINET, Ttl: 60},
-						AAAA: net.ParseIP(n.core.Address().String()),
+						AAAA: net.ParseIP(net.IP(n.core.AddrForDomain(types.NewDomain(name, n.core.PublicKey()))[:]).String()),
 					}
 					msg.Answer = append(msg.Answer, aaaaRecord)
 				}
 			}
 			w.WriteMsg(&msg)
+
 		})
 
 		server := &dns.Server{Addr: "127.0.0.1:53", Net: "udp"}
