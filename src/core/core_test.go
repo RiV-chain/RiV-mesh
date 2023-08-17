@@ -164,7 +164,10 @@ func BenchmarkCore_Start_Transfer(b *testing.B) {
 
 	// Send
 	msg := make([]byte, msgLen)
-	rand.Read(msg[40:])
+	_, err := rand.Read(msg[40:])
+	if err != nil {
+		b.Fatal(err)
+	}
 	msg[0] = 0x60
 	copy(msg[8:24], nodeB.Address())
 	copy(msg[24:40], nodeA.Address())
