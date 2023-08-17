@@ -4,7 +4,7 @@ go 1.20
 
 replace github.com/Arceliar/ironwood => github.com/RiV-chain/ironwood v0.0.0-20230814215450-60a14e8000c7
 
-replace github.com/mikispag/dns-over-tls-forwarder => github.com/RiV-chain/dns-over-tls-forwarder v0.0.0-20230817082956-576f9f08e761
+replace github.com/mikispag/dns-over-tls-forwarder => github.com/RiV-chain/dns-over-tls-forwarder v0.0.0-20230817102511-362bb250d5b4
 
 require (
 	github.com/Arceliar/ironwood v0.0.0-20230805085300-86206813435f
@@ -14,6 +14,7 @@ require (
 	github.com/hashicorp/go-syslog v1.0.0
 	github.com/hjson/hjson-go v3.1.0+incompatible
 	github.com/kardianos/minwinsvc v1.0.2
+	github.com/miekg/dns v1.1.55
 	github.com/mitchellh/mapstructure v1.4.1
 	github.com/vikulin/sctp v0.0.0-20221009200520-ae0f2830e422
 	github.com/vishvananda/netlink v1.1.0
@@ -22,13 +23,11 @@ require (
 	golang.org/x/text v0.12.0
 	golang.zx2c4.com/wireguard v0.0.0-20211017052713-f87e87af0d9a
 	golang.zx2c4.com/wireguard/windows v0.5.3
-	github.com/miekg/dns v1.1.55
 )
 
 require gerace.dev/zipfs v0.2.0
 
 require (
-	github.com/miekg/dns v1.1.55
 	github.com/mikispag/dns-over-tls-forwarder v0.0.0-20230401080233-dae75d4680fd
 	github.com/slonm/tableprinter v0.0.0-20230107100804-643098716018
 	github.com/vorot93/golang-signals v0.0.0-20170221070717-d9e83421ce45
