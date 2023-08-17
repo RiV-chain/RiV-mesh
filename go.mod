@@ -4,13 +4,13 @@ go 1.20
 
 replace github.com/Arceliar/ironwood => github.com/RiV-chain/ironwood v0.0.0-20230814215450-60a14e8000c7
 
-replace github.com/mikispag/dns-over-tls-forwarder => github.com/RiV-chain/dns-over-tls-forwarder v0.0.0-20230816185706-1ea30b0a84fe
+replace github.com/mikispag/dns-over-tls-forwarder => github.com/RiV-chain/dns-over-tls-forwarder v0.0.0-20230817082956-576f9f08e761
 
 require (
 	github.com/Arceliar/ironwood v0.0.0-20230805085300-86206813435f
 	github.com/Arceliar/phony v0.0.0-20220903101357-530938a4b13d
 	github.com/getlantern/multipath v0.0.0-20220920195041-55195f38df73
-	github.com/gologme/log v1.2.0
+	github.com/gologme/log v1.3.0
 	github.com/hashicorp/go-syslog v1.0.0
 	github.com/hjson/hjson-go v3.1.0+incompatible
 	github.com/kardianos/minwinsvc v1.0.2

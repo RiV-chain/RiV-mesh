@@ -3,9 +3,9 @@ package dnsapi
 import (
 	"context"
 	"net"
-	"os"
 	"strings"
-	"time"
+
+	"github.com/gologme/log"
 
 	"github.com/Arceliar/ironwood/types"
 	"github.com/RiV-chain/RiV-mesh/src/core"
@@ -27,24 +27,18 @@ type DnsServer struct {
 }
 
 func NewDnsServer(cfg DnsServerCfg) (*DnsServer, error) {
+	mux := dns.NewServeMux()
 	s := &DnsServer{
-		server:       proxy.NewServer(0, false, cfg.upstreamServers...),
+		server:       proxy.NewServer(mux, cfg.Log.(*log.Logger), 0, false, cfg.ListenAddress, cfg.upstreamServers...),
 		DnsServerCfg: cfg,
 	}
-
+	mux.HandleFunc(".", s.ServeDNS)
 	return s, nil
 }
 
 func (s *DnsServer) Run() {
-	sigs := make(chan os.Signal, 1)
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-	defer cancel()
 	go func() {
-		<-sigs
-		cancel()
-	}()
-	go func() {
-		s.Log.Errorln(s.server.RunWithHandle(ctx, s.ListenAddress, s.ServeDNS))
+		s.Log.Errorln(s.server.Run(context.Background()))
 	}()
 }
 
