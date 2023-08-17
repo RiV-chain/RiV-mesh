@@ -7,7 +7,9 @@ import (
 	"time"
 
 	//"encoding/hex"
+	"encoding/hex"
 	"encoding/json"
+
 	//"errors"
 	//"fmt"
 	"net"
@@ -53,7 +55,8 @@ type PathEntryInfo struct {
 }
 
 type SessionInfo struct {
-	Key     ed25519.PublicKey
+	Key     string
+	Domain  string
 	RXBytes uint64
 	TXBytes uint64
 	Uptime  time.Duration
@@ -140,7 +143,8 @@ func (c *Core) GetSessions() []SessionInfo {
 	ss := c.PacketConn.Debug.GetSessions()
 	for _, s := range ss {
 		var info SessionInfo
-		info.Key = s.Key
+		info.Key = hex.EncodeToString(s.Domain.Key)
+		info.Domain = string(s.Domain.Name)
 		info.RXBytes = s.RX
 		info.TXBytes = s.TX
 		info.Uptime = s.Uptime

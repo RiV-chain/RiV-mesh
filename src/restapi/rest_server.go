@@ -506,7 +506,8 @@ func (a *RestServer) getApiSessionsHandler(w http.ResponseWriter, r *http.Reques
 	result := make([]map[string]any, 0, len(sessions))
 	for _, s := range sessions {
 		entry := map[string]any{
-			"key":         hex.EncodeToString(s.Key),
+			"key":         s.Key,
+			"domain":      s.Domain,
 			"bytes_recvd": s.RXBytes,
 			"bytes_sent":  s.TXBytes,
 			"uptime":      s.Uptime.Seconds(),
