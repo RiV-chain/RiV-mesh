@@ -22,6 +22,7 @@ require (
 	golang.org/x/text v0.12.0
 	golang.zx2c4.com/wireguard v0.0.0-20211017052713-f87e87af0d9a
 	golang.zx2c4.com/wireguard/windows v0.5.3
+	github.com/miekg/dns v1.1.55
 )
 
 require gerace.dev/zipfs v0.2.0
@@ -49,7 +50,6 @@ require (
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/google/uuid v1.1.2 // indirect
 	github.com/libp2p/go-buffer-pool v0.0.2 // indirect
-	github.com/miekg/dns v1.1.55 // indirect
 	github.com/oxtoacart/bpool v0.0.0-20190530202638-03653db5a59c // indirect
 	github.com/rivo/uniseg v0.3.4 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect

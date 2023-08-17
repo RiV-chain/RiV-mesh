@@ -3,7 +3,7 @@ package core
 import (
 	"bytes"
 	"crypto/ed25519"
-	"math/rand"
+	"crypto/rand"
 	"testing"
 
 	"github.com/Arceliar/ironwood/types"
