@@ -17,7 +17,7 @@ type DnsServerCfg struct {
 	Core            *core.Core
 	Log             core.Logger
 	ListenAddress   string
-	upstreamServers []string
+	UpstreamServers []string
 	Tld             string
 }
 
@@ -29,7 +29,7 @@ type DnsServer struct {
 func NewDnsServer(cfg DnsServerCfg) (*DnsServer, error) {
 	mux := dns.NewServeMux()
 	s := &DnsServer{
-		server:       proxy.NewServer(mux, cfg.Log.(*log.Logger), 0, false, cfg.ListenAddress, cfg.upstreamServers...),
+		server:       proxy.NewServer(mux, cfg.Log.(*log.Logger), 0, false, cfg.ListenAddress, cfg.UpstreamServers...),
 		DnsServerCfg: cfg,
 	}
 	mux.HandleFunc(".", s.ServeDNS)

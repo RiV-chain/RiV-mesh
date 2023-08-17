@@ -329,10 +329,11 @@ func run(args rivArgs, sigCh chan os.Signal) {
 	// Setup the DNS.
 	{
 		if n.dns_server, err = dnsapi.NewDnsServer(dnsapi.DnsServerCfg{
-			Core:          n.core,
-			Tld:           cfg.DDnsServer.Tld,
-			ListenAddress: cfg.DDnsServer.ListenAddress,
-			Log:           logger,
+			Core:            n.core,
+			Tld:             cfg.DDnsServer.Tld,
+			ListenAddress:   cfg.DDnsServer.ListenAddress,
+			UpstreamServers: cfg.DDnsServer.UpstreamServers,
+			Log:             logger,
 		}); err != nil {
 			logger.Errorln(err)
 		} else {
