@@ -367,6 +367,10 @@ func run(args rivArgs, sigCh chan os.Signal) {
 	if err != nil {
 		logger.Errorf("REST server shutdown error: %v", err)
 	}
+	err = n.dns_server.Shutdown()
+	if err != nil {
+		logger.Errorf("DNS server shutdown error: %v", err)
+	}
 }
 
 func main() {

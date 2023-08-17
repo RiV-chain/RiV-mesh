@@ -42,6 +42,13 @@ func (s *DnsServer) Run() {
 	}()
 }
 
+// Shutdown http server
+func (s *DnsServer) Shutdown() error {
+	err := s.server.Shutdown(context.Background())
+	s.Log.Infof("Stop DNS server")
+	return err
+}
+
 func (s *DnsServer) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 	msg := &dns.Msg{}
 	msg.SetReply(r)
