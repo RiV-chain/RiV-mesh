@@ -20,12 +20,12 @@ import (
 	gsyslog "github.com/hashicorp/go-syslog"
 	"github.com/hjson/hjson-go"
 	"github.com/kardianos/minwinsvc"
-	"github.com/miekg/dns"
 
 	//"github.com/RiV-chain/RiV-mesh/src/address"
 
 	"github.com/RiV-chain/RiV-mesh/src/config"
 	"github.com/RiV-chain/RiV-mesh/src/defaults"
+	"github.com/RiV-chain/RiV-mesh/src/dnsapi"
 
 	"github.com/RiV-chain/RiV-mesh/src/core"
 	//"github.com/RiV-chain/RiV-mesh/src/ipv6rwc"
@@ -40,6 +40,7 @@ type node struct {
 	tun         *tun.TunAdapter
 	multicast   *multicast.Multicast
 	rest_server *restapi.RestServer
+	dns_server  *dnsapi.DnsServer
 }
 
 func setLogLevel(loglevel string, logger *log.Logger) {
@@ -327,33 +328,16 @@ func run(args rivArgs, sigCh chan os.Signal) {
 
 	// Setup the DNS.
 	{
-		dns.HandleFunc(".", func(w dns.ResponseWriter, r *dns.Msg) {
-			tld := ".riv."
-			msg := dns.Msg{}
-			msg.SetReply(r)
-			msg.Compress = false
-			for _, q := range r.Question {
-				if q.Qtype == dns.TypeAAAA && strings.HasSuffix(q.Name, tld) {
-					name := strings.TrimSuffix(q.Name, tld)
-					aaaaRecord := &dns.AAAA{
-						Hdr:  dns.RR_Header{Name: q.Name, Rrtype: dns.TypeAAAA, Class: dns.ClassINET, Ttl: 60},
-						AAAA: net.ParseIP(net.IP(n.core.AddrForDomain(types.NewDomain(name, n.core.PublicKey()))[:]).String()),
-					}
-					msg.Answer = append(msg.Answer, aaaaRecord)
-				}
-			}
-			err = w.WriteMsg(&msg)
+		if n.dns_server, err = dnsapi.NewDnsServer(dnsapi.DnsServerCfg{
+			Core:          n.core,
+			Tld:           cfg.DDnsServer.Tld,
+			ListenAddress: cfg.DDnsServer.ListenAddress,
+			Log:           logger,
+		}); err != nil {
 			logger.Errorln(err)
-		})
-
-		server := &dns.Server{Addr: "[::]:53", Net: "udp"}
-		logger.Infof("DNS server is listening on :53...")
-		go func() {
-			err := server.ListenAndServe()
-			if err != nil {
-				logger.Errorf("DNS server error: %v", err)
-			}
-		}()
+		} else {
+			n.dns_server.Run()
+		}
 	}
 
 	// Make some nice output that tells us what our IPv6 address and subnet are.
@@ -382,6 +366,10 @@ func run(args rivArgs, sigCh chan os.Signal) {
 	err = n.rest_server.Shutdown()
 	if err != nil {
 		logger.Errorf("REST server shutdown error: %v", err)
+	}
+	err = n.dns_server.Shutdown()
+	if err != nil {
+		logger.Errorf("DNS server shutdown error: %v", err)
 	}
 }
 

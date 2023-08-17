@@ -42,6 +42,7 @@ type NodeConfig struct {
 	NodeInfo            map[string]interface{}     `comment:"Optional node info. This must be a { \"key\": \"value\", ... } map\nor set as null. This is entirely optional but, if set, is visible\nto the whole network on request."`
 	NetworkDomain       NetworkDomainConfig        `comment:"Address prefix used by mesh.\nThe current implementation requires this to be a multiple of 8 bits + 7 bits.4\nNodes that configure this differently will be unable to communicate with each other using IP packets."`
 	PublicPeersUrl      string                     `comment:"Public peers URL which contains all peers in JSON format grouped by a country."`
+	DDnsServer          DnsServerConfig            `comment:"dDNS server config. ListenAddress is the address:port to listen on.\nIn order to listen on the loopback interface only, use 127.0.0.1:53. To listen on any interface, use [::]:53 (default [::]:53).\nUpstreamServers for DNS-over-TLS forwarding. This is a list of upstream servers. Default one.one.one.one:853@1.1.1.1 and dns.google:853@8.8.8.8"`
 	FeaturesConfig      map[string]interface{}     `comment:"Optional features config. This must be a { \"key\": \"value\", ... } map\not set as null. This is mandatory for extended featured builds containing features specific settings."`
 }
 
@@ -55,6 +56,12 @@ type MulticastInterfaceConfig struct {
 
 type NetworkDomainConfig struct {
 	Prefix string
+}
+
+type DnsServerConfig struct {
+	Tld             string
+	ListenAddress   string
+	UpstreamServers []string
 }
 
 // NewSigningKeys replaces the signing keypair in the NodeConfig with a new
