@@ -11,8 +11,10 @@ import (
 
 func (c *Core) TestAddress_Address_IsValid(t *testing.T) {
 	var address Address
-	rand.Read(address[:])
-
+	_, err := rand.Read(address[:])
+	if err != nil {
+		t.Fatal(err)
+	}
 	address[0] = 0
 
 	if c.IsValidAddress(address) {
@@ -34,8 +36,10 @@ func (c *Core) TestAddress_Address_IsValid(t *testing.T) {
 
 func (c *Core) TestAddress_Subnet_IsValid(t *testing.T) {
 	var subnet Subnet
-	rand.Read(subnet[:])
-
+	_, err := rand.Read(subnet[:])
+	if err != nil {
+		t.Fatal(err)
+	}
 	subnet[0] = 0
 
 	if c.IsValidSubnet(subnet) {
