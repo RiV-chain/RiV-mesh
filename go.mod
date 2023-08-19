@@ -1,10 +1,10 @@
 module github.com/RiV-chain/RiV-mesh
 
-go 1.20
+go 1.21.0
 
 replace github.com/Arceliar/ironwood => github.com/RiV-chain/ironwood v0.0.0-20230817175702-05a882d8c20e
 
-replace github.com/mikispag/dns-over-tls-forwarder => github.com/RiV-chain/dns-over-tls-forwarder v0.0.0-20230817102511-362bb250d5b4
+replace github.com/mikispag/dns-over-tls-forwarder => github.com/RiV-chain/dns-over-tls-forwarder v0.0.0-20230818201948-6aa572db1270
 
 require (
 	github.com/Arceliar/ironwood v0.0.0-20230805085300-86206813435f
@@ -51,13 +51,12 @@ require (
 	github.com/libp2p/go-buffer-pool v0.0.2 // indirect
 	github.com/oxtoacart/bpool v0.0.0-20190530202638-03653db5a59c // indirect
 	github.com/rivo/uniseg v0.3.4 // indirect
-	github.com/sirupsen/logrus v1.9.0 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.19.1 // indirect
 	golang.org/x/crypto v0.12.0 // indirect
 	golang.org/x/mod v0.8.0 // indirect
-	golang.org/x/sync v0.1.0 // indirect
+	golang.org/x/sync v0.3.0 // indirect
 	golang.org/x/tools v0.6.0 // indirect
 )
 
