@@ -422,7 +422,7 @@ func (a *RestServer) getApiDhtHandler(w http.ResponseWriter, r *http.Request) {
 		entry := map[string]any{
 			"address": net.IP(addr[:]).String(),
 			"key":     hex.EncodeToString(d.Domain.Key),
-			"Domain":  hex.EncodeToString(d.Domain.Name),
+			"domain":  string(d.Domain.Name),
 			"port":    d.Port,
 			"rest":    d.Rest,
 		}
