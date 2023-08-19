@@ -1,10 +1,10 @@
 module github.com/RiV-chain/RiV-mesh
 
-go 1.21.0
+go 1.21
 
 replace github.com/Arceliar/ironwood => github.com/RiV-chain/ironwood v0.0.0-20230817175702-05a882d8c20e
 
-replace github.com/mikispag/dns-over-tls-forwarder => github.com/RiV-chain/dns-over-tls-forwarder v0.0.0-20230818201948-6aa572db1270
+replace github.com/mikispag/dns-over-tls-forwarder => github.com/RiV-chain/dns-over-tls-forwarder v0.0.0-20230819192037-9ad070cc8a60
 
 require (
 	github.com/Arceliar/ironwood v0.0.0-20230805085300-86206813435f
