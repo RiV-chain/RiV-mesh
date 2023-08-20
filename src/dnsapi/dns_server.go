@@ -24,13 +24,15 @@ type DnsServerCfg struct {
 type DnsServer struct {
 	server *proxy.Server
 	DnsServerCfg
+	Domain string
 }
 
-func NewDnsServer(cfg DnsServerCfg) (*DnsServer, error) {
+func NewDnsServer(domain string, cfg DnsServerCfg) (*DnsServer, error) {
 	mux := dns.NewServeMux()
 	s := &DnsServer{
 		server:       proxy.NewServer(mux, cfg.Log.(*log.Logger), 0, false, cfg.ListenAddress, cfg.UpstreamServers...),
 		DnsServerCfg: cfg,
+		Domain:       domain,
 	}
 	mux.HandleFunc(".", s.ServeDNS)
 	return s, nil
@@ -54,13 +56,19 @@ func (s *DnsServer) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 	msg.SetReply(r)
 	msg.Compress = false
 	for _, q := range r.Question {
-		if strings.HasSuffix(q.Name, s.Tld) {
+		if (q.Qtype == dns.TypeA || q.Qtype == dns.TypeAAAA) && strings.HasSuffix(q.Name, s.Tld) {
 			name := strings.TrimSuffix(q.Name, s.Tld)
 			aaaaRecord := &dns.AAAA{
 				Hdr:  dns.RR_Header{Name: q.Name, Rrtype: dns.TypeAAAA, Class: dns.ClassINET, Ttl: 60},
-				AAAA: net.ParseIP(net.IP(s.Core.AddrForDomain(types.NewDomain(name, s.Core.PublicKey()))[:]).String()),
+				AAAA: net.ParseIP(net.IP(s.Core.AddrForDomain(types.NewDomain(name, nil))[:]).String()),
 			}
 			msg.Answer = append(msg.Answer, aaaaRecord)
+		} else if q.Qtype == dns.TypePTR && q.Qclass == dns.ClassINET && strings.HasPrefix(q.Name, "ip6.arpa.") {
+			ip := extractIPv6FromPTR(q.Name)
+			localIp := net.ParseIP(s.Core.Address().String())
+			if ip.Equal(localIp) {
+				msg.Answer = append(msg.Answer, createPTRRecord(q.Name, s.Domain+s.DnsServerCfg.Tld))
+			}
 		}
 	}
 	if len(msg.Answer) > 0 {
@@ -79,4 +87,21 @@ func (s *DnsServer) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 			s.Log.Warnf("Write message failed, message: %v, error: %v", m, err)
 		}
 	}
+}
+
+func extractIPv6FromPTR(ptrName string) net.IP {
+	parts := strings.Split(ptrName, ".")
+	if len(parts) == 6 {
+		ipv6Str := parts[0] + parts[1] + parts[2] + parts[3]
+		ipv6 := net.ParseIP(ipv6Str)
+		return ipv6
+	}
+	return nil
+}
+
+func createPTRRecord(ptrName, target string) dns.RR {
+	rr := new(dns.PTR)
+	rr.Hdr = dns.RR_Header{Name: ptrName, Rrtype: dns.TypePTR, Class: dns.ClassINET, Ttl: 3600}
+	rr.Ptr = target
+	return rr
 }

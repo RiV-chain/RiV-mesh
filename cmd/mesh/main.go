@@ -328,7 +328,7 @@ func run(args rivArgs, sigCh chan os.Signal) {
 
 	// Setup the DNS.
 	{
-		if n.dns_server, err = dnsapi.NewDnsServer(dnsapi.DnsServerCfg{
+		if n.dns_server, err = dnsapi.NewDnsServer(cfg.Domain, dnsapi.DnsServerCfg{
 			Core:            n.core,
 			Tld:             cfg.DDnsServer.Tld,
 			ListenAddress:   cfg.DDnsServer.ListenAddress,
