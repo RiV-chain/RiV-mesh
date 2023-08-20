@@ -147,7 +147,8 @@ func (c *Core) GetAddressDomain(a Address) iwt.Domain {
 	for idx := range key {
 		key[idx] = ^key[idx]
 	}
-	return iwt.NewDomain(string(key[:]), ed25519.PublicKey(key[:]))
+	var bytes [ed25519.PublicKeySize]byte
+	return iwt.NewDomain(string(key[:]), bytes[:])
 }
 
 // GetKet returns the partial ed25519.PublicKey for the Subnet.
