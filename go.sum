@@ -4,8 +4,8 @@ github.com/Arceliar/phony v0.0.0-20220903101357-530938a4b13d h1:UK9fsWbWqwIQkMCz
 github.com/Arceliar/phony v0.0.0-20220903101357-530938a4b13d/go.mod h1:BCnxhRf47C/dy/e/D2pmB8NkB3dQVIrkD98b220rx5Q=
 github.com/RiV-chain/dns-over-tls-forwarder v0.0.0-20230819192037-9ad070cc8a60 h1:jcKF9IFu0cdH/FhdFrmpwSXt79R4cCyrAWF6qviMKd4=
 github.com/RiV-chain/dns-over-tls-forwarder v0.0.0-20230819192037-9ad070cc8a60/go.mod h1:V2Irj3BjF2tLZ3xXp6TMQCu0I+eJWQPEktbLMHQN8XA=
-github.com/RiV-chain/ironwood v0.0.0-20230817175702-05a882d8c20e h1:uwMlUqaSoj1/j+k8eC1WyHppBtbvZIqgid4zmH+xaiY=
-github.com/RiV-chain/ironwood v0.0.0-20230817175702-05a882d8c20e/go.mod h1:GAApKAEfiaqEk2XuuaOJyyLkSeaIuRPMwv8C7G0d0pM=
+github.com/RiV-chain/ironwood v0.0.0-20230820130121-35c100e1e371 h1:jzMkktxnVLR5lboKXpUMO3LmBYEfGsLFAYx0Kp/j1n8=
+github.com/RiV-chain/ironwood v0.0.0-20230820130121-35c100e1e371/go.mod h1:GAApKAEfiaqEk2XuuaOJyyLkSeaIuRPMwv8C7G0d0pM=
 github.com/benbjohnson/clock v1.1.0 h1:Q92kusRqC1XV2MjkWETPvjJVqKetz1OzxZB7mHJLju8=
 github.com/benbjohnson/clock v1.1.0/go.mod h1:J11/hYXuz8f4ySSvYwY0FKfm+ezbsZBKZxNJlLklBHA=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
