@@ -22,6 +22,8 @@ func (c *Core) _applyOption(opt SetupOption) {
 		pk := [32]byte{}
 		copy(pk[:], v)
 		c.config._allowedPublicKeys[pk] = struct{}{}
+	case DDnsServer:
+		c.config.ddnsserver = v
 	}
 }
 
@@ -43,6 +45,12 @@ type NetworkDomain struct {
 }
 type AllowedPublicKey ed25519.PublicKey
 
+type DDnsServer struct {
+	Tld             string
+	ListenAddress   string
+	UpstreamServers []string
+}
+
 func (a Domain) isSetupOption()           {}
 func (a ListenAddress) isSetupOption()    {}
 func (a Peer) isSetupOption()             {}
@@ -50,3 +58,4 @@ func (a NodeInfo) isSetupOption()         {}
 func (a NodeInfoPrivacy) isSetupOption()  {}
 func (a NetworkDomain) isSetupOption()    {}
 func (a AllowedPublicKey) isSetupOption() {}
+func (a DDnsServer) isSetupOption()       {}

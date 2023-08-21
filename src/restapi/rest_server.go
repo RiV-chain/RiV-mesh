@@ -350,7 +350,7 @@ func (a *RestServer) getApiHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// @Summary		Show details about this node. The output contains following fields: build name, build version, public key, private key, address, subnet, coords, features.
+// @Summary		Show details about this node. The output contains following fields: build name, build version, public key, domain, tld, private key, address, subnet, coords, features.
 // @Produce		json
 // @Success		200		{string}	string		"ok"
 // @Failure		400		{error}		error		"Method not allowed"
@@ -364,6 +364,7 @@ func (a *RestServer) getApiSelfHandler(w http.ResponseWriter, r *http.Request) {
 		"build_version": version.BuildVersion(),
 		"key":           hex.EncodeToString(self.Domain.Key[:]),
 		"domain":        string(self.Domain.GetNormalizedName()),
+		"tld":           self.Tld,
 		"private_key":   hex.EncodeToString(self.PrivateKey[:]),
 		"address":       a.Core.Address().String(),
 		"subnet":        snet.String(),

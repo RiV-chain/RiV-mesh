@@ -26,6 +26,7 @@ import (
 type SelfInfo struct {
 	Domain     types.Domain
 	Root       types.Domain
+	Tld        string
 	PrivateKey ed25519.PrivateKey
 	Coords     []uint64
 }
@@ -69,6 +70,7 @@ func (c *Core) GetSelf() SelfInfo {
 	self.PrivateKey = c.secret
 	self.Root = s.Root
 	self.Coords = s.Coords
+	self.Tld = c.GetDdnsServer().Tld
 	return self
 }
 

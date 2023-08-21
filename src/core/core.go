@@ -45,6 +45,7 @@ type Core struct {
 		nodeinfoPrivacy    NodeInfoPrivacy            // immutable after startup
 		_allowedPublicKeys map[[32]byte]struct{}      // configurable after startup
 		networkdomain      NetworkDomain              // immutable after startup
+		ddnsserver         DDnsServer                 // ddns config
 	}
 }
 
@@ -105,6 +106,10 @@ func (c *Core) SetThisNodeInfo(nodeinfo NodeInfo) error {
 		return fmt.Errorf("error setting node info: %w", err)
 	}
 	return nil
+}
+
+func (c *Core) GetDdnsServer() DDnsServer {
+	return c.config.ddnsserver
 }
 
 func (c *Core) GetThisNodeInfo() json.RawMessage {

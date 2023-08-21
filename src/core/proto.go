@@ -129,6 +129,7 @@ func (p *protoHandler) _handleGetSelfRequest(key iwt.Domain) {
 	res := map[string]string{
 		"key":    hex.EncodeToString(self.Domain.Key),
 		"domain": string(self.Domain.GetNormalizedName()),
+		"tld":    self.Tld,
 		"coords": fmt.Sprintf("%v", self.Coords),
 	}
 	bs, err := json.Marshal(res) // FIXME this puts keys in base64, not hex

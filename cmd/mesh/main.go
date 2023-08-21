@@ -245,6 +245,7 @@ func run(args rivArgs, sigCh chan os.Signal) {
 			core.NodeInfo(cfg.NodeInfo),
 			core.NodeInfoPrivacy(cfg.NodeInfoPrivacy),
 			core.NetworkDomain(cfg.NetworkDomain),
+			core.DDnsServer(cfg.DDnsServer),
 		}
 		for _, addr := range cfg.Listen {
 			options = append(options, core.ListenAddress(addr))
@@ -346,7 +347,7 @@ func run(args rivArgs, sigCh chan os.Signal) {
 	address := n.core.Address()
 	subnet := n.core.Subnet()
 	public := n.core.GetSelf().Domain
-	logger.Infof("Your Domain is %s", string(public.GetNormalizedName()))
+	logger.Infof("Your Domain is %s", string(public.GetNormalizedName())+n.core.GetDdnsServer().Tld)
 	logger.Infof("Your public key is %s", hex.EncodeToString(public.Key[:]))
 	logger.Infof("Your IPv6 address is %s", address.String())
 	logger.Infof("Your IPv6 subnet is %s", subnet.String())
