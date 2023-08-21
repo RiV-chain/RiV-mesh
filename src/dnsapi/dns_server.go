@@ -2,6 +2,7 @@ package dnsapi
 
 import (
 	"context"
+	"crypto/ed25519"
 	"net"
 	"strings"
 
@@ -58,15 +59,17 @@ func (s *DnsServer) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 	for _, q := range r.Question {
 		if (q.Qtype == dns.TypeA || q.Qtype == dns.TypeAAAA) && strings.HasSuffix(q.Name, s.Tld) {
 			name := strings.TrimSuffix(q.Name, s.Tld)
+			var bytes [ed25519.PublicKeySize]byte
+			addr := s.Core.AddrForDomain(types.NewDomain(name, bytes[:]))
 			aaaaRecord := &dns.AAAA{
 				Hdr:  dns.RR_Header{Name: q.Name, Rrtype: dns.TypeAAAA, Class: dns.ClassINET, Ttl: 60},
-				AAAA: net.ParseIP(net.IP(s.Core.AddrForDomain(types.NewDomain(name, nil))[:]).String()),
+				AAAA: net.ParseIP(net.IP(addr[:]).String()),
 			}
 			msg.Answer = append(msg.Answer, aaaaRecord)
-		} else if q.Qtype == dns.TypePTR && q.Qclass == dns.ClassINET && strings.HasPrefix(q.Name, "ip6.arpa.") {
-			ip := extractIPv6FromPTR(q.Name)
+		} else if q.Qtype == dns.TypePTR && q.Qclass == dns.ClassINET && strings.HasSuffix(q.Name, "ip6.arpa.") {
 			localIp := net.ParseIP(s.Core.Address().String())
-			if ip.Equal(localIp) {
+			ptr := ipv6ToPTR(localIp)
+			if q.Name == ptr {
 				msg.Answer = append(msg.Answer, createPTRRecord(q.Name, s.Domain+s.DnsServerCfg.Tld))
 			}
 		}
@@ -89,14 +92,27 @@ func (s *DnsServer) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 	}
 }
 
-func extractIPv6FromPTR(ptrName string) net.IP {
-	parts := strings.Split(ptrName, ".")
-	if len(parts) == 6 {
-		ipv6Str := parts[0] + parts[1] + parts[2] + parts[3]
-		ipv6 := net.ParseIP(ipv6Str)
-		return ipv6
+func ipv6ToPTR(ip net.IP) string {
+	ipStr := ip.String()
+	ipStr = strings.ToLower(ipStr)
+	ipStr = strings.ReplaceAll(ipStr, ":", "")
+	return strings.Join(reverseStringSlice(chunkString(ipStr, 1)), ".") + ".ip6.arpa."
+}
+
+func chunkString(s string, chunkSize int) []string {
+	var chunks []string
+	for _, char := range s {
+		chunks = append(chunks, string(char))
 	}
-	return nil
+	return chunks
+}
+
+func reverseStringSlice(slice []string) []string {
+	for i := 0; i < len(slice)/2; i++ {
+		j := len(slice) - i - 1
+		slice[i], slice[j] = slice[j], slice[i]
+	}
+	return slice
 }
 
 func createPTRRecord(ptrName, target string) dns.RR {
