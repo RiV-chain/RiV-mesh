@@ -3,8 +3,7 @@ package dnsapi
 import (
 	"context"
 	"crypto/ed25519"
-	"errors"
-	"fmt"
+	"encoding/hex"
 	"net"
 	"strings"
 
@@ -75,15 +74,15 @@ func (s *DnsServer) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 			} else {
 				//send PTR request to another server here
 				resolver := &net.Resolver{}
-				dnsServer, err := ptrToIPv6String(q.Name)
+				dnsServer, err := ptrToIPv6(q.Name)
 				if err != nil {
 					msg.SetRcode(r, dns.RcodeFormatError)
 				} else {
 					resp, err := lookupDNSRecord(resolver, dnsServer, q)
 					if err != nil {
 						msg.SetRcode(r, dns.RcodeFormatError)
-					} else if err := w.WriteMsg(resp); err != nil {
-						s.Log.Warnf("Write message failed, message: %v, error: %v", msg, err)
+					} else {
+						msg.Answer = append(msg.Answer, resp.Answer...)
 					}
 				}
 			}
@@ -107,26 +106,20 @@ func (s *DnsServer) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 	}
 }
 
-func ptrToIPv6String(ptr string) (string, error) {
-	parts := strings.Split(ptr, ".")
-	if len(parts) < 33 {
-		return "", errors.New("incorrect length of PTR")
+func ptrToIPv6(arpa string) (string, error) {
+	mainPtr := arpa[:len(arpa)-9]
+	pieces := strings.Split(mainPtr, ".")
+	reversePieces := make([]string, len(pieces))
+	for i := len(pieces) - 1; i >= 0; i-- {
+		reversePieces[len(pieces)-1-i] = pieces[i]
 	}
-
-	ipv6Str := ""
-	for i := len(parts) - 2; i >= 0; i-- {
-		part := parts[i]
-		if len(part) == 1 {
-			ipv6Str += fmt.Sprintf("0%s", part)
-		} else {
-			ipv6Str += part
-		}
-		if i%4 == 0 && i > 0 {
-			ipv6Str += ":"
-		}
+	hexString := strings.Join(reversePieces, "")
+	ipBytes, err := hex.DecodeString(hexString)
+	if err != nil {
+		return "", err
 	}
-
-	return ipv6Str, nil
+	ipv6Addr := net.IP(ipBytes).String()
+	return ipv6Addr, nil
 }
 
 func lookupDNSRecord(resolver *net.Resolver, dnsServer string, q dns.Question) (r *dns.Msg, err error) {
@@ -137,12 +130,23 @@ func lookupDNSRecord(resolver *net.Resolver, dnsServer string, q dns.Question) (
 	msg.SetQuestion(q.Name, dns.TypePTR)
 
 	// Send the DNS query
-	resp, _, err := client.ExchangeContext(context.Background(), msg, dnsServer+":53")
+	ipv6Addr := net.ParseIP(dnsServer)
+	serverAddr := &net.UDPAddr{IP: ipv6Addr, Port: 53}
+	resp, _, err := client.ExchangeContext(context.Background(), msg, serverAddr.String())
 	if err != nil {
 		return nil, err
 	}
 	return resp, nil
 }
+
+/*
+func createPTRRecordFromResponse(msg dns.Msg) dns.RR {
+	rr := new(dns.PTR)
+	rr.Hdr = dns.RR_Header{Name: msg., Rrtype: dns.TypePTR, Class: dns.ClassINET, Ttl: 3600}
+	rr.Ptr = target
+	return rr
+}
+*/
 
 func createPTRRecord(ptrName, target string) dns.RR {
 	rr := new(dns.PTR)
