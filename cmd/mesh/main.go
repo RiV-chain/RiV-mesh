@@ -346,7 +346,7 @@ func run(args rivArgs, sigCh chan os.Signal) {
 	address := n.core.Address()
 	subnet := n.core.Subnet()
 	public := n.core.GetSelf().Domain
-	logger.Infof("Your Domain is %s", string(public.Name[:]))
+	logger.Infof("Your Domain is %s", string(public.GetNormalizedName()))
 	logger.Infof("Your public key is %s", hex.EncodeToString(public.Key[:]))
 	logger.Infof("Your IPv6 address is %s", address.String())
 	logger.Infof("Your IPv6 subnet is %s", subnet.String())

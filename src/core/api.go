@@ -144,7 +144,7 @@ func (c *Core) GetSessions() []SessionInfo {
 	for _, s := range ss {
 		var info SessionInfo
 		info.Key = hex.EncodeToString(s.Domain.Key)
-		info.Domain = string(s.Domain.Name)
+		info.Domain = string(s.Domain.GetNormalizedName())
 		info.RXBytes = s.RX
 		info.TXBytes = s.TX
 		info.Uptime = s.Uptime

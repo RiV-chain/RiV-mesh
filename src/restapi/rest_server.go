@@ -363,7 +363,7 @@ func (a *RestServer) getApiSelfHandler(w http.ResponseWriter, r *http.Request) {
 		"build_name":    version.BuildName(),
 		"build_version": version.BuildVersion(),
 		"key":           hex.EncodeToString(self.Domain.Key[:]),
-		"domain":        string(self.Domain.Name[:]),
+		"domain":        string(self.Domain.GetNormalizedName()),
 		"private_key":   hex.EncodeToString(self.PrivateKey[:]),
 		"address":       a.Core.Address().String(),
 		"subnet":        snet.String(),
@@ -422,7 +422,7 @@ func (a *RestServer) getApiDhtHandler(w http.ResponseWriter, r *http.Request) {
 		entry := map[string]any{
 			"address": net.IP(addr[:]).String(),
 			"key":     hex.EncodeToString(d.Domain.Key),
-			"domain":  string(d.Domain.Name),
+			"domain":  string(d.Domain.GetNormalizedName()),
 			"port":    d.Port,
 			"rest":    d.Rest,
 		}
@@ -564,7 +564,7 @@ func (a *RestServer) prepareGetPeers() []Peer {
 		entry := Peer{
 			net.IP(addr[:]).String(),
 			hex.EncodeToString(p.Domain.Key),
-			string(p.Domain.Name),
+			string(p.Domain.GetNormalizedName()),
 			p.Port,
 			uint64(p.Priority), // can't be uint8 thanks to gobind
 			p.Coords,
