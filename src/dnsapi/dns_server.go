@@ -3,6 +3,8 @@ package dnsapi
 import (
 	"context"
 	"crypto/ed25519"
+	"errors"
+	"fmt"
 	"net"
 	"strings"
 
@@ -66,11 +68,24 @@ func (s *DnsServer) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 				AAAA: net.ParseIP(net.IP(addr[:]).String()),
 			}
 			msg.Answer = append(msg.Answer, aaaaRecord)
-		} else if q.Qtype == dns.TypePTR && q.Qclass == dns.ClassINET && strings.HasSuffix(q.Name, "ip6.arpa.") {
-			localIp := net.ParseIP(s.Core.Address().String())
-			ptr := ipv6ToPTR(localIp)
+		} else if q.Qtype == dns.TypePTR && q.Qclass == dns.ClassINET && strings.HasSuffix(q.Name, ".c.f.ip6.arpa.") {
+			ptr, _ := dns.ReverseAddr(s.Core.Address().String())
 			if q.Name == ptr {
 				msg.Answer = append(msg.Answer, createPTRRecord(q.Name, s.Domain+s.DnsServerCfg.Tld))
+			} else {
+				//send PTR request to another server here
+				resolver := &net.Resolver{}
+				dnsServer, err := ptrToIPv6String(q.Name)
+				if err != nil {
+					msg.SetRcode(r, dns.RcodeFormatError)
+				} else {
+					resp, err := lookupDNSRecord(resolver, dnsServer, q)
+					if err != nil {
+						msg.SetRcode(r, dns.RcodeFormatError)
+					} else if err := w.WriteMsg(resp); err != nil {
+						s.Log.Warnf("Write message failed, message: %v, error: %v", msg, err)
+					}
+				}
 			}
 		}
 	}
@@ -92,27 +107,41 @@ func (s *DnsServer) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 	}
 }
 
-func ipv6ToPTR(ip net.IP) string {
-	ipStr := ip.String()
-	ipStr = strings.ToLower(ipStr)
-	ipStr = strings.ReplaceAll(ipStr, ":", "")
-	return strings.Join(reverseStringSlice(chunkString(ipStr, 1)), ".") + ".ip6.arpa."
+func ptrToIPv6String(ptr string) (string, error) {
+	parts := strings.Split(ptr, ".")
+	if len(parts) < 33 {
+		return "", errors.New("incorrect length of PTR")
+	}
+
+	ipv6Str := ""
+	for i := len(parts) - 2; i >= 0; i-- {
+		part := parts[i]
+		if len(part) == 1 {
+			ipv6Str += fmt.Sprintf("0%s", part)
+		} else {
+			ipv6Str += part
+		}
+		if i%4 == 0 && i > 0 {
+			ipv6Str += ":"
+		}
+	}
+
+	return ipv6Str, nil
 }
 
-func chunkString(s string, chunkSize int) []string {
-	var chunks []string
-	for _, char := range s {
-		chunks = append(chunks, string(char))
-	}
-	return chunks
-}
+func lookupDNSRecord(resolver *net.Resolver, dnsServer string, q dns.Question) (r *dns.Msg, err error) {
+	// Create a DNS client with custom DNS server
+	client := &dns.Client{}
 
-func reverseStringSlice(slice []string) []string {
-	for i := 0; i < len(slice)/2; i++ {
-		j := len(slice) - i - 1
-		slice[i], slice[j] = slice[j], slice[i]
+	msg := new(dns.Msg)
+	msg.SetQuestion(q.Name, dns.TypePTR)
+
+	// Send the DNS query
+	resp, _, err := client.ExchangeContext(context.Background(), msg, dnsServer+":53")
+	if err != nil {
+		return nil, err
 	}
-	return slice
+	return resp, nil
 }
 
 func createPTRRecord(ptrName, target string) dns.RR {
