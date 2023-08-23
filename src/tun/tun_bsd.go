@@ -5,6 +5,8 @@ package tun
 
 import (
 	"encoding/binary"
+	"net"
+	"net/netip"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -88,7 +90,7 @@ func (tun *TunAdapter) setup(ifname string, addr string, mtu uint64) error {
 	return tun.setupAddress(addr)
 }
 
-func (tun *TunAdapter) setupAddress(addr string) error {
+func (tun *TunAdapter) setupAddress(address string) error {
 	var sfd int
 	var err error
 
@@ -100,7 +102,7 @@ func (tun *TunAdapter) setupAddress(addr string) error {
 
 	// Friendly output
 	tun.log.Infof("Interface name: %s", tun.Name())
-	tun.log.Infof("Interface IPv6: %s", addr)
+	tun.log.Infof("Interface IPv6: %s", address)
 	tun.log.Infof("Interface MTU: %d", tun.mtu)
 
 	// Create the MTU request
@@ -129,7 +131,18 @@ func (tun *TunAdapter) setupAddress(addr string) error {
 	copy(ar.ifr_name[:], tun.Name())
 	ar.ifru_addr.sin6_len = uint8(unsafe.Sizeof(ar.ifru_addr))
 	ar.ifru_addr.sin6_family = unix.AF_INET6
-	parts := strings.Split(strings.Split(addr, "/")[0], ":")
+	a, _, err := net.ParseCIDR(address)
+	if err != nil {
+		tun.log.Printf("Incorrect CIDR: %v.", err)
+		return err
+	}
+	ip, err := netip.ParseAddr(a.String())
+	if err != nil {
+		tun.log.Printf("Incorrect address: %v.", err)
+		return err
+	}
+	ip_string := ip.StringExpanded()
+	parts := strings.Split(ip_string, ":")
 	for i := 0; i < 8; i++ {
 		addr, _ := strconv.ParseUint(parts[i], 16, 16)
 		b := make([]byte, 16)
