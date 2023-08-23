@@ -7,6 +7,8 @@ package tun
 
 import (
 	"encoding/binary"
+	"net"
+	"net/netip"
 	"strconv"
 	"strings"
 	"unsafe"
@@ -76,7 +78,8 @@ type ifreq struct {
 
 // Sets the IPv6 address of the utun adapter. On Darwin/macOS this is done using
 // a system socket and making direct syscalls to the kernel.
-func (tun *TunAdapter) setupAddress(addr string) error {
+func (tun *TunAdapter) setupAddress(address string) error {
+
 	var fd int
 	var err error
 
@@ -95,7 +98,18 @@ func (tun *TunAdapter) setupAddress(addr string) error {
 
 	ar.ifra_addr.sin6_len = uint8(unsafe.Sizeof(ar.ifra_addr))
 	ar.ifra_addr.sin6_family = unix.AF_INET6
-	parts := strings.Split(strings.Split(addr, "/")[0], ":")
+	a, _, err := net.ParseCIDR(address)
+	if err != nil {
+		tun.log.Printf("Incorrect CIDR: %v.", err)
+		return err
+	}
+	ip, err := netip.ParseAddr(a.String())
+	if err != nil {
+		tun.log.Printf("Incorrect address: %v.", err)
+		return err
+	}
+	ip_string := ip.StringExpanded()
+	parts := strings.Split(ip_string, ":")
 	for i := 0; i < 8; i++ {
 		addr, _ := strconv.ParseUint(parts[i], 16, 16)
 		b := make([]byte, 16)
@@ -114,7 +128,7 @@ func (tun *TunAdapter) setupAddress(addr string) error {
 	ir.ifru_mtu = uint32(tun.mtu)
 
 	tun.log.Infof("Interface name: %s", ar.ifra_name)
-	tun.log.Infof("Interface IPv6: %s", addr)
+	tun.log.Infof("Interface IPv6: %s", address)
 	tun.log.Infof("Interface MTU: %d", ir.ifru_mtu)
 
 	if _, _, errno := unix.Syscall(unix.SYS_IOCTL, uintptr(fd), uintptr(darwin_SIOCAIFADDR_IN6), uintptr(unsafe.Pointer(&ar))); errno != 0 {
