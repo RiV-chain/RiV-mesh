@@ -2,6 +2,7 @@ package core
 
 import (
 	"bytes"
+	"context"
 	"crypto/ed25519"
 	"crypto/rand"
 	"testing"
@@ -59,62 +60,170 @@ func (c *Core) TestAddress_Subnet_IsValid(t *testing.T) {
 	}
 }
 
-func (c *Core) TestAddress_AddrForKey(t *testing.T) {
-	publicKey := ed25519.PublicKey{
+func TestAddrForDomain(t *testing.T) {
+	expectedIPv6Address := Address{
+		0xfc, 0x8, 0xe6, 0x97, 0x43, 0xa3, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+	}
+	// Mock Core instance with GetPrefix method
+	core := &Core{
+		ctx: context.Background(),
+		config: struct {
+			domain             Domain
+			_peers             map[Peer]*linkInfo
+			_listeners         map[ListenAddress]struct{}
+			nodeinfo           NodeInfo
+			nodeinfoPrivacy    NodeInfoPrivacy
+			_allowedPublicKeys map[[32]byte]struct{}
+			networkdomain      NetworkDomain
+			ddnsserver         DDnsServer
+		}{
+			networkdomain: NetworkDomain{
+				Prefix: "fc",
+			},
+		},
+	}
+
+	name := "example"
+	key := ed25519.PublicKey{
 		189, 186, 207, 216, 34, 64, 222, 61, 205, 18, 57, 36, 203, 181, 82, 86,
 		251, 141, 171, 8, 170, 152, 227, 5, 82, 138, 184, 79, 65, 158, 110, 251,
 	}
 
-	expectedAddress := Address{
-		0xfc, 0, 132, 138, 96, 79, 187, 126, 67, 132, 101, 219, 141, 182, 104, 149,
+	domain := types.NewDomain(name, key)
+	addr := core.AddrForDomain(domain)
+
+	if addr == nil {
+		t.Errorf("Expected non-nil address, but got nil.")
 	}
 
-	if *c.AddrForDomain(types.Domain{Key: publicKey, Name: publicKey}) != expectedAddress {
-		t.Fatal("invalid address returned")
+	if !bytes.Equal(addr[:], expectedIPv6Address[:]) {
+		t.Errorf("Expected IPv6 address does not match encoded IPv6 address.")
 	}
 }
 
-func (c *Core) TestAddress_SubnetForKey(t *testing.T) {
-	publicKey := ed25519.PublicKey{
+func TestGetAddressDomain(t *testing.T) {
+	domainName := "example"
+	var bytes [ed25519.PublicKeySize]byte
+	expectedDomainName := types.NewDomain(domainName, bytes[:])
+	// Mock Core instance with GetPrefix method
+	core := &Core{}
+
+	ipv6Address := Address{
+		0xfc, 0x8, 0xe6, 0x97, 0x43, 0xa3, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+	}
+
+	domain := core.GetAddressDomain(ipv6Address)
+
+	if domain.Equal(types.Domain{}) {
+		t.Errorf("Expected non-empty domain, but got empty.")
+	}
+
+	if !expectedDomainName.Equal(domain) {
+		t.Errorf("Expected domain name does not match decoded domain name.")
+	}
+}
+
+func TestSubnetForDomain(t *testing.T) {
+	expectedIPv6Address := Subnet{
+		0xfd, 0x8, 0xe6, 0x97, 0x43, 0xa3, 0x0, 0x0,
+	}
+	// Mock Core instance with GetPrefix method
+	core := &Core{
+		ctx: context.Background(),
+		config: struct {
+			domain             Domain
+			_peers             map[Peer]*linkInfo
+			_listeners         map[ListenAddress]struct{}
+			nodeinfo           NodeInfo
+			nodeinfoPrivacy    NodeInfoPrivacy
+			_allowedPublicKeys map[[32]byte]struct{}
+			networkdomain      NetworkDomain
+			ddnsserver         DDnsServer
+		}{
+			networkdomain: NetworkDomain{
+				Prefix: "fc",
+			},
+		},
+	}
+
+	name := "example"
+	key := ed25519.PublicKey{
 		189, 186, 207, 216, 34, 64, 222, 61, 205, 18, 57, 36, 203, 181, 82, 86,
 		251, 141, 171, 8, 170, 152, 227, 5, 82, 138, 184, 79, 65, 158, 110, 251,
 	}
 
-	expectedSubnet := Subnet{0xfd, 0, 132, 138, 96, 79, 187, 126}
+	domain := types.NewDomain(name, key)
+	addr := core.SubnetForDomain(domain)
 
-	if *c.SubnetForDomain(types.Domain{Key: publicKey, Name: publicKey}) != expectedSubnet {
-		t.Fatal("invalid subnet returned")
+	if addr == nil {
+		t.Errorf("Expected non-nil address, but got nil.")
+	}
+
+	if !bytes.Equal(addr[:], expectedIPv6Address[:]) {
+		t.Errorf("Expected IPv6 subnet address does not match encoded IPv6 subnet address.")
 	}
 }
 
-func (c *Core) TestAddress_Address_GetKey(t *testing.T) {
-	address := Address{
-		0xfc, 0, 132, 138, 96, 79, 187, 126, 67, 132, 101, 219, 141, 182, 104, 149,
+func TestGetSubnetDomain(t *testing.T) {
+	domainName := "example"
+	var bytes [ed25519.PublicKeySize]byte
+	expectedDomainName := types.NewDomain(domainName, bytes[:])
+	// Mock Core instance with GetPrefix method
+	core := &Core{}
+
+	ipv6Address := Subnet{
+		0xfc, 0x8, 0xe6, 0x97, 0x43, 0xa3, 0x0, 0x0,
 	}
 
-	expectedPublicKey := ed25519.PublicKey{
-		189, 186, 207, 216, 34, 64, 222, 61,
-		205, 18, 57, 36, 203, 181, 127, 255,
-		255, 255, 255, 255, 255, 255, 255, 255,
-		255, 255, 255, 255, 255, 255, 255, 255,
+	domain := core.GetSubnetDomain(ipv6Address)
+
+	if domain.Equal(types.Domain{}) {
+		t.Errorf("Expected non-empty domain, but got empty.")
 	}
 
-	if !bytes.Equal(c.GetAddressDomain(address).Key, expectedPublicKey) {
-		t.Fatal("invalid public key returned")
+	if !expectedDomainName.Equal(domain) {
+		t.Errorf("Expected domain name does not match decoded domain name.")
 	}
 }
 
-func (c *Core) TestAddress_Subnet_GetKey(t *testing.T) {
-	subnet := Subnet{0xfd, 0, 132, 138, 96, 79, 187, 126}
+func TestMaxLengthDomain(t *testing.T) {
 
-	expectedPublicKey := ed25519.PublicKey{
-		189, 186, 207, 216, 34, 64, 255, 255,
-		255, 255, 255, 255, 255, 255, 255, 255,
-		255, 255, 255, 255, 255, 255, 255, 255,
-		255, 255, 255, 255, 255, 255, 255, 255,
+	// Mock Core instance with GetPrefix method
+	core := &Core{
+		ctx: context.Background(),
+		config: struct {
+			domain             Domain
+			_peers             map[Peer]*linkInfo
+			_listeners         map[ListenAddress]struct{}
+			nodeinfo           NodeInfo
+			nodeinfoPrivacy    NodeInfoPrivacy
+			_allowedPublicKeys map[[32]byte]struct{}
+			networkdomain      NetworkDomain
+			ddnsserver         DDnsServer
+		}{
+			networkdomain: NetworkDomain{
+				Prefix: "fc",
+			},
+		},
 	}
 
-	if !bytes.Equal(c.GetSubnetDomain(subnet).Key, expectedPublicKey) {
-		t.Fatal("invalid public key returned")
+	name := "veryverylongdomainnamez"
+	key := ed25519.PublicKey{
+		189, 186, 207, 216, 34, 64, 222, 61, 205, 18, 57, 36, 203, 181, 82, 86,
+		251, 141, 171, 8, 170, 152, 227, 5, 82, 138, 184, 79, 65, 158, 110, 251,
 	}
+
+	domain := types.NewDomain(name, key)
+	addr := *core.AddrForDomain(domain)
+
+	expectedDomain := core.GetAddressDomain(addr)
+
+	if expectedDomain.Equal(types.Domain{}) {
+		t.Errorf("Expected non-empty domain, but got empty.")
+	}
+
+	if !bytes.Equal(expectedDomain.GetNormalizedName(), []byte(name)) {
+		t.Errorf("Expected domain name does not match decoded domain name.")
+	}
+
 }

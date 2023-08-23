@@ -4,8 +4,8 @@ github.com/Arceliar/phony v0.0.0-20220903101357-530938a4b13d h1:UK9fsWbWqwIQkMCz
 github.com/Arceliar/phony v0.0.0-20220903101357-530938a4b13d/go.mod h1:BCnxhRf47C/dy/e/D2pmB8NkB3dQVIrkD98b220rx5Q=
 github.com/RiV-chain/dns-over-tls-forwarder v0.0.0-20230819192037-9ad070cc8a60 h1:jcKF9IFu0cdH/FhdFrmpwSXt79R4cCyrAWF6qviMKd4=
 github.com/RiV-chain/dns-over-tls-forwarder v0.0.0-20230819192037-9ad070cc8a60/go.mod h1:V2Irj3BjF2tLZ3xXp6TMQCu0I+eJWQPEktbLMHQN8XA=
-github.com/RiV-chain/ironwood v0.0.0-20230821133008-c143380d3f1a h1:jX/l9LC0SdU6I5GcQLBt5LbqyhqCa6DGG8AM93eRZtM=
-github.com/RiV-chain/ironwood v0.0.0-20230821133008-c143380d3f1a/go.mod h1:GAApKAEfiaqEk2XuuaOJyyLkSeaIuRPMwv8C7G0d0pM=
+github.com/RiV-chain/ironwood v0.0.0-20230823083127-70a39ab05d0c h1:d/A0iIs7qz9IcBgmB6fgnLF/kvVVvjsdOM2zpxBS4gI=
+github.com/RiV-chain/ironwood v0.0.0-20230823083127-70a39ab05d0c/go.mod h1:GAApKAEfiaqEk2XuuaOJyyLkSeaIuRPMwv8C7G0d0pM=
 github.com/benbjohnson/clock v1.1.0 h1:Q92kusRqC1XV2MjkWETPvjJVqKetz1OzxZB7mHJLju8=
 github.com/benbjohnson/clock v1.1.0/go.mod h1:J11/hYXuz8f4ySSvYwY0FKfm+ezbsZBKZxNJlLklBHA=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
@@ -13,6 +13,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dustin/go-humanize v1.0.0 h1:VSnTsYCnlFHaM2/igO1h6X3HA71jcobQuxemgkq4zYo=
 github.com/dustin/go-humanize v1.0.0/go.mod h1:HtrtbFcZ19U5GC7JDqmcUSB87Iq5E25KnS6fMYU6eOk=
+github.com/eknkc/basex v1.0.1 h1:TcyAkqh4oJXgV3WYyL4KEfCMk9W8oJCpmx1bo+jVgKY=
+github.com/eknkc/basex v1.0.1/go.mod h1:k/F/exNEHFdbs3ZHuasoP2E7zeWwZblG84Y7Z59vQRo=
 github.com/getlantern/context v0.0.0-20190109183933-c447772a6520 h1:NRUJuo3v3WGC/g5YiyF790gut6oQr5f3FBI88Wv0dx4=
 github.com/getlantern/context v0.0.0-20190109183933-c447772a6520/go.mod h1:L+mq6/vvYHKjCX2oez0CgEAJmbq1fbb/oNJIWQkBybY=
 github.com/getlantern/ema v0.0.0-20190620044903-5943d28f40e4 h1:PMK8QQn9GLTQXdHnqoNhyToOa8snagaZVt9Xb36NEUc=

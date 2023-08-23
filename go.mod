@@ -2,7 +2,7 @@ module github.com/RiV-chain/RiV-mesh
 
 go 1.21
 
-replace github.com/Arceliar/ironwood => github.com/RiV-chain/ironwood v0.0.0-20230821133008-c143380d3f1a
+replace github.com/Arceliar/ironwood => github.com/RiV-chain/ironwood v0.0.0-20230823083127-70a39ab05d0c
 
 replace github.com/mikispag/dns-over-tls-forwarder => github.com/RiV-chain/dns-over-tls-forwarder v0.0.0-20230819192037-9ad070cc8a60
 
@@ -28,6 +28,7 @@ require (
 require gerace.dev/zipfs v0.2.0
 
 require (
+	github.com/eknkc/basex v1.0.1
 	github.com/mikispag/dns-over-tls-forwarder v0.0.0-20230401080233-dae75d4680fd
 	github.com/slonm/tableprinter v0.0.0-20230107100804-643098716018
 	github.com/vorot93/golang-signals v0.0.0-20170221070717-d9e83421ce45

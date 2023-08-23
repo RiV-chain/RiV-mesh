@@ -5,9 +5,14 @@ package core
 import (
 	"crypto/ed25519"
 	"encoding/hex"
+	"fmt"
+
+	"github.com/eknkc/basex"
 
 	iwt "github.com/Arceliar/ironwood/types"
 )
+
+const domainNameCharacters string = "0123456789abcdefghijklmnopqrstuvwxyz-"
 
 // Address represents an IPv6 address in the mesh address range.
 type Address [16]byte
@@ -67,38 +72,11 @@ func (c *Core) AddrForDomain(domain iwt.Domain) *Address {
 	if len(domain.Key) != ed25519.PublicKeySize {
 		return nil
 	}
-	var buf [ed25519.PublicKeySize]byte
-	copy(buf[:], domain.Name)
-	for idx := range buf {
-		buf[idx] = ^buf[idx]
+	addr, err := encodeToIPv6(c.GetPrefix(), domain.Name)
+	if err != nil {
+		c.log.Errorln(err)
+		return nil
 	}
-	var addr Address
-	var temp = make([]byte, 0, 32)
-	done := false
-	ones := byte(0)
-	bits := byte(0)
-	nBits := 0
-	for idx := 0; idx < 8*len(buf); idx++ {
-		bit := (buf[idx/8] & (0x80 >> byte(idx%8))) >> byte(7-(idx%8))
-		if !done && bit != 0 {
-			ones++
-			continue
-		}
-		if !done && bit == 0 {
-			done = true
-			continue // FIXME? this assumes that ones <= 127, probably only worth changing by using a variable length uint64, but that would require changes to the addressing scheme, and I'm not sure ones > 127 is realistic
-		}
-		bits = (bits << 1) | bit
-		nBits++
-		if nBits == 8 {
-			nBits = 0
-			temp = append(temp, bits)
-		}
-	}
-	prefix := c.GetPrefix()
-	copy(addr[:], prefix[:])
-	addr[len(prefix)] = ones
-	copy(addr[len(prefix)+1:], temp)
 	return &addr
 }
 
@@ -121,34 +99,16 @@ func (c *Core) SubnetForDomain(domain iwt.Domain) *Subnet {
 	return &snet
 }
 
-// GetKet returns the partial ed25519.PublicKey for the Address.
+// GetKet returns the Domain.Name for the Address.
 // This is used for key lookup.
 
 func (c *Core) GetAddressDomain(a Address) iwt.Domain {
-	var key [ed25519.PublicKeySize]byte
-	prefix := c.GetPrefix() // nolint:staticcheck
-	ones := int(a[len(prefix)])
-	for idx := 0; idx < ones; idx++ {
-		key[idx/8] |= 0x80 >> byte(idx%8)
-	}
-	keyOffset := ones + 1
-	addrOffset := 8*len(prefix) + 8
-	for idx := addrOffset; idx < 8*len(a); idx++ {
-		bits := a[idx/8] & (0x80 >> byte(idx%8))
-		bits <<= byte(idx % 8)
-		keyIdx := keyOffset + (idx - addrOffset)
-		bits >>= byte(keyIdx % 8)
-		idx := keyIdx / 8
-		if idx >= len(key) {
-			break
-		}
-		key[idx] |= bits
-	}
-	for idx := range key {
-		key[idx] = ^key[idx]
+	name, err := decodeIPv6(a)
+	if err != nil {
+		return iwt.Domain{}
 	}
 	var bytes [ed25519.PublicKeySize]byte
-	return iwt.NewDomain(string(key[:]), bytes[:])
+	return iwt.NewDomain(string(name), bytes[:])
 }
 
 // GetKet returns the partial ed25519.PublicKey for the Subnet.
@@ -157,4 +117,41 @@ func (c *Core) GetSubnetDomain(s Subnet) iwt.Domain {
 	var addr Address
 	copy(addr[:], s[:])
 	return c.GetAddressDomain(addr)
+}
+
+func encodeToIPv6(prefix [1]byte, name []byte) (Address, error) {
+	str := string(truncateTrailingZeros(name))
+	if len(str) > 23 {
+		return Address{}, fmt.Errorf("input data is too long for an IPv6 address")
+	}
+	encoder, err := basex.NewEncoding(domainNameCharacters)
+	if err != nil {
+		return Address{}, err
+	}
+	var ipv6Bytes Address
+	copy(ipv6Bytes[:], prefix[:])
+	decoded, err := encoder.Decode(str)
+	if err != nil {
+		return Address{}, err
+	}
+	copy(ipv6Bytes[1:], decoded)
+	return ipv6Bytes, nil
+}
+
+func decodeIPv6(ipv6 Address) ([]byte, error) {
+	encoder, err := basex.NewEncoding(domainNameCharacters)
+	if err != nil {
+		return nil, err
+	}
+	encodedData := truncateTrailingZeros(ipv6[1:])
+	dst := []byte(encoder.Encode(encodedData))
+	return dst, nil
+}
+
+func truncateTrailingZeros(data []byte) []byte {
+	length := len(data)
+	for length > 0 && data[length-1] == 0 {
+		length--
+	}
+	return data[:length]
 }
