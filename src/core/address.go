@@ -5,6 +5,7 @@ package core
 import (
 	"crypto/ed25519"
 	"encoding/hex"
+	"errors"
 	"fmt"
 
 	"github.com/eknkc/basex"
@@ -132,7 +133,7 @@ func encodeToIPv6(prefix [1]byte, name []byte) (Address, error) {
 	copy(ipv6Bytes[:], prefix[:])
 	decoded, err := encoder.Decode(str)
 	if err != nil {
-		return Address{}, err
+		return Address{}, errors.New("Base37 decode error in string:" + str)
 	}
 	copy(ipv6Bytes[1:], decoded)
 	return ipv6Bytes, nil
