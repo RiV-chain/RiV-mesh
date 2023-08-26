@@ -1,6 +1,7 @@
 package dnsapi
 
 import (
+	"bytes"
 	"context"
 	"crypto/ed25519"
 	"encoding/hex"
@@ -59,14 +60,39 @@ func (s *DnsServer) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 	msg.Compress = false
 	for _, q := range r.Question {
 		if (q.Qtype == dns.TypeA || q.Qtype == dns.TypeAAAA) && strings.HasSuffix(q.Name, s.Tld) {
-			name := strings.TrimSuffix(q.Name, s.Tld)
-			var bytes [ed25519.PublicKeySize]byte
-			addr := s.Core.AddrForDomain(types.NewDomain(name, bytes[:]))
-			aaaaRecord := &dns.AAAA{
-				Hdr:  dns.RR_Header{Name: q.Name, Rrtype: dns.TypeAAAA, Class: dns.ClassINET, Ttl: 60},
-				AAAA: net.ParseIP(net.IP(addr[:]).String()),
+			n := strings.TrimSuffix(q.Name, s.Tld)
+			name := strings.Split(n, ".")
+			if len(name) > 1 {
+				st := name[len(name)-1]
+				var pub [ed25519.PublicKeySize]byte
+				if len(st) > 0 {
+					lookupIp := s.Core.AddrForDomain(types.NewDomain(st, pub[:]))
+					if bytes.Equal(lookupIp[:], s.Core.Address()[:]) {
+						//response with an exising A or AAAA for the local server
+					} else {
+						//this is a remote server. send the lookup to it recursively
+						resolver := &net.Resolver{}
+						dnsServer := net.IP(lookupIp[:])
+						resp, err := lookupDNSRecord(resolver, dnsServer, q)
+						if err != nil {
+							msg.SetRcode(r, dns.RcodeFormatError)
+						} else {
+							msg.Answer = append(msg.Answer, resp.Answer...)
+						}
+					}
+				} else {
+					//shouldn't ever happen but anyway return error
+					msg.SetRcode(r, dns.RcodeFormatError)
+				}
+			} else {
+				var bytes [ed25519.PublicKeySize]byte
+				addr := s.Core.AddrForDomain(types.NewDomain(name[0], bytes[:]))
+				aaaaRecord := &dns.AAAA{
+					Hdr:  dns.RR_Header{Name: q.Name, Rrtype: dns.TypeAAAA, Class: dns.ClassINET, Ttl: 60},
+					AAAA: net.IP(addr[:]),
+				}
+				msg.Answer = append(msg.Answer, aaaaRecord)
 			}
-			msg.Answer = append(msg.Answer, aaaaRecord)
 		} else if q.Qtype == dns.TypePTR && q.Qclass == dns.ClassINET && strings.HasSuffix(q.Name, ".c.f.ip6.arpa.") {
 			ptr, _ := dns.ReverseAddr(s.Core.Address().String())
 			if q.Name == ptr {
@@ -106,7 +132,7 @@ func (s *DnsServer) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 	}
 }
 
-func ptrToIPv6(arpa string) (string, error) {
+func ptrToIPv6(arpa string) (net.IP, error) {
 	mainPtr := arpa[:len(arpa)-9]
 	pieces := strings.Split(mainPtr, ".")
 	reversePieces := make([]string, len(pieces))
@@ -116,13 +142,13 @@ func ptrToIPv6(arpa string) (string, error) {
 	hexString := strings.Join(reversePieces, "")
 	ipBytes, err := hex.DecodeString(hexString)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	ipv6Addr := net.IP(ipBytes).String()
+	ipv6Addr := net.IP(ipBytes)
 	return ipv6Addr, nil
 }
 
-func lookupDNSRecord(resolver *net.Resolver, dnsServer string, q dns.Question) (r *dns.Msg, err error) {
+func lookupDNSRecord(resolver *net.Resolver, dnsServer net.IP, q dns.Question) (r *dns.Msg, err error) {
 	// Create a DNS client with custom DNS server
 	client := &dns.Client{}
 
@@ -130,8 +156,7 @@ func lookupDNSRecord(resolver *net.Resolver, dnsServer string, q dns.Question) (
 	msg.SetQuestion(q.Name, dns.TypePTR)
 
 	// Send the DNS query
-	ipv6Addr := net.ParseIP(dnsServer)
-	serverAddr := &net.UDPAddr{IP: ipv6Addr, Port: 53}
+	serverAddr := &net.UDPAddr{IP: dnsServer, Port: 53}
 	resp, _, err := client.ExchangeContext(context.Background(), msg, serverAddr.String())
 	if err != nil {
 		return nil, err
