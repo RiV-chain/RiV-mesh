@@ -270,6 +270,21 @@ func run(args rivArgs, sigCh chan os.Signal) {
 		}
 	}
 
+	// Setup the DNS.
+	{
+		if n.dns_server, err = dnsapi.NewDnsServer(cfg.Domain, dnsapi.DnsServerCfg{
+			Core:            n.core,
+			Tld:             cfg.DDnsServer.Tld,
+			ListenAddress:   cfg.DDnsServer.ListenAddress,
+			UpstreamServers: cfg.DDnsServer.UpstreamServers,
+			Log:             logger,
+		}); err != nil {
+			logger.Errorln(err)
+		} else {
+			n.dns_server.Run()
+		}
+	}
+
 	// Setup the multicast module.
 	{
 		options := []multicast.SetupOption{}
@@ -324,21 +339,6 @@ func run(args rivArgs, sigCh chan os.Signal) {
 			if err != nil {
 				logger.Errorln(err)
 			}
-		}
-	}
-
-	// Setup the DNS.
-	{
-		if n.dns_server, err = dnsapi.NewDnsServer(cfg.Domain, dnsapi.DnsServerCfg{
-			Core:            n.core,
-			Tld:             cfg.DDnsServer.Tld,
-			ListenAddress:   cfg.DDnsServer.ListenAddress,
-			UpstreamServers: cfg.DDnsServer.UpstreamServers,
-			Log:             logger,
-		}); err != nil {
-			logger.Errorln(err)
-		} else {
-			n.dns_server.Run()
 		}
 	}
 
