@@ -4,7 +4,7 @@ go 1.21
 
 replace github.com/Arceliar/ironwood => github.com/RiV-chain/ironwood v0.0.0-20230823083127-70a39ab05d0c
 
-replace github.com/mikispag/dns-over-tls-forwarder => github.com/RiV-chain/dns-over-tls-forwarder v0.0.0-20230819192037-9ad070cc8a60
+replace github.com/mikispag/dns-over-tls-forwarder => github.com/RiV-chain/dns-over-tls-forwarder v0.0.0-20230828114909-c2cd9f8d79d3
 
 require (
 	github.com/Arceliar/ironwood v0.0.0-20230805085300-86206813435f
