@@ -25,7 +25,7 @@ type version_metadata struct {
 func version_getBaseMetadata() version_metadata {
 	return version_metadata{
 		meta:     [4]byte{'d', 'e', 't', 'a'},
-		ver:      0,
+		ver:      5,
 		minorVer: 6,
 	}
 }
