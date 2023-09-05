@@ -23,6 +23,15 @@ import (
 	//"github.com/RiV-chain/RiV-mesh/src/address"
 )
 
+type LabelInfo struct {
+	Sig    []byte
+	Domain types.Domain
+	Root   types.Domain
+	Seq    uint64
+	Beacon uint64
+	Path   []uint64
+}
+
 type SelfInfo struct {
 	Domain     types.Domain
 	Root       types.Domain
@@ -61,6 +70,18 @@ type SessionInfo struct {
 	RXBytes uint64
 	TXBytes uint64
 	Uptime  time.Duration
+}
+
+func (c *Core) GetLabel() LabelInfo {
+	var label LabelInfo
+	s := c.PacketConn.PacketConn.Debug.GetLabel()
+	label.Domain = s.Domain
+	label.Root = s.Root
+	label.Seq = s.Seq
+	label.Beacon = s.Beacon
+	label.Path = s.Path
+	label.Sig = s.Sig
+	return label
 }
 
 func (c *Core) GetSelf() SelfInfo {

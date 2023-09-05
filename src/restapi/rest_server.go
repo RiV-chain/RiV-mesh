@@ -139,6 +139,7 @@ func NewRestServer(cfg RestServerCfg) (*RestServer, error) {
 	}
 
 	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api", Desc: "API documentation", Handler: a.getApiHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/label", Desc: "Show details about this network label", Handler: a.getApiLabelHandler})
 	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/self", Desc: "Show details about this node", Handler: a.getApiSelfHandler})
 	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/nodeinfo", Desc: "Request nodeinfo of this node", Handler: a.getApiNodeinfoHandler})
 	a.AddHandler(ApiHandler{Method: "PUT", Pattern: "/api/nodeinfo", Desc: "Update nodeinfo of this node", Handler: a.putApiNodeinfoHandler})
@@ -348,6 +349,24 @@ func (a *RestServer) getApiHandler(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/json; charset=utf-8")
 		fmt.Fprint(w, string(b))
 	}
+}
+
+// @Summary		Show details about this network root label. Domain is the current node domain. Root is the root domain. Beacon is uint64 random number generated and signed by root.
+// @Produce		json
+// @Success		200		{string}	string		"ok"
+// @Failure		400		{error}		error		"Method not allowed"
+// @Failure		401		{error}		error		"Authentication failed"
+// @Router		/label  [get]
+func (a *RestServer) getApiLabelHandler(w http.ResponseWriter, r *http.Request) {
+	label := a.Core.GetLabel()
+	var result = map[string]any{
+		"domain":   string(label.Domain.GetNormalizedName()),
+		"root":     string(label.Root.GetNormalizedName()),
+		"sequence": label.Seq,
+		"beacon":   label.Beacon,
+		"path":     label.Path,
+	}
+	WriteJson(w, r, result)
 }
 
 // @Summary		Show details about this node. The output contains following fields: build name, build version, public key, domain, tld, private key, address, subnet, coords, features.
