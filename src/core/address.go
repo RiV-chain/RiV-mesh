@@ -7,13 +7,16 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"regexp"
 
 	"github.com/eknkc/basex"
 
 	iwt "github.com/Arceliar/ironwood/types"
 )
 
-const domainNameCharacters string = "0123456789abcdefghijklmnopqrstuvwxyz-"
+const DomainNameCharacters string = "0123456789abcdefghijklmnopqrstuvwxyz-"
+
+var DOMAIN_REGEXP = regexp.MustCompile(fmt.Sprintf("^[%s]+$", DomainNameCharacters))
 
 // Address represents an IPv6 address in the mesh address range.
 type Address [16]byte
@@ -33,6 +36,10 @@ func (c *Core) GetPrefix() [1]byte {
 	var prefix [1]byte
 	copy(prefix[:], p[:1])
 	return prefix
+}
+
+func IsValidDomain(domain string) bool {
+	return DOMAIN_REGEXP.MatchString(domain)
 }
 
 // IsValid returns true if an address falls within the range used by nodes in the network.
@@ -125,7 +132,7 @@ func encodeToIPv6(prefix [1]byte, name []byte) (Address, error) {
 	if len(str) > 23 {
 		return Address{}, fmt.Errorf("input data is too long for an IPv6 address")
 	}
-	encoder, err := basex.NewEncoding(domainNameCharacters)
+	encoder, err := basex.NewEncoding(DomainNameCharacters)
 	if err != nil {
 		return Address{}, err
 	}
@@ -140,7 +147,7 @@ func encodeToIPv6(prefix [1]byte, name []byte) (Address, error) {
 }
 
 func decodeIPv6(ipv6 Address) ([]byte, error) {
-	encoder, err := basex.NewEncoding(domainNameCharacters)
+	encoder, err := basex.NewEncoding(DomainNameCharacters)
 	if err != nil {
 		return nil, err
 	}

@@ -227,3 +227,23 @@ func TestMaxLengthDomain(t *testing.T) {
 	}
 
 }
+
+func TestIsValidDomain(t *testing.T) {
+	testCases := []struct {
+		domain   string
+		expected bool
+	}{
+		{"valid-domain", true},
+		{"invalid@domain", false},
+		{"Valid123", false},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.domain, func(t *testing.T) {
+			isValid := IsValidDomain(testCase.domain)
+			if isValid != testCase.expected {
+				t.Errorf("Expected %s to be valid: %v, but got valid: %v", testCase.domain, testCase.expected, isValid)
+			}
+		})
+	}
+}

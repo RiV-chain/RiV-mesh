@@ -11,6 +11,7 @@ import (
 	"time"
 
 	iwe "github.com/Arceliar/ironwood/encrypted"
+	"github.com/Arceliar/ironwood/types"
 	iwt "github.com/Arceliar/ironwood/types"
 
 	"github.com/Arceliar/phony"
@@ -106,6 +107,10 @@ func (c *Core) SetThisNodeInfo(nodeinfo NodeInfo) error {
 		return fmt.Errorf("error setting node info: %w", err)
 	}
 	return nil
+}
+
+func (c *Core) SetDomainInfo(domain types.Domain) {
+	c.config.domain = Domain(domain.Name)
 }
 
 func (c *Core) GetDdnsServer() DDnsServer {

@@ -23,8 +23,10 @@ import (
 	"time"
 
 	"gerace.dev/zipfs"
+	"github.com/RiV-chain/RiV-mesh/types"
 	"golang.org/x/exp/slices"
 
+	t "github.com/Arceliar/ironwood/types"
 	"github.com/RiV-chain/RiV-mesh/src/config"
 	"github.com/RiV-chain/RiV-mesh/src/core"
 	"github.com/RiV-chain/RiV-mesh/src/defaults"
@@ -140,6 +142,7 @@ func NewRestServer(cfg RestServerCfg) (*RestServer, error) {
 
 	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api", Desc: "API documentation", Handler: a.getApiHandler})
 	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/label", Desc: "Show details about this network label", Handler: a.getApiLabelHandler})
+	a.AddHandler(ApiHandler{Method: "PUT", Pattern: "/api/domain", Desc: "Regiter a Domain", Handler: a.putApiDomainHandler})
 	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/self", Desc: "Show details about this node", Handler: a.getApiSelfHandler})
 	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/nodeinfo", Desc: "Request nodeinfo of this node", Handler: a.getApiNodeinfoHandler})
 	a.AddHandler(ApiHandler{Method: "PUT", Pattern: "/api/nodeinfo", Desc: "Update nodeinfo of this node", Handler: a.putApiNodeinfoHandler})
@@ -367,6 +370,68 @@ func (a *RestServer) getApiLabelHandler(w http.ResponseWriter, r *http.Request) 
 		"path":     label.Path,
 	}
 	WriteJson(w, r, result)
+}
+
+// @Summary		Register a Domain.
+// @Produce		json
+// @Success		202		{string}	string		"Accepted"
+// @Failure		400		{error}		error		"Bad request"
+// @Failure		401		{error}		error		"Authentication failed"
+// @Failure		500		{error}		error		"Internal error"
+// @Router		/domain [put]
+func (a *RestServer) putApiDomainHandler(w http.ResponseWriter, r *http.Request) {
+	cnt := strings.Split(r.URL.Path, "/")
+	if len(cnt) != 6 || cnt[4] == "" {
+		http.Error(w, "No domain name supplied", http.StatusBadRequest)
+		return
+	}
+	if cnt[5] == "" {
+		http.Error(w, "No public key supplied", http.StatusBadRequest)
+		return
+	}
+	key, err := hex.DecodeString(cnt[5])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	} else if len(key) != 32 {
+		http.Error(w, "Incorrect public key length", http.StatusBadRequest)
+		return
+	} else if len(cnt[4]) > 23 {
+		http.Error(w, "Domain name is exceeding max length", http.StatusBadRequest)
+		return
+	} else if !core.IsValidDomain(cnt[4]) {
+		http.Error(w, "Domain name contains illegal characters", http.StatusBadRequest)
+		return
+	}
+	// Check the domain is not registered
+	domain := t.NewDomain(cnt[4], key)
+	if types.IsRegistered(domain) {
+		http.Error(w, "Domain has been already registered", http.StatusConflict)
+		return
+	}
+	// Broadcast the method to peers recursively
+	err = types.Register(domain)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	a.Core.SetDomainInfo(domain)
+	w.WriteHeader(http.StatusAccepted)
+	a.saveConfig(func(cfg *config.NodeConfig) {
+		cfg.Domain = string(domain.GetNormalizedName())
+	}, r)
+	// Sync local DB
+	err = types.Sync()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	// Save to local DB
+	err = types.Save(domain)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 // @Summary		Show details about this node. The output contains following fields: build name, build version, public key, domain, tld, private key, address, subnet, coords, features.
