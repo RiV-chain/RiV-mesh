@@ -11,6 +11,7 @@ import (
 	"time"
 
 	iwe "github.com/Arceliar/ironwood/encrypted"
+	iwn "github.com/Arceliar/ironwood/network"
 	iwt "github.com/Arceliar/ironwood/types"
 
 	"github.com/Arceliar/phony"
@@ -47,11 +48,16 @@ type Core struct {
 		networkdomain      NetworkDomain              // immutable after startup
 		ddnsserver         DDnsServer                 // ddns config
 	}
+	pathNotify func(iwt.Domain)
 }
 
 func New(secret ed25519.PrivateKey, logger Logger, opts ...SetupOption) (*Core, error) {
 	c := &Core{
 		log: logger,
+	}
+	c.ctx, c.cancel = context.WithCancel(context.Background())
+	if c.log == nil {
+		c.log = log.New(io.Discard, "", 0)
 	}
 	if name := version.BuildName(); name != "unknown" {
 		c.log.Infoln("Build name:", name)
@@ -59,7 +65,7 @@ func New(secret ed25519.PrivateKey, logger Logger, opts ...SetupOption) (*Core, 
 	if version := version.BuildVersion(); version != "unknown" {
 		c.log.Infoln("Build version:", version)
 	}
-	c.ctx, c.cancel = context.WithCancel(context.Background())
+
 	// Take a copy of the private key so that it is in our own memory space.
 	if len(secret) != ed25519.PrivateKeySize {
 		return nil, fmt.Errorf("private key is incorrect length")
@@ -74,7 +80,16 @@ func New(secret ed25519.PrivateKey, logger Logger, opts ...SetupOption) (*Core, 
 	}
 	c.public = iwt.NewDomain(string(c.config.domain), secret.Public().(ed25519.PublicKey))
 	var err error
-	if c.PacketConn, err = iwe.NewPacketConn(c.secret, c.public); err != nil {
+	keyXform := func(key iwt.Domain) iwt.Domain {
+		return key
+	}
+	if c.PacketConn, err = iwe.NewPacketConn(
+		c.secret,
+		c.public,
+		iwn.WithBloomTransform(keyXform),
+		iwn.WithPeerMaxMessageSize(65535*2),
+		iwn.WithPathNotify(c.doPathNotify),
+	); err != nil {
 		return nil, fmt.Errorf("error creating encryption: %w", err)
 	}
 	if c.log == nil {
@@ -173,11 +188,16 @@ func (c *Core) _close() error {
 
 func (c *Core) MTU() uint64 {
 	const sessionTypeOverhead = 1
-	return c.PacketConn.MTU() - sessionTypeOverhead
+	MTU := c.PacketConn.MTU() - sessionTypeOverhead
+	if MTU > 65535 {
+		MTU = 65535
+	}
+	return MTU
 }
 
 func (c *Core) ReadFrom(p []byte) (n int, from net.Addr, err error) {
-	buf := make([]byte, c.PacketConn.MTU(), 65535)
+	buf := allocBytes(int(c.PacketConn.MTU()))
+	defer freeBytes(buf)
 	for {
 		bs := buf
 		n, from, err = c.PacketConn.ReadFrom(bs)
@@ -210,7 +230,8 @@ func (c *Core) ReadFrom(p []byte) (n int, from net.Addr, err error) {
 }
 
 func (c *Core) WriteTo(p []byte, addr net.Addr) (n int, err error) {
-	buf := make([]byte, 0, 65535)
+	buf := allocBytes(0)
+	defer freeBytes(buf)
 	buf = append(buf, typeSessionTraffic)
 	buf = append(buf, p...)
 	n, err = c.PacketConn.WriteTo(buf, addr)
@@ -218,6 +239,20 @@ func (c *Core) WriteTo(p []byte, addr net.Addr) (n int, err error) {
 		n -= 1
 	}
 	return
+}
+
+func (c *Core) doPathNotify(key iwt.Domain) {
+	c.Act(nil, func() {
+		if c.pathNotify != nil {
+			c.pathNotify(key)
+		}
+	})
+}
+
+func (c *Core) SetPathNotify(notify func(iwt.Domain)) {
+	c.Act(nil, func() {
+		c.pathNotify = notify
+	})
 }
 
 type Logger interface {

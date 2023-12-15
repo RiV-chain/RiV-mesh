@@ -51,6 +51,9 @@ func (k *keyStore) init(c *core.Core) {
 	k.core = c
 	k.address = *c.AddrForDomain(k.core.GetSelf().Domain)
 	k.subnet = *c.SubnetForDomain(k.core.GetSelf().Domain)
+	k.core.SetPathNotify(func(key types.Domain) {
+		k.update(key)
+	})
 	k.keyToInfo = make(map[keyArray]*keyInfo)
 	k.addrToInfo = make(map[core.Address]*keyInfo)
 	k.addrBuffer = make(map[core.Address]*buffer)

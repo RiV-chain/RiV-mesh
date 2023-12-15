@@ -100,9 +100,8 @@ func (c *Core) SubnetForDomain(domain iwt.Domain) *Subnet {
 	return &snet
 }
 
-// GetKet returns the Domain.Name for the Address.
-// This is used for key lookup.
-
+// Returns the partial Domain for the Address.
+// This is used for domain lookup.
 func (c *Core) GetAddressDomain(a Address) iwt.Domain {
 	name, err := decodeIPv6(a)
 	if err != nil {
@@ -114,8 +113,8 @@ func (c *Core) GetAddressDomain(a Address) iwt.Domain {
 	return iwt.NewDomain(string(name), bytes[:])
 }
 
-// GetKet returns the partial ed25519.PublicKey for the Subnet.
-// This is used for key lookup.
+// Returns the partial Domain for the Subnet.
+// This is used for domain lookup.
 func (c *Core) GetSubnetDomain(s Subnet) iwt.Domain {
 	var addr Address
 	copy(addr[:], s[:])
