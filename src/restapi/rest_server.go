@@ -428,7 +428,7 @@ func (a *RestServer) putApiNodeinfoHandler(w http.ResponseWriter, r *http.Reques
 	}, r)
 }
 
-// @Summary		Show known Tree entries. The output contains following fields: Address, Public Key, Port, Rest
+// @Summary		Show known Tree entries. The output contains following fields: Domain, Parent, Sequence
 // @Produce		json
 // @Success		200		{string}	string		"ok"
 // @Failure		400		{error}		error		"Method not allowed"
@@ -439,7 +439,7 @@ func (a *RestServer) getApiTreeHandler(w http.ResponseWriter, r *http.Request) {
 	result := make([]map[string]any, 0, len(tree))
 	for _, d := range tree {
 		entry := map[string]any{
-			"key":      hex.EncodeToString(d.Key),
+			"domain":   d.Domain,
 			"parent":   d.Parent,
 			"sequence": d.Sequence,
 		}
@@ -501,8 +501,10 @@ func (a *RestServer) getApiPathsHandler(w http.ResponseWriter, r *http.Request) 
 	result := make([]map[string]any, 0, len(paths))
 	for _, d := range paths {
 		entry := map[string]any{
-			"key":  hex.EncodeToString(d.Key),
-			"path": d.Path,
+			"ip":       d.IPAddress,
+			"domain":   d.Domain,
+			"path":     d.Path,
+			"sequence": d.Sequence,
 		}
 		result = append(result, entry)
 	}
@@ -523,7 +525,7 @@ func (a *RestServer) getApiSessionsHandler(w http.ResponseWriter, r *http.Reques
 	result := make([]map[string]any, 0, len(sessions))
 	for _, s := range sessions {
 		entry := map[string]any{
-			"key":         s.Key,
+			"ip":          s.IPAddress,
 			"domain":      s.Domain,
 			"bytes_recvd": s.RXBytes,
 			"bytes_sent":  s.TXBytes,

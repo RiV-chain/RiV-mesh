@@ -4,12 +4,8 @@ github.com/Arceliar/phony v0.0.0-20220903101357-530938a4b13d h1:UK9fsWbWqwIQkMCz
 github.com/Arceliar/phony v0.0.0-20220903101357-530938a4b13d/go.mod h1:BCnxhRf47C/dy/e/D2pmB8NkB3dQVIrkD98b220rx5Q=
 github.com/RiV-chain/dns-over-tls-forwarder v0.0.0-20230828114909-c2cd9f8d79d3 h1:gz71d+oEAMXYUYw54JKT4A6CxniQx6B9J0G5CYJeLok=
 github.com/RiV-chain/dns-over-tls-forwarder v0.0.0-20230828114909-c2cd9f8d79d3/go.mod h1:V2Irj3BjF2tLZ3xXp6TMQCu0I+eJWQPEktbLMHQN8XA=
-github.com/RiV-chain/ironwood v0.0.0-20231208144419-a961fa133a84 h1:+RgMzF9gt+2C/X8946XOHOUNXg2oyHp04Eeyup0jD/g=
-github.com/RiV-chain/ironwood v0.0.0-20231208144419-a961fa133a84/go.mod h1:O9iIMM9iVSXUIKNcrjossDuuXLwoGNuLSDXqjtTBHJk=
-github.com/RiV-chain/ironwood v0.0.0-20231209113647-b58bfdf04661 h1:SHIqoL+YZDhl7fk2f5J0HStbXuchgLHa8eTdLU/kYkE=
-github.com/RiV-chain/ironwood v0.0.0-20231209113647-b58bfdf04661/go.mod h1:O9iIMM9iVSXUIKNcrjossDuuXLwoGNuLSDXqjtTBHJk=
-github.com/RiV-chain/ironwood v0.0.0-20231214215935-1a5f91834ba7 h1:dF56xA9jGei6x93h/AAwdMKRumPBoqWI3RvYQFXgYh8=
-github.com/RiV-chain/ironwood v0.0.0-20231214215935-1a5f91834ba7/go.mod h1:O9iIMM9iVSXUIKNcrjossDuuXLwoGNuLSDXqjtTBHJk=
+github.com/RiV-chain/ironwood v0.0.0-20231215220801-c35d010e1cc0 h1:17qzo0LTxGO1Z841EFldw3jHudk0R6ZQj7RrBbFX6RU=
+github.com/RiV-chain/ironwood v0.0.0-20231215220801-c35d010e1cc0/go.mod h1:O9iIMM9iVSXUIKNcrjossDuuXLwoGNuLSDXqjtTBHJk=
 github.com/benbjohnson/clock v1.1.0 h1:Q92kusRqC1XV2MjkWETPvjJVqKetz1OzxZB7mHJLju8=
 github.com/benbjohnson/clock v1.1.0/go.mod h1:J11/hYXuz8f4ySSvYwY0FKfm+ezbsZBKZxNJlLklBHA=
 github.com/bits-and-blooms/bitset v1.3.1/go.mod h1:gIdJ4wp64HaoK2YrL1Q5/N7Y16edYb8uY+O0FJTyyDA=

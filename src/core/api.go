@@ -6,7 +6,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"encoding/hex"
 	"encoding/json"
 
 	"net"
@@ -51,23 +50,25 @@ type PeerInfo struct {
 }
 
 type TreeEntryInfo struct {
-	Key      ed25519.PublicKey
-	Parent   ed25519.PublicKey
-	Sequence uint64
+	IPAddress string
+	Domain    string
+	Parent    string
+	Sequence  uint64
 }
 
 type PathEntryInfo struct {
-	Key      ed25519.PublicKey
-	Path     []uint64
-	Sequence uint64
+	IPAddress string
+	Domain    string
+	Path      []uint64
+	Sequence  uint64
 }
 
 type SessionInfo struct {
-	Key     string
-	Domain  string
-	RXBytes uint64
-	TXBytes uint64
-	Uptime  time.Duration
+	IPAddress string
+	Domain    string
+	RXBytes   uint64
+	TXBytes   uint64
+	Uptime    time.Duration
 }
 
 func (c *Core) GetLabel() LabelInfo {
@@ -137,9 +138,11 @@ func (c *Core) GetTree() []TreeEntryInfo {
 	var trees []TreeEntryInfo
 	ts := c.PacketConn.PacketConn.Debug.GetTree()
 	for _, t := range ts {
+		addr := c.AddrForDomain(t.Domain)
 		var info TreeEntryInfo
-		info.Key = t.Key
-		info.Parent = t.Parent
+		info.IPAddress = net.IP(addr[:]).String()
+		info.Domain = string(t.Domain.GetNormalizedName())
+		info.Parent = string(t.Parent.GetNormalizedName())
 		info.Sequence = t.Sequence
 		trees = append(trees, info)
 	}
@@ -150,8 +153,10 @@ func (c *Core) GetPaths() []PathEntryInfo {
 	var paths []PathEntryInfo
 	ps := c.PacketConn.PacketConn.Debug.GetPaths()
 	for _, p := range ps {
+		addr := c.AddrForDomain(p.Domain)
 		var info PathEntryInfo
-		info.Key = p.Key
+		info.IPAddress = net.IP(addr[:]).String()
+		info.Domain = string(p.Domain.GetNormalizedName())
 		info.Sequence = p.Sequence
 		info.Path = p.Path
 		paths = append(paths, info)
@@ -163,8 +168,9 @@ func (c *Core) GetSessions() []SessionInfo {
 	var sessions []SessionInfo
 	ss := c.PacketConn.Debug.GetSessions()
 	for _, s := range ss {
+		addr := c.AddrForDomain(s.Domain)
 		var info SessionInfo
-		info.Key = hex.EncodeToString(s.Domain.Key)
+		info.IPAddress = net.IP(addr[:]).String()
 		info.Domain = string(s.Domain.GetNormalizedName())
 		info.RXBytes = s.RX
 		info.TXBytes = s.TX

@@ -225,7 +225,7 @@ func (p *protoHandler) _handleGetTreeRequest(domain iwt.Domain) {
 	dinfos := p.core.GetTree()
 	var bs []byte
 	for _, dinfo := range dinfos {
-		tmp := append(bs, dinfo.Key[:]...)
+		tmp := append(bs, dinfo.Domain[:]...)
 		const responseOverhead = 2 // 1 debug type, 1 gettree type
 		if uint64(len(tmp))+responseOverhead > p.core.MTU() {
 			break
