@@ -156,7 +156,7 @@ Request header "Riv-Save-Config: true" persists changes`, Handler: a.deleteApiPe
 	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/paths", Desc: "Show established paths through this node", Handler: a.getApiPathsHandler})
 	a.AddHandler(ApiHandler{Method: "POST", Pattern: "/api/health", Desc: "Run peers health check task", Handler: a.postApiHealthHandler})
 	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/sse", Desc: "Return server side events", Handler: a.getApiSseHandler})
-	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/dht", Desc: "Show known DHT entries", Handler: a.getApiDhtHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/dht", Desc: "Show known Tree entries", Handler: a.getApiTreeHandler})
 	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/sessions", Desc: "Show established traffic sessions with remote nodes", Handler: a.getApiSessionsHandler})
 	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/multicastinterfaces", Desc: "Show which interfaces multicast is enabled on", Handler: a.getApiMulticastinterfacesHandler})
 	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/remote/nodeinfo/{key}", Desc: "Request nodeinfo from a remote node by its public key", Handler: a.getApiRemoteNodeinfoHandler})
@@ -387,7 +387,7 @@ func (a *RestServer) getApiSelfHandler(w http.ResponseWriter, r *http.Request) {
 		"private_key":   hex.EncodeToString(self.PrivateKey[:]),
 		"address":       a.Core.Address().String(),
 		"subnet":        snet.String(),
-		"coords":        self.Coords,
+		"coords":        self.RoutingEntries,
 		"features":      a.Features,
 	}
 	WriteJson(w, r, result)
@@ -428,23 +428,20 @@ func (a *RestServer) putApiNodeinfoHandler(w http.ResponseWriter, r *http.Reques
 	}, r)
 }
 
-// @Summary		Show known DHT entries. The output contains following fields: Address, Public Key, Port, Rest
+// @Summary		Show known Tree entries. The output contains following fields: Address, Public Key, Port, Rest
 // @Produce		json
 // @Success		200		{string}	string		"ok"
 // @Failure		400		{error}		error		"Method not allowed"
 // @Failure		401		{error}		error		"Authentication failed"
 // @Router		/dht [get]
-func (a *RestServer) getApiDhtHandler(w http.ResponseWriter, r *http.Request) {
-	dht := a.Core.GetDHT()
-	result := make([]map[string]any, 0, len(dht))
-	for _, d := range dht {
-		addr := a.Core.AddrForDomain(d.Domain)
+func (a *RestServer) getApiTreeHandler(w http.ResponseWriter, r *http.Request) {
+	tree := a.Core.GetTree()
+	result := make([]map[string]any, 0, len(tree))
+	for _, d := range tree {
 		entry := map[string]any{
-			"address": net.IP(addr[:]).String(),
-			"key":     hex.EncodeToString(d.Domain.Key),
-			"domain":  string(d.Domain.GetNormalizedName()),
-			"port":    d.Port,
-			"rest":    d.Rest,
+			"key":      hex.EncodeToString(d.Key),
+			"parent":   d.Parent,
+			"sequence": d.Sequence,
 		}
 		result = append(result, entry)
 	}
@@ -842,7 +839,7 @@ Loop:
 func (a *RestServer) sendSseUpdate() {
 	rx, tx := a.getPeersRxTxBytes()
 	a.serverEvents <- ServerEvent{Event: "rxtx", Data: []byte(fmt.Sprintf(`[{"bytes_recvd":%d,"bytes_sent":%d}]`, rx, tx))}
-	data, _ := json.Marshal(a.Core.GetSelf().Coords)
+	data, _ := json.Marshal(a.Core.GetSelf().RoutingEntries)
 	a.serverEvents <- ServerEvent{Event: "coord", Data: data}
 }
 

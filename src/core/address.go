@@ -108,7 +108,9 @@ func (c *Core) GetAddressDomain(a Address) iwt.Domain {
 	if err != nil {
 		return iwt.Domain{}
 	}
+	//zero filled byte array here
 	var bytes [ed25519.PublicKeySize]byte
+
 	return iwt.NewDomain(string(name), bytes[:])
 }
 

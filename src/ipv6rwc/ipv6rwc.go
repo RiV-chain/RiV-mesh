@@ -20,13 +20,6 @@ import (
 
 const keyStoreTimeout = 2 * time.Minute
 
-// Out-of-band packet types
-const (
-	typeKeyDummy = iota // nolint:deadcode,varcheck
-	typeKeyLookup
-	typeKeyResponse
-)
-
 type keyArray [ed25519.PublicKeySize]byte
 
 type keyStore struct {
@@ -58,10 +51,6 @@ func (k *keyStore) init(c *core.Core) {
 	k.core = c
 	k.address = *c.AddrForDomain(k.core.GetSelf().Domain)
 	k.subnet = *c.SubnetForDomain(k.core.GetSelf().Domain)
-	if err := k.core.SetOutOfBandHandler(k.oobHandler); err != nil {
-		err = fmt.Errorf("tun.core.SetOutOfBandHander: %w", err)
-		panic(err)
-	}
 	k.keyToInfo = make(map[keyArray]*keyInfo)
 	k.addrToInfo = make(map[core.Address]*keyInfo)
 	k.addrBuffer = make(map[core.Address]*buffer)
@@ -180,38 +169,8 @@ func (k *keyStore) resetTimeout(info *keyInfo) {
 	})
 }
 
-func (k *keyStore) oobHandler(fromKey, toKey types.Domain, data []byte) {
-	if len(data) != 1+ed25519.SignatureSize {
-		return
-	}
-	sig := data[1:]
-	switch data[0] {
-	case typeKeyLookup:
-		snet := *k.core.SubnetForDomain(toKey)
-		if snet == k.subnet && ed25519.Verify(fromKey.Key, toKey.Key, sig) {
-			// This is looking for at least our subnet (possibly our address)
-			// Send a response
-			k.sendKeyResponse(fromKey)
-		}
-	case typeKeyResponse:
-		// TODO keep a list of something to match against...
-		// Ignore the response if it doesn't match anything of interest...
-		if ed25519.Verify(fromKey.Key, toKey.Key, sig) {
-			k.update(fromKey)
-		}
-	}
-}
-
 func (k *keyStore) sendKeyLookup(domain iwt.Domain) {
-	sig := ed25519.Sign(k.core.PrivateKey(), domain.Key)
-	bs := append([]byte{typeKeyLookup}, sig...)
-	_ = k.core.SendOutOfBand(domain, bs)
-}
-
-func (k *keyStore) sendKeyResponse(dest types.Domain) {
-	sig := ed25519.Sign(k.core.PrivateKey(), dest.Key[:])
-	bs := append([]byte{typeKeyResponse}, sig...)
-	_ = k.core.SendOutOfBand(dest, bs)
+	k.core.SendLookup(domain)
 }
 
 func (k *keyStore) readPC(p []byte) (int, error) {

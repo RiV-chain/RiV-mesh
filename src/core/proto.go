@@ -19,8 +19,8 @@ const (
 	typeDebugGetSelfResponse
 	typeDebugGetPeersRequest
 	typeDebugGetPeersResponse
-	typeDebugGetDHTRequest
-	typeDebugGetDHTResponse
+	typeDebugGetTreeRequest
+	typeDebugGetTreeResponse
 )
 
 type reqInfo struct {
@@ -88,10 +88,10 @@ func (p *protoHandler) _handleDebug(domain iwt.Domain, bs []byte) {
 		p._handleGetPeersRequest(domain)
 	case typeDebugGetPeersResponse:
 		p._handleGetPeersResponse(domain, bs[1:])
-	case typeDebugGetDHTRequest:
-		p._handleGetDHTRequest(domain)
-	case typeDebugGetDHTResponse:
-		p._handleGetDHTResponse(domain, bs[1:])
+	case typeDebugGetTreeRequest:
+		p._handleGetTreeRequest(domain)
+	case typeDebugGetTreeResponse:
+		p._handleGetTreeResponse(domain, bs[1:])
 	}
 }
 
@@ -130,7 +130,7 @@ func (p *protoHandler) _handleGetSelfRequest(key iwt.Domain) {
 		"key":    hex.EncodeToString(self.Domain.Key),
 		"domain": string(self.Domain.GetNormalizedName()),
 		"tld":    self.Tld,
-		"coords": fmt.Sprintf("%v", self.Coords),
+		"coords": fmt.Sprintf("%v", self.RoutingEntries),
 	}
 	bs, err := json.Marshal(res) // FIXME this puts keys in base64, not hex
 	if err != nil {
@@ -217,25 +217,25 @@ func (p *protoHandler) sendGetDHTRequest(domain iwt.Domain, callback func([]byte
 			})
 		})
 		p.dhtRequests[key] = info
-		p._sendDebug(domain, typeDebugGetDHTRequest, nil)
+		p._sendDebug(domain, typeDebugGetTreeRequest, nil)
 	})
 }
 
-func (p *protoHandler) _handleGetDHTRequest(domain iwt.Domain) {
-	dinfos := p.core.GetDHT()
+func (p *protoHandler) _handleGetTreeRequest(domain iwt.Domain) {
+	dinfos := p.core.GetTree()
 	var bs []byte
 	for _, dinfo := range dinfos {
-		tmp := append(bs, dinfo.Domain.Key[:]...)
-		const responseOverhead = 2 // 1 debug type, 1 getdht type
+		tmp := append(bs, dinfo.Key[:]...)
+		const responseOverhead = 2 // 1 debug type, 1 gettree type
 		if uint64(len(tmp))+responseOverhead > p.core.MTU() {
 			break
 		}
 		bs = tmp
 	}
-	p._sendDebug(domain, typeDebugGetDHTResponse, bs)
+	p._sendDebug(domain, typeDebugGetTreeResponse, bs)
 }
 
-func (p *protoHandler) _handleGetDHTResponse(domain iwt.Domain, bs []byte) {
+func (p *protoHandler) _handleGetTreeResponse(domain iwt.Domain, bs []byte) {
 	var key keyArray
 	copy(key[:], domain.Key)
 	if info := p.dhtRequests[key]; info != nil {

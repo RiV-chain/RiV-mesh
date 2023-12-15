@@ -6,21 +6,14 @@ import (
 	"sync/atomic"
 	"time"
 
-	//"encoding/hex"
 	"encoding/hex"
 	"encoding/json"
 
-	//"errors"
-	//"fmt"
 	"net"
 	"net/url"
 
-	//"sort"
-	//"time"
-
 	"github.com/Arceliar/ironwood/types"
 	"github.com/Arceliar/phony"
-	//"github.com/RiV-chain/RiV-mesh/src/address"
 )
 
 type LabelInfo struct {
@@ -33,35 +26,40 @@ type LabelInfo struct {
 }
 
 type SelfInfo struct {
-	Domain     types.Domain
-	Root       types.Domain
-	Tld        string
-	PrivateKey ed25519.PrivateKey
-	Coords     []uint64
+	Domain         types.Domain
+	PrivateKey     ed25519.PrivateKey
+	Tld            string
+	RoutingEntries uint64
 }
 
 type PeerInfo struct {
-	Domain   types.Domain
-	Root     types.Domain
-	Coords   []uint64
-	Port     uint64
-	Priority uint8
-	Remote   string
-	RXBytes  uint64
-	TXBytes  uint64
-	Uptime   time.Duration
-	RemoteIp string
+	Domain        types.Domain
+	Root          types.Domain
+	Remote        string
+	URI           string
+	Up            bool
+	Inbound       bool
+	LastError     error
+	LastErrorTime time.Time
+	Coords        []uint64
+	Port          uint64
+	Priority      uint8
+	RXBytes       uint64
+	TXBytes       uint64
+	Uptime        time.Duration
+	RemoteIp      string
 }
 
-type DHTEntryInfo struct {
-	Domain types.Domain
-	Port   uint64
-	Rest   uint64
+type TreeEntryInfo struct {
+	Key      ed25519.PublicKey
+	Parent   ed25519.PublicKey
+	Sequence uint64
 }
 
 type PathEntryInfo struct {
-	Key  ed25519.PublicKey
-	Path []uint64
+	Key      ed25519.PublicKey
+	Path     []uint64
+	Sequence uint64
 }
 
 type SessionInfo struct {
@@ -74,13 +72,13 @@ type SessionInfo struct {
 
 func (c *Core) GetLabel() LabelInfo {
 	var label LabelInfo
-	s := c.PacketConn.PacketConn.Debug.GetLabel()
-	label.Domain = s.Domain
-	label.Root = s.Root
-	label.Seq = s.Seq
-	label.Beacon = s.Beacon
-	label.Path = s.Path
-	label.Sig = s.Sig
+	//s := c.PacketConn.PacketConn.Debug.GetLabel()
+	//label.Domain = s.Domain
+	//label.Root = s.Root
+	//label.Seq = s.Seq
+	//label.Beacon = s.Beacon
+	//label.Path = s.Path
+	//label.Sig = s.Sig
 	return label
 }
 
@@ -89,8 +87,7 @@ func (c *Core) GetSelf() SelfInfo {
 	s := c.PacketConn.PacketConn.Debug.GetSelf()
 	self.Domain = s.Domain
 	self.PrivateKey = c.secret
-	self.Root = s.Root
-	self.Coords = s.Coords
+	self.RoutingEntries = s.RoutingEntries
 	self.Tld = c.GetDdnsServer().Tld
 	return self
 }
@@ -136,17 +133,17 @@ func (c *Core) GetPeers() []PeerInfo {
 	return peers
 }
 
-func (c *Core) GetDHT() []DHTEntryInfo {
-	var dhts []DHTEntryInfo
-	ds := c.PacketConn.PacketConn.Debug.GetDHT()
-	for _, d := range ds {
-		var info DHTEntryInfo
-		info.Domain = d.Domain
-		info.Port = d.Port
-		info.Rest = d.Rest
-		dhts = append(dhts, info)
+func (c *Core) GetTree() []TreeEntryInfo {
+	var trees []TreeEntryInfo
+	ts := c.PacketConn.PacketConn.Debug.GetTree()
+	for _, t := range ts {
+		var info TreeEntryInfo
+		info.Key = t.Key
+		info.Parent = t.Parent
+		info.Sequence = t.Sequence
+		trees = append(trees, info)
 	}
-	return dhts
+	return trees
 }
 
 func (c *Core) GetPaths() []PathEntryInfo {
@@ -155,6 +152,7 @@ func (c *Core) GetPaths() []PathEntryInfo {
 	for _, p := range ps {
 		var info PathEntryInfo
 		info.Key = p.Key
+		info.Sequence = p.Sequence
 		info.Path = p.Path
 		paths = append(paths, info)
 	}

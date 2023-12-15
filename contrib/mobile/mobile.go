@@ -221,7 +221,7 @@ func (m *Mesh) GetPublicKeyString() string {
 
 // GetCoordsString gets the node's coordinates
 func (m *Mesh) GetCoordsString() string {
-	return fmt.Sprintf("%v", m.core.GetSelf().Coords)
+	return fmt.Sprintf("%v", m.core.GetSelf().RoutingEntries)
 }
 
 func (m *Mesh) GetPeersJSON() (result string) {
@@ -247,8 +247,8 @@ func (m *Mesh) GetPeersJSON() (result string) {
 	}
 }
 
-func (m *Mesh) GetDHTJSON() (result string) {
-	if res, err := json.Marshal(m.core.GetDHT()); err == nil {
+func (m *Mesh) GetTreeJSON() (result string) {
+	if res, err := json.Marshal(m.core.GetTree()); err == nil {
 		return string(res)
 	} else {
 		return "{}"

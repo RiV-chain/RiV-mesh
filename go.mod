@@ -2,12 +2,11 @@ module github.com/RiV-chain/RiV-mesh
 
 go 1.21
 
-replace github.com/Arceliar/ironwood => github.com/RiV-chain/ironwood v0.0.0-20230905073302-0ee4831f9e91
+replace github.com/Arceliar/ironwood => github.com/RiV-chain/ironwood v0.0.0-20231214215935-1a5f91834ba7
 
 replace github.com/mikispag/dns-over-tls-forwarder => github.com/RiV-chain/dns-over-tls-forwarder v0.0.0-20230828114909-c2cd9f8d79d3
 
 require (
-	github.com/Arceliar/ironwood v0.0.0-20230805085300-86206813435f
 	github.com/Arceliar/phony v0.0.0-20220903101357-530938a4b13d
 	github.com/getlantern/multipath v0.0.0-20220920195041-55195f38df73
 	github.com/gologme/log v1.3.0
@@ -28,6 +27,7 @@ require (
 require gerace.dev/zipfs v0.2.0
 
 require (
+	github.com/Arceliar/ironwood v0.0.0-20231127131626-465b82dfb5bd
 	github.com/eknkc/basex v1.0.1
 	github.com/mikispag/dns-over-tls-forwarder v0.0.0-20230401080233-dae75d4680fd
 	github.com/slonm/tableprinter v0.0.0-20230107100804-643098716018
@@ -39,6 +39,8 @@ require (
 require github.com/kataras/tablewriter v0.0.0-20180708051242-e063d29b7c23 // indirect
 
 require (
+	github.com/bits-and-blooms/bitset v1.5.0 // indirect
+	github.com/bits-and-blooms/bloom/v3 v3.3.1 // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/getlantern/context v0.0.0-20190109183933-c447772a6520 // indirect
 	github.com/getlantern/ema v0.0.0-20190620044903-5943d28f40e4 // indirect
