@@ -11,7 +11,6 @@ import (
 	"net"
 	"net/url"
 
-	"github.com/Arceliar/ironwood/network"
 	"github.com/Arceliar/ironwood/types"
 	"github.com/Arceliar/phony"
 )
@@ -35,6 +34,7 @@ type SelfInfo struct {
 type PeerInfo struct {
 	Domain        types.Domain
 	Root          types.Domain
+	Remote        string
 	URI           string
 	Up            bool
 	Inbound       bool
@@ -94,48 +94,43 @@ func (c *Core) GetSelf() SelfInfo {
 }
 
 func (c *Core) GetPeers() []PeerInfo {
-	peers := []PeerInfo{}
-	conns := map[net.Conn]network.DebugPeerInfo{}
-	iwpeers := c.PacketConn.PacketConn.Debug.GetPeers()
-	for _, p := range iwpeers {
-		conns[p.Conn] = p
-	}
-
+	var peers []PeerInfo
+	names := make(map[net.Conn]string)
+	ips := make(map[net.Conn]string)
 	phony.Block(&c.links, func() {
-		for info, state := range c.links._links {
-			var peerinfo PeerInfo
-			var conn net.Conn
-
-			//peerinfo.LastError = state._err
-			//#peerinfo.LastErrorTime = state._errtime
-			if c := state.conn; c != nil {
-				conn = c
-				peerinfo.Up = true
-				//peerinfo.Inbound = state.linkType == linkTypeIncoming
-				peerinfo.RXBytes = atomic.LoadUint64(&c.rx)
-				peerinfo.TXBytes = atomic.LoadUint64(&c.tx)
-				peerinfo.Uptime = time.Since(c.up)
+		for _, info := range c.links._links {
+			if info == nil {
+				continue
 			}
-			if p, ok := conns[conn]; ok {
-				peerinfo.Domain = p.Domain
-				peerinfo.Root = p.Root
-				peerinfo.Port = p.Port
-				peerinfo.Priority = p.Priority
-				peerinfo.URI = p.Conn.RemoteAddr().String()
-				if name := state.lname; name != "" {
-					peerinfo.URI = name
-				}
-				if peerinfo.RemoteIp = info.remote; peerinfo.RemoteIp != "" {
-					//Cut port
-					if host, _, err := net.SplitHostPort(peerinfo.RemoteIp); err == nil {
-						peerinfo.RemoteIp = host
-					}
-				}
-			}
-			peers = append(peers, peerinfo)
+			names[info.conn] = info.lname
+			ips[info.conn] = info.info.remote
 		}
 	})
-
+	ps := c.PacketConn.PacketConn.Debug.GetPeers()
+	for _, p := range ps {
+		var info PeerInfo
+		info.Domain = p.Domain
+		info.Root = p.Root
+		info.Coords = p.Coords
+		info.Port = p.Port
+		info.Priority = p.Priority
+		info.Remote = p.Conn.RemoteAddr().String()
+		if name := names[p.Conn]; name != "" {
+			info.Remote = name
+		}
+		if info.RemoteIp = ips[p.Conn]; info.RemoteIp != "" {
+			//Cut port
+			if host, _, err := net.SplitHostPort(info.RemoteIp); err == nil {
+				info.RemoteIp = host
+			}
+		}
+		if linkconn, ok := p.Conn.(*linkConn); ok {
+			info.RXBytes = atomic.LoadUint64(&linkconn.rx)
+			info.TXBytes = atomic.LoadUint64(&linkconn.tx)
+			info.Uptime = time.Since(linkconn.up)
+		}
+		peers = append(peers, info)
+	}
 	return peers
 }
 
