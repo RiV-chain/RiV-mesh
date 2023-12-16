@@ -587,12 +587,12 @@ func (a *RestServer) prepareGetPeers() []Peer {
 			p.Port,
 			uint64(p.Priority), // can't be uint8 thanks to gobind
 			p.Coords,
-			p.Remote,
+			p.URI,
 			p.RemoteIp,
 			p.RXBytes,
 			p.TXBytes,
 			p.Uptime.Seconds(),
-			strings.Contains(p.Remote, "[fe80::"),
+			strings.Contains(p.URI, "[fe80::"),
 			"",
 			"",
 		}
