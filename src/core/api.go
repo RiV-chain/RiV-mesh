@@ -184,16 +184,7 @@ func (c *Core) GetSessions() []SessionInfo {
 // parsed from a string of the form e.g. "tcp://a.b.c.d:e". In the case of a
 // link-local address, the interface should be provided as the second argument.
 func (c *Core) Listen(u *url.URL, sintf string) (*Listener, error) {
-	switch u.Scheme {
-	case "tcp":
-		return c.links.tcp.listen(u, sintf)
-	case "tls":
-		return c.links.tls.listen(u, sintf)
-	case "unix":
-		return c.links.unix.listen(u, sintf)
-	default:
-		return nil, fmt.Errorf("unrecognised scheme %q", u.Scheme)
-	}
+	return c.links.listen(u, sintf)
 }
 
 // Address gets the IPv6 address of the Mesh node. This is always a /128
