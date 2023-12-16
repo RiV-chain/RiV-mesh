@@ -565,7 +565,7 @@ type Peer struct {
 	Port          uint64   `json:"port"`
 	Priority      uint64   `json:"priority"`
 	Coords        []uint64 `json:"coords"`
-	Remote        string   `json:"remote"`
+	URI           string   `json:"uri"`
 	Remote_ip     string   `json:"remote_ip"`
 	Bytes_recvd   uint64   `json:"bytes_recvd"`
 	Bytes_sent    uint64   `json:"bytes_sent"`
@@ -587,12 +587,12 @@ func (a *RestServer) prepareGetPeers() []Peer {
 			p.Port,
 			uint64(p.Priority), // can't be uint8 thanks to gobind
 			p.Coords,
-			p.Remote,
+			p.URI,
 			p.RemoteIp,
 			p.RXBytes,
 			p.TXBytes,
 			p.Uptime.Seconds(),
-			strings.Contains(p.Remote, "[fe80::"),
+			strings.Contains(p.URI, "[fe80::"),
 			"",
 			"",
 		}
