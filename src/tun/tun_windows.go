@@ -7,26 +7,25 @@ import (
 	"crypto/sha1"
 	"encoding/binary"
 	"errors"
-
+	"fmt"
 	"log"
 	"net/netip"
 	"time"
-	_ "unsafe"
 
+	"github.com/RiV-chain/RiV-mesh/src/config"
 	"golang.org/x/sys/windows"
 
 	"golang.zx2c4.com/wintun"
 	wgtun "golang.zx2c4.com/wireguard/tun"
 	"golang.zx2c4.com/wireguard/windows/elevate"
 	"golang.zx2c4.com/wireguard/windows/tunnel/winipcfg"
-
-	"github.com/RiV-chain/RiV-mesh/src/defaults"
 )
 
+// This is to catch Windows platforms
 // Configures the TUN adapter with the correct IPv6 address and MTU.
 func (tun *TunAdapter) setup(ifname string, addr string, mtu uint64) error {
 	if ifname == "auto" {
-		ifname = defaults.GetDefaults().DefaultIfName
+		ifname = config.GetDefaults().DefaultIfName
 	}
 	return elevate.DoAsSystem(func() error {
 		var err error
@@ -38,27 +37,27 @@ func (tun *TunAdapter) setup(ifname string, addr string, mtu uint64) error {
 		guid.Data3 = binary.LittleEndian.Uint16(hash[6:8])
 		copy(guid.Data4[:], hash[8:16])
 
-		iface, err = wgtun.CreateTUNWithRequestedGUID(ifname, &guid, int(mtu))
-		if err != nil {
+		if iface, err = wgtun.CreateTUNWithRequestedGUID(ifname, &guid, int(mtu)); err != nil {
 			wintun.Uninstall()
 			iface, err = wgtun.CreateTUNWithRequestedGUID(ifname, &guid, int(mtu))
 			if err != nil {
 				return err
 			}
 		}
-
 		tun.iface = iface
-		for i := 1; i < 10; i++ {
-			if err = tun.setupAddress(addr); err != nil {
-				tun.log.Errorln("Failed to set up TUN address:", err)
-				log.Printf("waiting...")
-				if i > 8 {
-					return err
+		if addr != "" {
+			for i := 1; i < 10; i++ {
+				if err = tun.setupAddress(addr); err != nil {
+					tun.log.Errorln("Failed to set up TUN address:", err)
+					log.Printf("waiting...")
+					if i > 8 {
+						return err
+					} else {
+						time.Sleep(time.Duration(2*i) * time.Second)
+					}
 				} else {
-					time.Sleep(time.Duration(2*i) * time.Second)
+					break
 				}
-			} else {
-				break
 			}
 		}
 		if err = tun.setupMTU(getSupportedMTU(mtu)); err != nil {
@@ -70,6 +69,11 @@ func (tun *TunAdapter) setup(ifname string, addr string, mtu uint64) error {
 		}
 		return nil
 	})
+}
+
+// Configures the "utun" adapter from an existing file descriptor.
+func (tun *TunAdapter) setupFD(fd int32, addr string, mtu uint64) error {
+	return fmt.Errorf("setup via FD not supported on this platform")
 }
 
 // Sets the MTU of the TUN adapter.
@@ -121,7 +125,7 @@ func (tun *TunAdapter) setupAddress(addr string) error {
 			return err
 		}
 	} else {
-		return errors.New("unable to get native TUN")
+		return errors.New("unable to get NativeTUN")
 	}
 	return nil
 }
