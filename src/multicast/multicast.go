@@ -247,7 +247,7 @@ func (m *Multicast) _announce() {
 		// It's possible that the link-local listener address has changed so if
 		// that is the case then we should clean up the interface listener
 		found := false
-		listenaddr, err := net.ResolveTCPAddr("tcp6", info.listener.Listener.Addr().String())
+		listenaddr, err := net.ResolveTCPAddr("tcp6", info.listener.Addr().String())
 		if err != nil {
 			stop()
 			continue
@@ -294,7 +294,7 @@ func (m *Multicast) _announce() {
 			}
 			// Try and see if we already have a TCP listener for this interface
 			var linfo *listenerInfo
-			if nfo, ok := m._listeners[iface.Name]; !ok || nfo.listener.Listener == nil {
+			if nfo, ok := m._listeners[iface.Name]; !ok || nfo.listener == nil {
 				// No listener was found - let's create one
 				urlString := fmt.Sprintf("tls://[%s]:%d", addrIP, info.port)
 				u, err := url.Parse(urlString)
@@ -321,7 +321,7 @@ func (m *Multicast) _announce() {
 				continue
 			}
 			// Get the listener details and construct the multicast beacon
-			lladdr := linfo.listener.Listener.Addr().String()
+			lladdr := linfo.listener.Addr().String()
 			if a, err := net.ResolveTCPAddr("tcp6", lladdr); err == nil {
 				a.Zone = ""
 				destAddr.Zone = iface.Name

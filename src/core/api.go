@@ -2,7 +2,6 @@ package core
 
 import (
 	"crypto/ed25519"
-	"fmt"
 	"sync/atomic"
 	"time"
 
@@ -98,12 +97,12 @@ func (c *Core) GetPeers() []PeerInfo {
 	names := make(map[net.Conn]string)
 	ips := make(map[net.Conn]string)
 	phony.Block(&c.links, func() {
-		for _, info := range c.links._links {
+		for linkInfo, info := range c.links._links {
 			if info == nil {
 				continue
 			}
-			names[info.conn] = info.lname
-			ips[info.conn] = info.info.remote
+			names[info._conn] = linkInfo.uri
+			ips[info._conn] = linkInfo.sintf
 		}
 	})
 	ps := c.PacketConn.PacketConn.Debug.GetPeers()
@@ -217,68 +216,26 @@ func (c *Core) SetLogger(log Logger) {
 }
 
 // AddPeer adds a peer. This should be specified in the peer URI format, e.g.:
-// 		tcp://a.b.c.d:e
-//		socks://a.b.c.d:e/f.g.h.i:j
+//
+//	tcp://a.b.c.d:e
+//	socks://a.b.c.d:e/f.g.h.i:j
+//
 // This adds the peer to the peer list, so that they will be called again if the
 // connection drops.
-
-func (c *Core) AddPeer(uri string, sourceInterface string) error {
-	var known bool
-	phony.Block(c, func() {
-		_, known = c.config._peers[Peer{uri, sourceInterface}]
-	})
-	if known {
-		return fmt.Errorf("peer already configured")
-	}
-	u, err := url.Parse(uri)
-	if err != nil {
-		return err
-	}
-	info, err := c.links.call(u, sourceInterface, nil)
-	if err != nil {
-		return err
-	}
-	phony.Block(c, func() {
-		c.config._peers[Peer{uri, sourceInterface}] = &info
-	})
-	return nil
+func (c *Core) AddPeer(u *url.URL, sintf string) error {
+	return c.links.add(u, sintf, linkTypePersistent)
 }
 
-func (c *Core) RemovePeer(uri string, sourceInterface string) error {
-	var err error
-	phony.Block(c, func() {
-		peer := Peer{uri, sourceInterface}
-		linkInfo, ok := c.config._peers[peer]
-		if !ok {
-			err = fmt.Errorf("peer not configured")
-			return
-		}
-		if ok && linkInfo != nil {
-			c.links.Act(nil, func() {
-				if link := c.links._links[*linkInfo]; link != nil {
-					_ = link.close()
-				}
-			})
-		}
-		delete(c.config._peers, peer)
-	})
-	return err
+// RemovePeer removes a peer. The peer should be specified in URI format, see AddPeer.
+// The peer is not disconnected immediately.
+func (c *Core) RemovePeer(url *url.URL, sourceInterface string) error {
+	return c.links.remove(url, sourceInterface, linkTypePersistent)
 }
 
+// RemovePeers removes all peers.
+// The peers are not disconnected immediately.
 func (c *Core) RemovePeers() error {
-	phony.Block(c, func() {
-		for peer, linkInfo := range c.config._peers {
-			if linkInfo != nil {
-				c.links.Act(nil, func() {
-					if link := c.links._links[*linkInfo]; link != nil {
-						_ = link.close()
-					}
-				})
-			}
-			delete(c.config._peers, peer)
-		}
-	})
-	return nil
+	return c.links.removeAll()
 }
 
 // CallPeer calls a peer once. This should be specified in the peer URI format,
@@ -290,8 +247,7 @@ func (c *Core) RemovePeers() error {
 // This does not add the peer to the peer list, so if the connection drops, the
 // peer will not be called again automatically.
 func (c *Core) CallPeer(u *url.URL, sintf string) error {
-	_, err := c.links.call(u, sintf, nil)
-	return err
+	return c.links.add(u, sintf, linkTypeEphemeral)
 }
 
 func (c *Core) PublicKey() ed25519.PublicKey {

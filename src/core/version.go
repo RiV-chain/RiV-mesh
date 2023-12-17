@@ -5,74 +5,169 @@ package core
 // Some of this could arguably go in wire.go instead
 
 import (
+	"bytes"
 	"crypto/ed25519"
+	"encoding/binary"
+	"fmt"
+	"io"
 
 	"github.com/Arceliar/ironwood/types"
+	"golang.org/x/crypto/blake2b"
 )
 
 // This is the version-specific metadata exchanged at the start of a connection.
 // It must always begin with the 4 bytes "meta" and a wire formatted uint64 major version number.
-// The current version also includes a minor version number, and the box/sig/link keys that need to be exchanged to open a connection.
+// The current version also includes a minor version number, and the Domain that need to be exchanged to open a connection.
 type version_metadata struct {
-	meta [4]byte
-	ver  uint8 // 1 byte in this version
-	// Everything after this point potentially depends on the version number, and is subject to change in future versions
-	minorVer uint8 // 1 byte in this version
+	majorVer uint16
+	minorVer uint16
 	domain   types.Domain
+	priority uint8
 }
+
+const (
+	ProtocolVersionMajor uint16 = 0
+	ProtocolVersionMinor uint16 = 8
+)
+
+// Once a major/minor version is released, it is not safe to change any of these
+// (including their ordering), it is only safe to add new ones.
+const (
+	metaVersionMajor uint16 = iota // uint16
+	metaVersionMinor               // uint16
+	metaPublicKey                  // [32]byte
+	metaDomainName                 // [32]byte
+	metaPriority                   // uint8
+)
 
 // Gets a base metadata with no keys set, but with the correct version numbers.
 func version_getBaseMetadata() version_metadata {
 	return version_metadata{
-		meta:     [4]byte{'d', 'e', 't', 'a'},
-		ver:      0,
-		minorVer: 7,
+		majorVer: ProtocolVersionMajor,
+		minorVer: ProtocolVersionMinor,
 	}
-}
-
-// Gets the length of the metadata for this version, used to know how many bytes to read from the start of a connection.
-func version_getMetaLength() (mlen int) {
-	mlen += 4                     // meta
-	mlen++                        // ver, as long as it's < 127, which it is in this version
-	mlen++                        // minorVer, as long as it's < 127, which it is in this version
-	mlen += ed25519.PublicKeySize // Domain Key
-	mlen += ed25519.PublicKeySize // Domain Name
-	return
 }
 
 // Encodes version metadata into its wire format.
-func (m *version_metadata) encode() []byte {
-	bs := make([]byte, 0, version_getMetaLength())
-	bs = append(bs, m.meta[:]...)
-	bs = append(bs, m.ver)
-	bs = append(bs, m.minorVer)
+func (m *version_metadata) encode(privateKey ed25519.PrivateKey, password []byte) ([]byte, error) {
+	bs := make([]byte, 0, 64)
+	bs = append(bs, 'd', 'e', 't', 'a')
+	bs = append(bs, 0, 0) // Remaining message length
+
+	bs = binary.BigEndian.AppendUint16(bs, metaVersionMajor)
+	bs = binary.BigEndian.AppendUint16(bs, 2)
+	bs = binary.BigEndian.AppendUint16(bs, m.majorVer)
+
+	bs = binary.BigEndian.AppendUint16(bs, metaVersionMinor)
+	bs = binary.BigEndian.AppendUint16(bs, 2)
+	bs = binary.BigEndian.AppendUint16(bs, m.minorVer)
+
+	bs = binary.BigEndian.AppendUint16(bs, metaPublicKey)
+	bs = binary.BigEndian.AppendUint16(bs, ed25519.PublicKeySize)
 	bs = append(bs, m.domain.Key[:]...)
+
+	bs = binary.BigEndian.AppendUint16(bs, metaDomainName)
+	bs = binary.BigEndian.AppendUint16(bs, ed25519.PublicKeySize)
 	bs = append(bs, m.domain.Name[:]...)
-	if len(bs) != version_getMetaLength() {
-		panic("Inconsistent metadata length")
+
+	bs = binary.BigEndian.AppendUint16(bs, metaPriority)
+	bs = binary.BigEndian.AppendUint16(bs, 1)
+	bs = append(bs, m.priority)
+
+	hasher, err := blake2b.New512(password)
+	if err != nil {
+		return nil, err
 	}
-	return bs
+	n, err := hasher.Write(m.domain.Key)
+	if err != nil {
+		return nil, err
+	}
+	if n != ed25519.PublicKeySize {
+		return nil, fmt.Errorf("hash writer only wrote %d bytes", n)
+	}
+	hash := hasher.Sum(nil)
+	bs = append(bs, ed25519.Sign(privateKey, hash)...)
+
+	binary.BigEndian.PutUint16(bs[4:6], uint16(len(bs)-6))
+	return bs, nil
 }
 
 // Decodes version metadata from its wire format into the struct.
-func (m *version_metadata) decode(bs []byte) bool {
-	if len(bs) != version_getMetaLength() {
-		return false
+func (m *version_metadata) decode(r io.Reader, password []byte) error {
+	bh := [6]byte{}
+	if _, err := io.ReadFull(r, bh[:]); err != nil {
+		return err
 	}
-	offset := 0
-	offset += copy(m.meta[:], bs[offset:])
-	m.ver, offset = bs[offset], offset+1
-	m.minorVer, offset = bs[offset], offset+1
-	var key keyArray
-	var name keyArray
-	offset += copy(key[:], bs[offset:])
-	copy(name[:], bs[offset:])
-	m.domain = types.NewDomain(string(name[:]), key[:])
-	return true
+	meta := [4]byte{'m', 'e', 't', 'a'}
+	if !bytes.Equal(bh[:4], meta[:]) {
+		return fmt.Errorf("invalid handshake preamble")
+	}
+	hl := binary.BigEndian.Uint16(bh[4:6])
+	if hl < ed25519.SignatureSize {
+		return fmt.Errorf("invalid handshake length")
+	}
+	bs := make([]byte, hl)
+	if _, err := io.ReadFull(r, bs); err != nil {
+		return err
+	}
+	sig := bs[len(bs)-ed25519.SignatureSize:]
+	bs = bs[:len(bs)-ed25519.SignatureSize]
+
+	m.domain = types.Domain{}
+	for len(bs) >= 4 {
+		op := binary.BigEndian.Uint16(bs[:2])
+		oplen := binary.BigEndian.Uint16(bs[2:4])
+		if bs = bs[4:]; len(bs) < int(oplen) {
+			break
+		}
+		switch op {
+		case metaVersionMajor:
+			m.majorVer = binary.BigEndian.Uint16(bs[:2])
+
+		case metaVersionMinor:
+			m.minorVer = binary.BigEndian.Uint16(bs[:2])
+
+		case metaPublicKey:
+			m.domain.Key = make(ed25519.PublicKey, ed25519.PublicKeySize)
+			copy(m.domain.Key, bs[:ed25519.PublicKeySize])
+
+		case metaDomainName:
+			m.domain.Name = make(ed25519.PublicKey, ed25519.PublicKeySize)
+			copy(m.domain.Name, bs[:ed25519.PublicKeySize])
+
+		case metaPriority:
+			m.priority = bs[0]
+		}
+		bs = bs[oplen:]
+	}
+
+	hasher, err := blake2b.New512(password)
+	if err != nil {
+		return fmt.Errorf("invalid password supplied")
+	}
+	n, err := hasher.Write(m.domain.Key)
+	if err != nil || n != ed25519.PublicKeySize {
+		return fmt.Errorf("failed to generate hash")
+	}
+	hash := hasher.Sum(nil)
+	if !ed25519.Verify(m.domain.Key, hash, sig) {
+		return fmt.Errorf("password is incorrect")
+	}
+	return nil
 }
 
 // Checks that the "meta" bytes and the version numbers are the expected values.
 func (m *version_metadata) check() bool {
-	base := version_getBaseMetadata()
-	return base.meta == m.meta && base.ver == m.ver && base.minorVer == m.minorVer
+	switch {
+	case m.majorVer != ProtocolVersionMajor:
+		return false
+	case m.minorVer != ProtocolVersionMinor:
+		return false
+	case len(m.domain.Key) != ed25519.PublicKeySize:
+		return false
+	case len(m.domain.Name) != ed25519.PublicKeySize:
+		return false
+	default:
+		return true
+	}
 }

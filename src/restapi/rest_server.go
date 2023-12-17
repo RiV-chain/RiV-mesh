@@ -683,9 +683,13 @@ func (a *RestServer) doPostPeers(w http.ResponseWriter, r *http.Request) (peers 
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
+	var u *url.URL
 	for _, peer := range peers {
-		if err = a.Core.AddPeer(peer["url"], peer["interface"]); err != nil {
+		if u, err = url.Parse(peer["url"]); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		if err = a.Core.AddPeer(u, peer["interface"]); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
