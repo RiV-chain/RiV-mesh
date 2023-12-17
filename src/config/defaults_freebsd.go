@@ -1,15 +1,15 @@
-//go:build windows
-// +build windows
+//go:build freebsd
+// +build freebsd
 
-package defaults
+package config
 
-// Sane defaults for the Windows platform. The "default" options may be
+// Sane defaults for the BSD platforms. The "default" options may be
 // may be replaced by the running configuration.
 func getDefaults() platformDefaultParameters {
 	return platformDefaultParameters{
 
 		// Configuration (used for meshctl)
-		DefaultConfigFile: "C:\\ProgramData\\RiV-mesh\\mesh.conf",
+		DefaultConfigFile: "/usr/local/etc/mesh.conf",
 
 		// Multicast interfaces
 		DefaultMulticastInterfaces: []MulticastInterfaceConfig{
@@ -17,8 +17,8 @@ func getDefaults() platformDefaultParameters {
 		},
 
 		// TUN
-		MaximumIfMTU:  65535,
-		DefaultIfMTU:  65535,
-		DefaultIfName: "RiV-mesh",
+		MaximumIfMTU:  32767,
+		DefaultIfMTU:  32767,
+		DefaultIfName: "/dev/tun0",
 	}
 }

@@ -1,15 +1,15 @@
-//go:build freebsd
-// +build freebsd
+//go:build !linux && !darwin && !windows && !openbsd && !freebsd
+// +build !linux,!darwin,!windows,!openbsd,!freebsd
 
-package defaults
+package config
 
-// Sane defaults for the BSD platforms. The "default" options may be
+// Sane defaults for the other platforms. The "default" options may be
 // may be replaced by the running configuration.
 func getDefaults() platformDefaultParameters {
 	return platformDefaultParameters{
 
 		// Configuration (used for meshctl)
-		DefaultConfigFile: "/usr/local/etc/mesh.conf",
+		DefaultConfigFile: "/etc/mesh.conf",
 
 		// Multicast interfaces
 		DefaultMulticastInterfaces: []MulticastInterfaceConfig{
@@ -17,8 +17,8 @@ func getDefaults() platformDefaultParameters {
 		},
 
 		// TUN
-		MaximumIfMTU:  32767,
-		DefaultIfMTU:  32767,
-		DefaultIfName: "/dev/tun0",
+		MaximumIfMTU:  65535,
+		DefaultIfMTU:  65535,
+		DefaultIfName: "none",
 	}
 }

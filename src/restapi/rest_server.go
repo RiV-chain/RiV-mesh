@@ -27,7 +27,7 @@ import (
 
 	"github.com/RiV-chain/RiV-mesh/src/config"
 	"github.com/RiV-chain/RiV-mesh/src/core"
-	"github.com/RiV-chain/RiV-mesh/src/defaults"
+
 	"github.com/RiV-chain/RiV-mesh/src/multicast"
 	"github.com/RiV-chain/RiV-mesh/src/version"
 	"github.com/ip2location/ip2location-go/v9"
@@ -461,7 +461,7 @@ func (a *RestServer) getApiTreeHandler(w http.ResponseWriter, r *http.Request) {
 func (a *RestServer) getApiPublicPeersHandler(w http.ResponseWriter, r *http.Request) {
 	var response *http.Response
 	var result []byte
-	cfg, err := defaults.ReadConfig(a.ConfigFn)
+	cfg, err := config.ReadConfig(a.ConfigFn)
 	if err == nil {
 		u := cfg.PublicPeersUrl
 		response, err = http.Get(u)
@@ -716,12 +716,12 @@ func (a *RestServer) saveConfig(setConfigFields func(*config.NodeConfig), r *htt
 	if len(a.ConfigFn) > 0 {
 		saveHeaders := r.Header["Riv-Save-Config"]
 		if len(saveHeaders) > 0 && saveHeaders[0] == "true" {
-			cfg, err := defaults.ReadConfig(a.ConfigFn)
+			cfg, err := config.ReadConfig(a.ConfigFn)
 			if err == nil {
 				if setConfigFields != nil {
 					setConfigFields(cfg)
 				}
-				err := defaults.WriteConfig(a.ConfigFn, cfg)
+				err := config.WriteConfig(a.ConfigFn, cfg)
 				if err != nil {
 					a.Log.Errorln("Config file write error:", err)
 				}

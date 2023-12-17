@@ -13,9 +13,9 @@ import (
 	"github.com/Arceliar/phony"
 	"golang.zx2c4.com/wireguard/tun"
 
-	//"github.com/RiV-chain/RiV-mesh/src/address"
+	"github.com/RiV-chain/RiV-mesh/src/config"
 	"github.com/RiV-chain/RiV-mesh/src/core"
-	"github.com/RiV-chain/RiV-mesh/src/defaults"
+
 	"github.com/RiV-chain/RiV-mesh/src/ipv6rwc"
 )
 
@@ -73,20 +73,20 @@ func (tun *TunAdapter) MTU() uint64 {
 
 // DefaultName gets the default TUN interface name for your platform.
 func DefaultName() string {
-	return defaults.GetDefaults().DefaultIfName
+	return config.GetDefaults().DefaultIfName
 }
 
 // DefaultMTU gets the default TUN interface MTU for your platform. This can
 // be as high as MaximumMTU(), depending on platform, but is never lower than 1280.
 func DefaultMTU() uint64 {
-	return defaults.GetDefaults().DefaultIfMTU
+	return config.GetDefaults().DefaultIfMTU
 }
 
 // MaximumMTU returns the maximum supported TUN interface MTU for your
 // platform. This can be as high as 65535, depending on platform, but is never
 // lower than 1280.
 func MaximumMTU() uint64 {
-	return defaults.GetDefaults().MaximumIfMTU
+	return config.GetDefaults().MaximumIfMTU
 }
 
 // Init initialises the TUN module. You must have acquired a Listener from

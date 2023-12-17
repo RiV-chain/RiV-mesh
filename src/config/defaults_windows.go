@@ -1,15 +1,15 @@
-//go:build !linux && !darwin && !windows && !openbsd && !freebsd
-// +build !linux,!darwin,!windows,!openbsd,!freebsd
+//go:build windows
+// +build windows
 
-package defaults
+package config
 
-// Sane defaults for the other platforms. The "default" options may be
+// Sane defaults for the Windows platform. The "default" options may be
 // may be replaced by the running configuration.
 func getDefaults() platformDefaultParameters {
 	return platformDefaultParameters{
 
 		// Configuration (used for meshctl)
-		DefaultConfigFile: "/etc/mesh.conf",
+		DefaultConfigFile: "C:\\ProgramData\\RiV-mesh\\mesh.conf",
 
 		// Multicast interfaces
 		DefaultMulticastInterfaces: []MulticastInterfaceConfig{
@@ -19,6 +19,6 @@ func getDefaults() platformDefaultParameters {
 		// TUN
 		MaximumIfMTU:  65535,
 		DefaultIfMTU:  65535,
-		DefaultIfName: "none",
+		DefaultIfName: "RiV-mesh",
 	}
 }

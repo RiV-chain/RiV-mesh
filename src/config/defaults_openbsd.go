@@ -1,7 +1,7 @@
 //go:build openbsd
 // +build openbsd
 
-package defaults
+package config
 
 // Sane defaults for the BSD platforms. The "default" options may be
 // may be replaced by the running configuration.

@@ -1,7 +1,7 @@
 //go:build darwin
 // +build darwin
 
-package defaults
+package config
 
 // Sane defaults for the macOS/Darwin platform. The "default" options may be
 // may be replaced by the running configuration.

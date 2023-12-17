@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"crypto/ed25519"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -39,8 +40,9 @@ type Core struct {
 	addPeerTimer       *time.Timer
 	PeersChangedSignal signals.Signal
 	config             struct {
-		domain             Domain
-		_peers             map[Peer]*linkInfo         // configurable after startup
+		tls    *tls.Config // immutable after startup
+		domain Domain
+		//_peers             map[Peer]*linkInfo         // configurable after startup
 		_listeners         map[ListenAddress]struct{} // configurable after startup
 		nodeinfo           NodeInfo                   // configurable after startup
 		nodeinfoPrivacy    NodeInfoPrivacy            // immutable after startup
@@ -51,7 +53,7 @@ type Core struct {
 	pathNotify func(iwt.Domain)
 }
 
-func New(secret ed25519.PrivateKey, logger Logger, opts ...SetupOption) (*Core, error) {
+func New(cert *tls.Certificate, logger Logger, opts ...SetupOption) (*Core, error) {
 	c := &Core{
 		log: logger,
 	}
@@ -59,6 +61,7 @@ func New(secret ed25519.PrivateKey, logger Logger, opts ...SetupOption) (*Core, 
 	if c.log == nil {
 		c.log = log.New(io.Discard, "", 0)
 	}
+
 	if name := version.BuildName(); name != "unknown" {
 		c.log.Infoln("Build name:", name)
 	}
@@ -66,20 +69,35 @@ func New(secret ed25519.PrivateKey, logger Logger, opts ...SetupOption) (*Core, 
 		c.log.Infoln("Build version:", version)
 	}
 
-	// Take a copy of the private key so that it is in our own memory space.
-	if len(secret) != ed25519.PrivateKeySize {
-		return nil, fmt.Errorf("private key is incorrect length")
-	}
-	c.secret = make(ed25519.PrivateKey, ed25519.PrivateKeySize)
-	copy(c.secret, secret)
-	c.config._peers = map[Peer]*linkInfo{}
+	var err error
 	c.config._listeners = map[ListenAddress]struct{}{}
 	c.config._allowedPublicKeys = map[[32]byte]struct{}{}
 	for _, opt := range opts {
-		c._applyOption(opt)
+		switch opt.(type) {
+		case Peer, ListenAddress:
+			// We can't do peers yet as the links aren't set up.
+			continue
+		default:
+			if err = c._applyOption(opt); err != nil {
+				return nil, fmt.Errorf("failed to apply configuration option %T: %w", opt, err)
+			}
+		}
 	}
-	c.public = iwt.NewDomain(string(c.config.domain), secret.Public().(ed25519.PublicKey))
-	var err error
+	if cert == nil || cert.PrivateKey == nil {
+		return nil, fmt.Errorf("no private key supplied")
+	}
+	var ok bool
+	if c.secret, ok = cert.PrivateKey.(ed25519.PrivateKey); !ok {
+		return nil, fmt.Errorf("private key must be ed25519")
+	}
+	if len(c.secret) != ed25519.PrivateKeySize {
+		return nil, fmt.Errorf("private key is incorrect length")
+	}
+	c.public = iwt.NewDomain(string(c.config.domain), c.secret.Public().(ed25519.PublicKey))
+
+	if c.config.tls, err = c.generateTLSConfig(cert); err != nil {
+		return nil, fmt.Errorf("error generating TLS config: %w", err)
+	}
 	keyXform := func(key iwt.Domain) iwt.Domain {
 		return key
 	}
@@ -99,6 +117,17 @@ func New(secret ed25519.PrivateKey, logger Logger, opts ...SetupOption) (*Core, 
 	if err := c.links.init(c); err != nil {
 		return nil, fmt.Errorf("error initialising links: %w", err)
 	}
+	for _, opt := range opts {
+		switch opt.(type) {
+		case Peer, ListenAddress:
+			// Now do the peers and listeners.
+			if err = c._applyOption(opt); err != nil {
+				return nil, fmt.Errorf("failed to apply configuration option %T: %w", opt, err)
+			}
+		default:
+			continue
+		}
+	}
 	if err := c.proto.nodeinfo.setNodeInfo(c.config.nodeinfo, bool(c.config.nodeinfoPrivacy)); err != nil {
 		return nil, fmt.Errorf("error setting node info: %w", err)
 	}
@@ -112,7 +141,6 @@ func New(secret ed25519.PrivateKey, logger Logger, opts ...SetupOption) (*Core, 
 			c.log.Errorf("Failed to start listener %q: %s\n", listenaddr, err)
 		}
 	}
-	c.Act(nil, c._addPeerLoop)
 	return c, nil
 }
 
@@ -131,38 +159,15 @@ func (c *Core) GetThisNodeInfo() json.RawMessage {
 	return c.proto.nodeinfo._getNodeInfo()
 }
 
-// If any static peers were provided in the configuration above then we should
-// configure them. The loop ensures that disconnected peers will eventually
-// be reconnected with.
-func (c *Core) _addPeerLoop() {
-	select {
-	case <-c.ctx.Done():
-		return
-	default:
-	}
-	// Add peers from the Peers section
-	for peer := range c.config._peers {
-		go func(peer string, intf string) {
-			u, err := url.Parse(peer)
-			if err != nil {
-				c.log.Errorln("Failed to parse peer url:", peer, err)
-			}
-			if err := c.CallPeer(u, intf); err != nil {
-				c.log.Errorln("Failed to add peer:", err)
-			}
-		}(peer.URI, peer.SourceInterface) // TODO: this should be acted and not in a goroutine?
-	}
-
-	c.addPeerTimer = time.AfterFunc(time.Minute, func() {
-		c.Act(nil, c._addPeerLoop)
-	})
-}
-
 func (c *Core) RetryPeersNow() {
-	if c.addPeerTimer != nil && !c.addPeerTimer.Stop() {
-		<-c.addPeerTimer.C
-	}
-	c.Act(nil, c._addPeerLoop)
+	phony.Block(&c.links, func() {
+		for _, l := range c.links._links {
+			select {
+			case l.kick <- struct{}{}:
+			default:
+			}
+		}
+	})
 }
 
 // Stop shuts down the Mesh node.

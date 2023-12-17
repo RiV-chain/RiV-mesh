@@ -21,14 +21,10 @@ import (
 	"github.com/hjson/hjson-go"
 	"github.com/kardianos/minwinsvc"
 
-	//"github.com/RiV-chain/RiV-mesh/src/address"
-
 	"github.com/RiV-chain/RiV-mesh/src/config"
-	"github.com/RiV-chain/RiV-mesh/src/defaults"
 	"github.com/RiV-chain/RiV-mesh/src/dnsapi"
 
 	"github.com/RiV-chain/RiV-mesh/src/core"
-	//"github.com/RiV-chain/RiV-mesh/src/ipv6rwc"
 	"github.com/RiV-chain/RiV-mesh/src/multicast"
 	"github.com/RiV-chain/RiV-mesh/src/restapi"
 	"github.com/RiV-chain/RiV-mesh/src/tun"
@@ -69,160 +65,117 @@ func setLogLevel(loglevel string, logger *log.Logger) {
 	}
 }
 
-type rivArgs struct {
-	genconf       bool
-	useconf       bool
-	normaliseconf bool
-	confjson      bool
-	autoconf      bool
-	ver           bool
-	getaddr       bool
-	getsnet       bool
-	useconffile   string
-	logto         string
-	loglevel      string
-	httpaddress   string
-	wwwroot       string
-}
-
-func getArgs() rivArgs {
+// The main function is responsible for configuring and starting RiV-mesh
+func run(sigCh chan os.Signal) {
 	genconf := flag.Bool("genconf", false, "print a new config to stdout")
 	useconf := flag.Bool("useconf", false, "read HJSON/JSON config from stdin")
 	useconffile := flag.String("useconffile", "", "read HJSON/JSON config from specified file path")
 	normaliseconf := flag.Bool("normaliseconf", false, "use in combination with either -useconf or -useconffile, outputs your configuration normalised")
+	exportkey := flag.Bool("exportkey", false, "use in combination with either -useconf or -useconffile, outputs your private key in PEM format")
 	confjson := flag.Bool("json", false, "print configuration from -genconf or -normaliseconf as JSON instead of HJSON")
 	autoconf := flag.Bool("autoconf", false, "automatic mode (dynamic IP, peer with IPv6 neighbors)")
 	ver := flag.Bool("version", false, "prints the version of this build")
 	logto := flag.String("logto", "stdout", "file path to log to, \"syslog\" or \"stdout\"")
-	getaddr := flag.Bool("address", false, "returns the IPv6 address as derived from the supplied configuration")
-	getsnet := flag.Bool("subnet", false, "returns the IPv6 subnet as derived from the supplied configuration")
+	getaddr := flag.Bool("address", false, "use in combination with either -useconf or -useconffile, outputs your IPv6 address")
+	getsnet := flag.Bool("subnet", false, "use in combination with either -useconf or -useconffile, outputs your IPv6 subnet")
+	getpkey := flag.Bool("publickey", false, "use in combination with either -useconf or -useconffile, outputs your public key")
 	loglevel := flag.String("loglevel", "info", "loglevel to enable")
 	httpaddress := flag.String("httpaddress", "", "httpaddress to enable")
 	wwwroot := flag.String("wwwroot", "", "wwwroot to enable")
 
 	flag.Parse()
-	return rivArgs{
-		genconf:       *genconf,
-		useconf:       *useconf,
-		useconffile:   *useconffile,
-		normaliseconf: *normaliseconf,
-		confjson:      *confjson,
-		autoconf:      *autoconf,
-		ver:           *ver,
-		logto:         *logto,
-		getaddr:       *getaddr,
-		getsnet:       *getsnet,
-		loglevel:      *loglevel,
-		httpaddress:   *httpaddress,
-		wwwroot:       *wwwroot,
-	}
-}
 
-func run(args rivArgs, sigCh chan os.Signal) {
 	// Create a new logger that logs output to stdout.
 	var logger *log.Logger
-	switch args.logto {
+	switch *logto {
 	case "stdout":
 		logger = log.New(os.Stdout, "", log.Flags())
+
 	case "syslog":
 		if syslogger, err := gsyslog.NewLogger(gsyslog.LOG_NOTICE, "DAEMON", version.BuildName()); err == nil {
-			logger = log.New(syslogger, "", log.Flags())
+			logger = log.New(syslogger, "", log.Flags()&^(log.Ldate|log.Ltime))
 		}
+
 	default:
-		if logfd, err := os.OpenFile(args.logto, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644); err == nil {
+		if logfd, err := os.OpenFile(*logto, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644); err == nil {
 			logger = log.New(logfd, "", log.Flags())
-			defer func() int {
-				if r := recover(); r != nil {
-					logger.Println("Fatal error:", r)
-					fmt.Print(logfd)
-					return 1
-				}
-				return 0
-			}()
 		}
 	}
 	if logger == nil {
 		logger = log.New(os.Stdout, "", log.Flags())
 		logger.Warnln("Logging defaulting to stdout")
 	}
-
-	if args.normaliseconf {
+	if *normaliseconf {
 		setLogLevel("error", logger)
 	} else {
-		setLogLevel(args.loglevel, logger)
+		setLogLevel(*loglevel, logger)
 	}
 
-	var cfg *config.NodeConfig
+	cfg := config.GenerateConfig()
 	var err error
 	switch {
-	case args.ver:
+	case *ver:
 		fmt.Println("Build name:", version.BuildName())
 		fmt.Println("Build version:", version.BuildVersion())
 		return
-	case args.autoconf:
+	case *autoconf:
 		// Use an autoconf-generated config, this will give us random keys and
 		// port numbers, and will use an automatically selected TUN interface.
-		cfg = defaults.GenerateConfig()
-	case args.useconffile != "" || args.useconf:
-		// Read the configuration from either stdin or from the filesystem
-		cfg, err = defaults.ReadConfig(args.useconffile)
+	case *useconf:
+		if _, err := cfg.ReadFrom(os.Stdin); err != nil {
+			panic(err)
+		}
+	case *useconffile != "":
+		f, err := os.Open(*useconffile)
 		if err != nil {
-			panic("Configuration file load error: " + err.Error())
+			panic(err)
 		}
-		// If the -normaliseconf option was specified then remarshal the above
-		// configuration and print it back to stdout. This lets the user update
-		// their configuration file with newly mapped names (like above) or to
-		// convert from plain JSON to commented HJSON.
-		if args.normaliseconf {
-			var bs []byte
-			if args.confjson {
-				bs, err = json.MarshalIndent(cfg, "", "  ")
-			} else {
-				bs, err = hjson.Marshal(cfg)
-			}
-			if err != nil {
-				panic(err)
-			}
-			fmt.Println(string(bs))
-			return
+		if _, err := cfg.ReadFrom(f); err != nil {
+			panic(err)
 		}
-	case args.genconf:
-		// Generate a new configuration and print it to stdout.
-		fmt.Println(defaults.Genconf(args.confjson))
+		_ = f.Close()
+
+	case *genconf:
+		var bs []byte
+		if *confjson {
+			bs, err = json.MarshalIndent(cfg, "", "  ")
+		} else {
+			bs, err = hjson.Marshal(cfg)
+		}
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(string(bs))
 		return
 	default:
-		// No flags were provided, therefore print the list of flags to stdout.
 		fmt.Println("Usage:")
 		flag.PrintDefaults()
 
-		if args.getaddr || args.getsnet {
+		if *getaddr || *getsnet {
 			fmt.Println("\nError: You need to specify some config data using -useconf or -useconffile.")
 		}
-	}
-	// Have we got a working configuration? If we don't then it probably means
-	// that neither -autoconf, -useconf or -useconffile were set above.
-	if cfg == nil {
 		return
 	}
+
+	privateKey := ed25519.PrivateKey(cfg.PrivateKey)
+	publicKey := privateKey.Public().(ed25519.PublicKey)
+
 	n := &node{}
-	// Have we been asked for the node address yet? If so, print it and then stop.
+
 	getNodeKey := func() types.Domain {
-		if pubkey, err := hex.DecodeString(cfg.PrivateKey); err == nil {
-			pub := ed25519.PrivateKey(pubkey).Public().(ed25519.PublicKey)
-			name := cfg.Domain
-			return types.Domain{Key: pub, Name: []byte(name)}
-		}
-		return types.Domain{}
+		name := cfg.Domain
+		return types.Domain{Key: publicKey, Name: []byte(name)}
 	}
+
 	switch {
-	case args.getaddr:
+	case *getaddr:
 		if key := getNodeKey(); !key.Equal(types.Domain{}) {
 			addr := n.core.AddrForDomain(key)
 			ip := net.IP(addr[:])
 			fmt.Println(ip.String())
 		}
 		return
-	case args.getsnet:
+	case *getsnet:
 		if key := getNodeKey(); !key.Equal(types.Domain{}) {
 			snet := n.core.SubnetForDomain(key)
 			ipnet := net.IPNet{
@@ -232,14 +185,40 @@ func run(args rivArgs, sigCh chan os.Signal) {
 			fmt.Println(ipnet.String())
 		}
 		return
+	case *getpkey:
+		fmt.Println(hex.EncodeToString(publicKey))
+		return
+	case *normaliseconf:
+		if cfg.PrivateKeyPath != "" {
+			cfg.PrivateKey = nil
+		}
+		var bs []byte
+		if *confjson {
+			bs, err = json.MarshalIndent(cfg, "", "  ")
+		} else {
+			bs, err = hjson.Marshal(cfg)
+		}
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(string(bs))
+		return
+	case *exportkey:
+		pem, err := cfg.MarshalPEMPrivateKey()
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(string(pem))
+		return
+	}
+	// Have we got a working configuration? If we don't then it probably means
+	// that neither -autoconf, -useconf or -useconffile were set above.
+	if cfg == nil {
+		return
 	}
 
 	// Setup the RiV-mesh node itself.
 	{
-		sk, err := hex.DecodeString(cfg.PrivateKey)
-		if err != nil {
-			panic(err)
-		}
 		options := []core.SetupOption{
 			core.Domain(cfg.Domain),
 			core.NodeInfo(cfg.NodeInfo),
@@ -265,7 +244,7 @@ func run(args rivArgs, sigCh chan os.Signal) {
 			}
 			options = append(options, core.AllowedPublicKey(k[:]))
 		}
-		if n.core, err = core.New(sk[:], logger, options...); err != nil {
+		if n.core, err = core.New(cfg.Certificate, logger, options...); err != nil {
 			panic(err)
 		}
 	}
@@ -317,10 +296,10 @@ func run(args rivArgs, sigCh chan os.Signal) {
 	{
 		//override httpaddress and wwwroot parameters in cfg
 		if len(cfg.HttpAddress) == 0 {
-			cfg.HttpAddress = args.httpaddress
+			cfg.HttpAddress = *httpaddress
 		}
 		if len(cfg.WwwRoot) == 0 {
-			cfg.WwwRoot = args.wwwroot
+			cfg.WwwRoot = *wwwroot
 		}
 		cfg.HttpAddress = strings.Replace(cfg.HttpAddress, "<tun>", "["+n.core.Address().String()+"]", 1)
 
@@ -330,7 +309,7 @@ func run(args rivArgs, sigCh chan os.Signal) {
 			Log:           logger,
 			ListenAddress: cfg.HttpAddress,
 			WwwRoot:       cfg.WwwRoot,
-			ConfigFn:      args.useconffile,
+			ConfigFn:      *useconffile,
 			Features:      []string{},
 		}); err != nil {
 			logger.Errorln(err)
@@ -376,7 +355,6 @@ func run(args rivArgs, sigCh chan os.Signal) {
 }
 
 func main() {
-	args := getArgs()
 
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
@@ -385,7 +363,7 @@ func main() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		run(args, sigCh)
+		run(sigCh)
 	}()
 	wg.Wait()
 }

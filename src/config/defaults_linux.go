@@ -1,7 +1,7 @@
 //go:build linux
 // +build linux
 
-package defaults
+package config
 
 // Sane defaults for the Linux platform. The "default" options may be
 // may be replaced by the running configuration.

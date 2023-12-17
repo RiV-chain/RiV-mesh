@@ -15,13 +15,11 @@ import (
 	"encoding/hex"
 	"fmt"
 	"net"
-	"os"
 	"runtime"
+	"time"
 
 	"github.com/Arceliar/ironwood/types"
-	"github.com/gologme/log"
-
-	c "github.com/RiV-chain/RiV-mesh/src/core"
+	"github.com/RiV-chain/RiV-mesh/src/core"
 )
 
 type keySet struct {
@@ -31,6 +29,8 @@ type keySet struct {
 
 func main() {
 	threads := runtime.GOMAXPROCS(0)
+	fmt.Println("Threads:", threads)
+	start := time.Now()
 	var currentBest ed25519.PublicKey
 	newKeys := make(chan keySet, threads)
 	for i := 0; i < threads; i++ {
@@ -40,13 +40,12 @@ func main() {
 		newKey := <-newKeys
 		if isBetter(currentBest, newKey.pub) || len(currentBest) == 0 {
 			currentBest = newKey.pub
-			fmt.Println("-----")
+			fmt.Println("-----", time.Since(start))
 			fmt.Println("Priv:", hex.EncodeToString(newKey.priv))
 			fmt.Println("Pub:", hex.EncodeToString(newKey.pub))
-			logger := log.New(os.Stdout, "", log.Flags())
-			core, _ := c.New(newKey.priv, logger, nil)
+			c := &core.Core{}
 			var bytes [ed25519.PublicKeySize]byte
-			addr := core.AddrForDomain(types.Domain{Key: bytes[:], Name: newKey.pub})
+			addr := c.AddrForDomain(types.Domain{Key: bytes[:], Name: newKey.pub})
 			fmt.Println("IP:", net.IP(addr[:]).String())
 		}
 	}

@@ -1,19 +1,11 @@
 package core
 
 import (
-	"bytes"
 	"context"
-	"crypto/rand"
 	"crypto/tls"
-	"crypto/x509"
-	"crypto/x509/pkix"
-	"encoding/hex"
-	"encoding/pem"
 	"fmt"
-	"math/big"
 	"net"
 	"net/url"
-	"time"
 
 	"github.com/Arceliar/phony"
 )
@@ -35,13 +27,8 @@ func (l *links) newLinkTLS(tcp *linkTCP) *linkTLS {
 			Control:   tcp.tcpContext,
 			KeepAlive: -1,
 		},
-		//config:     l.core.config.tls.Clone(),
+		config:     l.core.config.tls.Clone(),
 		_listeners: map[*Listener]context.CancelFunc{},
-	}
-	var err error
-	lt.config, err = lt.generateConfig()
-	if err != nil {
-		panic(err)
 	}
 	return lt
 }
@@ -84,49 +71,4 @@ func (l *linkTLS) listen(ctx context.Context, url *url.URL, sintf string) (net.L
 	}
 	tlslistener := tls.NewListener(listener, l.config)
 	return tlslistener, nil
-}
-
-// RFC5280 section 4.1.2.5
-var notAfterNeverExpires = time.Date(9999, time.December, 31, 23, 59, 59, 0, time.UTC)
-
-func (l *linkTLS) generateConfig() (*tls.Config, error) {
-	certBuf := &bytes.Buffer{}
-	cert := x509.Certificate{
-		SerialNumber: big.NewInt(1),
-		Subject: pkix.Name{
-			CommonName: hex.EncodeToString(l.links.core.public.Key[:]),
-		},
-		NotBefore:             time.Now(),
-		NotAfter:              notAfterNeverExpires,
-		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
-		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
-		BasicConstraintsValid: true,
-	}
-
-	certbytes, err := x509.CreateCertificate(rand.Reader, &cert, &cert, l.links.core.public.Key, l.links.core.secret)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := pem.Encode(certBuf, &pem.Block{
-		Type:  "CERTIFICATE",
-		Bytes: certbytes,
-	}); err != nil {
-		return nil, err
-	}
-
-	rootCAs := x509.NewCertPool()
-	rootCAs.AppendCertsFromPEM(certbytes)
-
-	return &tls.Config{
-		RootCAs: rootCAs,
-		Certificates: []tls.Certificate{
-			{
-				Certificate: [][]byte{certbytes},
-				PrivateKey:  l.links.core.secret,
-			},
-		},
-		InsecureSkipVerify: true,
-		MinVersion:         tls.VersionTLS13,
-	}, nil
 }

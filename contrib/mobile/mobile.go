@@ -3,7 +3,6 @@ package mobile
 import (
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"net"
 	"regexp"
 
@@ -12,10 +11,10 @@ import (
 	//"github.com/RiV-chain/RiV-mesh/src/address"
 	"github.com/RiV-chain/RiV-mesh/src/config"
 	"github.com/RiV-chain/RiV-mesh/src/core"
-	"github.com/RiV-chain/RiV-mesh/src/defaults"
 	"github.com/RiV-chain/RiV-mesh/src/ipv6rwc"
 	"github.com/RiV-chain/RiV-mesh/src/multicast"
 	"github.com/RiV-chain/RiV-mesh/src/restapi"
+	"github.com/RiV-chain/RiV-mesh/src/tun"
 	"github.com/RiV-chain/RiV-mesh/src/version"
 )
 
@@ -31,7 +30,9 @@ type Mesh struct {
 	config      *config.NodeConfig
 	multicast   *multicast.Multicast
 	rest_server *restapi.RestServer
+	tun         *tun.TunAdapter // optional
 	log         MobileLogger
+	logger      *log.Logger
 }
 
 // StartAutoconfigure starts a node with a randomly generated config
@@ -42,25 +43,20 @@ func (m *Mesh) StartAutoconfigure() error {
 // StartJSON starts a node with the given JSON config. You can get JSON config
 // (rather than HJSON) by using the GenerateConfigJSON() function
 func (m *Mesh) StartJSON(configjson []byte) error {
+	setMemLimitIfPossible()
+
 	logger := log.New(m.log, "", 0)
 	logger.EnableLevel("error")
 	logger.EnableLevel("warn")
 	logger.EnableLevel("info")
-	m.config = defaults.GenerateConfig()
-	if err := json.Unmarshal(configjson, &m.config); err != nil {
+	m.logger = logger
+	m.config = config.GenerateConfig()
+	if err := m.config.UnmarshalHJSON(configjson); err != nil {
 		return err
 	}
 	// Setup the Mesh node itself.
 	{
-		sk, err := hex.DecodeString(m.config.PrivateKey)
-		if err != nil {
-			panic(err)
-		}
-		options := []core.SetupOption{
-			core.NodeInfo(m.config.NodeInfo),
-			core.NodeInfoPrivacy(m.config.NodeInfoPrivacy),
-			core.NetworkDomain(m.config.NetworkDomain),
-		}
+		options := []core.SetupOption{}
 		for _, peer := range m.config.Peers {
 			options = append(options, core.Peer{URI: peer})
 		}
@@ -76,15 +72,24 @@ func (m *Mesh) StartJSON(configjson []byte) error {
 			}
 			options = append(options, core.AllowedPublicKey(k[:]))
 		}
-		m.core, err = core.New(sk[:], logger, options...)
+		for _, lAddr := range m.config.Listen {
+			options = append(options, core.ListenAddress(lAddr))
+		}
+		var err error
+		m.core, err = core.New(m.config.Certificate, logger, options...)
 		if err != nil {
 			panic(err)
 		}
+		address, subnet := m.core.Address(), m.core.Subnet()
+		logger.Infof("Your public key is %s", hex.EncodeToString(m.core.PublicKey()))
+		logger.Infof("Your IPv6 address is %s", address.String())
+		logger.Infof("Your IPv6 subnet is %s", subnet.String())
 	}
 
 	// Setup the multicast module.
 	if len(m.config.MulticastInterfaces) > 0 {
 		var err error
+		logger.Infof("Initializing multicast %s", "")
 		options := []multicast.SetupOption{}
 		for _, intf := range m.config.MulticastInterfaces {
 			options = append(options, multicast.MulticastInterface{
@@ -95,10 +100,10 @@ func (m *Mesh) StartJSON(configjson []byte) error {
 				Priority: uint8(intf.Priority),
 			})
 		}
-		if m.multicast, err = multicast.New(m.core, logger, options...); err != nil {
-			fmt.Println("Multicast module fail:", err)
-		} else {
-			logger.Infof("Multicast module started")
+		logger.Infof("Starting multicast %s", "")
+		m.multicast, err = multicast.New(m.core, m.logger, options...)
+		if err != nil {
+			logger.Errorln("An error occurred starting multicast:", err)
 		}
 	}
 
@@ -177,10 +182,20 @@ func (m *Mesh) RecvBuffer(buf []byte) (int, error) {
 func (m *Mesh) Stop() error {
 	logger := log.New(m.log, "", 0)
 	logger.EnableLevel("info")
-	logger.Infof("Stop the mobile Mesh instance %s", "")
-	if err := m.multicast.Stop(); err != nil {
-		return err
+	logger.Infof("Stopping the mobile Mesh instance %s", "")
+	if m.multicast != nil {
+		logger.Infof("Stopping multicast %s", "")
+		if err := m.multicast.Stop(); err != nil {
+			return err
+		}
 	}
+	logger.Infof("Stopping TUN device %s", "")
+	if m.tun != nil {
+		if err := m.tun.Stop(); err != nil {
+			return err
+		}
+	}
+	logger.Infof("Stopping Mesh core %s", "")
 	m.core.Stop()
 	m.rest_server.Shutdown()
 	m.rest_server = nil
@@ -194,7 +209,7 @@ func (m *Mesh) RetryPeersNow() {
 
 // GenerateConfigJSON generates mobile-friendly configuration in JSON format
 func GenerateConfigJSON() []byte {
-	nc := defaults.GenerateConfig()
+	nc := config.GenerateConfig()
 	nc.IfName = "none"
 	if json, err := json.Marshal(nc); err == nil {
 		return json
@@ -219,9 +234,9 @@ func (m *Mesh) GetPublicKeyString() string {
 	return hex.EncodeToString(m.core.GetSelf().Domain.Key)
 }
 
-// GetCoordsString gets the node's coordinates
-func (m *Mesh) GetCoordsString() string {
-	return fmt.Sprintf("%v", m.core.GetSelf().RoutingEntries)
+// GetRoutingEntries gets the number of entries in the routing table
+func (m *Mesh) GetRoutingEntries() int {
+	return int(m.core.GetSelf().RoutingEntries)
 }
 
 func (m *Mesh) GetPeersJSON() (result string) {
@@ -241,6 +256,14 @@ func (m *Mesh) GetPeersJSON() (result string) {
 		})
 	}
 	if res, err := json.Marshal(peers); err == nil {
+		return string(res)
+	} else {
+		return "{}"
+	}
+}
+
+func (m *Mesh) GetPathsJSON() (result string) {
+	if res, err := json.Marshal(m.core.GetPaths()); err == nil {
 		return string(res)
 	} else {
 		return "{}"

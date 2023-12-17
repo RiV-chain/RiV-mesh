@@ -1,4 +1,4 @@
-package defaults
+package config
 
 import (
 	"bytes"
@@ -6,15 +6,10 @@ import (
 	"io"
 	"os"
 
-	"github.com/RiV-chain/RiV-mesh/src/config"
 	"github.com/hjson/hjson-go"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/text/encoding/unicode"
 )
-
-type MulticastInterfaceConfig = config.MulticastInterfaceConfig
-type NetworkDomainConfig = config.NetworkDomainConfig
-type DnsServerConfig = config.DnsServerConfig
 
 var defaultConfig = "" // LDFLAGS='-X github.com/yggdrasil-network/yggdrasil-go/src/defaults.defaultConfig=/path/to/config
 
@@ -78,43 +73,7 @@ func GetDefaults() platformDefaultParameters {
 	return defaults
 }
 
-// Generates default configuration and returns a pointer to the resulting
-// NodeConfig. This is used when outputting the -genconf parameter and also when
-// using -autoconf.
-func GenerateConfig() *config.NodeConfig {
-	// Get the defaults for the platform.
-	defaults := GetDefaults()
-	// Create a node configuration and populate it.
-	cfg := new(config.NodeConfig)
-	cfg.NewKeys()
-	cfg.Listen = []string{}
-	cfg.Peers = []string{}
-	cfg.InterfacePeers = map[string][]string{}
-	cfg.AllowedPublicKeys = []string{}
-	cfg.MulticastInterfaces = defaults.DefaultMulticastInterfaces
-	cfg.IfName = defaults.DefaultIfName
-	cfg.IfMTU = defaults.DefaultIfMTU
-	cfg.NodeInfoPrivacy = false
-	cfg.HttpAddress = Define().DefaultHttpAddress
-	cfg.NetworkDomain = Define().DefaultNetworkDomain
-	cfg.PublicPeersUrl = Define().DefaultPublicPeersUrl
-	cfg.DDnsServer = Define().DefaultDnsServerConfig
-
-	return cfg
-}
-
-func Genconf(isjson bool) string {
-	cfg := GenerateConfig()
-	var bs []byte
-	if isjson {
-		bs, _ = json.MarshalIndent(cfg, "", "  ")
-	} else {
-		bs, _ = hjson.Marshal(cfg)
-	}
-	return string(bs)
-}
-
-func ReadConfig(useconffile string) (*config.NodeConfig, error) {
+func ReadConfig(useconffile string) (*NodeConfig, error) {
 	// Use a configuration file. If -useconf, the configuration will be read
 	// from stdin. If -useconffile, the configuration will be read from the
 	// filesystem.
@@ -168,7 +127,7 @@ func ReadConfig(useconffile string) (*config.NodeConfig, error) {
 	return cfg, nil
 }
 
-func WriteConfig(confFn string, cfg *config.NodeConfig) error {
+func WriteConfig(confFn string, cfg *NodeConfig) error {
 	bs, err := hjson.Marshal(cfg)
 	if err != nil {
 		return err

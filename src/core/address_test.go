@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/ed25519"
 	"crypto/rand"
+	"crypto/tls"
 	"testing"
 
 	"github.com/Arceliar/ironwood/types"
@@ -68,8 +69,8 @@ func TestAddrForDomain(t *testing.T) {
 	core := &Core{
 		ctx: context.Background(),
 		config: struct {
+			tls                *tls.Config
 			domain             Domain
-			_peers             map[Peer]*linkInfo
 			_listeners         map[ListenAddress]struct{}
 			nodeinfo           NodeInfo
 			nodeinfoPrivacy    NodeInfoPrivacy
@@ -131,8 +132,8 @@ func TestSubnetForDomain(t *testing.T) {
 	core := &Core{
 		ctx: context.Background(),
 		config: struct {
+			tls                *tls.Config
 			domain             Domain
-			_peers             map[Peer]*linkInfo
 			_listeners         map[ListenAddress]struct{}
 			nodeinfo           NodeInfo
 			nodeinfoPrivacy    NodeInfoPrivacy
@@ -192,8 +193,8 @@ func TestMaxLengthDomain(t *testing.T) {
 	core := &Core{
 		ctx: context.Background(),
 		config: struct {
+			tls                *tls.Config
 			domain             Domain
-			_peers             map[Peer]*linkInfo
 			_listeners         map[ListenAddress]struct{}
 			nodeinfo           NodeInfo
 			nodeinfoPrivacy    NodeInfoPrivacy

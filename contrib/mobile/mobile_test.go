@@ -9,7 +9,7 @@ func TestStartYggdrasil(t *testing.T) {
 	}
 	t.Log("Address:", mesh.GetAddressString())
 	t.Log("Subnet:", mesh.GetSubnetString())
-	t.Log("Coords:", mesh.GetCoordsString())
+	t.Log("Routing entries:", mesh.GetRoutingEntries())
 	if err := mesh.Stop(); err != nil {
 		t.Fatalf("Failed to stop RiV-mesh: %s", err)
 	}

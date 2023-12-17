@@ -7,10 +7,9 @@ import (
 	"log"
 	"os"
 
+	"github.com/RiV-chain/RiV-mesh/src/config"
 	"github.com/hjson/hjson-go"
 	"golang.org/x/text/encoding/unicode"
-
-	"github.com/RiV-chain/RiV-mesh/src/defaults"
 )
 
 type CmdLineEnv struct {
@@ -21,7 +20,7 @@ type CmdLineEnv struct {
 
 func newCmdLineEnv() CmdLineEnv {
 	var cmdLineEnv CmdLineEnv
-	cmdLineEnv.endpoint = defaults.Define().DefaultHttpAddress
+	cmdLineEnv.endpoint = config.Define().DefaultHttpAddress
 	return cmdLineEnv
 }
 
@@ -56,31 +55,31 @@ func (cmdLineEnv *CmdLineEnv) parseFlagsAndArgs() {
 
 func (cmdLineEnv *CmdLineEnv) setEndpoint(logger *log.Logger) {
 	if cmdLineEnv.server == cmdLineEnv.endpoint {
-		if config, err := os.ReadFile(defaults.GetDefaults().DefaultConfigFile); err == nil {
-			if bytes.Equal(config[0:2], []byte{0xFF, 0xFE}) ||
-				bytes.Equal(config[0:2], []byte{0xFE, 0xFF}) {
+		if c, err := os.ReadFile(config.GetDefaults().DefaultConfigFile); err == nil {
+			if bytes.Equal(c[0:2], []byte{0xFF, 0xFE}) ||
+				bytes.Equal(c[0:2], []byte{0xFE, 0xFF}) {
 				utf := unicode.UTF16(unicode.BigEndian, unicode.UseBOM)
 				decoder := utf.NewDecoder()
-				config, err = decoder.Bytes(config)
+				c, err = decoder.Bytes(c)
 				if err != nil {
 					panic(err)
 				}
 			}
 			var dat map[string]interface{}
-			if err := hjson.Unmarshal(config, &dat); err != nil {
+			if err := hjson.Unmarshal(c, &dat); err != nil {
 				panic(err)
 			}
 			if ep, ok := dat["HttpAddress"].(string); ok && (ep != "none" && ep != "") {
 				cmdLineEnv.endpoint = ep
-				logger.Println("Found platform default config file", defaults.Define().DefaultHttpAddress)
+				logger.Println("Found platform default config file", config.Define().DefaultHttpAddress)
 				logger.Println("Using endpoint", cmdLineEnv.endpoint, "from HttpAddress")
 			} else {
 				logger.Println("Configuration file doesn't contain appropriate HttpAddress option")
-				logger.Println("Falling back to platform default", defaults.Define().DefaultHttpAddress)
+				logger.Println("Falling back to platform default", config.Define().DefaultHttpAddress)
 			}
 		} else {
-			logger.Println("Can't open config file from default location", defaults.GetDefaults().DefaultConfigFile)
-			logger.Println("Falling back to platform default", defaults.Define().DefaultHttpAddress)
+			logger.Println("Can't open config file from default location", config.GetDefaults().DefaultConfigFile)
+			logger.Println("Falling back to platform default", config.Define().DefaultHttpAddress)
 		}
 	} else {
 		cmdLineEnv.endpoint = cmdLineEnv.server
