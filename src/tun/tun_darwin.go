@@ -1,5 +1,5 @@
-//go:build !mobile
-// +build !mobile
+//go:build darwin || ios
+// +build darwin ios
 
 package tun
 
@@ -7,8 +7,10 @@ package tun
 
 import (
 	"encoding/binary"
+	"fmt"
 	"net"
 	"net/netip"
+	"os"
 	"strconv"
 	"strings"
 	"unsafe"
@@ -25,7 +27,7 @@ func (tun *TunAdapter) setup(ifname string, addr string, mtu uint64) error {
 	}
 	iface, err := wgtun.CreateTUN(ifname, int(mtu))
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("failed to create TUN: %w", err)
 	}
 	tun.iface = iface
 	if m, err := iface.MTU(); err == nil {
@@ -33,7 +35,35 @@ func (tun *TunAdapter) setup(ifname string, addr string, mtu uint64) error {
 	} else {
 		tun.mtu = 0
 	}
-	return tun.setupAddress(addr)
+	if addr != "" {
+		return tun.setupAddress(addr)
+	}
+	return nil
+}
+
+// Configures the "utun" adapter from an existing file descriptor.
+func (tun *TunAdapter) setupFD(fd int32, addr string, mtu uint64) error {
+	dfd, err := unix.Dup(int(fd))
+	if err != nil {
+		return fmt.Errorf("failed to duplicate FD: %w", err)
+	}
+	err = unix.SetNonblock(dfd, true)
+	if err != nil {
+		unix.Close(dfd)
+		return fmt.Errorf("failed to set FD as non-blocking: %w", err)
+	}
+	iface, err := wgtun.CreateTUNFromFile(os.NewFile(uintptr(dfd), "/dev/tun"), 0)
+	if err != nil {
+		unix.Close(dfd)
+		return fmt.Errorf("failed to create TUN from FD: %w", err)
+	}
+	tun.iface = iface
+	if m, err := iface.MTU(); err == nil {
+		tun.mtu = getSupportedMTU(uint64(m))
+	} else {
+		tun.mtu = 0
+	}
+	return nil // tun.setupAddress(addr)
 }
 
 const (
@@ -78,14 +108,13 @@ type ifreq struct {
 
 // Sets the IPv6 address of the utun adapter. On Darwin/macOS this is done using
 // a system socket and making direct syscalls to the kernel.
-func (tun *TunAdapter) setupAddress(address string) error {
-
+func (tun *TunAdapter) setupAddress(addr string) error {
 	var fd int
 	var err error
 
 	if fd, err = unix.Socket(unix.AF_INET6, unix.SOCK_DGRAM, 0); err != nil {
-		tun.log.Printf("Create AF_SYSTEM socket failed: %v.", err)
-		return err
+		tun.log.Errorf("Create AF_SYSTEM socket failed: %v.", err)
+		return fmt.Errorf("failed to open AF_SYSTEM: %w", err)
 	}
 
 	var ar in6_aliasreq
@@ -128,19 +157,19 @@ func (tun *TunAdapter) setupAddress(address string) error {
 	ir.ifru_mtu = uint32(tun.mtu)
 
 	tun.log.Infof("Interface name: %s", ar.ifra_name)
-	tun.log.Infof("Interface IPv6: %s", address)
+	tun.log.Infof("Interface IPv6: %s", addr)
 	tun.log.Infof("Interface MTU: %d", ir.ifru_mtu)
 
-	if _, _, errno := unix.Syscall(unix.SYS_IOCTL, uintptr(fd), uintptr(darwin_SIOCAIFADDR_IN6), uintptr(unsafe.Pointer(&ar))); errno != 0 {
+	if _, _, errno := unix.Syscall(unix.SYS_IOCTL, uintptr(fd), uintptr(darwin_SIOCAIFADDR_IN6), uintptr(unsafe.Pointer(&ar))); errno != 0 { // nolint:staticcheck
 		err = errno
 		tun.log.Errorf("Error in darwin_SIOCAIFADDR_IN6: %v", errno)
-		return err
+		return fmt.Errorf("failed to call SIOCAIFADDR_IN6: %w", err)
 	}
 
-	if _, _, errno := unix.Syscall(unix.SYS_IOCTL, uintptr(fd), uintptr(unix.SIOCSIFMTU), uintptr(unsafe.Pointer(&ir))); errno != 0 {
+	if _, _, errno := unix.Syscall(unix.SYS_IOCTL, uintptr(fd), uintptr(unix.SIOCSIFMTU), uintptr(unsafe.Pointer(&ir))); errno != 0 { // nolint:staticcheck
 		err = errno
 		tun.log.Errorf("Error in SIOCSIFMTU: %v", errno)
-		return err
+		return fmt.Errorf("failed to call SIOCSIFMTU: %w", err)
 	}
 
 	return err

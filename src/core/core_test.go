@@ -158,14 +158,11 @@ func TestCore_Start_Transfer(t *testing.T) {
 
 	// Send
 	msg := make([]byte, msgLen)
-	_, err := rand.Read(msg[40:])
-	if err != nil {
-		t.Fatal(err)
-	}
+	_, _ = rand.Read(msg[40:])
 	msg[0] = 0x60
 	copy(msg[8:24], nodeB.Address())
 	copy(msg[24:40], nodeA.Address())
-	_, err = nodeB.WriteTo(msg, nodeA.LocalAddr())
+	_, err := nodeB.WriteTo(msg, nodeA.LocalAddr())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -193,10 +190,7 @@ func BenchmarkCore_Start_Transfer(b *testing.B) {
 
 	// Send
 	msg := make([]byte, msgLen)
-	_, err := rand.Read(msg[40:])
-	if err != nil {
-		b.Fatal(err)
-	}
+	_, _ = rand.Read(msg[40:])
 	msg[0] = 0x60
 	copy(msg[8:24], nodeB.Address())
 	copy(msg[24:40], nodeA.Address())

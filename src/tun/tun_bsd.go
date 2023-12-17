@@ -5,6 +5,7 @@ package tun
 
 import (
 	"encoding/binary"
+	"fmt"
 	"net"
 	"net/netip"
 	"os/exec"
@@ -79,7 +80,7 @@ type in6_ifreq_lifetime struct {
 func (tun *TunAdapter) setup(ifname string, addr string, mtu uint64) error {
 	iface, err := wgtun.CreateTUN(ifname, int(mtu))
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("failed to create TUN: %w", err)
 	}
 	tun.iface = iface
 	if mtu, err := iface.MTU(); err == nil {
@@ -87,10 +88,18 @@ func (tun *TunAdapter) setup(ifname string, addr string, mtu uint64) error {
 	} else {
 		tun.mtu = 0
 	}
-	return tun.setupAddress(addr)
+	if addr != "" {
+		return tun.setupAddress(addr)
+	}
+	return nil
 }
 
-func (tun *TunAdapter) setupAddress(address string) error {
+// Configures the "utun" adapter from an existing file descriptor.
+func (tun *TunAdapter) setupFD(fd int32, addr string, mtu uint64) error {
+	return fmt.Errorf("setup via FD not supported on this platform")
+}
+
+func (tun *TunAdapter) setupAddress(addr string) error {
 	var sfd int
 	var err error
 
@@ -102,7 +111,7 @@ func (tun *TunAdapter) setupAddress(address string) error {
 
 	// Friendly output
 	tun.log.Infof("Interface name: %s", tun.Name())
-	tun.log.Infof("Interface IPv6: %s", address)
+	tun.log.Infof("Interface IPv6: %s", addr)
 	tun.log.Infof("Interface MTU: %d", tun.mtu)
 
 	// Create the MTU request
