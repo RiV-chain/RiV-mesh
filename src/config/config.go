@@ -138,7 +138,16 @@ func (cfg *NodeConfig) ReadFrom(r io.Reader) (int64, error) {
 }
 
 func (cfg *NodeConfig) UnmarshalHJSON(b []byte) error {
-	if err := hjson.Unmarshal(b, cfg); err != nil {
+	var dat map[string]interface{}
+	if err := hjson.Unmarshal(b, &dat); err != nil {
+		return err
+	}
+	// Sanitise the config
+	confJson, err := json.Marshal(dat)
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal(confJson, cfg); err != nil {
 		return err
 	}
 	return cfg.postprocessConfig()
