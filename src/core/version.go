@@ -98,7 +98,7 @@ func (m *version_metadata) decode(r io.Reader, password []byte) error {
 	if _, err := io.ReadFull(r, bh[:]); err != nil {
 		return err
 	}
-	meta := [4]byte{'m', 'e', 't', 'a'}
+	meta := [4]byte{'d', 'e', 't', 'a'}
 	if !bytes.Equal(bh[:4], meta[:]) {
 		return fmt.Errorf("invalid handshake preamble")
 	}

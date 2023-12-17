@@ -36,38 +36,50 @@ func CreateAndConnectTwo(t testing.TB, verbose bool) (nodeA *Core, nodeB *Core) 
 	if err = cfgB.GenerateSelfSignedCertificate(); err != nil {
 		t.Fatal(err)
 	}
+
 	logger := GetLoggerWithPrefix("", false)
 	logger.EnableLevel("debug")
 
 	optionsA := []SetupOption{
-		ListenAddress("tcp://127.0.0.1:0"),
 		Domain("domainA"),
 		NetworkDomain(NetworkDomain{
 			Prefix: "fc",
 		}),
 	}
+
 	if nodeA, err = New(cfgA.Certificate, logger, optionsA...); err != nil {
 		t.Fatal(err)
 	}
+
 	optionsB := []SetupOption{
-		ListenAddress("tcp://127.0.0.1:0"),
 		Domain("domainB"),
 		NetworkDomain(NetworkDomain{
 			Prefix: "fc",
 		}),
 	}
+
 	if nodeB, err = New(cfgB.Certificate, logger, optionsB...); err != nil {
 		t.Fatal(err)
 	}
-	for l := range nodeA.config._listeners {
-		u, err := url.Parse(string(l))
-		if err != nil {
-			t.Fatal(err)
-		}
-		err = nodeB.CallPeer(u, "")
-		if err != nil {
-			t.Fatal(err)
-		}
+
+	lA := ListenAddress("tcp://127.0.0.1:0")
+
+	nodeAListenURL, err := url.Parse(string(lA))
+	if err != nil {
+		t.Fatal(err)
+	}
+	nodeAListener, err := nodeA.Listen(nodeAListenURL, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	nodeAURL, err := url.Parse("tcp://" + nodeAListener.Addr().String())
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = nodeB.CallPeer(nodeAURL, "")
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	time.Sleep(100 * time.Millisecond)
