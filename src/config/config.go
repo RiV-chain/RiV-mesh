@@ -99,6 +99,8 @@ func GenerateConfig() *NodeConfig {
 	cfg.HttpAddress = Define().DefaultHttpAddress
 	cfg.NetworkDomain = Define().DefaultNetworkDomain
 	cfg.PublicPeersUrl = Define().DefaultPublicPeersUrl
+	cfg.DDnsServer = Define().DefaultDnsServerConfig
+
 	if err := cfg.postprocessConfig(); err != nil {
 		panic(err)
 	}
