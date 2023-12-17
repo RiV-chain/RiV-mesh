@@ -47,7 +47,6 @@ type NodeConfig struct {
 	WwwRoot             string                     `comment:"Points out to embedded webserver root folder path where web interface assets are located.\nExample:/apps/mesh/www."`
 	MulticastInterfaces []MulticastInterfaceConfig `comment:"Configuration for which interfaces multicast peer discovery should be\nenabled on. Each entry in the list should be a json object which may\ncontain Regex, Beacon, Listen, and Port. Regex is a regular expression\nwhich is matched against an interface name, and interfaces use the\nfirst configuration that they match gainst. Beacon configures whether\nor not the node should send link-local multicast beacons to advertise\ntheir presence, while listening for incoming connections on Port.\nListen controls whether or not the node listens for multicast beacons\nand opens outgoing connections."`
 	AllowedPublicKeys   []string                   `comment:"List of peer public keys to allow incoming peering connections\nfrom. If left empty/undefined then all connections will be allowed\nby default. This does not affect outgoing peerings, nor does it\naffect link-local peers discovered via multicast."`
-	PublicKey           string                     `comment:"Your public key. Your peers may ask you for this to put\ninto their AllowedPublicKeys configuration."`
 	PrivateKey          KeyBytes                   `json:",omitempty" comment:"Your private key. DO NOT share this with anyone!"`
 	PrivateKeyPath      string                     `json:",omitempty" comment:"The path to your private key file in PEM format."`
 	Certificate         *tls.Certificate           `json:"-"`
@@ -97,6 +96,9 @@ func GenerateConfig() *NodeConfig {
 	cfg.IfName = defaults.DefaultIfName
 	cfg.IfMTU = defaults.DefaultIfMTU
 	cfg.NodeInfoPrivacy = false
+	cfg.HttpAddress = Define().DefaultHttpAddress
+	cfg.NetworkDomain = Define().DefaultNetworkDomain
+	cfg.PublicPeersUrl = Define().DefaultPublicPeersUrl
 	if err := cfg.postprocessConfig(); err != nil {
 		panic(err)
 	}
