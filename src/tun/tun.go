@@ -38,13 +38,14 @@ type TunAdapter struct {
 	isOpen    bool
 	isEnabled bool // Used by the writer to drop sessionTraffic if not enabled
 	config    struct {
+		fd   int32
 		name InterfaceName
 		mtu  InterfaceMTU
 	}
 }
 
 // Gets the maximum supported MTU for the platform based on the defaults in
-// defaults.GetDefaults().
+// config.GetDefaults().
 func getSupportedMTU(mtu uint64) uint64 {
 	if mtu < 1280 {
 		return 1280
@@ -111,7 +112,11 @@ func (tun *TunAdapter) _start() error {
 	}
 	tun.addr = tun.rwc.Address()
 	tun.subnet = tun.rwc.Subnet()
-	addr := fmt.Sprintf("%s/%d", net.IP(tun.addr[:]).String(), 8*len(tun.core.GetPrefix())-1)
+	prefix := tun.core.GetPrefix()
+	var addr string
+	if tun.core.IsValidAddress(tun.addr) {
+		addr = fmt.Sprintf("%s/%d", net.IP(tun.addr[:]).String(), 8*len(prefix[:])-1)
+	}
 	if tun.config.name == "none" || tun.config.name == "dummy" {
 		tun.log.Debugln("Not starting TUN as ifname is none or dummy")
 		tun.isEnabled = false
@@ -122,7 +127,13 @@ func (tun *TunAdapter) _start() error {
 	if tun.rwc.MaxMTU() < mtu {
 		mtu = tun.rwc.MaxMTU()
 	}
-	if err := tun.setup(string(tun.config.name), addr, mtu); err != nil {
+	var err error
+	if tun.config.fd > 0 {
+		err = tun.setupFD(tun.config.fd, addr, mtu)
+	} else {
+		err = tun.setup(string(tun.config.name), addr, mtu)
+	}
+	if err != nil {
 		return err
 	}
 	if tun.MTU() != mtu {
@@ -145,6 +156,8 @@ func (tun *TunAdapter) IsStarted() bool {
 	return isOpen
 }
 
+// Start the setup process for the TUN adapter. If successful, starts the
+// read/write goroutines to handle packets on that interface.
 func (tun *TunAdapter) Stop() error {
 	var err error
 	phony.Block(tun, func() {
