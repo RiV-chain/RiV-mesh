@@ -8,6 +8,7 @@ replace github.com/mikispag/dns-over-tls-forwarder => github.com/RiV-chain/dns-o
 
 require (
 	github.com/Arceliar/phony v0.0.0-20220903101357-530938a4b13d
+	github.com/apernet/quic-go v0.40.1-0.20231112225043-e7f3af208dee
 	github.com/gologme/log v1.3.0
 	github.com/hashicorp/go-syslog v1.0.0
 	github.com/hjson/hjson-go v3.1.0+incompatible
@@ -41,11 +42,16 @@ require (
 	github.com/bits-and-blooms/bitset v1.5.0 // indirect
 	github.com/bits-and-blooms/bloom/v3 v3.3.1 // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
+	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
+	github.com/google/pprof v0.0.0-20210407192527-94a9f03dee38 // indirect
+	github.com/onsi/ginkgo/v2 v2.9.5 // indirect
+	github.com/quic-go/qtls-go1-20 v0.4.1 // indirect
 	github.com/rivo/uniseg v0.3.4 // indirect
 	github.com/stretchr/testify v1.8.0 // indirect
-	golang.org/x/mod v0.8.0 // indirect
+	go.uber.org/mock v0.3.0 // indirect
+	golang.org/x/mod v0.11.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
-	golang.org/x/tools v0.6.0 // indirect
+	golang.org/x/tools v0.9.1 // indirect
 )
 
 require (
