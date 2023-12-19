@@ -127,7 +127,7 @@ func (tun *TunAdapter) setupAddress(addr string) error {
 
 	ar.ifra_addr.sin6_len = uint8(unsafe.Sizeof(ar.ifra_addr))
 	ar.ifra_addr.sin6_family = unix.AF_INET6
-	a, _, err := net.ParseCIDR(address)
+	a, _, err := net.ParseCIDR(addr)
 	if err != nil {
 		tun.log.Printf("Incorrect CIDR: %v.", err)
 		return err
