@@ -155,6 +155,8 @@ func TestCore_Start_Transfer(t *testing.T) {
 	if !WaitConnected(nodeA, nodeB) {
 		t.Fatal("nodes did not connect")
 	}
+	//FIX ME! Temporal fix to resolve issue in GetPeers.
+	time.Sleep(5000 * time.Millisecond)
 
 	// Send
 	msg := make([]byte, msgLen)
@@ -187,6 +189,8 @@ func BenchmarkCore_Start_Transfer(b *testing.B) {
 	if !WaitConnected(nodeA, nodeB) {
 		b.Fatal("nodes did not connect")
 	}
+	//FIX ME! Temporal fix to resolve issue in GetPeers.
+	time.Sleep(5000 * time.Millisecond)
 
 	// Send
 	msg := make([]byte, msgLen)
