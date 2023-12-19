@@ -559,20 +559,19 @@ func (a *RestServer) getApiMulticastinterfacesHandler(w http.ResponseWriter, r *
 }
 
 type Peer struct {
-	Address       string   `json:"address"`
-	Key           string   `json:"key"`
-	Domain        string   `json:"domain"`
-	Port          uint64   `json:"port"`
-	Priority      uint64   `json:"priority"`
-	Coords        []uint64 `json:"coords"`
-	Remote        string   `json:"remote"`
-	Remote_ip     string   `json:"remote_ip"`
-	Bytes_recvd   uint64   `json:"bytes_recvd"`
-	Bytes_sent    uint64   `json:"bytes_sent"`
-	Uptime        float64  `json:"uptime"`
-	Multicast     bool     `json:"multicast"`
-	Country_short string   `json:"country_short"`
-	Country_long  string   `json:"country_long"`
+	Address       string  `json:"address"`
+	Key           string  `json:"key"`
+	Domain        string  `json:"domain"`
+	Port          uint64  `json:"port"`
+	Priority      uint64  `json:"priority"`
+	Remote        string  `json:"remote"`
+	Remote_ip     string  `json:"remote_ip"`
+	Bytes_recvd   uint64  `json:"bytes_recvd"`
+	Bytes_sent    uint64  `json:"bytes_sent"`
+	Uptime        float64 `json:"uptime"`
+	Multicast     bool    `json:"multicast"`
+	Country_short string  `json:"country_short"`
+	Country_long  string  `json:"country_long"`
 }
 
 func (a *RestServer) prepareGetPeers() []Peer {
@@ -586,7 +585,6 @@ func (a *RestServer) prepareGetPeers() []Peer {
 			string(p.Domain.GetNormalizedName()),
 			p.Port,
 			uint64(p.Priority), // can't be uint8 thanks to gobind
-			p.Coords,
 			p.URI,
 			p.RemoteIp,
 			p.RXBytes,

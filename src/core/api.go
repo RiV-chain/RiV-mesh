@@ -34,13 +34,11 @@ type SelfInfo struct {
 type PeerInfo struct {
 	Domain        types.Domain
 	Root          types.Domain
-	Remote        string
 	URI           string
 	Up            bool
 	Inbound       bool
 	LastError     error
 	LastErrorTime time.Time
-	Coords        []uint64
 	Port          uint64
 	Priority      uint8
 	RXBytes       uint64
@@ -118,12 +116,12 @@ func (c *Core) GetPeers() []PeerInfo {
 			}
 			if p, ok := conns[conn]; ok {
 				peerinfo.Domain = p.Domain
-				peerinfo.Remote = p.Conn.RemoteAddr().String()
+				peerinfo.RemoteIp = p.Conn.RemoteAddr().String()
 				peerinfo.Root = p.Root
 				peerinfo.Port = p.Port
 				peerinfo.Priority = p.Priority
+				peers = append(peers, peerinfo)
 			}
-			peers = append(peers, peerinfo)
 		}
 	})
 
