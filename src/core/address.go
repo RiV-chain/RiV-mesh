@@ -73,7 +73,7 @@ func (c *Core) AddrForDomain(domain iwt.Domain) *Address {
 	if len(domain.Key) != ed25519.PublicKeySize {
 		return nil
 	}
-	addr, err := encodeToIPv6(c.GetPrefix(), domain.Name)
+	addr, err := encodeToIPv6(c.GetPrefix(), domain.Name[:])
 	if err != nil {
 		c.log.Errorln(err)
 		return nil

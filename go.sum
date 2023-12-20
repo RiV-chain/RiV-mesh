@@ -4,8 +4,8 @@ github.com/Arceliar/phony v0.0.0-20220903101357-530938a4b13d h1:UK9fsWbWqwIQkMCz
 github.com/Arceliar/phony v0.0.0-20220903101357-530938a4b13d/go.mod h1:BCnxhRf47C/dy/e/D2pmB8NkB3dQVIrkD98b220rx5Q=
 github.com/RiV-chain/dns-over-tls-forwarder v0.0.0-20230828114909-c2cd9f8d79d3 h1:gz71d+oEAMXYUYw54JKT4A6CxniQx6B9J0G5CYJeLok=
 github.com/RiV-chain/dns-over-tls-forwarder v0.0.0-20230828114909-c2cd9f8d79d3/go.mod h1:V2Irj3BjF2tLZ3xXp6TMQCu0I+eJWQPEktbLMHQN8XA=
-github.com/RiV-chain/ironwood v0.0.0-20231220103331-37a8ba431a4e h1:RLKFjAHKnaCXQUyVdiBWf3VULWLRea6UW849QJbNODY=
-github.com/RiV-chain/ironwood v0.0.0-20231220103331-37a8ba431a4e/go.mod h1:O9iIMM9iVSXUIKNcrjossDuuXLwoGNuLSDXqjtTBHJk=
+github.com/RiV-chain/ironwood v0.0.0-20231220110601-a30286562e6e h1:JLsGxvmxpuijrprn5U7gdvS97ruA8WE4FkpRS6w+l50=
+github.com/RiV-chain/ironwood v0.0.0-20231220110601-a30286562e6e/go.mod h1:O9iIMM9iVSXUIKNcrjossDuuXLwoGNuLSDXqjtTBHJk=
 github.com/apernet/quic-go v0.40.1-0.20231112225043-e7f3af208dee h1:S3r63crMLzbjjVJjiR+l6oS7Dzli1mYpxXNNlVc/qCc=
 github.com/apernet/quic-go v0.40.1-0.20231112225043-e7f3af208dee/go.mod h1:9i0/jnY+4NvJA/wdatko2/I8iRf5R0bvZQ6fbk76tRA=
 github.com/bits-and-blooms/bitset v1.3.1/go.mod h1:gIdJ4wp64HaoK2YrL1Q5/N7Y16edYb8uY+O0FJTyyDA=

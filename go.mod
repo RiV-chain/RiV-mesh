@@ -2,7 +2,7 @@ module github.com/RiV-chain/RiV-mesh
 
 go 1.21
 
-replace github.com/Arceliar/ironwood => github.com/RiV-chain/ironwood v0.0.0-20231220103331-37a8ba431a4e
+replace github.com/Arceliar/ironwood => github.com/RiV-chain/ironwood v0.0.0-20231220110601-a30286562e6e
 
 replace github.com/mikispag/dns-over-tls-forwarder => github.com/RiV-chain/dns-over-tls-forwarder v0.0.0-20230828114909-c2cd9f8d79d3
 

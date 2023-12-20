@@ -132,8 +132,9 @@ func (m *version_metadata) decode(r io.Reader, password []byte) error {
 			copy(m.domain.Key, bs[:ed25519.PublicKeySize])
 
 		case metaDomainName:
-			m.domain.Name = make(ed25519.PublicKey, ed25519.PublicKeySize)
-			copy(m.domain.Name, bs[:ed25519.PublicKeySize])
+			var n [ed25519.PublicKeySize]byte
+			copy(n[:], bs[:ed25519.PublicKeySize])
+			m.domain.Name = n
 
 		case metaPriority:
 			m.priority = bs[0]
