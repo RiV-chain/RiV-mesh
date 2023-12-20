@@ -553,6 +553,8 @@ func (l *links) connect(ctx context.Context, u *url.URL, info linkInfo, options 
 		dialer = l.unix
 	case "quic":
 		dialer = l.quic
+	case "mptcp":
+		dialer = l.mptcp
 	default:
 		return nil, ErrLinkUnrecognisedSchema
 	}
