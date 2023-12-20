@@ -15,6 +15,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/Arceliar/ironwood/types"
 	"github.com/Arceliar/phony"
 
 	"golang.org/x/crypto/blake2b"
@@ -67,7 +68,7 @@ type link struct {
 }
 
 type linkOptions struct {
-	pinnedEd25519Keys map[keyArray]struct{}
+	pinnedEd25519Keys map[types.PublicKey]struct{}
 	priority          uint8
 	tlsSNI            string
 	password          []byte
@@ -160,10 +161,10 @@ func (l *links) add(u *url.URL, sintf string, linkType linkType) error {
 				retErr = ErrLinkPinnedKeyInvalid
 				return
 			}
-			var sigPubKey keyArray
+			var sigPubKey types.PublicKey
 			copy(sigPubKey[:], sigPub)
 			if options.pinnedEd25519Keys == nil {
-				options.pinnedEd25519Keys = map[keyArray]struct{}{}
+				options.pinnedEd25519Keys = map[types.PublicKey]struct{}{}
 			}
 			options.pinnedEd25519Keys[sigPubKey] = struct{}{}
 		}
@@ -604,8 +605,7 @@ func (l *links) handler(linkType linkType, options linkOptions, conn net.Conn, s
 	// Check if the remote side matches the keys we expected. This is a bit of a weak
 	// check - in future versions we really should check a signature or something like that.
 	if pinned := options.pinnedEd25519Keys; len(pinned) > 0 {
-		var key keyArray
-		copy(key[:], meta.domain.Key)
+		key := meta.domain.Key
 		if _, allowed := pinned[key]; !allowed {
 			return fmt.Errorf("node public key that does not match pinned keys")
 		}
@@ -617,13 +617,13 @@ func (l *links) handler(linkType linkType, options linkOptions, conn net.Conn, s
 	})
 	isallowed := len(allowed) == 0
 	for k := range allowed {
-		if bytes.Equal(k[:], meta.domain.Key) {
+		if bytes.Equal(k[:], meta.domain.Key.ToSlice()) {
 			isallowed = true
 			break
 		}
 	}
 	if linkType == linkTypeIncoming && !isallowed {
-		return fmt.Errorf("node public key %q is not in AllowedPublicKeys", hex.EncodeToString(meta.domain.Key))
+		return fmt.Errorf("node public key %q is not in AllowedPublicKeys", hex.EncodeToString(meta.domain.Key.ToSlice()))
 	}
 
 	dir := "outbound"

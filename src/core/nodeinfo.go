@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/Arceliar/ironwood/types"
 	iwt "github.com/Arceliar/ironwood/types"
 	"github.com/Arceliar/phony"
 
@@ -19,7 +20,7 @@ type nodeinfo struct {
 	phony.Inbox
 	proto      *protoHandler
 	myNodeInfo json.RawMessage
-	callbacks  map[keyArray]nodeinfoCallback
+	callbacks  map[types.PublicKey]nodeinfoCallback
 }
 
 type nodeinfoCallback struct {
@@ -37,7 +38,7 @@ func (m *nodeinfo) init(proto *protoHandler) {
 
 func (m *nodeinfo) _init(proto *protoHandler) {
 	m.proto = proto
-	m.callbacks = make(map[keyArray]nodeinfoCallback)
+	m.callbacks = make(map[types.PublicKey]nodeinfoCallback)
 	m._cleanup()
 }
 
@@ -52,7 +53,7 @@ func (m *nodeinfo) _cleanup() {
 	})
 }
 
-func (m *nodeinfo) _addCallback(sender keyArray, call func(nodeinfo json.RawMessage)) {
+func (m *nodeinfo) _addCallback(sender types.PublicKey, call func(nodeinfo json.RawMessage)) {
 	m.callbacks[sender] = nodeinfoCallback{
 		created: time.Now(),
 		call:    call,
@@ -60,7 +61,7 @@ func (m *nodeinfo) _addCallback(sender keyArray, call func(nodeinfo json.RawMess
 }
 
 // Handles the callback, if there is one
-func (m *nodeinfo) _callback(sender keyArray, nodeinfo json.RawMessage) {
+func (m *nodeinfo) _callback(sender types.PublicKey, nodeinfo json.RawMessage) {
 	if callback, ok := m.callbacks[sender]; ok {
 		callback.call(nodeinfo)
 		delete(m.callbacks, sender)
@@ -110,8 +111,7 @@ func (m *nodeinfo) sendReq(from phony.Actor, key iwt.Domain, callback func(nodei
 
 func (m *nodeinfo) _sendReq(domain iwt.Domain, callback func(nodeinfo json.RawMessage)) {
 	if callback != nil {
-		var key keyArray
-		copy(key[:], domain.Key)
+		key := domain.Key
 		m._addCallback(key, callback)
 	}
 	_, _ = m.proto.core.PacketConn.WriteTo([]byte{typeSessionProto, typeProtoNodeInfoRequest}, iwt.Addr(domain))
@@ -125,8 +125,7 @@ func (m *nodeinfo) handleReq(from phony.Actor, key iwt.Domain) {
 
 func (m *nodeinfo) handleRes(from phony.Actor, domain iwt.Domain, info json.RawMessage) {
 	m.Act(from, func() {
-		var key keyArray
-		copy(key[:], domain.Key)
+		key := domain.Key
 		m._callback(key, info)
 	})
 }
@@ -148,7 +147,8 @@ func (m *nodeinfo) nodeInfoAdminHandler(in json.RawMessage) (interface{}, error)
 	if err := json.Unmarshal(in, &req); err != nil {
 		return nil, err
 	}
-	if req.Key.Key.Equal([]byte("")) {
+	var zeros [32]byte
+	if req.Key.Key.Equal(zeros) {
 		return nil, fmt.Errorf("no remote public key supplied")
 	}
 	ch := make(chan []byte, 1)
@@ -165,7 +165,7 @@ func (m *nodeinfo) nodeInfoAdminHandler(in json.RawMessage) (interface{}, error)
 		if err := msg.UnmarshalJSON(info); err != nil {
 			return nil, err
 		}
-		key := hex.EncodeToString(req.Key.Key)
+		key := hex.EncodeToString(req.Key.Key.ToSlice())
 		res := GetNodeInfoResponse{key: msg}
 		return res, nil
 	}

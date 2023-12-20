@@ -246,7 +246,7 @@ func (c *Core) CallPeer(u *url.URL, sintf string) error {
 }
 
 func (c *Core) PublicKey() ed25519.PublicKey {
-	return c.public.Key
+	return c.public.Key.ToEd()
 }
 
 // Hack to get the admin stuff working, TODO something cleaner

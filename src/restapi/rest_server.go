@@ -581,7 +581,7 @@ func (a *RestServer) prepareGetPeers() []Peer {
 		addr := a.Core.AddrForDomain(p.Domain)
 		entry := Peer{
 			net.IP(addr[:]).String(),
-			hex.EncodeToString(p.Domain.Key),
+			hex.EncodeToString(p.Domain.Key.ToSlice()),
 			string(p.Domain.GetNormalizedName()),
 			p.Port,
 			uint64(p.Priority), // can't be uint8 thanks to gobind

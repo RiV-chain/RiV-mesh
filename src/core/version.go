@@ -78,7 +78,7 @@ func (m *version_metadata) encode(privateKey ed25519.PrivateKey, password []byte
 	if err != nil {
 		return nil, err
 	}
-	n, err := hasher.Write(m.domain.Key)
+	n, err := hasher.Write(m.domain.Key[:])
 	if err != nil {
 		return nil, err
 	}
@@ -128,8 +128,8 @@ func (m *version_metadata) decode(r io.Reader, password []byte) error {
 			m.minorVer = binary.BigEndian.Uint16(bs[:2])
 
 		case metaPublicKey:
-			m.domain.Key = make(ed25519.PublicKey, ed25519.PublicKeySize)
-			copy(m.domain.Key, bs[:ed25519.PublicKeySize])
+			//m.domain.Key = make(ed25519.PublicKey, ed25519.PublicKeySize)
+			copy(m.domain.Key[:], bs[:ed25519.PublicKeySize])
 
 		case metaDomainName:
 			var n [ed25519.PublicKeySize]byte
@@ -146,12 +146,12 @@ func (m *version_metadata) decode(r io.Reader, password []byte) error {
 	if err != nil {
 		return fmt.Errorf("invalid password supplied")
 	}
-	n, err := hasher.Write(m.domain.Key)
+	n, err := hasher.Write(m.domain.Key[:])
 	if err != nil || n != ed25519.PublicKeySize {
 		return fmt.Errorf("failed to generate hash")
 	}
 	hash := hasher.Sum(nil)
-	if !ed25519.Verify(m.domain.Key, hash, sig) {
+	if !ed25519.Verify(m.domain.Key[:], hash, sig) {
 		return fmt.Errorf("password is incorrect")
 	}
 	return nil

@@ -164,7 +164,7 @@ func run(sigCh chan os.Signal) {
 
 	getNodeKey := func() types.Domain {
 		name := cfg.Domain
-		return types.Domain{Key: publicKey, Name: [ed25519.PublicKeySize]byte([]byte(name))}
+		return types.Domain{Key: types.PublicKey(publicKey), Name: [ed25519.PublicKeySize]byte([]byte(name))}
 	}
 
 	switch {

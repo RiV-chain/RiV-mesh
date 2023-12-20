@@ -1,13 +1,13 @@
 package core
 
 import (
-	"crypto/ed25519"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net"
 	"time"
 
+	"github.com/Arceliar/ironwood/types"
 	iwt "github.com/Arceliar/ironwood/types"
 	"github.com/Arceliar/phony"
 	//"github.com/RiV-chain/RiV-mesh/src/address"
@@ -28,7 +28,7 @@ type reqInfo struct {
 	timer    *time.Timer // time.AfterFunc cleanup
 }
 
-type keyArray [ed25519.PublicKeySize]byte
+type keyArray types.PublicKey
 
 type protoHandler struct {
 	phony.Inbox
@@ -36,18 +36,18 @@ type protoHandler struct {
 	core     *Core
 	nodeinfo nodeinfo
 
-	selfRequests  map[keyArray]*reqInfo
-	peersRequests map[keyArray]*reqInfo
-	dhtRequests   map[keyArray]*reqInfo
+	selfRequests  map[types.PublicKey]*reqInfo
+	peersRequests map[types.PublicKey]*reqInfo
+	dhtRequests   map[types.PublicKey]*reqInfo
 }
 
 func (p *protoHandler) init(core *Core) {
 	p.core = core
 	p.nodeinfo.init(p)
 
-	p.selfRequests = make(map[keyArray]*reqInfo)
-	p.peersRequests = make(map[keyArray]*reqInfo)
-	p.dhtRequests = make(map[keyArray]*reqInfo)
+	p.selfRequests = make(map[types.PublicKey]*reqInfo)
+	p.peersRequests = make(map[types.PublicKey]*reqInfo)
+	p.dhtRequests = make(map[types.PublicKey]*reqInfo)
 }
 
 // Common functions
@@ -104,8 +104,7 @@ func (p *protoHandler) _sendDebug(key iwt.Domain, dType uint8, data []byte) {
 
 func (p *protoHandler) sendGetSelfRequest(domain iwt.Domain, callback func([]byte)) {
 	p.Act(nil, func() {
-		var key keyArray
-		copy(key[:], domain.Key)
+		key := domain.Key
 		if info := p.selfRequests[key]; info != nil {
 			info.timer.Stop()
 			delete(p.selfRequests, key)
@@ -127,7 +126,7 @@ func (p *protoHandler) sendGetSelfRequest(domain iwt.Domain, callback func([]byt
 func (p *protoHandler) _handleGetSelfRequest(key iwt.Domain) {
 	self := p.core.GetSelf()
 	res := map[string]string{
-		"key":    hex.EncodeToString(self.Domain.Key),
+		"key":    hex.EncodeToString(self.Domain.Key.ToSlice()),
 		"domain": string(self.Domain.GetNormalizedName()),
 		"tld":    self.Tld,
 		"coords": fmt.Sprintf("%v", self.RoutingEntries),
@@ -140,8 +139,8 @@ func (p *protoHandler) _handleGetSelfRequest(key iwt.Domain) {
 }
 
 func (p *protoHandler) _handleGetSelfResponse(domain iwt.Domain, bs []byte) {
-	var key keyArray
-	copy(key[:], domain.Key)
+
+	key := domain.Key
 	if info := p.selfRequests[key]; info != nil {
 		info.timer.Stop()
 		info.callback(bs)
@@ -153,8 +152,7 @@ func (p *protoHandler) _handleGetSelfResponse(domain iwt.Domain, bs []byte) {
 
 func (p *protoHandler) sendGetPeersRequest(domain iwt.Domain, callback func([]byte)) {
 	p.Act(nil, func() {
-		var key keyArray
-		copy(key[:], domain.Key)
+		key := domain.Key
 		if info := p.peersRequests[key]; info != nil {
 			info.timer.Stop()
 			delete(p.peersRequests, key)
@@ -188,8 +186,7 @@ func (p *protoHandler) _handleGetPeersRequest(domain iwt.Domain) {
 }
 
 func (p *protoHandler) _handleGetPeersResponse(domain iwt.Domain, bs []byte) {
-	var key keyArray
-	copy(key[:], domain.Key)
+	key := domain.Key
 	if info := p.peersRequests[key]; info != nil {
 		info.timer.Stop()
 		info.callback(bs)
@@ -201,8 +198,7 @@ func (p *protoHandler) _handleGetPeersResponse(domain iwt.Domain, bs []byte) {
 
 func (p *protoHandler) sendGetDHTRequest(domain iwt.Domain, callback func([]byte)) {
 	p.Act(nil, func() {
-		var key keyArray
-		copy(key[:], domain.Key)
+		key := domain.Key
 		if info := p.dhtRequests[key]; info != nil {
 			info.timer.Stop()
 			delete(p.dhtRequests, key)
@@ -236,8 +232,7 @@ func (p *protoHandler) _handleGetTreeRequest(domain iwt.Domain) {
 }
 
 func (p *protoHandler) _handleGetTreeResponse(domain iwt.Domain, bs []byte) {
-	var key keyArray
-	copy(key[:], domain.Key)
+	key := domain.Key
 	if info := p.dhtRequests[key]; info != nil {
 		info.timer.Stop()
 		info.callback(bs)
@@ -291,9 +286,7 @@ func (p *protoHandler) getPeersHandler(in json.RawMessage) (interface{}, error) 
 	if err := json.Unmarshal(in, &req); err != nil {
 		return nil, err
 	}
-	var key keyArray
-	kbs := req.Key.Key
-	copy(key[:], kbs)
+	key := req.Key.Key
 	ch := make(chan []byte, 1)
 	p.sendGetPeersRequest(req.Key, func(info []byte) {
 		ch <- info
@@ -337,8 +330,7 @@ func (p *protoHandler) getDHTHandler(in json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(in, &req); err != nil {
 		return nil, err
 	}
-	var key keyArray
-	copy(key[:], req.Key.Key)
+	key := req.Key.Key
 	ch := make(chan []byte, 1)
 	p.sendGetDHTRequest(req.Key, func(info []byte) {
 		ch <- info

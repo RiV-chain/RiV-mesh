@@ -27,7 +27,7 @@ type keyStore struct {
 	address      core.Address
 	subnet       core.Subnet
 	mutex        sync.Mutex
-	keyToInfo    map[keyArray]*keyInfo
+	keyToInfo    map[types.PublicKey]*keyInfo
 	addrToInfo   map[core.Address]*keyInfo
 	addrBuffer   map[core.Address]*buffer
 	subnetToInfo map[core.Subnet]*keyInfo
@@ -54,7 +54,7 @@ func (k *keyStore) init(c *core.Core) {
 	k.core.SetPathNotify(func(key types.Domain) {
 		k.update(key)
 	})
-	k.keyToInfo = make(map[keyArray]*keyInfo)
+	k.keyToInfo = make(map[types.PublicKey]*keyInfo)
 	k.addrToInfo = make(map[core.Address]*keyInfo)
 	k.addrBuffer = make(map[core.Address]*buffer)
 	k.subnetToInfo = make(map[core.Subnet]*keyInfo)
@@ -122,8 +122,7 @@ func (k *keyStore) sendToSubnet(subnet core.Subnet, bs []byte) {
 
 func (k *keyStore) update(key iwt.Domain) *keyInfo {
 	k.mutex.Lock()
-	var kArray keyArray
-	copy(kArray[:], key.Key)
+	kArray := key.Key
 	var info *keyInfo
 	var packets [][]byte
 	if info = k.keyToInfo[kArray]; info == nil {
@@ -158,8 +157,7 @@ func (k *keyStore) resetTimeout(info *keyInfo) {
 	info.timeout = time.AfterFunc(keyStoreTimeout, func() {
 		k.mutex.Lock()
 		defer k.mutex.Unlock()
-		var kArray keyArray
-		copy(kArray[:], info.domain.Key)
+		kArray := info.domain.Key
 		if nfo := k.keyToInfo[kArray]; nfo == info {
 			delete(k.keyToInfo, kArray)
 		}
