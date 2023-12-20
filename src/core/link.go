@@ -36,6 +36,7 @@ type links struct {
 	unix  *linkUNIX  // UNIX interface support
 	socks *linkSOCKS // SOCKS interface support
 	quic  *linkQUIC  // QUIC interface support
+	mptcp *linkMPTCP // QUIC interface support
 	// _links can only be modified safely from within the links actor
 	_links map[linkInfo]*link // *link is nil if connection in progress
 }
@@ -95,6 +96,7 @@ func (l *links) init(c *Core) error {
 	l.unix = l.newLinkUNIX()
 	l.socks = l.newLinkSOCKS()
 	l.quic = l.newLinkQUIC()
+	l.mptcp = l.newLinkMPTCP()
 	l._links = make(map[linkInfo]*link)
 
 	var listeners []ListenAddress
@@ -421,6 +423,8 @@ func (l *links) listen(u *url.URL, sintf string) (*Listener, error) {
 		protocol = l.unix
 	case "quic":
 		protocol = l.quic
+	case "mptcp":
+		protocol = l.mptcp
 	default:
 		cancel()
 		return nil, ErrLinkUnrecognisedSchema
