@@ -48,6 +48,7 @@ require (
 	github.com/quic-go/qtls-go1-20 v0.4.1 // indirect
 	github.com/rivo/uniseg v0.3.4 // indirect
 	github.com/stretchr/testify v1.8.0 // indirect
+	github.com/vikulin/sctp v0.0.0-20221009200520-ae0f2830e422 // indirect
 	go.uber.org/mock v0.3.0 // indirect
 	golang.org/x/mod v0.11.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
