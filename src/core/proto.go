@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/Arceliar/ironwood/types"
-	iwt "github.com/Arceliar/ironwood/types"
 	"github.com/Arceliar/phony"
 	//"github.com/RiV-chain/RiV-mesh/src/address"
 )
@@ -27,8 +26,6 @@ type reqInfo struct {
 	callback func([]byte)
 	timer    *time.Timer // time.AfterFunc cleanup
 }
-
-type keyArray types.PublicKey
 
 type protoHandler struct {
 	phony.Inbox
@@ -52,7 +49,7 @@ func (p *protoHandler) init(core *Core) {
 
 // Common functions
 
-func (p *protoHandler) handleProto(from phony.Actor, key iwt.Domain, bs []byte) {
+func (p *protoHandler) handleProto(from phony.Actor, key types.Addr, bs []byte) {
 	if len(bs) == 0 {
 		return
 	}
@@ -67,13 +64,13 @@ func (p *protoHandler) handleProto(from phony.Actor, key iwt.Domain, bs []byte) 
 	}
 }
 
-func (p *protoHandler) handleDebug(from phony.Actor, key iwt.Domain, bs []byte) {
+func (p *protoHandler) handleDebug(from phony.Actor, key types.Addr, bs []byte) {
 	p.Act(from, func() {
 		p._handleDebug(key, bs)
 	})
 }
 
-func (p *protoHandler) _handleDebug(domain iwt.Domain, bs []byte) {
+func (p *protoHandler) _handleDebug(domain types.Addr, bs []byte) {
 	if len(bs) == 0 {
 		return
 	}
@@ -95,14 +92,14 @@ func (p *protoHandler) _handleDebug(domain iwt.Domain, bs []byte) {
 	}
 }
 
-func (p *protoHandler) _sendDebug(key iwt.Domain, dType uint8, data []byte) {
+func (p *protoHandler) _sendDebug(key types.Addr, dType uint8, data []byte) {
 	bs := append([]byte{typeSessionProto, typeProtoDebug, dType}, data...)
-	_, _ = p.core.PacketConn.WriteTo(bs, iwt.Addr(key))
+	_, _ = p.core.PacketConn.WriteTo(bs, key)
 }
 
 // Get self
 
-func (p *protoHandler) sendGetSelfRequest(domain iwt.Domain, callback func([]byte)) {
+func (p *protoHandler) sendGetSelfRequest(domain types.Addr, callback func([]byte)) {
 	p.Act(nil, func() {
 		key := domain.Key
 		if info := p.selfRequests[key]; info != nil {
@@ -123,7 +120,7 @@ func (p *protoHandler) sendGetSelfRequest(domain iwt.Domain, callback func([]byt
 	})
 }
 
-func (p *protoHandler) _handleGetSelfRequest(key iwt.Domain) {
+func (p *protoHandler) _handleGetSelfRequest(key types.Addr) {
 	self := p.core.GetSelf()
 	res := map[string]string{
 		"key":    hex.EncodeToString(self.Domain.Key.ToSlice()),
@@ -138,7 +135,7 @@ func (p *protoHandler) _handleGetSelfRequest(key iwt.Domain) {
 	p._sendDebug(key, typeDebugGetSelfResponse, bs)
 }
 
-func (p *protoHandler) _handleGetSelfResponse(domain iwt.Domain, bs []byte) {
+func (p *protoHandler) _handleGetSelfResponse(domain types.Addr, bs []byte) {
 
 	key := domain.Key
 	if info := p.selfRequests[key]; info != nil {
@@ -150,7 +147,7 @@ func (p *protoHandler) _handleGetSelfResponse(domain iwt.Domain, bs []byte) {
 
 // Get peers
 
-func (p *protoHandler) sendGetPeersRequest(domain iwt.Domain, callback func([]byte)) {
+func (p *protoHandler) sendGetPeersRequest(domain types.Addr, callback func([]byte)) {
 	p.Act(nil, func() {
 		key := domain.Key
 		if info := p.peersRequests[key]; info != nil {
@@ -171,7 +168,7 @@ func (p *protoHandler) sendGetPeersRequest(domain iwt.Domain, callback func([]by
 	})
 }
 
-func (p *protoHandler) _handleGetPeersRequest(domain iwt.Domain) {
+func (p *protoHandler) _handleGetPeersRequest(domain types.Addr) {
 	peers := p.core.GetPeers()
 	var bs []byte
 	for _, pinfo := range peers {
@@ -185,7 +182,7 @@ func (p *protoHandler) _handleGetPeersRequest(domain iwt.Domain) {
 	p._sendDebug(domain, typeDebugGetPeersResponse, bs)
 }
 
-func (p *protoHandler) _handleGetPeersResponse(domain iwt.Domain, bs []byte) {
+func (p *protoHandler) _handleGetPeersResponse(domain types.Addr, bs []byte) {
 	key := domain.Key
 	if info := p.peersRequests[key]; info != nil {
 		info.timer.Stop()
@@ -196,7 +193,7 @@ func (p *protoHandler) _handleGetPeersResponse(domain iwt.Domain, bs []byte) {
 
 // Get DHT
 
-func (p *protoHandler) sendGetDHTRequest(domain iwt.Domain, callback func([]byte)) {
+func (p *protoHandler) sendGetDHTRequest(domain types.Addr, callback func([]byte)) {
 	p.Act(nil, func() {
 		key := domain.Key
 		if info := p.dhtRequests[key]; info != nil {
@@ -217,7 +214,7 @@ func (p *protoHandler) sendGetDHTRequest(domain iwt.Domain, callback func([]byte
 	})
 }
 
-func (p *protoHandler) _handleGetTreeRequest(domain iwt.Domain) {
+func (p *protoHandler) _handleGetTreeRequest(domain types.Addr) {
 	dinfos := p.core.GetTree()
 	var bs []byte
 	for _, dinfo := range dinfos {
@@ -231,7 +228,7 @@ func (p *protoHandler) _handleGetTreeRequest(domain iwt.Domain) {
 	p._sendDebug(domain, typeDebugGetTreeResponse, bs)
 }
 
-func (p *protoHandler) _handleGetTreeResponse(domain iwt.Domain, bs []byte) {
+func (p *protoHandler) _handleGetTreeResponse(domain types.Addr, bs []byte) {
 	key := domain.Key
 	if info := p.dhtRequests[key]; info != nil {
 		info.timer.Stop()
@@ -243,7 +240,7 @@ func (p *protoHandler) _handleGetTreeResponse(domain iwt.Domain, bs []byte) {
 // Admin socket stuff for "Get self"
 
 type DebugGetSelfRequest struct {
-	Key iwt.Domain `json:"key"`
+	Key types.Domain `json:"key"`
 }
 
 type DebugGetSelfResponse map[string]interface{}
@@ -254,7 +251,7 @@ func (p *protoHandler) getSelfHandler(in json.RawMessage) (interface{}, error) {
 		return nil, err
 	}
 	ch := make(chan []byte, 1)
-	p.sendGetSelfRequest(req.Key, func(info []byte) {
+	p.sendGetSelfRequest(types.Addr(req.Key), func(info []byte) {
 		ch <- info
 	})
 	timer := time.NewTimer(6 * time.Second)
@@ -276,7 +273,7 @@ func (p *protoHandler) getSelfHandler(in json.RawMessage) (interface{}, error) {
 // Admin socket stuff for "Get peers"
 
 type DebugGetPeersRequest struct {
-	Key iwt.Domain `json:"key"`
+	Key types.Domain `json:"key"`
 }
 
 type DebugGetPeersResponse map[string]interface{}
@@ -288,7 +285,7 @@ func (p *protoHandler) getPeersHandler(in json.RawMessage) (interface{}, error) 
 	}
 	key := req.Key.Key
 	ch := make(chan []byte, 1)
-	p.sendGetPeersRequest(req.Key, func(info []byte) {
+	p.sendGetPeersRequest(types.Addr(req.Key), func(info []byte) {
 		ch <- info
 	})
 	timer := time.NewTimer(6 * time.Second)
@@ -320,7 +317,7 @@ func (p *protoHandler) getPeersHandler(in json.RawMessage) (interface{}, error) 
 // Admin socket stuff for "Get DHT"
 
 type DebugGetDHTRequest struct {
-	Key iwt.Domain `json:"key"`
+	Key types.Domain `json:"key"`
 }
 
 type DebugGetDHTResponse map[string]interface{}
@@ -332,7 +329,7 @@ func (p *protoHandler) getDHTHandler(in json.RawMessage) (interface{}, error) {
 	}
 	key := req.Key.Key
 	ch := make(chan []byte, 1)
-	p.sendGetDHTRequest(req.Key, func(info []byte) {
+	p.sendGetDHTRequest(types.Addr(req.Key), func(info []byte) {
 		ch <- info
 	})
 	timer := time.NewTimer(6 * time.Second)

@@ -216,9 +216,8 @@ func (c *Core) ReadFrom(p []byte) (n int, from net.Addr, err error) {
 		case typeSessionTraffic:
 			// This is what we want to handle here
 		case typeSessionProto:
-			key := iwt.Domain(from.(iwt.Addr))
 			data := append([]byte(nil), bs[1:n]...)
-			c.proto.handleProto(nil, key, data)
+			c.proto.handleProto(nil, from.(iwt.Addr), data)
 			continue
 		default:
 			continue
