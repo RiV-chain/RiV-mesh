@@ -463,6 +463,12 @@ func (l *links) listen(u *url.URL, sintf string) (*Listener, error) {
 			if err != nil {
 				return
 			}
+			if u.Scheme == "mptcp" {
+				isMultipathTCP, err := conn.(*net.TCPConn).MultipathTCP() // Check if the connection supports mptcp
+				l.core.log.Infof("Accepted connection from %s with mptcp: %t, err: %v\n", conn.RemoteAddr(), isMultipathTCP, err)
+			} else {
+				l.core.log.Warnf("MultipathTCP is not on. TCP will be used.")
+			}
 			go func(conn net.Conn) {
 				defer conn.Close()
 

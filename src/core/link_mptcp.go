@@ -108,6 +108,11 @@ func (l *linkMPTCP) dialerFor(dst *net.TCPAddr, sintf string) (*net.Dialer, erro
 		Control:   l.tcp.tcpContext,
 	}
 	dialer.SetMultipathTCP(true)
+	if dialer.MultipathTCP() {
+		l.core.log.Infof("Enabled MPTCP")
+	} else {
+		l.core.log.Warnf("MultipathTCP is not on after having been forced to on. TCP will be used.")
+	}
 	if sintf != "" {
 		dialer.Control = l.tcp.getControl(sintf)
 		ief, err := net.InterfaceByName(sintf)
