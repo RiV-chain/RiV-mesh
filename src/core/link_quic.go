@@ -41,9 +41,14 @@ func (l *links) newLinkQUIC() *linkQUIC {
 		links:     l,
 		tlsconfig: l.core.config.tls.Clone(),
 		quicconfig: &quic.Config{
-			MaxIdleTimeout:  time.Minute,
-			KeepAlivePeriod: time.Second * 20,
-			TokenStore:      quic.NewLRUTokenStore(255, 255),
+			MaxIdleTimeout:                 time.Minute,
+			KeepAlivePeriod:                time.Second * 20,
+			TokenStore:                     quic.NewLRUTokenStore(255, 255),
+			InitialStreamReceiveWindow:     1145141,
+			MaxStreamReceiveWindow:         1145142,
+			InitialConnectionReceiveWindow: 1145143,
+			MaxConnectionReceiveWindow:     1145144,
+			EnableDatagrams:                true,
 		},
 	}
 	return lt
