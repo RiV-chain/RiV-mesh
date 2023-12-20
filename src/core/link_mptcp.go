@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"net"
 	"net/url"
-	"strconv"
-	"time"
 
 	"github.com/Arceliar/phony"
 )
@@ -14,57 +12,28 @@ import (
 type linkMPTCP struct {
 	phony.Inbox
 	*links
-	listenconfig *net.ListenConfig
-	_listeners   map[*Listener]context.CancelFunc
+	tcp        *linkTCP
+	listener   *net.ListenConfig
+	_listeners map[*Listener]context.CancelFunc
 }
 
-func (l *links) newLinkMPTCP() *linkMPTCP {
+func (l *links) newLinkMPTCP(tcp *linkTCP) *linkMPTCP {
 	lt := &linkMPTCP{
 		links: l,
-		listenconfig: &net.ListenConfig{
+		tcp:   tcp,
+		listener: &net.ListenConfig{
+			Control:   tcp.tcpContext,
 			KeepAlive: -1,
 		},
 		_listeners: map[*Listener]context.CancelFunc{},
 	}
-	lt.listenconfig.Control = lt.tcp.tcpContext
-	lt.listenconfig.SetMultipathTCP(true)
+	lt.listener.Control = lt.tcp.tcpContext
+	lt.listener.SetMultipathTCP(true)
 	return lt
 }
 
-func (l *linkMPTCP) dialersFor(url *url.URL, info linkInfo) ([]*tcpDialer, error) {
-	host, p, err := net.SplitHostPort(url.Host)
-	if err != nil {
-		return nil, err
-	}
-	port, err := strconv.Atoi(p)
-	if err != nil {
-		return nil, err
-	}
-	ips, err := net.LookupIP(host)
-	if err != nil {
-		return nil, err
-	}
-	dialers := make([]*tcpDialer, 0, len(ips))
-	for _, ip := range ips {
-		addr := &net.TCPAddr{
-			IP:   ip,
-			Port: port,
-		}
-		dialer, err := l.dialerFor(addr, info.sintf)
-		if err != nil {
-			continue
-		}
-		dialers = append(dialers, &tcpDialer{
-			info:   info,
-			dialer: dialer,
-			addr:   addr,
-		})
-	}
-	return dialers, nil
-}
-
 func (l *linkMPTCP) dial(ctx context.Context, url *url.URL, info linkInfo, options linkOptions) (net.Conn, error) {
-	dialers, err := l.dialersFor(url, info)
+	dialers, err := l.tcp.dialersFor(url, info)
 	if err != nil {
 		return nil, err
 	}
@@ -73,6 +42,12 @@ func (l *linkMPTCP) dial(ctx context.Context, url *url.URL, info linkInfo, optio
 	}
 	for _, d := range dialers {
 		var conn net.Conn
+		d.dialer.SetMultipathTCP(true)
+		if d.dialer.MultipathTCP() {
+			l.core.log.Infof("Enabled MPTCP")
+		} else {
+			l.core.log.Infof("Enabled TCP")
+		}
 		conn, err = d.dialer.DialContext(ctx, "tcp", d.addr.String())
 		if err != nil {
 			l.core.log.Warnf("Failed to connect to %s: %s", d.addr, err)
@@ -90,70 +65,5 @@ func (l *linkMPTCP) listen(ctx context.Context, url *url.URL, sintf string) (net
 			hostport = fmt.Sprintf("[%s%%%s]:%s", host, sintf, port)
 		}
 	}
-	return l.listenconfig.Listen(ctx, "tcp", hostport)
-}
-
-func (l *linkMPTCP) dialerFor(dst *net.TCPAddr, sintf string) (*net.Dialer, error) {
-	if dst.IP.IsLinkLocalUnicast() {
-		if sintf != "" {
-			dst.Zone = sintf
-		}
-		if dst.Zone == "" {
-			return nil, fmt.Errorf("link-local address requires a zone")
-		}
-	}
-	dialer := &net.Dialer{
-		Timeout:   time.Second * 5,
-		KeepAlive: -1,
-		Control:   l.tcp.tcpContext,
-	}
-	dialer.SetMultipathTCP(true)
-	if dialer.MultipathTCP() {
-		l.core.log.Infof("Enabled MPTCP")
-	} else {
-		l.core.log.Warnf("MultipathTCP is not on after having been forced to on. TCP will be used.")
-	}
-	if sintf != "" {
-		dialer.Control = l.tcp.getControl(sintf)
-		ief, err := net.InterfaceByName(sintf)
-		if err != nil {
-			return nil, fmt.Errorf("interface %q not found", sintf)
-		}
-		if ief.Flags&net.FlagUp == 0 {
-			return nil, fmt.Errorf("interface %q is not up", sintf)
-		}
-		addrs, err := ief.Addrs()
-		if err != nil {
-			return nil, fmt.Errorf("interface %q addresses not available: %w", sintf, err)
-		}
-		for addrindex, addr := range addrs {
-			src, _, err := net.ParseCIDR(addr.String())
-			if err != nil {
-				continue
-			}
-			if !src.IsGlobalUnicast() && !src.IsLinkLocalUnicast() {
-				continue
-			}
-			bothglobal := src.IsGlobalUnicast() == dst.IP.IsGlobalUnicast()
-			bothlinklocal := src.IsLinkLocalUnicast() == dst.IP.IsLinkLocalUnicast()
-			if !bothglobal && !bothlinklocal {
-				continue
-			}
-			if (src.To4() != nil) != (dst.IP.To4() != nil) {
-				continue
-			}
-			if bothglobal || bothlinklocal || addrindex == len(addrs)-1 {
-				dialer.LocalAddr = &net.TCPAddr{
-					IP:   src,
-					Port: 0,
-					Zone: sintf,
-				}
-				break
-			}
-		}
-		if dialer.LocalAddr == nil {
-			return nil, fmt.Errorf("no suitable source address found on interface %q", sintf)
-		}
-	}
-	return dialer, nil
+	return l.listener.Listen(ctx, "tcp", hostport)
 }
