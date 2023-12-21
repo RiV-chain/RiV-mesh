@@ -1,7 +1,6 @@
 package ipv6rwc
 
 import (
-	"crypto/ed25519"
 	"errors"
 	"fmt"
 	"net"
@@ -19,8 +18,6 @@ import (
 )
 
 const keyStoreTimeout = 2 * time.Minute
-
-type keyArray [ed25519.PublicKeySize]byte
 
 type keyStore struct {
 	core         *core.Core

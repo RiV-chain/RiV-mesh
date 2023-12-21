@@ -283,7 +283,8 @@ func (p *protoHandler) getPeersHandler(in json.RawMessage) (interface{}, error) 
 	if err := json.Unmarshal(in, &req); err != nil {
 		return nil, err
 	}
-	key := req.Key.Key
+
+	key := req.Key.Key // nolint:unused
 	ch := make(chan []byte, 1)
 	p.sendGetPeersRequest(types.Addr(req.Key), func(info []byte) {
 		ch <- info
@@ -327,7 +328,7 @@ func (p *protoHandler) getDHTHandler(in json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(in, &req); err != nil {
 		return nil, err
 	}
-	key := req.Key.Key
+	key := req.Key.Key // nolint:unused
 	ch := make(chan []byte, 1)
 	p.sendGetDHTRequest(types.Addr(req.Key), func(info []byte) {
 		ch <- info
