@@ -7,9 +7,8 @@ import (
 	"net"
 	"time"
 
-	"github.com/Arceliar/ironwood/types"
+	iwt "github.com/Arceliar/ironwood/types"
 	"github.com/Arceliar/phony"
-	//"github.com/RiV-chain/RiV-mesh/src/address"
 )
 
 const (
@@ -33,23 +32,22 @@ type protoHandler struct {
 	core     *Core
 	nodeinfo nodeinfo
 
-	selfRequests  map[types.PublicKey]*reqInfo
-	peersRequests map[types.PublicKey]*reqInfo
-	dhtRequests   map[types.PublicKey]*reqInfo
+	selfRequests  map[iwt.PublicKey]*reqInfo
+	peersRequests map[iwt.PublicKey]*reqInfo
+	treeRequests  map[iwt.PublicKey]*reqInfo
 }
 
 func (p *protoHandler) init(core *Core) {
 	p.core = core
 	p.nodeinfo.init(p)
 
-	p.selfRequests = make(map[types.PublicKey]*reqInfo)
-	p.peersRequests = make(map[types.PublicKey]*reqInfo)
-	p.dhtRequests = make(map[types.PublicKey]*reqInfo)
+	p.selfRequests = make(map[iwt.PublicKey]*reqInfo)
+	p.peersRequests = make(map[iwt.PublicKey]*reqInfo)
 }
 
 // Common functions
 
-func (p *protoHandler) handleProto(from phony.Actor, key types.Addr, bs []byte) {
+func (p *protoHandler) handleProto(from phony.Actor, key iwt.Addr, bs []byte) {
 	if len(bs) == 0 {
 		return
 	}
@@ -64,13 +62,13 @@ func (p *protoHandler) handleProto(from phony.Actor, key types.Addr, bs []byte) 
 	}
 }
 
-func (p *protoHandler) handleDebug(from phony.Actor, key types.Addr, bs []byte) {
+func (p *protoHandler) handleDebug(from phony.Actor, key iwt.Addr, bs []byte) {
 	p.Act(from, func() {
 		p._handleDebug(key, bs)
 	})
 }
 
-func (p *protoHandler) _handleDebug(domain types.Addr, bs []byte) {
+func (p *protoHandler) _handleDebug(domain iwt.Addr, bs []byte) {
 	if len(bs) == 0 {
 		return
 	}
@@ -92,14 +90,14 @@ func (p *protoHandler) _handleDebug(domain types.Addr, bs []byte) {
 	}
 }
 
-func (p *protoHandler) _sendDebug(key types.Addr, dType uint8, data []byte) {
+func (p *protoHandler) _sendDebug(key iwt.Addr, dType uint8, data []byte) {
 	bs := append([]byte{typeSessionProto, typeProtoDebug, dType}, data...)
 	_, _ = p.core.PacketConn.WriteTo(bs, key)
 }
 
 // Get self
 
-func (p *protoHandler) sendGetSelfRequest(domain types.Addr, callback func([]byte)) {
+func (p *protoHandler) sendGetSelfRequest(domain iwt.Addr, callback func([]byte)) {
 	p.Act(nil, func() {
 		key := domain.Key
 		if info := p.selfRequests[key]; info != nil {
@@ -120,7 +118,7 @@ func (p *protoHandler) sendGetSelfRequest(domain types.Addr, callback func([]byt
 	})
 }
 
-func (p *protoHandler) _handleGetSelfRequest(key types.Addr) {
+func (p *protoHandler) _handleGetSelfRequest(key iwt.Addr) {
 	self := p.core.GetSelf()
 	res := map[string]string{
 		"key":    hex.EncodeToString(self.Domain.Key.ToSlice()),
@@ -135,7 +133,7 @@ func (p *protoHandler) _handleGetSelfRequest(key types.Addr) {
 	p._sendDebug(key, typeDebugGetSelfResponse, bs)
 }
 
-func (p *protoHandler) _handleGetSelfResponse(domain types.Addr, bs []byte) {
+func (p *protoHandler) _handleGetSelfResponse(domain iwt.Addr, bs []byte) {
 
 	key := domain.Key
 	if info := p.selfRequests[key]; info != nil {
@@ -147,7 +145,7 @@ func (p *protoHandler) _handleGetSelfResponse(domain types.Addr, bs []byte) {
 
 // Get peers
 
-func (p *protoHandler) sendGetPeersRequest(domain types.Addr, callback func([]byte)) {
+func (p *protoHandler) sendGetPeersRequest(domain iwt.Addr, callback func([]byte)) {
 	p.Act(nil, func() {
 		key := domain.Key
 		if info := p.peersRequests[key]; info != nil {
@@ -168,7 +166,7 @@ func (p *protoHandler) sendGetPeersRequest(domain types.Addr, callback func([]by
 	})
 }
 
-func (p *protoHandler) _handleGetPeersRequest(domain types.Addr) {
+func (p *protoHandler) _handleGetPeersRequest(domain iwt.Addr) {
 	peers := p.core.GetPeers()
 	var bs []byte
 	for _, pinfo := range peers {
@@ -182,7 +180,7 @@ func (p *protoHandler) _handleGetPeersRequest(domain types.Addr) {
 	p._sendDebug(domain, typeDebugGetPeersResponse, bs)
 }
 
-func (p *protoHandler) _handleGetPeersResponse(domain types.Addr, bs []byte) {
+func (p *protoHandler) _handleGetPeersResponse(domain iwt.Addr, bs []byte) {
 	key := domain.Key
 	if info := p.peersRequests[key]; info != nil {
 		info.timer.Stop()
@@ -191,7 +189,7 @@ func (p *protoHandler) _handleGetPeersResponse(domain types.Addr, bs []byte) {
 	}
 }
 
-func (p *protoHandler) _handleGetTreeRequest(domain types.Addr) {
+func (p *protoHandler) _handleGetTreeRequest(domain iwt.Addr) {
 	dinfos := p.core.GetTree()
 	var bs []byte
 	for _, dinfo := range dinfos {
@@ -205,19 +203,19 @@ func (p *protoHandler) _handleGetTreeRequest(domain types.Addr) {
 	p._sendDebug(domain, typeDebugGetTreeResponse, bs)
 }
 
-func (p *protoHandler) _handleGetTreeResponse(domain types.Addr, bs []byte) {
+func (p *protoHandler) _handleGetTreeResponse(domain iwt.Addr, bs []byte) {
 	key := domain.Key
-	if info := p.dhtRequests[key]; info != nil {
+	if info := p.treeRequests[key]; info != nil {
 		info.timer.Stop()
 		info.callback(bs)
-		delete(p.dhtRequests, key)
+		delete(p.treeRequests, key)
 	}
 }
 
 // Admin socket stuff for "Get self"
 
 type DebugGetSelfRequest struct {
-	Key types.Domain `json:"key"`
+	Key iwt.Domain `json:"key"`
 }
 
 type DebugGetSelfResponse map[string]interface{}
@@ -228,7 +226,7 @@ func (p *protoHandler) getSelfHandler(in json.RawMessage) (interface{}, error) {
 		return nil, err
 	}
 	ch := make(chan []byte, 1)
-	p.sendGetSelfRequest(types.Addr(req.Key), func(info []byte) {
+	p.sendGetSelfRequest(iwt.Addr(req.Key), func(info []byte) {
 		ch <- info
 	})
 	timer := time.NewTimer(6 * time.Second)
@@ -250,7 +248,7 @@ func (p *protoHandler) getSelfHandler(in json.RawMessage) (interface{}, error) {
 // Admin socket stuff for "Get peers"
 
 type DebugGetPeersRequest struct {
-	Key types.Domain `json:"key"`
+	Key iwt.Domain `json:"key"`
 }
 
 type DebugGetPeersResponse map[string]interface{}
@@ -263,7 +261,7 @@ func (p *protoHandler) getPeersHandler(in json.RawMessage) (interface{}, error) 
 
 	key := req.Key.Key //nolint:all
 	ch := make(chan []byte, 1)
-	p.sendGetPeersRequest(types.Addr(req.Key), func(info []byte) {
+	p.sendGetPeersRequest(iwt.Addr(req.Key), func(info []byte) {
 		ch <- info
 	})
 	timer := time.NewTimer(6 * time.Second)

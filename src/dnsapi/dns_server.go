@@ -10,7 +10,7 @@ import (
 
 	"github.com/gologme/log"
 
-	"github.com/Arceliar/ironwood/types"
+	iwt "github.com/Arceliar/ironwood/types"
 	"github.com/RiV-chain/RiV-mesh/src/core"
 	"github.com/miekg/dns"
 	"github.com/mikispag/dns-over-tls-forwarder/proxy"
@@ -66,7 +66,7 @@ func (s *DnsServer) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 				st := name[len(name)-1]
 				var pub [ed25519.PublicKeySize]byte
 				if len(st) > 0 {
-					lookupIp := s.Core.AddrForDomain(types.NewDomain(st, pub[:]))
+					lookupIp := s.Core.AddrForDomain(iwt.NewDomain(st, pub[:]))
 					if bytes.Equal(lookupIp[:], s.Core.Address()[:]) {
 						//response with an exising A or AAAA for the local server
 					} else {
@@ -86,7 +86,7 @@ func (s *DnsServer) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 				}
 			} else {
 				var bytes [ed25519.PublicKeySize]byte
-				addr := s.Core.AddrForDomain(types.NewDomain(name[0], bytes[:]))
+				addr := s.Core.AddrForDomain(iwt.NewDomain(name[0], bytes[:]))
 				aaaaRecord := &dns.AAAA{
 					Hdr:  dns.RR_Header{Name: q.Name, Rrtype: dns.TypeAAAA, Class: dns.ClassINET, Ttl: 60},
 					AAAA: net.IP(addr[:]),

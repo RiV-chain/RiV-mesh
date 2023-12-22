@@ -7,10 +7,8 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/Arceliar/ironwood/types"
+	iwt "github.com/Arceliar/ironwood/types"
 	"github.com/Arceliar/phony"
-
-	//"github.com/RiV-chain/RiV-mesh/src/crypto"
 
 	"github.com/RiV-chain/RiV-mesh/src/version"
 )
@@ -19,7 +17,7 @@ type nodeinfo struct {
 	phony.Inbox
 	proto      *protoHandler
 	myNodeInfo json.RawMessage
-	callbacks  map[types.PublicKey]nodeinfoCallback
+	callbacks  map[iwt.PublicKey]nodeinfoCallback
 }
 
 type nodeinfoCallback struct {
@@ -37,7 +35,7 @@ func (m *nodeinfo) init(proto *protoHandler) {
 
 func (m *nodeinfo) _init(proto *protoHandler) {
 	m.proto = proto
-	m.callbacks = make(map[types.PublicKey]nodeinfoCallback)
+	m.callbacks = make(map[iwt.PublicKey]nodeinfoCallback)
 	m._cleanup()
 }
 
@@ -52,7 +50,7 @@ func (m *nodeinfo) _cleanup() {
 	})
 }
 
-func (m *nodeinfo) _addCallback(sender types.PublicKey, call func(nodeinfo json.RawMessage)) {
+func (m *nodeinfo) _addCallback(sender iwt.PublicKey, call func(nodeinfo json.RawMessage)) {
 	m.callbacks[sender] = nodeinfoCallback{
 		created: time.Now(),
 		call:    call,
@@ -60,7 +58,7 @@ func (m *nodeinfo) _addCallback(sender types.PublicKey, call func(nodeinfo json.
 }
 
 // Handles the callback, if there is one
-func (m *nodeinfo) _callback(sender types.PublicKey, nodeinfo json.RawMessage) {
+func (m *nodeinfo) _callback(sender iwt.PublicKey, nodeinfo json.RawMessage) {
 	if callback, ok := m.callbacks[sender]; ok {
 		callback.call(nodeinfo)
 		delete(m.callbacks, sender)
@@ -102,34 +100,34 @@ func (m *nodeinfo) _setNodeInfo(given map[string]interface{}, privacy bool) erro
 	}
 }
 
-func (m *nodeinfo) sendReq(from phony.Actor, key types.Domain, callback func(nodeinfo json.RawMessage)) {
+func (m *nodeinfo) sendReq(from phony.Actor, key iwt.Domain, callback func(nodeinfo json.RawMessage)) {
 	m.Act(from, func() {
 		m._sendReq(key, callback)
 	})
 }
 
-func (m *nodeinfo) _sendReq(domain types.Domain, callback func(nodeinfo json.RawMessage)) {
+func (m *nodeinfo) _sendReq(domain iwt.Domain, callback func(nodeinfo json.RawMessage)) {
 	if callback != nil {
 		key := domain.Key
 		m._addCallback(key, callback)
 	}
-	_, _ = m.proto.core.PacketConn.WriteTo([]byte{typeSessionProto, typeProtoNodeInfoRequest}, types.Addr(domain))
+	_, _ = m.proto.core.PacketConn.WriteTo([]byte{typeSessionProto, typeProtoNodeInfoRequest}, iwt.Addr(domain))
 }
 
-func (m *nodeinfo) handleReq(from phony.Actor, key types.Addr) {
+func (m *nodeinfo) handleReq(from phony.Actor, key iwt.Addr) {
 	m.Act(from, func() {
 		m._sendRes(key)
 	})
 }
 
-func (m *nodeinfo) handleRes(from phony.Actor, domain types.Addr, info json.RawMessage) {
+func (m *nodeinfo) handleRes(from phony.Actor, domain iwt.Addr, info json.RawMessage) {
 	m.Act(from, func() {
 		key := domain.Key
 		m._callback(key, info)
 	})
 }
 
-func (m *nodeinfo) _sendRes(key types.Addr) {
+func (m *nodeinfo) _sendRes(key iwt.Addr) {
 	bs := append([]byte{typeSessionProto, typeProtoNodeInfoResponse}, m._getNodeInfo()...)
 	_, _ = m.proto.core.PacketConn.WriteTo(bs, key)
 }
@@ -137,7 +135,7 @@ func (m *nodeinfo) _sendRes(key types.Addr) {
 // Admin socket stuff
 
 type GetNodeInfoRequest struct {
-	Key types.Domain `json:"key"`
+	Key iwt.Domain `json:"key"`
 }
 type GetNodeInfoResponse map[string]json.RawMessage
 

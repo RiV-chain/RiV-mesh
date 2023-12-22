@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/Arceliar/ironwood/types"
+	iwt "github.com/Arceliar/ironwood/types"
 	"golang.org/x/crypto/blake2b"
 )
 
@@ -21,7 +21,7 @@ import (
 type version_metadata struct {
 	majorVer uint16
 	minorVer uint16
-	domain   types.Domain
+	domain   iwt.Domain
 	priority uint8
 }
 
@@ -113,7 +113,7 @@ func (m *version_metadata) decode(r io.Reader, password []byte) error {
 	sig := bs[len(bs)-ed25519.SignatureSize:]
 	bs = bs[:len(bs)-ed25519.SignatureSize]
 
-	m.domain = types.Domain{}
+	m.domain = iwt.Domain{}
 	for len(bs) >= 4 {
 		op := binary.BigEndian.Uint16(bs[:2])
 		oplen := binary.BigEndian.Uint16(bs[2:4])

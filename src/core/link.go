@@ -15,7 +15,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/Arceliar/ironwood/types"
+	iwt "github.com/Arceliar/ironwood/types"
 	"github.com/Arceliar/phony"
 
 	"golang.org/x/crypto/blake2b"
@@ -68,7 +68,7 @@ type link struct {
 }
 
 type linkOptions struct {
-	pinnedEd25519Keys map[types.PublicKey]struct{}
+	pinnedEd25519Keys map[iwt.PublicKey]struct{}
 	priority          uint8
 	tlsSNI            string
 	password          []byte
@@ -161,10 +161,10 @@ func (l *links) add(u *url.URL, sintf string, linkType linkType) error {
 				retErr = ErrLinkPinnedKeyInvalid
 				return
 			}
-			var sigPubKey types.PublicKey
+			var sigPubKey iwt.PublicKey
 			copy(sigPubKey[:], sigPub)
 			if options.pinnedEd25519Keys == nil {
-				options.pinnedEd25519Keys = map[types.PublicKey]struct{}{}
+				options.pinnedEd25519Keys = map[iwt.PublicKey]struct{}{}
 			}
 			options.pinnedEd25519Keys[sigPubKey] = struct{}{}
 		}

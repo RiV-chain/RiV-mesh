@@ -8,7 +8,7 @@ import (
 	"crypto/tls"
 	"testing"
 
-	"github.com/Arceliar/ironwood/types"
+	iwt "github.com/Arceliar/ironwood/types"
 )
 
 func (c *Core) TestAddress_Address_IsValid(t *testing.T) {
@@ -90,7 +90,7 @@ func TestAddrForDomain(t *testing.T) {
 		251, 141, 171, 8, 170, 152, 227, 5, 82, 138, 184, 79, 65, 158, 110, 251,
 	}
 
-	domain := types.NewDomain(name, key)
+	domain := iwt.NewDomain(name, key)
 	addr := core.AddrForDomain(domain)
 
 	if addr == nil {
@@ -105,7 +105,7 @@ func TestAddrForDomain(t *testing.T) {
 func TestGetAddressDomain(t *testing.T) {
 	domainName := "example"
 	var bytes [ed25519.PublicKeySize]byte
-	expectedDomainName := types.NewDomain(domainName, bytes[:])
+	expectedDomainName := iwt.NewDomain(domainName, bytes[:])
 	// Mock Core instance with GetPrefix method
 	core := &Core{}
 
@@ -115,7 +115,7 @@ func TestGetAddressDomain(t *testing.T) {
 
 	domain := core.GetAddressDomain(ipv6Address)
 
-	if domain.Equal(types.Domain{}) {
+	if domain.Equal(iwt.Domain{}) {
 		t.Errorf("Expected non-empty domain, but got empty.")
 	}
 
@@ -153,7 +153,7 @@ func TestSubnetForDomain(t *testing.T) {
 		251, 141, 171, 8, 170, 152, 227, 5, 82, 138, 184, 79, 65, 158, 110, 251,
 	}
 
-	domain := types.NewDomain(name, key)
+	domain := iwt.NewDomain(name, key)
 	addr := core.SubnetForDomain(domain)
 
 	if addr == nil {
@@ -168,7 +168,7 @@ func TestSubnetForDomain(t *testing.T) {
 func TestGetSubnetDomain(t *testing.T) {
 	domainName := "example"
 	var bytes [ed25519.PublicKeySize]byte
-	expectedDomainName := types.NewDomain(domainName, bytes[:])
+	expectedDomainName := iwt.NewDomain(domainName, bytes[:])
 	// Mock Core instance with GetPrefix method
 	core := &Core{}
 
@@ -178,7 +178,7 @@ func TestGetSubnetDomain(t *testing.T) {
 
 	domain := core.GetSubnetDomain(ipv6Address)
 
-	if domain.Equal(types.Domain{}) {
+	if domain.Equal(iwt.Domain{}) {
 		t.Errorf("Expected non-empty domain, but got empty.")
 	}
 
@@ -214,12 +214,12 @@ func TestMaxLengthDomain(t *testing.T) {
 		251, 141, 171, 8, 170, 152, 227, 5, 82, 138, 184, 79, 65, 158, 110, 251,
 	}
 
-	domain := types.NewDomain(name, key)
+	domain := iwt.NewDomain(name, key)
 	addr := *core.AddrForDomain(domain)
 
 	expectedDomain := core.GetAddressDomain(addr)
 
-	if expectedDomain.Equal(types.Domain{}) {
+	if expectedDomain.Equal(iwt.Domain{}) {
 		t.Errorf("Expected non-empty domain, but got empty.")
 	}
 

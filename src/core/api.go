@@ -10,30 +10,30 @@ import (
 	"net"
 	"net/url"
 
-	"github.com/Arceliar/ironwood/network"
-	"github.com/Arceliar/ironwood/types"
+	iwn "github.com/Arceliar/ironwood/network"
+	iwt "github.com/Arceliar/ironwood/types"
 	"github.com/Arceliar/phony"
 )
 
 type LabelInfo struct {
 	Sig    []byte
-	Domain types.Domain
-	Root   types.Domain
+	Domain iwt.Domain
+	Root   iwt.Domain
 	Seq    uint64
 	Beacon uint64
 	Path   []uint64
 }
 
 type SelfInfo struct {
-	Domain         types.Domain
+	Domain         iwt.Domain
 	PrivateKey     ed25519.PrivateKey
 	Tld            string
 	RoutingEntries uint64
 }
 
 type PeerInfo struct {
-	Domain        types.Domain
-	Root          types.Domain
+	Domain        iwt.Domain
+	Root          iwt.Domain
 	URI           string
 	Up            bool
 	Inbound       bool
@@ -93,7 +93,7 @@ func (c *Core) GetSelf() SelfInfo {
 
 func (c *Core) GetPeers() []PeerInfo {
 	peers := []PeerInfo{}
-	conns := map[net.Conn]network.DebugPeerInfo{}
+	conns := map[net.Conn]iwn.DebugPeerInfo{}
 	iwpeers := c.PacketConn.PacketConn.Debug.GetPeers()
 	for _, p := range iwpeers {
 		conns[p.Conn] = p

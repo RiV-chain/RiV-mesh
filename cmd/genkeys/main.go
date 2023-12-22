@@ -18,7 +18,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/Arceliar/ironwood/types"
+	iwt "github.com/Arceliar/ironwood/types"
 	"github.com/RiV-chain/RiV-mesh/src/core"
 )
 
@@ -45,7 +45,7 @@ func main() {
 			fmt.Println("Pub:", hex.EncodeToString(newKey.pub))
 			c := &core.Core{}
 			var bytes [ed25519.PublicKeySize]byte
-			addr := c.AddrForDomain(types.Domain{Key: bytes, Name: [32]byte(newKey.pub)})
+			addr := c.AddrForDomain(iwt.Domain{Key: bytes, Name: [32]byte(newKey.pub)})
 			fmt.Println("IP:", net.IP(addr[:]).String())
 		}
 	}

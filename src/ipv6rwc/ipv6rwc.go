@@ -10,10 +10,8 @@ import (
 	"golang.org/x/net/icmp"
 	"golang.org/x/net/ipv6"
 
-	"github.com/Arceliar/ironwood/types"
 	iwt "github.com/Arceliar/ironwood/types"
 
-	//"github.com/RiV-chain/RiV-mesh/src/address"
 	"github.com/RiV-chain/RiV-mesh/src/core"
 )
 
@@ -24,7 +22,7 @@ type keyStore struct {
 	address      core.Address
 	subnet       core.Subnet
 	mutex        sync.Mutex
-	keyToInfo    map[types.PublicKey]*keyInfo
+	keyToInfo    map[iwt.PublicKey]*keyInfo
 	addrToInfo   map[core.Address]*keyInfo
 	addrBuffer   map[core.Address]*buffer
 	subnetToInfo map[core.Subnet]*keyInfo
@@ -33,7 +31,7 @@ type keyStore struct {
 }
 
 type keyInfo struct {
-	domain  types.Domain
+	domain  iwt.Domain
 	address core.Address
 	subnet  core.Subnet
 	timeout *time.Timer // From calling a time.AfterFunc to do cleanup
@@ -48,10 +46,10 @@ func (k *keyStore) init(c *core.Core) {
 	k.core = c
 	k.address = *c.AddrForDomain(k.core.GetSelf().Domain)
 	k.subnet = *c.SubnetForDomain(k.core.GetSelf().Domain)
-	k.core.SetPathNotify(func(key types.Domain) {
+	k.core.SetPathNotify(func(key iwt.Domain) {
 		k.update(key)
 	})
-	k.keyToInfo = make(map[types.PublicKey]*keyInfo)
+	k.keyToInfo = make(map[iwt.PublicKey]*keyInfo)
 	k.addrToInfo = make(map[core.Address]*keyInfo)
 	k.addrBuffer = make(map[core.Address]*buffer)
 	k.subnetToInfo = make(map[core.Subnet]*keyInfo)

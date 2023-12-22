@@ -15,7 +15,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/Arceliar/ironwood/types"
+	iwt "github.com/Arceliar/ironwood/types"
 	"github.com/gologme/log"
 	gsyslog "github.com/hashicorp/go-syslog"
 	"github.com/hjson/hjson-go"
@@ -162,21 +162,21 @@ func run(sigCh chan os.Signal) {
 
 	n := &node{}
 
-	getNodeKey := func() types.Domain {
+	getNodeKey := func() iwt.Domain {
 		name := cfg.Domain
-		return types.Domain{Key: types.PublicKey(publicKey), Name: [ed25519.PublicKeySize]byte([]byte(name))}
+		return iwt.Domain{Key: iwt.PublicKey(publicKey), Name: [ed25519.PublicKeySize]byte([]byte(name))}
 	}
 
 	switch {
 	case *getaddr:
-		if key := getNodeKey(); !key.Equal(types.Domain{}) {
+		if key := getNodeKey(); !key.Equal(iwt.Domain{}) {
 			addr := n.core.AddrForDomain(key)
 			ip := net.IP(addr[:])
 			fmt.Println(ip.String())
 		}
 		return
 	case *getsnet:
-		if key := getNodeKey(); !key.Equal(types.Domain{}) {
+		if key := getNodeKey(); !key.Equal(iwt.Domain{}) {
 			snet := n.core.SubnetForDomain(key)
 			ipnet := net.IPNet{
 				IP:   append(snet[:], 0, 0, 0, 0, 0, 0, 0, 0),
