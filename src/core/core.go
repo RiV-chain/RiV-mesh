@@ -212,18 +212,17 @@ func (c *Core) ReadFrom(p []byte) (n int, from net.Addr, err error) {
 		if n == 0 {
 			continue
 		}
-		switch bs[0] {
+		switch bs[3] {
 		case typeSessionTraffic:
 			// This is what we want to handle here
 		case typeSessionProto:
-			data := append([]byte(nil), bs[1:n]...)
+			data := append([]byte(nil), bs[:n]...)
 			c.proto.handleProto(nil, from.(iwt.Addr), data)
 			continue
 		default:
 			continue
 		}
-		bs = bs[1:n]
-		copy(p, bs)
+		copy(p, bs[:n])
 		if len(p) < len(bs) {
 			n = len(p)
 		} else {
@@ -236,12 +235,9 @@ func (c *Core) ReadFrom(p []byte) (n int, from net.Addr, err error) {
 func (c *Core) WriteTo(p []byte, addr net.Addr) (n int, err error) {
 	buf := allocBytes(0)
 	defer freeBytes(buf)
-	buf = append(buf, typeSessionTraffic)
 	buf = append(buf, p...)
+	buf[3] = typeSessionTraffic
 	n, err = c.PacketConn.WriteTo(buf, addr)
-	if n > 0 {
-		n -= 1
-	}
 	return
 }
 
