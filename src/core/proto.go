@@ -32,17 +32,17 @@ type protoHandler struct {
 	core     *Core
 	nodeinfo nodeinfo
 
-	selfRequests  map[iwt.PublicKey]*reqInfo
-	peersRequests map[iwt.PublicKey]*reqInfo
-	treeRequests  map[iwt.PublicKey]*reqInfo
+	selfRequests  map[iwt.Name]*reqInfo
+	peersRequests map[iwt.Name]*reqInfo
+	treeRequests  map[iwt.Name]*reqInfo
 }
 
 func (p *protoHandler) init(core *Core) {
 	p.core = core
 	p.nodeinfo.init(p)
 
-	p.selfRequests = make(map[iwt.PublicKey]*reqInfo)
-	p.peersRequests = make(map[iwt.PublicKey]*reqInfo)
+	p.selfRequests = make(map[iwt.Name]*reqInfo)
+	p.peersRequests = make(map[iwt.Name]*reqInfo)
 }
 
 // Common functions
@@ -99,7 +99,7 @@ func (p *protoHandler) _sendDebug(key iwt.Addr, dType uint8, data []byte) {
 
 func (p *protoHandler) sendGetSelfRequest(domain iwt.Addr, callback func([]byte)) {
 	p.Act(nil, func() {
-		key := domain.Key
+		key := domain.Name
 		if info := p.selfRequests[key]; info != nil {
 			info.timer.Stop()
 			delete(p.selfRequests, key)
@@ -135,7 +135,7 @@ func (p *protoHandler) _handleGetSelfRequest(key iwt.Addr) {
 
 func (p *protoHandler) _handleGetSelfResponse(domain iwt.Addr, bs []byte) {
 
-	key := domain.Key
+	key := domain.Name
 	if info := p.selfRequests[key]; info != nil {
 		info.timer.Stop()
 		info.callback(bs)
@@ -147,7 +147,7 @@ func (p *protoHandler) _handleGetSelfResponse(domain iwt.Addr, bs []byte) {
 
 func (p *protoHandler) sendGetPeersRequest(domain iwt.Addr, callback func([]byte)) {
 	p.Act(nil, func() {
-		key := domain.Key
+		key := domain.Name
 		if info := p.peersRequests[key]; info != nil {
 			info.timer.Stop()
 			delete(p.peersRequests, key)
@@ -181,7 +181,7 @@ func (p *protoHandler) _handleGetPeersRequest(domain iwt.Addr) {
 }
 
 func (p *protoHandler) _handleGetPeersResponse(domain iwt.Addr, bs []byte) {
-	key := domain.Key
+	key := domain.Name
 	if info := p.peersRequests[key]; info != nil {
 		info.timer.Stop()
 		info.callback(bs)
@@ -204,7 +204,7 @@ func (p *protoHandler) _handleGetTreeRequest(domain iwt.Addr) {
 }
 
 func (p *protoHandler) _handleGetTreeResponse(domain iwt.Addr, bs []byte) {
-	key := domain.Key
+	key := domain.Name
 	if info := p.treeRequests[key]; info != nil {
 		info.timer.Stop()
 		info.callback(bs)
