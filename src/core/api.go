@@ -278,12 +278,6 @@ func (c *Core) SetAdmin(a AddHandler) error {
 	); err != nil {
 		return err
 	}
-	if err := a.AddHandler(
-		"debug_remoteGetDHT", "Debug use only", []string{"key"},
-		c.proto.getDHTHandler,
-	); err != nil {
-		return err
-	}
 	return nil
 }
 
@@ -314,8 +308,4 @@ func (c *Core) RemoteGetSelf(key string) (map[string]any, error) {
 
 func (c *Core) RemoteGetPeers(key string) (map[string]any, error) {
 	return applyAdminCall(c.proto.getPeersHandler, key)
-}
-
-func (c *Core) RemoteGetDHT(key string) (map[string]any, error) {
-	return applyAdminCall(c.proto.getDHTHandler, key)
 }

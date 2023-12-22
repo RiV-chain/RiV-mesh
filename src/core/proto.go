@@ -191,29 +191,6 @@ func (p *protoHandler) _handleGetPeersResponse(domain types.Addr, bs []byte) {
 	}
 }
 
-// Get DHT
-
-func (p *protoHandler) sendGetDHTRequest(domain types.Addr, callback func([]byte)) {
-	p.Act(nil, func() {
-		key := domain.Key
-		if info := p.dhtRequests[key]; info != nil {
-			info.timer.Stop()
-			delete(p.dhtRequests, key)
-		}
-		info := new(reqInfo)
-		info.callback = callback
-		info.timer = time.AfterFunc(time.Minute, func() {
-			p.Act(nil, func() {
-				if p.dhtRequests[key] == info {
-					delete(p.dhtRequests, key)
-				}
-			})
-		})
-		p.dhtRequests[key] = info
-		p._sendDebug(domain, typeDebugGetTreeRequest, nil)
-	})
-}
-
 func (p *protoHandler) _handleGetTreeRequest(domain types.Addr) {
 	dinfos := p.core.GetTree()
 	var bs []byte
@@ -311,50 +288,6 @@ func (p *protoHandler) getPeersHandler(in json.RawMessage) (interface{}, error) 
 		}
 		ip := net.IP(p.core.AddrForDomain(req.Key)[:])
 		res := DebugGetPeersResponse{ip.String(): msg}
-		return res, nil
-	}
-}
-
-// Admin socket stuff for "Get DHT"
-
-type DebugGetDHTRequest struct {
-	Key types.Domain `json:"key"`
-}
-
-type DebugGetDHTResponse map[string]interface{}
-
-func (p *protoHandler) getDHTHandler(in json.RawMessage) (interface{}, error) {
-	var req DebugGetDHTRequest
-	if err := json.Unmarshal(in, &req); err != nil {
-		return nil, err
-	}
-	key := req.Key.Key //nolint:all
-	ch := make(chan []byte, 1)
-	p.sendGetDHTRequest(types.Addr(req.Key), func(info []byte) {
-		ch <- info
-	})
-	timer := time.NewTimer(6 * time.Second)
-	defer timer.Stop()
-	select {
-	case <-timer.C:
-		return nil, ErrTimeout
-	case info := <-ch:
-		ks := make(map[string][]string)
-		bs := info
-		for len(bs) >= len(key) {
-			ks["keys"] = append(ks["keys"], hex.EncodeToString(bs[:len(key)]))
-			bs = bs[len(key):]
-		}
-		js, err := json.Marshal(ks)
-		if err != nil {
-			return nil, err
-		}
-		var msg json.RawMessage
-		if err := msg.UnmarshalJSON(js); err != nil {
-			return nil, err
-		}
-		ip := net.IP(p.core.AddrForDomain(req.Key)[:])
-		res := DebugGetDHTResponse{ip.String(): msg}
 		return res, nil
 	}
 }
