@@ -215,7 +215,7 @@ func (p *protoHandler) _handleGetTreeResponse(domain iwt.Addr, bs []byte) {
 // Admin socket stuff for "Get self"
 
 type DebugGetSelfRequest struct {
-	Key iwt.Domain `json:"key"`
+	Name string `json:"name"`
 }
 
 type DebugGetSelfResponse map[string]interface{}
@@ -226,7 +226,9 @@ func (p *protoHandler) getSelfHandler(in json.RawMessage) (interface{}, error) {
 		return nil, err
 	}
 	ch := make(chan []byte, 1)
-	p.sendGetSelfRequest(iwt.Addr(req.Key), func(info []byte) {
+	var key [32]byte
+	domain := iwt.NewDomain(req.Name, key[:])
+	p.sendGetSelfRequest(iwt.Addr(domain), func(info []byte) {
 		ch <- info
 	})
 	timer := time.NewTimer(6 * time.Second)
@@ -239,7 +241,7 @@ func (p *protoHandler) getSelfHandler(in json.RawMessage) (interface{}, error) {
 		if err := msg.UnmarshalJSON(info); err != nil {
 			return nil, err
 		}
-		ip := net.IP(p.core.AddrForDomain(req.Key)[:])
+		ip := net.IP(p.core.AddrForDomain(domain)[:])
 		res := DebugGetSelfResponse{ip.String(): msg}
 		return res, nil
 	}
@@ -248,7 +250,7 @@ func (p *protoHandler) getSelfHandler(in json.RawMessage) (interface{}, error) {
 // Admin socket stuff for "Get peers"
 
 type DebugGetPeersRequest struct {
-	Key iwt.Domain `json:"key"`
+	Name string `json:"name"`
 }
 
 type DebugGetPeersResponse map[string]interface{}
@@ -259,9 +261,10 @@ func (p *protoHandler) getPeersHandler(in json.RawMessage) (interface{}, error) 
 		return nil, err
 	}
 
-	key := req.Key.Key //nolint:all
 	ch := make(chan []byte, 1)
-	p.sendGetPeersRequest(iwt.Addr(req.Key), func(info []byte) {
+	var key [32]byte
+	domain := iwt.NewDomain(req.Name, key[:])
+	p.sendGetPeersRequest(iwt.Addr(domain), func(info []byte) {
 		ch <- info
 	})
 	timer := time.NewTimer(6 * time.Second)
@@ -284,7 +287,7 @@ func (p *protoHandler) getPeersHandler(in json.RawMessage) (interface{}, error) 
 		if err := msg.UnmarshalJSON(js); err != nil {
 			return nil, err
 		}
-		ip := net.IP(p.core.AddrForDomain(req.Key)[:])
+		ip := net.IP(p.core.AddrForDomain(domain)[:])
 		res := DebugGetPeersResponse{ip.String(): msg}
 		return res, nil
 	}

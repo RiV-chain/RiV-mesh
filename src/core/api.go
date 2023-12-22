@@ -261,19 +261,19 @@ type AddHandlerFunc func(json.RawMessage) (interface{}, error)
 // It sets the admin handler for NodeInfo and the Debug admin functions.
 func (c *Core) SetAdmin(a AddHandler) error {
 	if err := a.AddHandler(
-		"getNodeInfo", "Request nodeinfo from a remote node by its public key", []string{"key"},
+		"getNodeInfo", "Request nodeinfo from a remote node by its domain name", []string{"name"},
 		c.proto.nodeinfo.nodeInfoAdminHandler,
 	); err != nil {
 		return err
 	}
 	if err := a.AddHandler(
-		"debug_remoteGetSelf", "Debug use only", []string{"key"},
+		"debug_remoteGetSelf", "Debug use only", []string{"name"},
 		c.proto.getSelfHandler,
 	); err != nil {
 		return err
 	}
 	if err := a.AddHandler(
-		"debug_remoteGetPeers", "Debug use only", []string{"key"},
+		"debug_remoteGetPeers", "Debug use only", []string{"name"},
 		c.proto.getPeersHandler,
 	); err != nil {
 		return err
@@ -281,9 +281,9 @@ func (c *Core) SetAdmin(a AddHandler) error {
 	return nil
 }
 
-func applyAdminCall(handlerfunc AddHandlerFunc, key string) (result map[string]any, err error) {
+func applyAdminCall(handlerfunc AddHandlerFunc, name string) (result map[string]any, err error) {
 	var in []byte
-	if in, err = json.Marshal(map[string]any{"key": key}); err != nil {
+	if in, err = json.Marshal(map[string]any{"name": name}); err != nil {
 		return
 	}
 	var out1 any
@@ -298,14 +298,14 @@ func applyAdminCall(handlerfunc AddHandlerFunc, key string) (result map[string]a
 	return
 }
 
-func (c *Core) GetNodeInfo(key string) (result map[string]any, err error) {
-	return applyAdminCall(c.proto.nodeinfo.nodeInfoAdminHandler, key)
+func (c *Core) GetNodeInfo(name string) (result map[string]any, err error) {
+	return applyAdminCall(c.proto.nodeinfo.nodeInfoAdminHandler, name)
 }
 
-func (c *Core) RemoteGetSelf(key string) (map[string]any, error) {
-	return applyAdminCall(c.proto.getSelfHandler, key)
+func (c *Core) RemoteGetSelf(name string) (map[string]any, error) {
+	return applyAdminCall(c.proto.getSelfHandler, name)
 }
 
-func (c *Core) RemoteGetPeers(key string) (map[string]any, error) {
-	return applyAdminCall(c.proto.getPeersHandler, key)
+func (c *Core) RemoteGetPeers(name string) (map[string]any, error) {
+	return applyAdminCall(c.proto.getPeersHandler, name)
 }

@@ -159,9 +159,9 @@ Request header "Riv-Save-Config: true" persists changes`, Handler: a.deleteApiPe
 	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/sse", Desc: "Return server side events", Handler: a.getApiSseHandler})
 	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/sessions", Desc: "Show established traffic sessions with remote nodes", Handler: a.getApiSessionsHandler})
 	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/multicastinterfaces", Desc: "Show which interfaces multicast is enabled on", Handler: a.getApiMulticastinterfacesHandler})
-	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/remote/nodeinfo/{key}", Desc: "Request nodeinfo from a remote node by its public key", Handler: a.getApiRemoteNodeinfoHandler})
-	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/remote/self/{key}", Desc: "Request self from a remote node by its public key", Handler: a.getApiRemoteSelfHandler})
-	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/remote/peers/{key}", Desc: "Request peers from a remote node by its public key", Handler: a.getApiRemotePeersHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/remote/nodeinfo/{name}", Desc: "Request nodeinfo from a remote node by its domain name", Handler: a.getApiRemoteNodeinfoHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/remote/self/{name}", Desc: "Request self from a remote node by its domain name", Handler: a.getApiRemoteSelfHandler})
+	a.AddHandler(ApiHandler{Method: "GET", Pattern: "/api/remote/peers/{name}", Desc: "Request peers from a remote node by its public key", Handler: a.getApiRemotePeersHandler})
 
 	var _ = a.Core.PeersChangedSignal.Connect(func(data any) {
 		b, err := json.Marshal(a.prepareGetPeers())
@@ -732,7 +732,7 @@ func (a *RestServer) saveConfig(setConfigFields func(*config.NodeConfig), r *htt
 func applyKeyParameterized(w http.ResponseWriter, r *http.Request, fn func(key string) (map[string]any, error)) {
 	cnt := strings.Split(r.URL.Path, "/")
 	if len(cnt) != 5 || cnt[4] == "" {
-		http.Error(w, "No remote public key supplied", http.StatusBadRequest)
+		http.Error(w, "No domain name supplied", http.StatusBadRequest)
 		return
 	}
 	result, err := fn(cnt[4])
