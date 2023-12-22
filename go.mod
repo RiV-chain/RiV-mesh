@@ -2,7 +2,7 @@ module github.com/RiV-chain/RiV-mesh
 
 go 1.21
 
-replace github.com/Arceliar/ironwood => github.com/RiV-chain/ironwood v0.0.0-20231220225542-c2451499a10f
+replace github.com/Arceliar/ironwood => github.com/RiV-chain/ironwood v0.0.0-20231222113431-623dd4cf303c
 
 replace github.com/mikispag/dns-over-tls-forwarder => github.com/RiV-chain/dns-over-tls-forwarder v0.0.0-20230828114909-c2cd9f8d79d3
 
@@ -17,8 +17,8 @@ require (
 	github.com/mitchellh/mapstructure v1.4.1
 	github.com/vishvananda/netlink v1.1.0
 	golang.org/x/net v0.10.0
-	golang.org/x/sys v0.11.0
-	golang.org/x/text v0.12.0
+	golang.org/x/sys v0.15.0
+	golang.org/x/text v0.14.0
 	golang.zx2c4.com/wireguard v0.0.0-20211017052713-f87e87af0d9a
 	golang.zx2c4.com/wireguard/windows v0.5.3
 )
@@ -31,7 +31,7 @@ require (
 	github.com/mikispag/dns-over-tls-forwarder v0.0.0-20230401080233-dae75d4680fd
 	github.com/slonm/tableprinter v0.0.0-20230107100804-643098716018
 	github.com/vorot93/golang-signals v0.0.0-20170221070717-d9e83421ce45
-	golang.org/x/crypto v0.12.0
+	golang.org/x/crypto v0.17.0
 	golang.org/x/exp v0.0.0-20221217163422-3c43f8badb15
 	golang.zx2c4.com/wintun v0.0.0-20211104114900-415007cec224
 )
