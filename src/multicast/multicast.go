@@ -11,6 +11,8 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/wlynxg/anet"
+
 	"github.com/Arceliar/phony"
 	"github.com/gologme/log"
 
@@ -170,7 +172,7 @@ func (m *Multicast) Interfaces() map[string]net.Interface {
 func (m *Multicast) _getAllowedInterfaces() map[string]*interfaceInfo {
 	interfaces := make(map[string]*interfaceInfo)
 	// Ask the system for network interfaces
-	allifaces, err := net.Interfaces()
+	allifaces, err := anet.Interfaces()
 	if err != nil {
 		// Don't panic, since this may be from e.g. too many open files (from too much connection spam)
 		// TODO? log something
