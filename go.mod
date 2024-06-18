@@ -25,6 +25,7 @@ require gerace.dev/zipfs v0.2.0
 require (
 	github.com/slonm/tableprinter v0.0.0-20230107100804-643098716018
 	github.com/vorot93/golang-signals v0.0.0-20170221070717-d9e83421ce45
+	github.com/wlynxg/anet v0.0.2
 	golang.org/x/exp v0.0.0-20221217163422-3c43f8badb15
 	golang.zx2c4.com/wintun v0.0.0-20211104114900-415007cec224
 )
@@ -45,7 +46,6 @@ require (
 	github.com/libp2p/go-buffer-pool v0.0.2 // indirect
 	github.com/oxtoacart/bpool v0.0.0-20190530202638-03653db5a59c // indirect
 	github.com/rivo/uniseg v0.3.4 // indirect
-	github.com/wlynxg/anet v0.0.1 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.19.1 // indirect

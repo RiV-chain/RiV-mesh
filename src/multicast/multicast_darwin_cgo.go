@@ -30,6 +30,10 @@ import (
 	"golang.org/x/sys/unix"
 )
 
+func (m *Multicast) SetOsVersion() {
+
+}
+
 func (m *Multicast) _multicastStarted() {
 	if !m._isOpen {
 		return

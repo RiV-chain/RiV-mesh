@@ -44,6 +44,7 @@ type Core struct {
 		_allowedPublicKeys map[[32]byte]struct{}      // configurable after startup
 		networkdomain      NetworkDomain              // immutable after startup
 	}
+	OsVersion uint
 }
 
 func New(secret ed25519.PrivateKey, logger Logger, opts ...SetupOption) (*Core, error) {

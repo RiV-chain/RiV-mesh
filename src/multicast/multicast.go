@@ -65,6 +65,7 @@ func New(core *core.Core, log *log.Logger, opts ...SetupOption) (*Multicast, err
 		_listeners:  make(map[string]*listenerInfo),
 		_interfaces: make(map[string]*interfaceInfo),
 	}
+	m.SetOsVersion()
 	m.config._interfaces = map[MulticastInterface]struct{}{}
 	m.config._groupAddr = GroupAddress("[ff02::114]:9001")
 	for _, opt := range opts {
@@ -146,7 +147,7 @@ func (m *Multicast) _stop() error {
 func (m *Multicast) _updateInterfaces() {
 	interfaces := m._getAllowedInterfaces()
 	for name, info := range interfaces {
-		addrs, err := info.iface.Addrs()
+		addrs, err := anet.InterfaceAddrsByInterface(&info.iface)
 		if err != nil {
 			m.log.Warnf("Failed up get addresses for interface %s: %s", name, err)
 			delete(interfaces, name)
