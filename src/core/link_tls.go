@@ -46,13 +46,14 @@ func (l *links) newLinkTLS(tcp *linkTCP) *linkTLS {
 	return lt
 }
 
-func (l *linkTLS) dial(url *url.URL, options linkOptions, sintf, sni string) error {
+func (l *linkTLS) dial(url *url.URL, options linkOptions, sintf string, sni string) error {
 	addr, err := net.ResolveTCPAddr("tcp", url.Host)
 	if err != nil {
 		return err
 	}
 	dialer, err := l.tcp.dialerFor(addr, sintf)
 	if err != nil {
+		l.core.log.Infoln("Dialing error\n", err)
 		return err
 	}
 	info := linkInfoFor("tls", sintf, tcpIDFor(dialer.LocalAddr, addr))

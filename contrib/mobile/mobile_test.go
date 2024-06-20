@@ -4,7 +4,7 @@ import "testing"
 
 func TestStartYggdrasil(t *testing.T) {
 	mesh := &Mesh{}
-	if err := mesh.StartAutoconfigure(); err != nil {
+	if err := mesh.StartAutoconfigure(14); err != nil {
 		t.Fatalf("Failed to start RiV-mesh: %s", err)
 	}
 	t.Log("Address:", mesh.GetAddressString())

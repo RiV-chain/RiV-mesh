@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/wlynxg/anet"
+
 	"github.com/Arceliar/phony"
 )
 
@@ -136,6 +138,22 @@ func (l *linkTCP) dialerFor(dst *net.TCPAddr, sintf string) (*net.Dialer, error)
 			return nil, fmt.Errorf("link-local address requires a zone")
 		}
 	}
+	i, err := anet.Interfaces()
+	if err != nil {
+		return nil, fmt.Errorf("interfaces error: %w", err)
+	}
+	var ief net.Interface
+	found := false
+	for _, ie := range i {
+		if ie.Name == sintf {
+			ief = ie
+			found = true
+			break
+		}
+	}
+	if !found {
+		return nil, fmt.Errorf("interface %s not found", sintf)
+	}
 	dialer := &net.Dialer{
 		Timeout:   time.Second * 5,
 		KeepAlive: -1,
@@ -143,14 +161,11 @@ func (l *linkTCP) dialerFor(dst *net.TCPAddr, sintf string) (*net.Dialer, error)
 	}
 	if sintf != "" {
 		dialer.Control = l.getControl(sintf)
-		ief, err := net.InterfaceByName(sintf)
-		if err != nil {
-			return nil, fmt.Errorf("interface %q not found", sintf)
-		}
+
 		if ief.Flags&net.FlagUp == 0 {
 			return nil, fmt.Errorf("interface %q is not up", sintf)
 		}
-		addrs, err := ief.Addrs()
+		addrs, err := anet.InterfaceAddrsByInterface(&ief)
 		if err != nil {
 			return nil, fmt.Errorf("interface %q addresses not available: %w", sintf, err)
 		}

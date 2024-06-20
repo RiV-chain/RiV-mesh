@@ -39,8 +39,8 @@ func (m *Multicast) _multicastStarted() {
 		return
 	}
 	C.StopAWDLBrowsing()
-	for intf := range m._interfaces {
-		if intf == "awdl0" {
+	for _, info := range m._interfaces {
+		if info.iface.Name == "awdl0" {
 			C.StartAWDLBrowsing()
 			break
 		}
