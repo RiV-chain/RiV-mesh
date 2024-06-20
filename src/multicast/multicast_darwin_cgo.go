@@ -13,7 +13,7 @@ void StartAWDLBrowsing() {
 		serviceBrowser = [[NSNetServiceBrowser alloc] init];
 		serviceBrowser.includesPeerToPeer = YES;
 	}
-	[serviceBrowser searchForServicesOfType:@"_yggdrasil._tcp" inDomain:@""];
+	[serviceBrowser searchForServicesOfType:@"_mesh._tcp" inDomain:@""];
 }
 void StopAWDLBrowsing() {
 	if (serviceBrowser == nil) {
@@ -39,8 +39,8 @@ func (m *Multicast) _multicastStarted() {
 		return
 	}
 	C.StopAWDLBrowsing()
-	for intf := range m._interfaces {
-		if intf == "awdl0" {
+	for _, info := range m._interfaces {
+		if info.iface.Name == "awdl0" {
 			C.StartAWDLBrowsing()
 			break
 		}
