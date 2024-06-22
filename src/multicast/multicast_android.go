@@ -1,6 +1,5 @@
-//go:build !android && (linux || netbsd || freebsd || openbsd || dragonflybsd)
-// +build !android
-// +build linux netbsd freebsd openbsd dragonflybsd
+//go:build android
+// +build android
 
 package multicast
 
@@ -9,11 +8,12 @@ import (
 	"os"
 	"syscall"
 
+	"github.com/wlynxg/anet"
 	"golang.org/x/sys/unix"
 )
 
 func (m *Multicast) SetOsVersion() {
-
+	anet.SetAndroidVersion(m.core.OsVersion)
 }
 
 func (m *Multicast) _multicastStarted() {

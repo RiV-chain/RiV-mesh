@@ -9,6 +9,10 @@ import (
 	"golang.org/x/sys/windows"
 )
 
+func (m *Multicast) SetOsVersion() {
+
+}
+
 func (m *Multicast) _multicastStarted() {
 
 }
