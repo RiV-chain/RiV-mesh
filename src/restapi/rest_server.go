@@ -713,7 +713,7 @@ func applyKeyParameterized(w http.ResponseWriter, r *http.Request, fn func(key s
 	result, err := fn(cnt[4])
 	if err == nil {
 		WriteJson(w, r, result)
-	} else if errors.As(err, &core.ErrTimeout) {
+	} else if errors.Is(err, core.ErrTimeout) {
 		http.Error(w, "Node inaccessible", http.StatusBadGateway)
 	} else {
 		http.Error(w, err.Error(), http.StatusBadRequest)

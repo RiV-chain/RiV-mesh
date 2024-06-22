@@ -15,7 +15,7 @@ import (
 type MulticastInterfaceConfig = config.MulticastInterfaceConfig
 type NetworkDomainConfig = config.NetworkDomainConfig
 
-var defaultConfig = "" // LDFLAGS='-X github.com/yggdrasil-network/yggdrasil-go/src/defaults.defaultConfig=/path/to/config
+var defaultConfig = "" // LDFLAGS='-X github.com/RiV-chain/RiV-mesh/src/defaults.defaultConfig=/path/to/config
 
 type defaultParameters struct {
 	//Default Http address
