@@ -8,7 +8,7 @@ jobs:
   build-libs-android:
 
     name: Build libs (Android)
-    runs-on: self-hosted, Linux
+    runs-on: self-hosted
 
     steps:
     - name: Checkout repository
