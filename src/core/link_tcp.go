@@ -160,6 +160,21 @@ func (l *linkTCP) dialerFor(dst *net.TCPAddr, sintf string) (*net.Dialer, error)
 		Control:   l.tcpContext,
 	}
 	if sintf != "" {
+		i, err := anet.Interfaces()
+		if err != nil {
+			return nil, fmt.Errorf("interfaces error: %w", err)
+		}
+		found := false
+		for _, ie := range i {
+			if ie.Name == sintf {
+				ief = ie
+				found = true
+				break
+			}
+		}
+		if !found {
+			return nil, fmt.Errorf("interface %s not found", sintf)
+		}
 		dialer.Control = l.getControl(sintf)
 
 		if ief.Flags&net.FlagUp == 0 {
