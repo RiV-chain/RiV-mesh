@@ -13,9 +13,9 @@ require (
 	github.com/mitchellh/mapstructure v1.4.1
 	github.com/vikulin/sctp v0.0.0-20221009200520-ae0f2830e422
 	github.com/vishvananda/netlink v1.1.0
-	golang.org/x/net v0.7.0
-	golang.org/x/sys v0.5.0
-	golang.org/x/text v0.7.0
+	golang.org/x/net v0.26.0
+	golang.org/x/sys v0.21.0
+	golang.org/x/text v0.16.0
 	golang.zx2c4.com/wireguard v0.0.0-20211017052713-f87e87af0d9a
 	golang.zx2c4.com/wireguard/windows v0.5.3
 )
@@ -49,7 +49,11 @@ require (
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.19.1 // indirect
-	golang.org/x/crypto v0.1.0 // indirect
+	golang.org/x/crypto v0.24.0 // indirect
+	golang.org/x/mobile v0.0.0-20240604190613-2782386b8afd // indirect
+	golang.org/x/mod v0.18.0 // indirect
+	golang.org/x/sync v0.7.0 // indirect
+	golang.org/x/tools v0.22.0 // indirect
 )
 
 require (
