@@ -46,6 +46,7 @@ jobs:
       with:
         artifact_repo: RiV-chain/artifact
         artifact_path: mesh.aar
+        artifact_source_path: mesh-sources.jar
         gh_pat: ${{ secrets.MAVEN_PAT }}
         artifact_id: mesh
         group_id: org.rivchain
