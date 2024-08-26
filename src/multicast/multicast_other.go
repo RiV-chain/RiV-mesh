@@ -5,10 +5,6 @@ package multicast
 
 import "syscall"
 
-func (m *Multicast) SetOsVersion() {
-
-}
-
 func (m *Multicast) _multicastStarted() {
 
 }

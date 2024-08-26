@@ -4,7 +4,7 @@ import "testing"
 
 func TestStartMesh(t *testing.T) {
 	mesh := &Mesh{}
-	if err := mesh.StartAutoconfigure(14); err != nil {
+	if err := mesh.StartAutoconfigure(); err != nil {
 		t.Fatalf("Failed to start RiV-mesh: %s", err)
 	}
 	t.Log("Address:", mesh.GetAddressString())

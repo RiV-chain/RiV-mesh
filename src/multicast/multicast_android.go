@@ -8,13 +8,8 @@ import (
 	"os"
 	"syscall"
 
-	"github.com/wlynxg/anet"
 	"golang.org/x/sys/unix"
 )
-
-func (m *Multicast) SetOsVersion() {
-	anet.SetAndroidVersion(m.core.OsVersion)
-}
 
 func (m *Multicast) _multicastStarted() {
 
