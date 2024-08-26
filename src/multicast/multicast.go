@@ -66,7 +66,6 @@ func New(core *core.Core, log *log.Logger, opts ...SetupOption) (*Multicast, err
 		_listeners:  make(map[int]*listenerInfo),
 		_interfaces: make(map[int]*interfaceInfo),
 	}
-	m.SetOsVersion()
 	m.config._interfaces = map[MulticastInterface]struct{}{}
 	m.config._groupAddr = GroupAddress("[ff02::114]:9001")
 	for _, opt := range opts {
@@ -180,8 +179,7 @@ func (m *Multicast) _getAllowedInterfaces() map[int]*interfaceInfo {
 	// Ask the system for network interfaces
 	allifaces, err := anet.Interfaces()
 	if err != nil {
-		// Don't panic, since this may be from e.g. too many open files (from too much connection spam)
-		// TODO? log something
+		m.log.Debugf("Failed to get interfaces: %s", err)
 		return nil
 	}
 	// Work out which interfaces to announce on
