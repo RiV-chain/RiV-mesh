@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/wlynxg/anet"
+	"github.com/vikulin/anet"
 
 	"github.com/Arceliar/phony"
 )
