@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/vikulin/anet"
+	"github.com/wlynxg/anet"
 
 	"github.com/Arceliar/phony"
 	"github.com/gologme/log"
