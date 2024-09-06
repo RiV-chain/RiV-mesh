@@ -203,35 +203,26 @@ func run(args rivArgs, sigCh chan os.Signal) {
 	}
 	n := &node{}
 	// Have we been asked for the node address yet? If so, print it and then stop.
-	getNodeKey := func() ed25519.PublicKey {
-		if pubkey, err := hex.DecodeString(cfg.PrivateKey); err == nil {
-			return ed25519.PrivateKey(pubkey).Public().(ed25519.PublicKey)
-		}
-		return nil
-	}
+	privateKey := ed25519.PrivateKey(cfg.PrivateKey)
+	publicKey := privateKey.Public().(ed25519.PublicKey)
 	switch {
 	case args.getaddr:
-		if key := getNodeKey(); key != nil {
-			addr := n.core.AddrForKey(key)
-			ip := net.IP(addr[:])
-			fmt.Println(ip.String())
-		}
+		addr := n.core.AddrForKey(publicKey)
+		ip := net.IP(addr[:])
+		fmt.Println(ip.String())
 		return
 	case args.getsnet:
-		if key := getNodeKey(); key != nil {
-			snet := n.core.SubnetForKey(key)
-			ipnet := net.IPNet{
-				IP:   append(snet[:], 0, 0, 0, 0, 0, 0, 0, 0),
-				Mask: net.CIDRMask(len(snet)*8, 128),
-			}
-			fmt.Println(ipnet.String())
+		snet := n.core.SubnetForKey(publicKey)
+		ipnet := net.IPNet{
+			IP:   append(snet[:], 0, 0, 0, 0, 0, 0, 0, 0),
+			Mask: net.CIDRMask(len(snet)*8, 128),
 		}
+		fmt.Println(ipnet.String())
 		return
 	}
 
 	// Setup the RiV-mesh node itself.
 	{
-		sk, err := hex.DecodeString(cfg.PrivateKey)
 		if err != nil {
 			panic(err)
 		}
@@ -258,7 +249,10 @@ func run(args rivArgs, sigCh chan os.Signal) {
 			}
 			options = append(options, core.AllowedPublicKey(k[:]))
 		}
-		if n.core, err = core.New(sk[:], logger, options...); err != nil {
+		if n.core, err = core.New(privateKey, logger, options...); err != nil {
+			panic(err)
+		}
+		if err = n.core.GenerateTLS(cfg.Certificate); err != nil {
 			panic(err)
 		}
 	}
@@ -273,6 +267,7 @@ func run(args rivArgs, sigCh chan os.Signal) {
 				Listen:   intf.Listen,
 				Port:     intf.Port,
 				Priority: uint8(intf.Priority),
+				Password: intf.Password,
 			})
 		}
 		if n.multicast, err = multicast.New(n.core, logger, options...); err != nil {

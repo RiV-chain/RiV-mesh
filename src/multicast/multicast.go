@@ -4,35 +4,35 @@ import (
 	"bytes"
 	"context"
 	"crypto/ed25519"
-	"encoding/binary"
 	"encoding/hex"
 	"fmt"
+	"math/rand"
 	"net"
 	"net/url"
-	"strconv"
+	"sync/atomic"
 	"time"
-
-	"github.com/wlynxg/anet"
 
 	"github.com/Arceliar/phony"
 	"github.com/gologme/log"
+	"github.com/wlynxg/anet"
 
 	"github.com/RiV-chain/RiV-mesh/src/core"
+	"golang.org/x/crypto/blake2b"
 	"golang.org/x/net/ipv6"
 )
 
 // Multicast represents the multicast advertisement and discovery mechanism used
-// by RiV-mesh to find peers on the same subnet. When a beacon is received on a
-// configured multicast interface, RiV-mesh will attempt to peer with that node
+// by Yggdrasil to find peers on the same subnet. When a beacon is received on a
+// configured multicast interface, Yggdrasil will attempt to peer with that node
 // automatically.
 type Multicast struct {
 	phony.Inbox
 	core        *core.Core
 	log         *log.Logger
 	sock        *ipv6.PacketConn
-	_isOpen     bool
-	_listeners  map[int]*listenerInfo
-	_interfaces map[int]*interfaceInfo
+	running     atomic.Bool
+	_listeners  map[string]*listenerInfo
+	_interfaces map[string]*interfaceInfo
 	_timer      *time.Timer
 	config      struct {
 		_groupAddr  GroupAddress
@@ -47,6 +47,8 @@ type interfaceInfo struct {
 	listen   bool
 	port     uint16
 	priority uint8
+	password []byte
+	hash     []byte
 }
 
 type listenerInfo struct {
@@ -63,8 +65,8 @@ func New(core *core.Core, log *log.Logger, opts ...SetupOption) (*Multicast, err
 	m := &Multicast{
 		core:        core,
 		log:         log,
-		_listeners:  make(map[int]*listenerInfo),
-		_interfaces: make(map[int]*interfaceInfo),
+		_listeners:  make(map[string]*listenerInfo),
+		_interfaces: make(map[string]*interfaceInfo),
 	}
 	m.config._interfaces = map[MulticastInterface]struct{}{}
 	m.config._groupAddr = GroupAddress("[ff02::114]:9001")
@@ -79,8 +81,7 @@ func New(core *core.Core, log *log.Logger, opts ...SetupOption) (*Multicast, err
 }
 
 func (m *Multicast) _start() error {
-	m.log.Infoln("Starting multicasting")
-	if m._isOpen {
+	if !m.running.CompareAndSwap(false, true) {
 		return fmt.Errorf("multicast module is already started")
 	}
 	var anyEnabled bool
@@ -88,13 +89,14 @@ func (m *Multicast) _start() error {
 		anyEnabled = anyEnabled || intf.Beacon || intf.Listen
 	}
 	if !anyEnabled {
+		m.running.Store(false)
 		return nil
 	}
-	m.log.Infoln("Starting multicast module")
-	defer m.log.Infoln("Started multicast module")
+	m.log.Debugln("Starting multicast module")
+	defer m.log.Debugln("Started multicast module")
 	addr, err := net.ResolveUDPAddr("udp", string(m.config._groupAddr))
 	if err != nil {
-		m.log.Infoln("ResolveTCPAddr failed on", string(m.config._groupAddr), "due to error:", err)
+		m.running.Store(false)
 		return err
 	}
 	listenString := fmt.Sprintf("[::]:%v", addr.Port)
@@ -103,16 +105,14 @@ func (m *Multicast) _start() error {
 	}
 	conn, err := lc.ListenPacket(context.Background(), "udp6", listenString)
 	if err != nil {
-		m.log.Infoln("ListenPacket failed on", listenString, "due to error:", err)
+		m.running.Store(false)
 		return err
 	}
 	m.sock = ipv6.NewPacketConn(conn)
 	if err = m.sock.SetControlMessage(ipv6.FlagDst, true); err != nil { // nolint:staticcheck
 		// Windows can't set this flag, so we need to handle it in other ways
-		m.log.Infoln("SetControlMessage failed due to error:", err)
 	}
 
-	m._isOpen = true
 	go m.listen()
 	m.Act(nil, m._multicastStarted)
 	m.Act(nil, m._announce)
@@ -122,11 +122,7 @@ func (m *Multicast) _start() error {
 
 // IsStarted returns true if the module has been started.
 func (m *Multicast) IsStarted() bool {
-	var isOpen bool
-	phony.Block(m, func() {
-		isOpen = m._isOpen
-	})
-	return isOpen
+	return m.running.Load()
 }
 
 // Stop stops the multicast module.
@@ -140,8 +136,10 @@ func (m *Multicast) Stop() error {
 }
 
 func (m *Multicast) _stop() error {
+	if !m.running.CompareAndSwap(true, false) {
+		return nil
+	}
 	m.log.Infoln("Stopping multicast module")
-	m._isOpen = false
 	if m.sock != nil {
 		m.sock.Close()
 	}
@@ -151,14 +149,16 @@ func (m *Multicast) _stop() error {
 func (m *Multicast) _updateInterfaces() {
 	interfaces := m._getAllowedInterfaces()
 	for name, info := range interfaces {
+		// 'anet' package is used here to avoid https://github.com/golang/go/issues/40569
 		addrs, err := anet.InterfaceAddrsByInterface(&info.iface)
 		if err != nil {
-			m.log.Warnf("Failed up get addresses for interface %s: %s", info.iface.Name, err)
+			m.log.Warnf("Failed up get addresses for interface %s: %s", name, err)
 			delete(interfaces, name)
 			continue
 		}
 		info.addrs = addrs
 		interfaces[name] = info
+		m.log.Debugf("Discovered addresses for interface %s: %s", name, addrs)
 	}
 	m._interfaces = interfaces
 }
@@ -174,15 +174,18 @@ func (m *Multicast) Interfaces() map[string]net.Interface {
 }
 
 // getAllowedInterfaces returns the currently known/enabled multicast interfaces.
-func (m *Multicast) _getAllowedInterfaces() map[int]*interfaceInfo {
-	interfaces := make(map[int]*interfaceInfo)
+func (m *Multicast) _getAllowedInterfaces() map[string]*interfaceInfo {
+	interfaces := make(map[string]*interfaceInfo)
 	// Ask the system for network interfaces
+	// 'anet' package is used here to avoid https://github.com/golang/go/issues/40569
 	allifaces, err := anet.Interfaces()
 	if err != nil {
+		// Don't panic, since this may be from e.g. too many open files (from too much connection spam)
 		m.log.Debugf("Failed to get interfaces: %s", err)
 		return nil
 	}
 	// Work out which interfaces to announce on
+	pk := m.core.PublicKey()
 	for _, iface := range allifaces {
 		switch {
 		case iface.Flags&net.FlagUp == 0:
@@ -201,11 +204,23 @@ func (m *Multicast) _getAllowedInterfaces() map[int]*interfaceInfo {
 			if !ifcfg.Regex.MatchString(iface.Name) {
 				continue
 			}
-			interfaces[iface.Index] = &interfaceInfo{
-				iface:  iface,
-				beacon: ifcfg.Beacon,
-				listen: ifcfg.Listen,
-				port:   ifcfg.Port,
+			hasher, err := blake2b.New512([]byte(ifcfg.Password))
+			if err != nil {
+				continue
+			}
+			if n, err := hasher.Write(pk); err != nil {
+				continue
+			} else if n != ed25519.PublicKeySize {
+				continue
+			}
+			interfaces[iface.Name] = &interfaceInfo{
+				iface:    iface,
+				beacon:   ifcfg.Beacon,
+				listen:   ifcfg.Listen,
+				port:     ifcfg.Port,
+				priority: ifcfg.Priority,
+				password: []byte(ifcfg.Password),
+				hash:     hasher.Sum(nil),
 			}
 			break
 		}
@@ -223,7 +238,7 @@ func (m *Multicast) AnnounceNow() {
 }
 
 func (m *Multicast) _announce() {
-	if !m._isOpen {
+	if !m.running.Load() {
 		return
 	}
 	m._updateInterfaces()
@@ -240,7 +255,7 @@ func (m *Multicast) _announce() {
 	for name, info := range m._listeners {
 		// Prepare our stop function!
 		stop := func() {
-			info.listener.Close()
+			info.listener.Cancel()
 			delete(m._listeners, name)
 			m.log.Debugln("No longer multicasting on", name)
 		}
@@ -253,9 +268,8 @@ func (m *Multicast) _announce() {
 		// It's possible that the link-local listener address has changed so if
 		// that is the case then we should clean up the interface listener
 		found := false
-		listenaddr, err := net.ResolveTCPAddr("tcp6", info.listener.Listener.Addr().String())
+		listenaddr, err := net.ResolveTCPAddr("tcp6", info.listener.Addr().String())
 		if err != nil {
-			m.log.Infoln("ResolveTCPAddr on", info.listener.Listener.Addr().String(), "due to error:", err)
 			stop()
 			continue
 		}
@@ -301,24 +315,27 @@ func (m *Multicast) _announce() {
 			}
 			// Try and see if we already have a TCP listener for this interface
 			var linfo *listenerInfo
-			if nfo, ok := m._listeners[iface.Index]; !ok || nfo.listener.Listener == nil {
+			if _, ok := m._listeners[iface.Name]; !ok {
 				// No listener was found - let's create one
-				urlString := fmt.Sprintf("tls://[%s]:%d", addrIP, info.port)
-				u, err := url.Parse(urlString)
-				if err != nil {
-					panic(err)
+				v := &url.Values{}
+				v.Add("priority", fmt.Sprintf("%d", info.priority))
+				v.Add("password", string(info.password))
+				u := &url.URL{
+					Scheme:   "tls",
+					Host:     net.JoinHostPort(addrIP.String(), fmt.Sprintf("%d", info.port)),
+					RawQuery: v.Encode(),
 				}
 				if li, err := m.core.Listen(u, iface.Name); err == nil {
-					m.log.Infoln("Started multicasting on", iface.Name)
+					m.log.Debugln("Started multicasting on", iface.Name)
 					// Store the listener so that we can stop it later if needed
 					linfo = &listenerInfo{listener: li, time: time.Now(), port: info.port}
-					m._listeners[iface.Index] = linfo
+					m._listeners[iface.Name] = linfo
 				} else {
-					m.log.Infoln("Not multicasting on", iface.Name, "due to error:", err)
+					m.log.Warnln("Not multicasting on", iface.Name, "due to error:", err)
 				}
 			} else {
 				// An existing listener was found
-				linfo = m._listeners[iface.Index]
+				linfo = m._listeners[iface.Name]
 			}
 			// Make sure nothing above failed for some reason
 			if linfo == nil {
@@ -327,27 +344,31 @@ func (m *Multicast) _announce() {
 			if time.Since(linfo.time) < linfo.interval {
 				continue
 			}
-			// Get the listener details and construct the multicast beacon
-			lladdr := linfo.listener.Listener.Addr().String()
-			if a, err := net.ResolveTCPAddr("tcp6", lladdr); err == nil {
-				a.Zone = ""
-				destAddr.Zone = iface.Name
-				msg := append([]byte(nil), m.core.GetSelf().Key...)
-				msg = append(msg, a.IP...)
-				pbs := make([]byte, 2)
-				binary.BigEndian.PutUint16(pbs, uint16(a.Port))
-				msg = append(msg, pbs...)
-				_, _ = m.sock.WriteTo(msg, nil, destAddr)
-			} else {
-				m.log.Infoln("ResolveTCPAddr failed on", iface.Name, "due to error:", err)
+			addr := linfo.listener.Addr().(*net.TCPAddr)
+			adv := multicastAdvertisement{
+				MajorVersion: core.ProtocolVersionMajor,
+				MinorVersion: core.ProtocolVersionMinor,
+				PublicKey:    m.core.PublicKey(),
+				Port:         uint16(addr.Port),
+				Hash:         info.hash,
+			}
+			msg, err := adv.MarshalBinary()
+			if err != nil {
+				continue
+			}
+			destAddr.Zone = iface.Name
+			if _, err = m.sock.WriteTo(msg, nil, destAddr); err != nil {
+				m.log.Warn("Failed to send multicast beacon:", err)
 			}
 			if linfo.interval.Seconds() < 15 {
 				linfo.interval += time.Second
 			}
+			linfo.time = time.Now()
 			break
 		}
 	}
-	m._timer = time.AfterFunc(time.Second, func() {
+	annInterval := time.Second + time.Microsecond*(time.Duration(rand.Intn(1048576))) // Randomize delay
+	m._timer = time.AfterFunc(annInterval, func() {
 		m.Act(nil, m._announce)
 	})
 }
@@ -358,8 +379,12 @@ func (m *Multicast) listen() {
 		panic(err)
 	}
 	bs := make([]byte, 2048)
+	hb := make([]byte, 0, blake2b.Size) // Reused to reduce hash allocations
 	for {
-		nBytes, rcm, fromAddr, err := m.sock.ReadFrom(bs)
+		if !m.running.Load() {
+			return
+		}
+		n, rcm, fromAddr, err := m.sock.ReadFrom(bs)
 		if err != nil {
 			if !m.IsStarted() {
 				return
@@ -377,59 +402,49 @@ func (m *Multicast) listen() {
 				continue
 			}
 		}
-		if nBytes < ed25519.PublicKeySize {
+		var adv multicastAdvertisement
+		if err := adv.UnmarshalBinary(bs[:n]); err != nil {
 			continue
 		}
-		var key ed25519.PublicKey
-		key = append(key, bs[:ed25519.PublicKeySize]...)
-		if bytes.Equal(key, m.core.GetSelf().Key) {
-			continue // don't bother trying to peer with self
-		}
-		begin := ed25519.PublicKeySize
-		end := nBytes - 2
-		if end <= begin {
-			continue // malformed address
-		}
-		ip := bs[begin:end]
-		port := binary.BigEndian.Uint16(bs[end:nBytes])
-		anAddr := net.TCPAddr{IP: ip, Port: int(port)}
-		addr, err := net.ResolveTCPAddr("tcp6", anAddr.String())
-		if err != nil {
-			m.log.Infoln("ResolveTCPAddr failed on", anAddr.String())
+		switch {
+		case adv.MajorVersion != core.ProtocolVersionMajor:
+			continue
+		case adv.MinorVersion != core.ProtocolVersionMinor:
+			continue
+		case adv.PublicKey.Equal(m.core.PublicKey()):
 			continue
 		}
 		from := fromAddr.(*net.UDPAddr)
-		if !from.IP.Equal(addr.IP) {
-			continue
-		}
-		var interfaces map[int]*interfaceInfo
+		from.Port = int(adv.Port)
+		var interfaces map[string]*interfaceInfo
 		phony.Block(m, func() {
 			interfaces = m._interfaces
 		})
-		zone, err := strconv.Atoi(from.Zone)
-		if err != nil {
-			continue
-		}
-		if info, ok := interfaces[zone]; ok && info.listen {
-			addr.Zone = ""
-			pin := fmt.Sprintf("/?key=%s&priority=%d", hex.EncodeToString(key), info.priority)
-			u, err := url.Parse("tls://" + addr.String() + pin)
+		if info, ok := interfaces[from.Zone]; ok && info.listen {
+			hasher, err := blake2b.New512(info.password)
 			if err != nil {
-				m.log.Infoln("Call from multicast failed, parse error:", addr.String(), err)
+				continue
 			}
-			if err := m.core.CallPeer(u, info.iface.Name); err != nil {
-				m.log.Infoln("Call from multicast failed:", err)
+			if n, err := hasher.Write(adv.PublicKey); err != nil {
+				continue
+			} else if n != ed25519.PublicKeySize {
+				continue
 			}
-		} else {
-			m.log.Infoln("Multicat: ", ok, from.String(), m.createKeyValuePairs(interfaces))
+			if !bytes.Equal(hasher.Sum(hb[:0]), adv.Hash) {
+				continue
+			}
+			v := &url.Values{}
+			v.Add("key", hex.EncodeToString(adv.PublicKey))
+			v.Add("priority", fmt.Sprintf("%d", info.priority))
+			v.Add("password", string(info.password))
+			u := &url.URL{
+				Scheme:   "tls",
+				Host:     from.String(),
+				RawQuery: v.Encode(),
+			}
+			if err := m.core.CallPeer(u, from.Zone); err != nil {
+				m.log.Debugln("Call from multicast failed:", err)
+			}
 		}
 	}
-}
-
-func (m *Multicast) createKeyValuePairs(map_ map[int]*interfaceInfo) string {
-	b := new(bytes.Buffer)
-	for key, value := range map_ {
-		fmt.Fprintf(b, "%d=\"%s\"\n", key, value.iface.Name)
-	}
-	return b.String()
 }

@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"crypto/ed25519"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -37,6 +38,7 @@ type Core struct {
 	addPeerTimer       *time.Timer
 	PeersChangedSignal signals.Signal
 	config             struct {
+		tls                *tls.Config                // immutable after startup
 		_peers             map[Peer]*linkInfo         // configurable after startup
 		_listeners         map[ListenAddress]struct{} // configurable after startup
 		nodeinfo           NodeInfo                   // configurable after startup
@@ -96,6 +98,14 @@ func New(secret ed25519.PrivateKey, logger Logger, opts ...SetupOption) (*Core, 
 	}
 	c.Act(nil, c._addPeerLoop)
 	return c, nil
+}
+
+func (c *Core) GenerateTLS(cert *tls.Certificate) error {
+	var err error
+	if c.config.tls, err = c.generateTLSConfig(cert); err != nil {
+		return fmt.Errorf("error generating TLS config: %w", err)
+	}
+	return nil
 }
 
 func (c *Core) SetThisNodeInfo(nodeinfo NodeInfo) error {

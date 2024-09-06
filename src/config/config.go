@@ -17,8 +17,18 @@ configuration option that is not provided.
 package config
 
 import (
+	"bytes"
 	"crypto/ed25519"
+	"crypto/rand"
+	"crypto/tls"
+	"crypto/x509"
+	"crypto/x509/pkix"
 	"encoding/hex"
+	"encoding/pem"
+	"fmt"
+	"math/big"
+	"os"
+	"time"
 )
 
 // NodeConfig is the main configuration structure, containing configuration
@@ -33,8 +43,9 @@ type NodeConfig struct {
 	WwwRoot             string                     `comment:"Points out to embedded webserver root folder path where web interface assets are located.\nExample:/apps/mesh/www."`
 	MulticastInterfaces []MulticastInterfaceConfig `comment:"Configuration for which interfaces multicast peer discovery should be\nenabled on. Each entry in the list should be a json object which may\ncontain Regex, Beacon, Listen, and Port. Regex is a regular expression\nwhich is matched against an interface name, and interfaces use the\nfirst configuration that they match gainst. Beacon configures whether\nor not the node should send link-local multicast beacons to advertise\ntheir presence, while listening for incoming connections on Port.\nListen controls whether or not the node listens for multicast beacons\nand opens outgoing connections."`
 	AllowedPublicKeys   []string                   `comment:"List of peer public keys to allow incoming peering connections\nfrom. If left empty/undefined then all connections will be allowed\nby default. This does not affect outgoing peerings, nor does it\naffect link-local peers discovered via multicast."`
-	PublicKey           string                     `comment:"Your public key. Your peers may ask you for this to put\ninto their AllowedPublicKeys configuration."`
-	PrivateKey          string                     `comment:"Your private key. DO NOT share this with anyone!"`
+	PrivateKey          KeyBytes                   `json:",omitempty" comment:"Your private key. DO NOT share this with anyone!"`
+	PrivateKeyPath      string                     `json:",omitempty" comment:"The path to your private key file in PEM format."`
+	Certificate         *tls.Certificate           `json:"-"`
 	IfName              string                     `comment:"Local network interface name for TUN adapter, or \"auto\" to select\nan interface automatically, or \"none\" to run without TUN."`
 	IfMTU               uint64                     `comment:"Maximum Transmission Unit (MTU) size for your local TUN interface.\nDefault is the largest supported size for your platform. The lowest\npossible value is 1280."`
 	NodeInfoPrivacy     bool                       `comment:"By default, nodeinfo contains some defaults including the platform,\narchitecture and RiV-mesh version. These can help when surveying\nthe network and diagnosing network routing problems. Enabling\nnodeinfo privacy prevents this, so that only items specified in\n\"NodeInfo\" are sent back if specified."`
@@ -44,26 +55,134 @@ type NodeConfig struct {
 	FeaturesConfig      map[string]interface{}     `comment:"Optional features config. This must be a { \"key\": \"value\", ... } map\not set as null. This is mandatory for extended featured builds containing features specific settings."`
 }
 
+type KeyBytes []byte
+
+// RFC5280 section 4.1.2.5
+var notAfterNeverExpires = time.Date(9999, time.December, 31, 23, 59, 59, 0, time.UTC)
+
 type MulticastInterfaceConfig struct {
 	Regex    string
 	Beacon   bool
 	Listen   bool
 	Port     uint16
 	Priority uint64 // really uint8, but gobind won't export it
+	Password string
 }
 
 type NetworkDomainConfig struct {
 	Prefix string
 }
 
-// NewSigningKeys replaces the signing keypair in the NodeConfig with a new
-// signing keypair. The signing keys are used by the switch to derive the
-// structure of the spanning tree.
-func (cfg *NodeConfig) NewKeys() {
-	spub, spriv, err := ed25519.GenerateKey(nil)
+func (cfg *NodeConfig) NewPrivateKey() {
+	_, spriv, err := ed25519.GenerateKey(nil)
 	if err != nil {
 		panic(err)
 	}
-	cfg.PublicKey = hex.EncodeToString(spub[:])
-	cfg.PrivateKey = hex.EncodeToString(spriv[:])
+	cfg.PrivateKey = KeyBytes(spriv)
+}
+
+func (cfg *NodeConfig) PostprocessConfig() error {
+	if cfg.PrivateKeyPath != "" {
+		cfg.PrivateKey = nil
+		f, err := os.ReadFile(cfg.PrivateKeyPath)
+		if err != nil {
+			return err
+		}
+		if err := cfg.UnmarshalPEMPrivateKey(f); err != nil {
+			return err
+		}
+	}
+	switch {
+	case cfg.Certificate == nil:
+		// No self-signed certificate has been generated yet.
+		fallthrough
+	case !bytes.Equal(cfg.Certificate.PrivateKey.(ed25519.PrivateKey), cfg.PrivateKey):
+		// A self-signed certificate was generated but the private
+		// key has changed since then, possibly because a new config
+		// was parsed.
+		if err := cfg.GenerateSelfSignedCertificate(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (cfg *NodeConfig) MarshalPEMPrivateKey() ([]byte, error) {
+	b, err := x509.MarshalPKCS8PrivateKey(ed25519.PrivateKey(cfg.PrivateKey))
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal PKCS8 key: %w", err)
+	}
+	block := &pem.Block{
+		Type:  "PRIVATE KEY",
+		Bytes: b,
+	}
+	return pem.EncodeToMemory(block), nil
+}
+
+func (cfg *NodeConfig) UnmarshalPEMPrivateKey(b []byte) error {
+	p, _ := pem.Decode(b)
+	if p == nil {
+		return fmt.Errorf("failed to parse PEM file")
+	}
+	if p.Type != "PRIVATE KEY" {
+		return fmt.Errorf("unexpected PEM type %q", p.Type)
+	}
+	k, err := x509.ParsePKCS8PrivateKey(p.Bytes)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal PKCS8 key: %w", err)
+	}
+	key, ok := k.(ed25519.PrivateKey)
+	if !ok {
+		return fmt.Errorf("private key must be ed25519 key")
+	}
+	if len(key) != ed25519.PrivateKeySize {
+		return fmt.Errorf("unexpected ed25519 private key length")
+	}
+	cfg.PrivateKey = KeyBytes(key)
+	return nil
+}
+
+func (cfg *NodeConfig) GenerateSelfSignedCertificate() error {
+	key, err := cfg.MarshalPEMPrivateKey()
+	if err != nil {
+		return err
+	}
+	cert, err := cfg.MarshalPEMCertificate()
+	if err != nil {
+		return err
+	}
+	tlsCert, err := tls.X509KeyPair(cert, key)
+	if err != nil {
+		return err
+	}
+	cfg.Certificate = &tlsCert
+	return nil
+}
+
+func (cfg *NodeConfig) MarshalPEMCertificate() ([]byte, error) {
+	privateKey := ed25519.PrivateKey(cfg.PrivateKey)
+	publicKey := privateKey.Public().(ed25519.PublicKey)
+
+	cert := &x509.Certificate{
+		SerialNumber: big.NewInt(1),
+		Subject: pkix.Name{
+			CommonName: hex.EncodeToString(publicKey),
+		},
+		NotBefore:             time.Now(),
+		NotAfter:              notAfterNeverExpires,
+		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		BasicConstraintsValid: true,
+	}
+
+	certbytes, err := x509.CreateCertificate(rand.Reader, cert, cert, publicKey, privateKey)
+	if err != nil {
+		return nil, err
+	}
+
+	block := &pem.Block{
+		Type:  "CERTIFICATE",
+		Bytes: certbytes,
+	}
+	return pem.EncodeToMemory(block), nil
 }

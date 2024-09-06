@@ -76,7 +76,7 @@ func GenerateConfig() *config.NodeConfig {
 	defaults := GetDefaults()
 	// Create a node configuration and populate it.
 	cfg := new(config.NodeConfig)
-	cfg.NewKeys()
+	cfg.NewPrivateKey()
 	cfg.Listen = []string{}
 	cfg.Peers = []string{}
 	cfg.InterfacePeers = map[string][]string{}
@@ -88,7 +88,9 @@ func GenerateConfig() *config.NodeConfig {
 	cfg.HttpAddress = Define().DefaultHttpAddress
 	cfg.NetworkDomain = Define().DefaultNetworkDomain
 	cfg.PublicPeersUrl = Define().DefaultPublicPeersUrl
-
+	if err := cfg.PostprocessConfig(); err != nil {
+		panic(err)
+	}
 	return cfg
 }
 
