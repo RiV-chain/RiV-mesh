@@ -46,7 +46,7 @@ if [ $ANDROID ]; then
   echo "Building aar for Android"
   go get golang.org/x/mobile/bind
   gomobile bind \
-    -target android -tags mobile -o mesh.aar \
+    -androidapi 21 -target android -tags mobile -o mesh.aar \
     -ldflags="$LDFLAGS $STRIP" -gcflags="$GCFLAGS" \
     ./contrib/mobile ./src/config;
 fi
