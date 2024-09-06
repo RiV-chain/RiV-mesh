@@ -1,37 +1,25 @@
-#!/bin/bash
+#!/bin/sh
+
 set -ef
+
+[ ! -d contrib/mobile ] && (echo "Must run ./contrib/mobile/build [-i] [-a] from the repository top level folder"; exit 1)
 
 PKGSRC=${PKGSRC:-github.com/RiV-chain/RiV-mesh/src/version}
 PKGNAME=${PKGNAME:-$(sh contrib/semver/name.sh)}
 PKGVER=${PKGVER:-$(sh contrib/semver/version.sh --bare)}
-echo "Building: $PKGVER"
-
-if [ "$LDFLAGS" ]; then
-  LDFLAGS="$LDFLAGS -X $PKGSRC.buildName=$PKGNAME -X $PKGSRC.buildVersion=$PKGVER"
-else
-  LDFLAGS="-X $PKGSRC.buildName=$PKGNAME -X $PKGSRC.buildVersion=$PKGVER"
-fi
+LDFLAGS="-X $PKGSRC.buildName=$PKGNAME -X $PKGSRC.buildVersion=$PKGVER"
 ARGS="-v"
 
-TARGET_PATH=$(pwd)
-while getopts "utc:l:dro:psg:b:" option
+while getopts "aitc:l:d" option
 do
   case "$option"
   in
-  u) UPX=true;;
+  i) IOS=true;;
+  a) ANDROID=true;;
   t) TABLES=true;;
   c) GCFLAGS="$GCFLAGS $OPTARG";;
   l) LDFLAGS="$LDFLAGS $OPTARG";;
   d) ARGS="$ARGS -tags debug" DEBUG=true;;
-  r) ARGS="$ARGS -race";;
-  o) ARGS="$ARGS -o $OPTARG";;
-  p) ARGS="$ARGS -buildmode=pie";;
-  # statically linked executable
-  s) STATIC=" -linkmode external -extldflags=-static";;
-  # build target
-  g) TARGET=$OPTARG;;
-  # build path
-  b) TARGET_PATH=$OPTARG;;
   esac
 done
 
@@ -39,35 +27,25 @@ if [ -z $TABLES ] && [ -z $DEBUG ]; then
   LDFLAGS="$LDFLAGS -s -w"
 fi
 
-#could be static
-buildbin() {
-  local CMD=$(realpath $1)
-  echo "Building: $CMD for $GOOS-$GOARCH"
+if [ ! $IOS ] && [ ! $ANDROID ]; then 
+  echo "Must specify -a (Android), -i (iOS) or both"
+  exit 1
+fi
 
-  (cd "$TARGET_PATH" && go build $ARGS -ldflags "${LDFLAGS}${LDFLAGS2}" -gcflags "$GCFLAGS" "$CMD")
+if [ $IOS ]; then
+  echo "Building framework for iOS"
+  go get golang.org/x/mobile/bind
+  gomobile bind \
+    -target ios -tags mobile -o Mesh.xcframework \
+    -ldflags="$LDFLAGS $STRIP" -gcflags="$GCFLAGS" \
+    ./contrib/mobile ./src/config;
+fi
 
-  if [ $UPX ]; then
-    upx --brute "$CMD"
-  fi
-}
-
-build_mesh() {
-  LDFLAGS2="${STATIC}" buildbin ./cmd/mesh
-}
-
-build_meshctl() {
-  LDFLAGS2="${STATIC}" buildbin ./cmd/meshctl
-}
-
-case $TARGET in 
-  "mesh")
-    build_mesh
-    ;;
-  "meshctl")
-    build_meshctl
-    ;;
-  *)
-    build_mesh
-    build_meshctl
-    ;;
-esac
+if [ $ANDROID ]; then
+  echo "Building aar for Android"
+  go get golang.org/x/mobile/bind
+  gomobile bind \
+    -androidapi 21 -target android -tags mobile -o mesh.aar \
+    -ldflags="$LDFLAGS $STRIP" -gcflags="$GCFLAGS" \
+    ./contrib/mobile ./src/config;
+fi
