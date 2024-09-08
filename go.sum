@@ -68,8 +68,6 @@ github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UV
 github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.8.0 h1:pSgiaMZlXftHpm5L7V1+rVB+AZJydKsMxsQBIJw4PKk=
-github.com/vikulin/anet v0.0.6-0.20240829153812-99b8955b2cff h1:iifW98BSWU92RJmWRcnruOihGZphu1YYBlWA0zLG7zs=
-github.com/vikulin/anet v0.0.6-0.20240829153812-99b8955b2cff/go.mod h1:4hyB1C384gHwcoCRaXPrCy90R0JK1AlK/a0kH+BrPyQ=
 github.com/vikulin/sctp v0.0.0-20221009200520-ae0f2830e422 h1:KJn6ovcNlavPTgdK2uKJoonWPP3GTb8x4FyYPIrwpZw=
 github.com/vikulin/sctp v0.0.0-20221009200520-ae0f2830e422/go.mod h1:wbWp47D/qXkQrDuO8qSeUXdLN9qXNZzIgLGDQIoJlJU=
 github.com/vishvananda/netlink v1.1.0 h1:1iyaYNBLmP6L0220aDnYQpo1QEV4t4hJ+xEEhhJH8j0=
@@ -79,6 +77,8 @@ github.com/vishvananda/netns v0.0.0-20210104183010-2eb08e3e575f h1:p4VB7kIXpOQvV
 github.com/vishvananda/netns v0.0.0-20210104183010-2eb08e3e575f/go.mod h1:DD4vA1DwXk04H54A1oHXtwZmA0grkVMdPxx/VGLCah0=
 github.com/vorot93/golang-signals v0.0.0-20170221070717-d9e83421ce45 h1:hB/hkjwf3BQnZE6Wk3SBwMJz0NqnGdwXoNzHVSYb0N0=
 github.com/vorot93/golang-signals v0.0.0-20170221070717-d9e83421ce45/go.mod h1:dfjQkJsG5auteUbnfLIcU72Y/z8tj7DuW9fik8f2Zn0=
+github.com/wlynxg/anet v0.0.4 h1:0de1OFQxnNqAu+x2FAKKCVIrnfGKQbs7FQz++tB0+Uw=
+github.com/wlynxg/anet v0.0.4/go.mod h1:eay5PRQr7fIVAMbTbchTnO9gG65Hg/uYGdc7mguHxoA=
 github.com/yuin/goldmark v1.3.5/go.mod h1:mwnBkeHKe2W/ZEtQ+71ViKU8L12m81fl3OWwC1Zlc8k=
 go.uber.org/atomic v1.7.0 h1:ADUqmZGgLDDfbSL9ZmPxKTybcoEYHgpYfELNoN+7hsw=
 go.uber.org/atomic v1.7.0/go.mod h1:fEN4uk6kAWBTFdckzkM89CLk9XfWZrxpCo0nPH17wJc=
