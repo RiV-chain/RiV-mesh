@@ -9,10 +9,9 @@ import (
 	"fmt"
 	"net"
 	"net/url"
-	"strconv"
 	"time"
 
-	"github.com/vikulin/anet"
+	"github.com/wlynxg/anet"
 
 	"github.com/Arceliar/phony"
 	"github.com/gologme/log"
@@ -406,11 +405,16 @@ func (m *Multicast) listen() {
 		phony.Block(m, func() {
 			interfaces = m._interfaces
 		})
-		zone, err := strconv.Atoi(from.Zone)
-		if err != nil {
-			continue
+		var inter interfaceInfo
+		var ok = false
+		for _, info := range interfaces {
+			if info.iface.Name == from.Zone {
+				inter = *info
+				ok = true
+			}
 		}
-		if info, ok := interfaces[zone]; ok && info.listen {
+		info := inter
+		if ok && info.listen {
 			addr.Zone = ""
 			pin := fmt.Sprintf("/?key=%s&priority=%d", hex.EncodeToString(key), info.priority)
 			u, err := url.Parse("tls://" + addr.String() + pin)
