@@ -1,8 +1,5 @@
 # RiV-mesh first self arranging mesh network with link aggregation.
 
-## Why fork?
-RiV-mesh is fork of Yggdrasil which is great project. Yggdrasil uses a custom admin TCP protocol istead of REST. Second reason: Yggdrasil uses deprecated 200::/7 IPv6 address pool which can be assigned for some network in future, unlike this fc00::/7 is safe and has been taken for RiV-mesh. So far RiV-mesh can be easy switched to Yggdrasil network address space with NetworkDomain.Prefix 2 in mesh.conf configuration file.
-
 ## Introduction
 
 RiV-mesh is an implementation of a fully end-to-end encrypted IPv6

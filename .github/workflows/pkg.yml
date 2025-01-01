@@ -8,11 +8,14 @@ jobs:
   build-libs-android:
 
     name: Build libs (Android)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        fetch-tags: true
 
     - name: 🐼 Setup go1.22+
       uses: actions/setup-go@v5
@@ -24,6 +27,12 @@ jobs:
         go install golang.org/x/mobile/cmd/gomobile@latest
         gomobile init
         ./contrib/mobile/build -a
+    
+    - name: Get version
+      id: get_version
+      run: |
+        PKGVERSION=$(sh -c './contrib/semver/version.sh --bare') 
+        echo "PKGVERSION=$PKGVERSION" >> $GITHUB_ENV
 
     - name: Upload .aar files
       uses: actions/upload-artifact@v4
@@ -36,3 +45,14 @@ jobs:
       with:
         name: jar-files
         path: '**/*.jar'
+    
+    - name: Publish aar library to Maven repo
+      uses: RiV-chain/copy-local-file-maven-action@main
+      with:
+        artifact_repo: RiV-chain/artifact
+        artifact_path: mesh.aar
+        artifact_source_path: mesh-sources.jar
+        gh_pat: ${{ secrets.MAVEN_PAT }}
+        artifact_id: mesh
+        group_id: org.rivchain
+        version: ${{ env.PKGVERSION }}

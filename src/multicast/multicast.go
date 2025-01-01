@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"net"
 	"net/url"
-	"strconv"
 	"time"
 
 	"github.com/wlynxg/anet"
@@ -66,7 +65,6 @@ func New(core *core.Core, log *log.Logger, opts ...SetupOption) (*Multicast, err
 		_listeners:  make(map[int]*listenerInfo),
 		_interfaces: make(map[int]*interfaceInfo),
 	}
-	m.SetOsVersion()
 	m.config._interfaces = map[MulticastInterface]struct{}{}
 	m.config._groupAddr = GroupAddress("[ff02::114]:9001")
 	for _, opt := range opts {
@@ -180,8 +178,7 @@ func (m *Multicast) _getAllowedInterfaces() map[int]*interfaceInfo {
 	// Ask the system for network interfaces
 	allifaces, err := anet.Interfaces()
 	if err != nil {
-		// Don't panic, since this may be from e.g. too many open files (from too much connection spam)
-		// TODO? log something
+		m.log.Debugf("Failed to get interfaces: %s", err)
 		return nil
 	}
 	// Work out which interfaces to announce on
@@ -408,11 +405,16 @@ func (m *Multicast) listen() {
 		phony.Block(m, func() {
 			interfaces = m._interfaces
 		})
-		zone, err := strconv.Atoi(from.Zone)
-		if err != nil {
-			continue
+		var inter interfaceInfo
+		var ok = false
+		for _, info := range interfaces {
+			if info.iface.Name == from.Zone {
+				inter = *info
+				ok = true
+			}
 		}
-		if info, ok := interfaces[zone]; ok && info.listen {
+		info := inter
+		if ok && info.listen {
 			addr.Zone = ""
 			pin := fmt.Sprintf("/?key=%s&priority=%d", hex.EncodeToString(key), info.priority)
 			u, err := url.Parse("tls://" + addr.String() + pin)

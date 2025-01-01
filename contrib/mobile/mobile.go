@@ -35,13 +35,13 @@ type Mesh struct {
 }
 
 // StartAutoconfigure starts a node with a randomly generated config
-func (m *Mesh) StartAutoconfigure(osVersion int) error {
-	return m.StartJSON([]byte("{}"), osVersion)
+func (m *Mesh) StartAutoconfigure() error {
+	return m.StartJSON([]byte("{}"))
 }
 
 // StartJSON starts a node with the given JSON config. You can get JSON config
 // (rather than HJSON) by using the GenerateConfigJSON() function
-func (m *Mesh) StartJSON(configjson []byte, osVersion int) error {
+func (m *Mesh) StartJSON(configjson []byte) error {
 	logger := log.New(m.log, "", 0)
 	logger.EnableLevel("error")
 	logger.EnableLevel("warn")
@@ -80,7 +80,6 @@ func (m *Mesh) StartJSON(configjson []byte, osVersion int) error {
 		if err != nil {
 			panic(err)
 		}
-		m.core.OsVersion = uint(osVersion)
 	}
 
 	// Setup the multicast module.
