@@ -1,7 +1,7 @@
 #!/bin/bash
 set -ef
 
-PKGSRC=${PKGSRC:-github.com/RiV-chain/RiV-mesh/src/version}
+PKGSRC=${PKGSRC:-github.com/Uqda/Core/src/version}
 PKGNAME=${PKGNAME:-$(sh contrib/semver/name.sh)}
 PKGVER=${PKGVER:-$(sh contrib/semver/version.sh --bare)}
 echo "Building: $PKGVER"

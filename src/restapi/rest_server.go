@@ -25,26 +25,26 @@ import (
 	"gerace.dev/zipfs"
 	"golang.org/x/exp/slices"
 
-	"github.com/RiV-chain/RiV-mesh/src/config"
-	"github.com/RiV-chain/RiV-mesh/src/core"
-	"github.com/RiV-chain/RiV-mesh/src/defaults"
-	"github.com/RiV-chain/RiV-mesh/src/multicast"
-	"github.com/RiV-chain/RiV-mesh/src/version"
+	"github.com/Uqda/Core/src/config"
+	"github.com/Uqda/Core/src/core"
+	"github.com/Uqda/Core/src/defaults"
+	"github.com/Uqda/Core/src/multicast"
+	"github.com/Uqda/Core/src/version"
 	"github.com/ip2location/ip2location-go/v9"
 	"github.com/slonm/tableprinter"
 )
 
-//	@title			RiV-mesh API
+//	@title			Uqda-Core API
 //	@version		0.1
-//	@description	This is RiV-mesh client API documentation.
+//	@description	This is Uqda-Core client API documentation.
 //	@termsOfService	http://swagger.io/terms/
 
 //	@contact.name	Development team
-//	@contact.url	https://github.com/RiV-chain/RiV-mesh
+//	@contact.url	https://github.com/Uqda/Core
 //	@contact.email	support@rivchain.org
 
 //	@license.name	LGPL3
-//	@license.url	https://github.com/RiV-chain/RiV-mesh/blob/develop/LICENSE
+//	@license.url	https://github.com/Uqda/Core/blob/develop/LICENSE
 
 //	@host		localhost:19019
 //	@BasePath	/api

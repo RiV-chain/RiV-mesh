@@ -13,8 +13,8 @@ import (
 
 	iwt "github.com/Arceliar/ironwood/types"
 
-	//"github.com/RiV-chain/RiV-mesh/src/address"
-	"github.com/RiV-chain/RiV-mesh/src/core"
+	//"github.com/Uqda/Core/src/address"
+	"github.com/Uqda/Core/src/core"
 )
 
 const keyStoreTimeout = 2 * time.Minute

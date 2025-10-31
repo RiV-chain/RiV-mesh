@@ -20,17 +20,17 @@ import (
 	"github.com/hjson/hjson-go"
 	"github.com/kardianos/minwinsvc"
 
-	//"github.com/RiV-chain/RiV-mesh/src/address"
+	//"github.com/Uqda/Core/src/address"
 
-	"github.com/RiV-chain/RiV-mesh/src/config"
-	"github.com/RiV-chain/RiV-mesh/src/defaults"
+	"github.com/Uqda/Core/src/config"
+	"github.com/Uqda/Core/src/defaults"
 
-	"github.com/RiV-chain/RiV-mesh/src/core"
-	//"github.com/RiV-chain/RiV-mesh/src/ipv6rwc"
-	"github.com/RiV-chain/RiV-mesh/src/multicast"
-	"github.com/RiV-chain/RiV-mesh/src/restapi"
-	"github.com/RiV-chain/RiV-mesh/src/tun"
-	"github.com/RiV-chain/RiV-mesh/src/version"
+	"github.com/Uqda/Core/src/core"
+	//"github.com/Uqda/Core/src/ipv6rwc"
+	"github.com/Uqda/Core/src/multicast"
+	"github.com/Uqda/Core/src/restapi"
+	"github.com/Uqda/Core/src/tun"
+	"github.com/Uqda/Core/src/version"
 )
 
 type node struct {
@@ -229,7 +229,7 @@ func run(args rivArgs, sigCh chan os.Signal) {
 		return
 	}
 
-	// Setup the RiV-mesh node itself.
+	// Setup the Uqda-Core node itself.
 	{
 		sk, err := hex.DecodeString(cfg.PrivateKey)
 		if err != nil {

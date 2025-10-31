@@ -9,7 +9,7 @@ func getDefaults() platformDefaultParameters {
 	return platformDefaultParameters{
 
 		// Configuration (used for meshctl)
-		DefaultConfigFile: "C:\\ProgramData\\RiV-mesh\\mesh.conf",
+		DefaultConfigFile: "C:\\ProgramData\\Uqda-Core\\mesh.conf",
 
 		// Multicast interfaces
 		DefaultMulticastInterfaces: []MulticastInterfaceConfig{
@@ -19,6 +19,6 @@ func getDefaults() platformDefaultParameters {
 		// TUN
 		MaximumIfMTU:  65535,
 		DefaultIfMTU:  65535,
-		DefaultIfName: "RiV-mesh",
+		DefaultIfName: "Uqda-Core",
 	}
 }

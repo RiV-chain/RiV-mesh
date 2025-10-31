@@ -10,9 +10,9 @@ import (
 	iwt "github.com/Arceliar/ironwood/types"
 	"github.com/Arceliar/phony"
 
-	//"github.com/RiV-chain/RiV-mesh/src/crypto"
+	//"github.com/Uqda/Core/src/crypto"
 
-	"github.com/RiV-chain/RiV-mesh/src/version"
+	"github.com/Uqda/Core/src/version"
 )
 
 type nodeinfo struct {

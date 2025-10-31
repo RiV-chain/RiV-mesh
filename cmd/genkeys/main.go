@@ -22,7 +22,7 @@ import (
 
 	"github.com/gologme/log"
 
-	c "github.com/RiV-chain/RiV-mesh/src/core"
+	c "github.com/Uqda/Core/src/core"
 )
 
 type keySet struct {

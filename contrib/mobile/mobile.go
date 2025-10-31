@@ -9,17 +9,17 @@ import (
 
 	"github.com/gologme/log"
 
-	//"github.com/RiV-chain/RiV-mesh/src/address"
-	"github.com/RiV-chain/RiV-mesh/src/config"
-	"github.com/RiV-chain/RiV-mesh/src/core"
-	"github.com/RiV-chain/RiV-mesh/src/defaults"
-	"github.com/RiV-chain/RiV-mesh/src/ipv6rwc"
-	"github.com/RiV-chain/RiV-mesh/src/multicast"
-	"github.com/RiV-chain/RiV-mesh/src/restapi"
-	"github.com/RiV-chain/RiV-mesh/src/version"
+	//"github.com/Uqda/Core/src/address"
+	"github.com/Uqda/Core/src/config"
+	"github.com/Uqda/Core/src/core"
+	"github.com/Uqda/Core/src/defaults"
+	"github.com/Uqda/Core/src/ipv6rwc"
+	"github.com/Uqda/Core/src/multicast"
+	"github.com/Uqda/Core/src/restapi"
+	"github.com/Uqda/Core/src/version"
 )
 
-// RiV-mesh mobile package is meant to "plug the gap" for mobile support, as
+// Uqda-Core mobile package is meant to "plug the gap" for mobile support, as
 // Gomobile will not create headers for Swift/Obj-C etc if they have complex
 // (non-native) types. Therefore for iOS we will expose some nice simple
 // functions. Note that in the case of iOS we handle reading/writing to/from TUN
@@ -131,7 +131,7 @@ func (m *Mesh) StartJSON(configjson []byte) error {
 	return nil
 }
 
-// Send sends a packet to RiV-mesh. It should be a fully formed
+// Send sends a packet to Uqda-Core. It should be a fully formed
 // IPv6 packet
 func (m *Mesh) Send(p []byte) error {
 	if m.iprwc == nil {
@@ -141,7 +141,7 @@ func (m *Mesh) Send(p []byte) error {
 	return nil
 }
 
-// Send sends a packet from given buffer to RiV-mesh. From first byte up to length.
+// Send sends a packet from given buffer to Uqda-Core. From first byte up to length.
 func (m *Mesh) SendBuffer(p []byte, length int) error {
 	if m.iprwc == nil {
 		return nil
@@ -153,7 +153,7 @@ func (m *Mesh) SendBuffer(p []byte, length int) error {
 	return nil
 }
 
-// Recv waits for and reads a packet coming from RiV-mesh. It
+// Recv waits for and reads a packet coming from Uqda-Core. It
 // will be a fully formed IPv6 packet
 func (m *Mesh) Recv() ([]byte, error) {
 	if m.iprwc == nil {
@@ -164,7 +164,7 @@ func (m *Mesh) Recv() ([]byte, error) {
 	return buf[:n], nil
 }
 
-// Recv waits for and reads a packet coming from RiV-mesh to given buffer, returning size of packet
+// Recv waits for and reads a packet coming from Uqda-Core to given buffer, returning size of packet
 func (m *Mesh) RecvBuffer(buf []byte) (int, error) {
 	if m.iprwc == nil {
 		return 0, nil

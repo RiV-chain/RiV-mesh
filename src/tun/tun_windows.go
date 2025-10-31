@@ -20,7 +20,7 @@ import (
 	"golang.zx2c4.com/wireguard/windows/elevate"
 	"golang.zx2c4.com/wireguard/windows/tunnel/winipcfg"
 
-	"github.com/RiV-chain/RiV-mesh/src/defaults"
+	"github.com/Uqda/Core/src/defaults"
 )
 
 // Configures the TUN adapter with the correct IPv6 address and MTU.

@@ -16,13 +16,13 @@ import (
 	"github.com/Arceliar/phony"
 	"github.com/gologme/log"
 
-	"github.com/RiV-chain/RiV-mesh/src/core"
+	"github.com/Uqda/Core/src/core"
 	"golang.org/x/net/ipv6"
 )
 
 // Multicast represents the multicast advertisement and discovery mechanism used
-// by RiV-mesh to find peers on the same subnet. When a beacon is received on a
-// configured multicast interface, RiV-mesh will attempt to peer with that node
+// by Uqda-Core to find peers on the same subnet. When a beacon is received on a
+// configured multicast interface, Uqda-Core will attempt to peer with that node
 // automatically.
 type Multicast struct {
 	phony.Inbox

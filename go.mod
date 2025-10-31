@@ -1,4 +1,4 @@
-module github.com/RiV-chain/RiV-mesh
+module github.com/Uqda/Core
 
 go 1.18
 

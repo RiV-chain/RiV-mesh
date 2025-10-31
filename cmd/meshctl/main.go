@@ -10,7 +10,7 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/RiV-chain/RiV-mesh/src/version"
+	"github.com/Uqda/Core/src/version"
 )
 
 func main() {

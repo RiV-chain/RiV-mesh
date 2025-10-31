@@ -17,7 +17,7 @@ import (
 	//"time"
 
 	"github.com/Arceliar/phony"
-	//"github.com/RiV-chain/RiV-mesh/src/address"
+	//"github.com/Uqda/Core/src/address"
 )
 
 type SelfInfo struct {

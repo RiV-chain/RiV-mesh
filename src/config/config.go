@@ -1,6 +1,6 @@
 /*
 The config package contains structures related to the configuration of an
-RiV-mesh node.
+Uqda-Core node.
 
 The configuration contains, amongst other things, encryption keys which are used
 to derive a node's identity, information about peerings and node information
@@ -11,7 +11,7 @@ In order for a node to maintain the same identity across restarts, you should
 persist the configuration onto the filesystem or into some configuration storage
 so that the encryption keys (and therefore the node ID) do not change.
 
-Note that RiV-mesh will automatically populate sane defaults for any
+Note that Uqda-Core will automatically populate sane defaults for any
 configuration option that is not provided.
 */
 package config
@@ -22,8 +22,8 @@ import (
 )
 
 // NodeConfig is the main configuration structure, containing configuration
-// options that are necessary for an RiV-mesh node to run. You will need to
-// supply one of these structs to the RiV-mesh core when starting a node.
+// options that are necessary for an Uqda-Core node to run. You will need to
+// supply one of these structs to the Uqda-Core core when starting a node.
 type NodeConfig struct {
 	Peers               []string                   `comment:"List of connection strings for outbound peer connections in URI format,\ne.g. tls://a.b.c.d:e or socks://a.b.c.d:e/f.g.h.i:j. These connections\nwill obey the operating system routing table, therefore you should\nuse this section when you may connect via different interfaces."`
 	InterfacePeers      map[string][]string        `comment:"List of connection strings for outbound peer connections in URI format,\narranged by source interface, e.g. { \"eth0\": [ \"tls://a.b.c.d:e\" ] }.\nNote that SOCKS peerings will NOT be affected by this option and should\ngo in the \"Peers\" section instead."`
@@ -37,7 +37,7 @@ type NodeConfig struct {
 	PrivateKey          string                     `comment:"Your private key. DO NOT share this with anyone!"`
 	IfName              string                     `comment:"Local network interface name for TUN adapter, or \"auto\" to select\nan interface automatically, or \"none\" to run without TUN."`
 	IfMTU               uint64                     `comment:"Maximum Transmission Unit (MTU) size for your local TUN interface.\nDefault is the largest supported size for your platform. The lowest\npossible value is 1280."`
-	NodeInfoPrivacy     bool                       `comment:"By default, nodeinfo contains some defaults including the platform,\narchitecture and RiV-mesh version. These can help when surveying\nthe network and diagnosing network routing problems. Enabling\nnodeinfo privacy prevents this, so that only items specified in\n\"NodeInfo\" are sent back if specified."`
+	NodeInfoPrivacy     bool                       `comment:"By default, nodeinfo contains some defaults including the platform,\narchitecture and Uqda-Core version. These can help when surveying\nthe network and diagnosing network routing problems. Enabling\nnodeinfo privacy prevents this, so that only items specified in\n\"NodeInfo\" are sent back if specified."`
 	NodeInfo            map[string]interface{}     `comment:"Optional node info. This must be a { \"key\": \"value\", ... } map\nor set as null. This is entirely optional but, if set, is visible\nto the whole network on request."`
 	NetworkDomain       NetworkDomainConfig        `comment:"Address prefix used by mesh.\nThe current implementation requires this to be a multiple of 8 bits + 7 bits.4\nNodes that configure this differently will be unable to communicate with each other using IP packets."`
 	PublicPeersUrl      string                     `comment:"Public peers URL which contains all peers in JSON format grouped by a country."`

@@ -6,7 +6,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/RiV-chain/RiV-mesh/src/config"
+	"github.com/Uqda/Core/src/config"
 	"github.com/hjson/hjson-go"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/text/encoding/unicode"
@@ -15,7 +15,7 @@ import (
 type MulticastInterfaceConfig = config.MulticastInterfaceConfig
 type NetworkDomainConfig = config.NetworkDomainConfig
 
-var defaultConfig = "" // LDFLAGS='-X github.com/RiV-chain/RiV-mesh/src/defaults.defaultConfig=/path/to/config
+var defaultConfig = "" // LDFLAGS='-X github.com/Uqda/Core/src/defaults.defaultConfig=/path/to/config
 
 type defaultParameters struct {
 	//Default Http address
